@@ -2,2698 +2,2335 @@
 
 > Historique des tâches terminées archivé dans `claude_code_queue_archive.md` (nettoyé le 2026-06-03).
 
-## ✅ RETOUR COWORK — Pill « Signature Conseiller » home FAIT sur TEST (2026-06-10)
-**Sur test, en attente de validation Robin. PAS en prod.** Branche `test-theme-sapi-maison`, déployé sur test.atelier-sapi.fr. 3 itérations : V1 trop grosse (`99c6903`) → mini B1 (`595874f`) → **format final `76a468f`**.
-- **Format final :** la signature de la **home** (section Conseiller / room-picker) = mini capsule bois sombre avec **photo ronde sans contour + accroche Square Peg blanche 24px**. **« Le conseil de Robin » retiré** (l'identité passe par la photo). Texte d'accroche et photo inchangés. Rendu mobile géré (≤600px).
-- **Scopé à la home uniquement** : la signature dans la **modale Conseiller** et la pill **fiche produit** ne bougent pas (réservées à l'étape suivante = généralisation, à lancer si Robin valide la V1).
-- ⚠️ **Coordination 2 fenêtres :** ce chantier tournait **en parallèle** de la « suppression bento legacy » (autre fenêtre Claude Code) qui éditait le **même `style.css`** → ma 1re passe a été écrasée. Refaite proprement **après** que le bento soit passé en prod. Les deux travaux sont bien séparés, aucun mélange.
-
-**👉 Action Robin :** regarder la pill sombre sur la home test (desktop + mobile). Si OK → me dire « go généralisation » (modale tous états + pill fiche produit + page conseils, même V1, lignes du bas contextuelles). Puis, quand tout est validé, go-live (merge master + prod manuel).
-
 ---
 
-## ✅ RETOUR COWORK — Suppression bento legacy (CSS + JS) EN PROD (2026-06-10)
-**Fait par l'autre fenêtre Claude Code, validé Robin, déjà en prod (atelier-sapi.fr).** Le vieux système « bento CINÉTIQUE » (CSS mort + code JS mort dans `cinetique.js`) a été retiré. `.hero-bento` et `.bento-bestseller-badge` (Star du moment) conservés. Pour mémoire Cowork : c'est la tâche « suppression du JS » dont Robin parlait.
-
----
-
-## ✅ RETOUR COWORK — GO-LIVE refonte home FAIT + 10 retouches photos (2026-06-10, EN PROD)
-**Refonte home mergée dans `master` et déployée en prod (atelier-sapi.fr).** Merge commit `1c3c642` « Refonte home juin 2026 » (129 commits de `feature/refonte-home`). Audit de branches fait avant merge : `master` était **== `test-theme-sapi-maison`** (aucune divergence test↔master, **pas de méga-filtre / prompts IA / backend Conseiller** embarqués). Après go-live, les deux branches test (`test-theme-sapi-maison` + `feature/refonte-home`) ont été **réalignées sur master**.
-
-**Retouches photos/logos faites directement sur master (à la demande de Robin, EN PROD) :**
-- Card **Sur mesure** : photo **ET** sous-titre désormais **pilotés par la catégorie produit `creations-sur-mesure`** — image via ACF `image_collection` → 3ᵉ photo ambiance produit → vignette ; sous-titre via la **description WooCommerce** de la catégorie ; repli en dur (`2026/04/Photo-Trio-de-34.jpg` / « Une pièce unique… ») si vide. **Plus rien en dur à changer dans le code → tout se pilote en admin** (Produits → Catégories → Créations sur mesure).
-- Section **L'atelier** : fond par défaut → `2026/05/Claudine-La-turbine-Suspensions-Detail-1.jpg` (variable `$atelier_default_img`).
-- Photo **Assemblage** (étape 04) : affichée en **miroir horizontal** (CSS `scaleX(-1)` sur `data-key="4"`).
-- Bande **presse** : fix logo **Région Auvergne-Rhône-Alpes** (ancien fichier 404 + version blanche invisible → PNG couleur) + **tous les logos harmonisés à la même hauteur (46px, width auto, object-fit contain)**.
-
-**⚠️ Actions restantes côté Robin → voir la section « À faire » plus bas** (vérifs prod, sitemap GSC, séquence Brevo, passe Yoast).
-
-<details><summary>Ancien retour (2026-06-09, quand la refonte était encore sur test)</summary>
-
-## ↩️ RETOUR COWORK — Refonte home : DA + passe mobile TERMINÉES (2026-06-09, sur test)
-**Branche `feature/refonte-home`**, tout poussé/déployé sur **test.atelier-sapi.fr**, **jamais mergé master**. Dernier commit `17db187`.
-
-**✅ Fait depuis le dernier point (tout validé par Robin sur test) :**
-- **Série DA #1 → #8 complète** (desktop) : Atelier immersion lumière (#1), Hero naming card verre dépoli + dots sous le nom (#2), Conseiller signature de Robin + réchauffe (#3), Collections scrim allégé + carte « Sur mesure » + voile Star (#4), Avis papiers à ombre douce + grain bois (#5), Carte localisation mini-carte bois SVG (#6), Cadeau+Actus objet orange vs journal (#7), Newsletter bande bois chaud (#8).
-- **Correctif réassurance** : wording humain single-line (Livraison rapide 48-72h / Façonné main à Lyon sous 5 jours / 30 jours pour changer d'avis / Paiement sécurisé). Mobile = 2 items (Livraison + Paiement).
-- **Généralisation signature Robin** : modale Conseiller (états accueil + chat) + pill « Comment choisir ? » fiche produit (mini-avatar).
-- **Vague de retouches Robin** (cosmétique) : numérotation sections 01→04 (plus de saut), espaces header→contenu harmonisés (2,5rem ; atelier 5rem), flèches Collections à gauche, hero carrousel = 8 produits, fix saut scroll-snap Collections (proximity→none desktop), hover Star, photo fond citation (`2026/06/Robin-Shooting.jpg`), pastille Conseiller (`2026/03/Robin-face-avec-Alice-lhelice.jpg`, zoom), card cadeau = photo `Carte-de-visite-3` + voile sombre, textes/paddings divers, 2e § atelier réécrit, CTA « Voir toutes les créations », etc.
-- **PASSE MOBILE complète** : marge latérale 14px commune à toutes les sections-cards ; room-picker chips compactes (icône gauche + texte) ; titres catégories −40 % / sous-titres −30 % ; Collections cards −20 % ; **« Créations du moment » = star inchangée + 2 modèles en slider horizontal avec dots (scroll-dots.js), mini-cards photo 190px, prix masqué** ; avis carrousel ombres OK ; newsletter marge ; menu burger compacté (items 18px). Fix focal point : déjà géré par le plugin Media Focus Point sur toutes les images `wp_get_attachment_image` (décision « on ne touche à rien de plus »).
-
-**⚠️ À SAVOIR :**
-- Images `2026/03` + `2026/06` (atelier, expédition, Robin shooting, carte-de-visite) : **404 sur test (clone d'avril) / 200 en prod** → OK une fois en prod.
-- Le point focal des images = **plugin Media Focus Point** (pas le thème) ; s'applique auto sur tout `wp_get_attachment_image()`.
-
-**RESTE avant prod (dans l'ordre) :**
-1. **Passe Yoast** — titre + meta description de la home (à faire, ou Claude Code prépare une proposition).
-2. **Tester** une inscription newsletter + le form « Échanger avec Robin » fiche produit (Brevo) sur test.
-3. **Go-live** : merge `feature/refonte-home` → `master` (sur « go » explicite Robin) → Robin lance le workflow GitHub Actions → prod → **re-soumission sitemap à Google Search Console**.
-4. **Brevo (Robin)** : maj séquence d'accueil −10 % pour inclure `surmesure` + `ficheproduit`.
-5. (optionnel) nettoyage CSS mort résiduel (`.bento-*`, `.process-*`).
-
-</details>
-
-## ✅ EN PROD (déploiement #124, commit `38184ae` — 2026-06-03)
-Lot complet Brevo/disclaimers live sur atelier-sapi.fr : étiquetage `SOURCE` des portes #6, footer home réparé, `sapi_ajax_robin_contact` réparé, modale Conseiller + page /sur-mesure/ → #6 + disclaimers, fiche produit → disclaimer, suppression du form inline mort + JS.
-
-## ✅ EN PROD (déploiement #125, commit `c9e07cd` — 2026-06-03)
-- Source dédiée **`surmesure`** pour le form de la page /sur-mesure/ (`sapi_handle_surmesure_form`) — commit `27a89d4`.
-- Source dédiée **`ficheproduit`** pour le form « Échanger avec Robin » des fiches produit (`sapi_ajax_robin_contact`) — commit `c9e07cd`.
-
-⚠️ **Reste côté Brevo (Robin)** : les sources prospects sont maintenant `homepage`, `popupBienvenue`, `inspiration`, `conseiller`, `surmesure`, `ficheproduit` (+ `checkout` pour les acheteurs). Mettre à jour les conditions de la séquence d'accueil −10 % pour inclure les nouvelles valeurs `surmesure` et `ficheproduit` (avant elles étaient toutes en `conseiller`).
-
-## ✅ [FAIT 2026-06-08 — sur test] Généralisation design « signature Robin » (chantier suivant DA #3) (commit `d659fe8`)
-Le composant `.conseiller-sig` (pastille Robin + « Le conseil de Robin » + accroche Square Peg) est étendu :
-- **Modale Conseiller** : signature injectée en en-tête de **S0 (accueil/choix pièce)** et **S2 (chat libre)** seulement (choix Robin) — markup statique PHP dans le shell `functions.php` (avatar `sapi_image 2026/03/Robin-face-avec-Alice-lhelice.jpg`). Badge contextuel **masqué en CSS** sur S0+S2 (élément gardé dans le DOM → hook JS `data-s0-badge-text` intact). États S1/S3/récap/contact inchangés. MQ mobile ≤600px : avatar 52px, accroche 24px.
-- **Fiche produit** : pill « Comment choisir ? » (`.conseiller-pill-secondary`) — SVG crayon remplacé par un **mini-avatar rond Robin** (26px). `data-action`/`data-help-pill`/`data-help-pill-text` conservés (`sapi-help-pill.js` intact). Encart « Échanger avec Robin » NON touché (hors périmètre).
-- **Aucun changement JS.** CSS 3825/3825, PHP 891/891 + 245/245.
-**👉 Robin :** valider sur test (ouvrir le Conseiller → S0 + chat ; fiche produit variable → pill avec avatar). Reste pour la généralisation complète si voulu : room-picker page /conseils-éclairés/, encart contact fiche produit.
-
----
-
-## 🔧 À faire
-
-## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 4 : modale (6 états) (commit `f45f187`)
-**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
-- **A. Cadre C** : la carte modale (`.conseiller-card--modal`) passe en **grain bois en filigrane** (le `::before` dashed est **repurposé en grain**, inset:0 desktop + mobile) → **plus de pointillé**, pas d'ourlet orange. Fond crème, radius 16, ombre inchangés.
-- **B. Pill V1 sur les 6 écrans** : `.conseiller-sig conseiller-sig--v1` (composant Phase 1, non recréé) sur **s0** (accroche gardée) + **s2-chat** (« Discutons de ton projet ») + **ajoutée** en tête de **s1** (« On affine ton projet »), **s-product-recap** (« Mon conseil pour toi »), **s3** (« On récapitule ? »), **s-contact** form (« Échangeons ensemble ») et succès (« Merci, à très vite »). Anciens **badges texte masqués** (`.conseiller-card--modal .badge{display:none}`) mais **gardés dans le DOM** (ils portent `data-s0-badge-text`/`data-contact-badge-text`). Overrides modale obsolètes (signature 72px mobile) **nettoyés** → sizing 100 % géré par `--v1`.
-- **C. Tutoiement** : corrigé dans `inc/guide-data.php` (titres taille/sortie/table/style — **possessifs accordés au genre** via table pièce→forme, pas de « ton chambre »), dans `buildRecapIntro` (JS, même table → « Pour ton salon, Robin recommande : ») et le **consentement s-contact** (« en envoyant ta demande, tu acceptes… »). ⚠️ `guide-data.php` est partagé → le bandeau « Mon projet » bénéficie aussi du tutoiement.
-- **D. Hover des cartes de choix** (`.choice`) en **orange** (border + icône), scopé modale, comme la home.
-- **Préservé** : tous les `data-*` (data-screen, data-s0-*, data-question-title, data-choices, data-progress-fill, data-chat-*, data-product-recap-*, data-recap-chips, data-contact-*), l'attribut `hidden`, le **honeypot `name="website"`**, la pill `#robin-product-pill`. **Aucune logique JS de filtre touchée.**
-- **Vérifs** : accolades CSS 3738/3738 ; 7 pills `--v1` ; 0 vouvoiement résiduel (guide-data + modale) ; hooks présents.
-**👉 Robin :** sur une **fiche produit variable** (test), ouvrir le Conseiller et parcourir les 6 écrans (desktop **+ mobile**) → carte au **grain bois sans pointillé**, **pill V1 photo + accroche Square Peg** en tête de chaque écran, **plus de vouvoiement** (titres s1, intro recap, consentement), **hover des choix en orange**. Vérifier que le filtre marche comme avant (choix → étapes → reco → appliquer → contact) et **console F12 = 0 erreur**. ⚠️ Lien « Contacter Robin » du récap produit → toujours `/contact/` (hors périmètre, à traiter à part si tu veux). Reste **Phase 3** (card Mes créations, après ton brief).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Harmonisation Conseiller — PHASE 4 : modale (tous les états)
-**Date :** 2026-06-10 · **Priorité :** haute · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod = SEULEMENT après validation Robin sur test.
-**Réfs :** `mockups/AUDIT-MODALE-PHASE4.md` (audit complet des 6 états + liste des hooks à préserver) · `mockups/mockup-modale-conseiller-phase4.html` (rendu cible validé Robin).
-**Décisions Robin (validées sur mockup) :** (1) **cadre C** = la carte modale passe en **fond crème + grain bois en filigrane seul**, on **retire le pointillé** (`::before` dashed) ; pas d'ourlet orange. (2) **pill V1 sur TOUS les écrans** (photo Robin sans contour + accroche Square Peg blanche), à la place des anciens badges texte. (3) **tutoiement** corrigé partout.
-
-**Contexte / périmètre :** la modale (`.conseiller-modal` / `.conseiller-card--modal`) est injectée sur la **fiche produit variable** (markup statique PHP dans le shell `functions.php` ; scripts `sapi-modal-conseiller.js`, `sapi-cards-conseiller.js`, `sapi-help-pill.js`). **6 écrans** : `s0`, `s1`, `s2-chat`, `s-product-recap`, `s3`, `s-contact`. ⚠️ **Markup propre à la modale** (`.modal__*`, `.choices`, `.separator-or`, `.text-input*`, `.badge`) — ce n'est PAS la famille `.room-picker-*`. **Ne casser AUCUN hook JS / `data-*`** (liste exhaustive dans l'audit §4 : tous les `data-screen`, `data-s0-*`, `data-question-title`, `data-choices`, `data-progress-fill`, `data-chat-*`, `data-product-recap-*`, `data-recap-chips`, `data-contact-*`, l'attribut `hidden` de chaque `.modal__screen`, et le **honeypot `input[name="website"]`**). La pill déclencheur `#robin-product-pill` (Phase 2) reste inchangée.
-
-**À faire :**
-
-### A. Cadre C sur la carte modale (`.conseiller-card--modal`)
-- Garder le fond crème `--color-warm`, **ajouter le grain bois** en filigrane : `background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.05) 0,rgba(139,115,85,.05) 1px,transparent 1px,transparent 7px);`
-- **Retirer le pointillé** : supprimer (ou neutraliser) le `::before` dashed `1.11px rgba(139,115,85,.35)` de la carte. Pas d'ourlet orange. Reste : `border-radius:16px`, ombre actuelle, overlay inchangé, bouton fermer inchangé.
-
-### B. Pill V1 sur les 6 écrans (remplace les badges texte)
-- **Réutiliser la classe existante `.conseiller-sig conseiller-sig--v1`** (déjà au CSS depuis Phase 1, commit `cb849af` — capsule wood-dark, avatar 34px sans contour, `__who` masqué, hook Square Peg blanc 24px, MQ mobile 21px). **Ne pas recréer de composant.**
-- **s0 et s2-chat** : la signature `.conseiller-sig` existe déjà (commit `d659fe8`) → **ajouter la classe `conseiller-sig--v1`** + mettre l'accroche voulue. ⚠️ Vérifier qu'aucun override modale plus spécifique (`.conseiller-card--modal .conseiller-sig__avatar` à 72px, etc.) ne batte `--v1` ; si oui, neutraliser pour que le rendu compact V1 s'applique réellement dans la modale.
-- **s1, s-product-recap, s3, s-contact** : **ajouter** le markup pill en tête de chaque écran :
-```php
-<div class="conseiller-sig conseiller-sig--v1">
-  <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg','medium',['alt'=>'Robin, artisan de l\'Atelier Sâpi','class'=>'conseiller-sig__img','loading'=>'lazy']); ?></span>
-  <span class="conseiller-sig__text"><span class="conseiller-sig__who">Le conseil de Robin</span><span class="conseiller-sig__hook">ACCROCHE</span></span>
-</div>
-```
-- **Masquer les anciens badges texte** sans les retirer du DOM (ils portent des `data-*` lus par le JS) : `.conseiller-card--modal .badge{display:none}`. Vérifier que `.badge` n'a pas d'autre rôle visible dans la modale (l'audit ne lui en voit aucun) et qu'aucune LOGIQUE JS ne dépend de sa visibilité (texte/valeur OK, visibilité non).
-- **Accroches Square Peg par écran** (tutoiement, pas de tiret cadratin) :
-  - `s0` → « Mon regard d'artisan sur ton projet » (déjà en place, garder)
-  - `s1` → « On affine ton projet »
-  - `s2-chat` → « Discutons de ton projet » (remplace l'accroche actuelle)
-  - `s-product-recap` → « Mon conseil pour toi »
-  - `s3` → « On récapitule ? »
-  - `s-contact` → « Échangeons ensemble »
-
-### C. Tutoiement (corriger le vouvoiement résiduel)
-Repérer et corriger dans le code de la modale / du mégafiltre (PHP `functions.php` et/ou config des questions) :
-1. **Titres s1** type « QUELLE TAILLE FAIT VOTRE SALON ? » / « QUEL STYLE POUR VOTRE SALON ? ».
-2. **Intro s-product-recap** : « Pour **votre** salon / salle à manger, Robin recommande : ».
-3. **Consentement s-contact** : « En envoyant **votre** demande, **vous** acceptez… » → « En envoyant **ta** demande, **tu** acceptes… ».
-
-⚠️ **Piège de genre** : ces titres **interpolent le nom de la pièce** ; « votre » est neutre, le tutoiement ne l'est pas. **Ne PAS remplacer mécaniquement « votre » par « ton »** (ça donnerait « ton chambre »). Introduire une **table piece-clé → possessif tutoyé exact**, et l'utiliser pour s1 + l'intro produit-recap :
-| Pièce (label) | Forme tutoyée |
-|---|---|
-| Cuisine | ta cuisine |
-| Bureau / Atelier | ton bureau |
-| Salon / Salle à manger | ton salon |
-| Chambre | ta chambre |
-| Chambre enfant | ta chambre d'enfant |
-| Entrée / Couloir | ton entrée |
-| Cage d'escalier | ta cage d'escalier |
-(Adapter aux clés réelles trouvées dans le code. Si une pièce manque, choisir la forme correcte ; en dernier recours, replier sur « **ta pièce** » plutôt qu'une forme fautive.)
-
-### D. Hover des cartes de choix en orange (comme la home)
-- `.conseiller-card--modal .choices > *:hover` (ou la classe réelle des cartes `.choices`) → aligner sur la home : `border-color:var(--color-orange);transform:translateY(-2px);box-shadow:var(--shadow-card-hover)` + carré d'icône `background:rgba(227,91,36,.12);color:var(--color-orange)` au hover. Scoper à la modale.
-
-**NE PAS faire :** toucher au JS de filtre / aux `data-*` / au honeypot / à l'attribut `hidden` / à `#robin-product-pill`. Ne pas changer le comportement du lien « Contacter Robin » du récap produit (il part sur `/contact/` — incohérence notée dans l'audit §1 s-product-recap, mais **hors périmètre design**, à traiter à part si Robin le veut). Pas de tiret cadratin. Accolades équilibrées.
-
-**Critères de succès :** sur une fiche produit variable (test), ouvrir la modale et parcourir les 6 écrans → carte au **grain bois sans pointillé**, **pill V1 photo + accroche Square Peg** en tête de **chaque** écran (accroches ci-dessus), **plus aucun vouvoiement** (titres s1, intro recap, consentement contact), **hover des choix en orange**. Le filtre fonctionne exactement comme avant (choix → étapes → reco → appliquer la sélection → contact). Console F12 = 0 erreur. Mobile ≤600px OK (pill 21px, plein écran).
-
-### 👉 Action Robin
-Sur test, fiche produit variable → ouvrir le Conseiller et faire défiler les 6 écrans (desktop + mobile). Vérifier grain/pill/tutoiement/hover + que rien n'est cassé. Si OK → go-live (avec les autres chantiers Conseiller en attente). Reste après ça : **Phase 3** (card Robin sur Mes créations, après ton brief refonte Mes créations).
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 2 : pill fiche produit mini V1 (V6) (commit `424828f`)
-**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
-- **CSS** `.conseiller-pill-secondary` : capsule claire dashed → **mini capsule bois sombre** (`--color-wood-dark`, radius 60), **photo sans contour** (rond), **accroche Square Peg blanche**, **sans badge ni flèche**, hover ombre + lift. **Anciennes règles mortes retirées**. Retouche Robin (`068d366`) : **+20 % de taille** (avatar 31px, accroche 22px / mobile 19px, gap 11 / padding 5px 17px 5px 5px) + **`text-transform:none`** (le texte sortait en MAJUSCULES à cause de la règle `button` globale).
-- **Texte (PHP, `single-product.php`)** : « Comment choisir ? » → **« Je t'aide à choisir la bonne version »** (wording final Robin, `5e0fb8c`). **Identique dans les 3 états** du projet.
-- **JS (`sapi-help-pill.js`)** : comme le texte est désormais unique, la logique de texte contextuel (initial/partiel/complet + chips) a été **retirée proprement** (code mort) → le fichier ne garde que le câblage **clic → modale** (`data-help-pill` intact). Texte rendu côté PHP.
-- **Câblage préservé** : `id="robin-product-pill"`, `data-action="open-modal"`, `data-modal-state="product"`, `data-help-pill`, `data-help-pill-text` → clic ouvre toujours la modale. Hook `woocommerce_before_single_variation` inchangé (**pill à sa position actuelle**). Accessoires/carte cadeau : toujours pas de pill.
-- **Vérifs** : accolades 3737/3737 ; escaping JS/PHP OK ; pas de tiret cadratin.
-**👉 Robin :** sur une **fiche produit variable** (test) : vérifier le look V6 (mini pill sombre + photo Robin + accroche Square Peg) + que le clic ouvre la modale + que le texte évolue selon le projet. **Position** : la pill reste à sa place actuelle — si tu la veux SOUS le sélecteur (mockup V6), c'est un changement de hook à part, dis-le. Restent **Phase 4** (modale, exploration mockup) et **Phase 3** (card Mes créations, après ton brief).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Harmonisation Conseiller — PHASE 2 : pill fiche produit en mini V1 (variante V6)
-**Date :** 2026-06-10 · **Priorité :** haute · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod après validation Robin.
-**Mockup de référence :** `mockups/mockup-conseiller-pill-fiche-produit-10.html` → **variante V6** (mini pill V1 sombre DISCRÈTE, photo sans contour + accroche Square Peg, SANS badge ni flèche).
-**Contexte :** la pill « Comment choisir ? » de la fiche produit (`.conseiller-pill-secondary`, `single-product.php` ~l.424) passe au design V1 mini/discret (capsule bois sombre, photo sans contour, accroche Square Peg, pas d'ornement). ⚠️ C'est un `<button>` CLIQUABLE qui ouvre la modale → **préserver tout le câblage** : `id="robin-product-pill"`, `data-action="open-modal"`, `data-modal-state="product"`, `data-help-pill`, et le span `data-help-pill-text` (texte piloté en live par `assets/sapi-help-pill.js`). **NE PAS toucher au JS.**
-
-**À faire :**
-1. **Markup** (`single-product.php`, `$render_help_pill`) : garder le `<button>` + tous ses attributs + le span avatar + le span `data-help-pill-text`. Juste **changer le texte par défaut** « Comment choisir ? » → « **Je t'aide à choisir la bonne variante** ». Vérifier dans `sapi-help-pill.js` si « Comment choisir ? » est codé en dur comme fallback → si oui, aligner le fallback sur le nouveau wording, **sans changer la logique** (les variantes contextuelles type « Adapter à mon projet » restent gérées par le JS).
-2. **CSS** — remplacer le style actuel (capsule claire dashed) de `.conseiller-pill-secondary` par le mini V1 (V6, sans badge) :
-```css
-.conseiller-pill-secondary{display:inline-flex;align-items:center;gap:9px;background:var(--color-wood-dark);border:none;border-radius:60px;padding:4px 14px 4px 4px;cursor:pointer;transition:.2s}
-.conseiller-pill-secondary:hover{box-shadow:var(--shadow-card-hover);transform:translateY(-1px)}
-.conseiller-pill-secondary__avatar{width:26px;height:26px;flex-shrink:0}
-.conseiller-pill-secondary__img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
-.conseiller-pill-secondary [data-help-pill-text]{font-family:var(--font-display);color:#fff;font-size:18px;line-height:1}
-```
-(Pas de badge, pas de flèche. Mobile ≤600px : si l'accroche déborde, réduire à ~16px.)
-3. **Cleanup** : retirer les anciennes règles `.conseiller-pill-secondary` devenues mortes (cadre dashed, ancien avatar, etc.).
-
-**Pièges :** ne pas toucher au JS (`sapi-help-pill.js`), aux `data-*`, à l'`id`, ni au hook `woocommerce_before_single_variation` (la pill reste à sa position actuelle — si Robin veut la passer SOUS le sélecteur comme dans le mockup V6, c'est un changement de hook à part, à confirmer). Pas de tiret cadratin. Accolades équilibrées.
-**Critères :** sur une fiche produit VARIABLE, la pill = mini capsule bois sombre + photo Robin sans contour (26px) + accroche Square Peg « Je t'aide à choisir la bonne variante », discrète ; clic ouvre toujours la modale ; le texte dynamique selon le projet fonctionne encore. Accessoires / carte cadeau : pas de pill (inchangé).
-
-### 👉 Action Robin
-Ouvrir une fiche produit variable sur test : vérifier le look V6 + que le clic ouvre bien la modale. Dis-moi aussi si tu veux la pill SOUS le sélecteur (mockup V6) ou si la position actuelle te va. Si OK → reste la **Phase 4** (modale, exploration mockup) et la **Phase 3** (card Mes créations, après ton brief).
-
-</details>
-
-## ✅ [FAIT 2026-06-10 — sur test] Harmonisation Conseiller — PHASE 1 : page Conseils alignée sur la home (commit `cb849af`)
-**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :**
-- **A. Pill V1 factorisée** : `.home-projet .conseiller-sig*` → classe partagée **`.conseiller-sig--v1*`** (mêmes déclarations). Home : classe `conseiller-sig--v1` ajoutée sur `.conseiller-sig` → **rendu home strictement identique** (base + override, v1 gagne par ordre source comme avant). 0 référence `.home-projet .conseiller-sig` restante.
-- **B. Panneau Conseils** : cadre **dashed crème supprimé** (`.advice-room-picker::before` dashed inset) → **fond warm + grain bois** (`::before` repeating-linear-gradient, inset:0, z-index:0 ; inner z-index:1). Panneau **contenu** conservé (`.advice-room-picker-section` max-width 1400). Padding 2.75rem 2rem.
-- **C. Pill Robin V1** ajoutée en tête du `.room-picker-inner` de `page-conseils-eclaires.php` (même avatar que la home `2026/03/Robin-face-avec-Alice-lhelice.jpg`), accroche dédiée **« Mes conseils spécifiques pour ton projet »** (commit `97c1ef4`).
-- **D. Titre** : `<h3>` conservé, texte passé au **tutoiement** « Pour quelle pièce cherches-tu un luminaire ? ». Style déjà aligné (classe partagée `.room-picker-title` = même typo que la home) → aucune CSS dupliquée ajoutée.
-- **E. Hover chips orange** scopé Conseils : valeurs **exactement celles de la home** (border orange + bg #f4ead3 + shadow-card-hover + translateY-2 ; icône bg rgba(227,91,36,.12) + color orange).
-- **Vérifs** : accolades 3735/3735 ; modale, fiche produit, Inspiration, tous les `data-*` non touchés ; pas de tiret cadratin.
-**👉 Robin :** comparer home et page Conseils côte à côte sur test (fond warm+grain, pill V1 « Je t'éclaire avant de choisir », chips hover orange, titre tutoyé, panneau contenu). Home doit être inchangée. Si OK → **Phase 2** (mockup pill fiche produit d'abord, puis code).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Harmonisation Conseiller — PHASE 1 : aligner le room-picker page Conseils sur la home
-**Date :** 2026-06-10 · **Priorité :** haute · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod après validation Robin.
-**Réf :** `mockups/AUDIT-CONSEILLER-PHASE0.md` + `mockups/PLAN-HARMONISATION-CONSEILLER.md`.
-**Décisions Robin :** panneau contenu restylé (PAS pleine largeur) · garder `<h3>` mais style aligné + tutoiement · accroche dédiée Conseils « **Je t'éclaire avant de choisir** » · Inspiration HORS périmètre (ne pas toucher) · modale = Phase 4 (ne pas toucher) · fiche produit = Phase 2 (ne pas toucher).
-
-**À faire :**
-
-### A. Factoriser la pill V1 en classe partagée `.conseiller-sig--v1`
-Dans `style.css`, RENOMMER les règles `.home-projet .conseiller-sig*` (commit `76a468f`) en `.conseiller-sig--v1*` (mêmes déclarations, juste le sélecteur change) :
-```css
-.conseiller-sig--v1{display:inline-flex;align-items:center;gap:12px;background:var(--color-wood-dark);border-radius:60px;padding:6px 24px 6px 6px;margin:0 0 16px}
-.conseiller-sig--v1 .conseiller-sig__avatar{width:34px;height:34px;border:none;box-shadow:none}
-.conseiller-sig--v1 .conseiller-sig__who{display:none}
-.conseiller-sig--v1 .conseiller-sig__text{gap:0}
-.conseiller-sig--v1 .conseiller-sig__hook{color:#fff;font-size:24px;line-height:1;margin:0}
-@media (max-width:600px){.conseiller-sig--v1{max-width:100%}.conseiller-sig--v1 .conseiller-sig__hook{font-size:21px}}
-```
-Puis dans `front-page.php`, ajouter la classe `conseiller-sig--v1` à l'élément `.conseiller-sig` de la home. **Le rendu de la home doit rester STRICTEMENT identique** (vérifier).
-
-### B. Restyler le panneau Conseils (panneau contenu, pas pleine largeur)
-Supprimer le cadre dashed crème (`.advice-room-picker::before` dashed + fond carte actuel) et le remplacer par warm + grain :
-```css
-.advice-room-picker{position:relative;background:var(--color-warm);border-radius:16px;padding:2.75rem 2rem;text-align:center;overflow:hidden}
-.advice-room-picker::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.05) 0,rgba(139,115,85,.05) 1px,transparent 1px,transparent 7px);pointer-events:none;z-index:0}
-.advice-room-picker .room-picker-inner{position:relative;z-index:1}
-```
-`.advice-room-picker-section` garde son `max-width:1400` + padding (→ contenu, pas edge-to-edge).
-
-### C. Ajouter la pill Robin V1 en tête du `.room-picker-inner` (avant le `<h3>`), dans `page-conseils-eclaires.php`
-```php
-<div class="conseiller-sig conseiller-sig--v1">
-  <span class="conseiller-sig__avatar"><?php echo sapi_image('<MÊME IMAGE AVATAR QUE LA HOME>', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
-  <span class="conseiller-sig__text">
-    <span class="conseiller-sig__who">Le conseil de Robin</span>
-    <span class="conseiller-sig__hook">Je t'éclaire avant de choisir</span>
-  </span>
-</div>
-```
-(reprendre l'image d'avatar EXACTE utilisée sur la home pour la cohérence.)
-
-### D. Titre : garder `<h3 class="room-picker-title">` mais aligner le style sur la home + passer au tutoiement
-- Texte → « Pour quelle pièce cherches-tu un luminaire ? » (tutoiement).
-- Style identique à la home : `.advice-room-picker .room-picker-title{font-family:var(--font-body);font-weight:700;font-size:clamp(...même valeur que la home...);color:var(--color-wood-dark)}`. Relever la valeur exacte du titre home et la reprendre.
-
-### E. Hover des chips en ORANGE (comme la home), scopé Conseils
-Reprendre les valeurs EXACTES de la home :
-```css
-@media (hover:hover){
-  .advice-room-picker .room-card:hover{border-color:var(--color-orange);background:#f4ead3;box-shadow:var(--shadow-card-hover);transform:translateY(-2px)}
-  .advice-room-picker .room-card:hover .room-card-icon{background:rgba(227,91,36,.12);color:var(--color-orange)}
-}
-```
-
-**Pièges / NE PAS faire :** ne pas toucher la modale, la fiche produit, la page Inspiration, ni les `data-*` du room-picker. Pas de tiret cadratin. Accolades équilibrées. Vérifier que la home rend identique après la refacto de la pill (point A).
-
-**Critères :** la page Conseils a le MÊME langage que la home (fond warm + grain, pill V1 avec accroche « Je t'éclaire avant de choisir », chips hover orange, titre aligné, tutoiement), en restant un panneau contenu (max-width 1400). Home inchangée. Mobile OK.
-
-### 👉 Action Robin
-Comparer home et page Conseils côte à côte sur test. Si identiques → on passe à la **Phase 2** (mockup pill fiche produit d'abord, puis code).
-
-</details>
-
-## ✅ [FAIT 2026-06-10 — lecture seule] Harmonisation Conseiller — PHASE 0 : spec + audit
-**Livrable : `mockups/AUDIT-CONSEILLER-PHASE0.md`** (rapport complet, aucune modif de code). Synthèse :
-- **(a) Spec de référence** figée (HOME) : bande `.home-projet-section` warm + grain bois `::before` (⚠️ pas de border-top aujourd'hui) ; pill V1 `.home-projet .conseiller-sig` (capsule wood-dark, photo 34px sans contour, hook Square Peg blanc 24px, label masqué) ; socle partagé `.room-picker-*` (valeurs exactes inner/title/cards/room-card/icon/label/or/freetext) ; câblage `data-room-picker`/`data-piece`/`data-room-picker-freetext`.
-- **(b) Écarts par emplacement** : **Conseils** (`.advice-room-picker`) = cadre crème **dashed inset** + pas de pill + titre `<h3>` **vouvoiement** + hover **wood** (vs orange) + pas de grain ; **Modale S0** = ⚠️ **markup totalement à part** (`.modal__*`/`.choices`/`.separator-or`/`.text-input*`, PAS la famille `.room-picker-*`) + `.conseiller-sig` style ANCIEN → confirme un chantier Phase 4 (réécriture, pas override) ; **Pill fiche produit** = capsule claire dashed + avatar 26px → à passer V1 (préserver `id robin-product-pill`/`data-action`/`data-modal-state`/`data-help-pill`/`data-help-pill-text`) ; **Mes créations** = carte + badge crayon + titre vouvoiement (Phase 3, attend le brief).
-- **(c) Reco Phase 1** : le socle `.room-picker-*` est **déjà bien factorisé** → ne pas le refactorer, juste réduire les overrides Conseils. Option : extraire les 3 traits identitaires home (grain + pill V1 + hover orange + tutoiement) dans un modificateur partagé `.room-picker--robin` **scopé aux room-pickers de PAGE** (home + conseils ; jamais modale/mes-créations).
-- **(d) Verdict Inspiration** : **HORS périmètre** — c'est un **filtre de galerie** (`.inspiration-filter-btn`, pièce+essence), pas un room-picker. Il n'y a PAS de 4e room-picker.
-- **Questions à trancher avant Phase 1** (dans le rapport §E) : Conseils en bande pleine largeur ou panneau contenu restylé (reco) ? garder `<h3>` SEO ou `<h2>` ? accroche pill propre à Conseils ? confirmer Inspiration exclu.
-**👉 Robin :** lire `mockups/AUDIT-CONSEILLER-PHASE0.md` + trancher les questions §E → j'écris la Phase 1.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Harmonisation Conseiller — PHASE 0 : spec + audit (LECTURE SEULE, aucun changement)
-**Date :** 2026-06-10 · **Priorité :** haute · **Lecture seule, AUCUNE modif de fichier.**
-**Plan complet :** `mockups/PLAN-HARMONISATION-CONSEILLER.md` (à lire). Objectif : préparer l'harmonisation du composant « Robin Conseiller » sur tout le site, en partant de la HOME comme référence (pill V1 = commit `76a468f`).
-
-**À faire :**
-1. **Figer la spec** du composant de référence (room-picker home `.home-projet` + pill Robin V1) : relever les valeurs réelles dans `front-page.php` + `style.css` — fond/grain de la bande, titre (typo, tutoiement), pill V1 (capsule wood-dark, photo 34px sans contour, accroche Square Peg blanche 24px, pas de label), chips `.room-card` (repos + hover), séparateur « ou », champ libre + bouton rond orange, couleurs, attributs `data-*`. Restituer la spec noir sur blanc.
-2. **Auditer chaque emplacement** et lister les ÉCARTS vs la référence :
-   - Room-picker page **Conseils** (`page-conseils-eclaires.php` `.advice-room-picker-section`) : cadre crème dashed, titre vouvoiement « cherchez-vous », pas de pill Robin…
-   - Room-picker **modale** (mégafiltre S0, `functions.php`) : documenter (traité en Phase 4, mais relever l'état).
-   - **Pill fiche produit** (`single-product.php` `.conseiller-pill-secondary`).
-   - **Card Robin Mes créations** (`woocommerce/archive-product.php`).
-   - **`page-inspiration.php`** : confirmer si ses `room-card` = room-picker « pour quelle pièce » (4e à aligner) ou filtre distinct.
-3. **Cartographier classes partagées vs spécifiques** (`.room-picker-*` base vs overrides `.home-projet` / `.advice-room-picker` / modale) → préparer une factorisation pour Phase 1.
-
-**Livrable :** rapport = (a) spec de référence ; (b) tableau « emplacement → écarts » ; (c) reco de factorisation Phase 1 ; (d) verdict Inspiration. Aucune modif de code.
-**👉 Robin :** lire le rapport → j'écris la Phase 1 (aligner Conseils sur la home) depuis les écarts.
-
-</details>
-
-## ✅ [FAIT 2026-06-10 — sur test] Pill Conseiller home — V1 accroche Square Peg dans la pill, sans label (commit `76a468f`)
-**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :** `.home-projet .conseiller-sig*` → la pill sombre ne contient plus que la **photo sans contour** (avatar 34px, `border:none`) + l'**accroche Square Peg blanche 24px**. **« Le conseil de Robin » masqué** (`__who{display:none}`, markup conservé). `gap:12`, `padding:6px 24px 6px 6px`, `margin:0 0 16px`, `__text gap:0`. Mobile ≤600px : hook **21px** + `max-width:100%`. Texte d'accroche et photo inchangés. Scopé home → modale + fiche produit intactes. Accolades 3732/3732, pas de tiret cadratin.
-**👉 Robin :** valider sur test (accroche Square Peg lisible, plus de label, titre dominant). Si OK → généralisation (modale + fiche + page conseils) avec ce format, accroche **contextuelle par page** (home = actuel ; fiche = « Je t'aide à choisir la bonne variante » ; etc.).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Pill Conseiller home — V1 « accroche Square Peg DANS la pill, sans label »
-**Date :** 2026-06-10 · **Priorité :** normale · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod après validation Robin.
-**Contexte :** itération finale du format. Le mini B1 (`595874f`) avec le Square Peg blanc 18px était illisible. Nouvelle direction validée (mockup `mockups/mockup-conseiller-pill-squarepeg-dedans.html` variante **V1**) : la pill sombre ne contient plus QUE la photo (**sans contour**) + l'**accroche Square Peg en plus grand** ; on **SUPPRIME « Le conseil de Robin »**. L'identité « Robin » passe par la photo. ⚠️ Ça remplace la règle précédente « ligne du haut fixe ».
-
-**À faire (scopé home `.home-projet .conseiller-sig*`, ne pas toucher modale ni fiche) :**
-1. **Retirer le label** : masquer la ligne « Le conseil de Robin » → `.home-projet .conseiller-sig__who{display:none}` (markup laissé en place, juste caché ; OK).
-2. **Remplacer les tailles B1** par V1 :
-```css
-.home-projet .conseiller-sig{
-  display:inline-flex;align-items:center;gap:12px;
-  background:var(--color-wood-dark);
-  border-radius:60px;
-  padding:6px 24px 6px 6px;
-  margin:0 0 16px;
-}
-.home-projet .conseiller-sig__avatar{width:34px;height:34px;border:none;box-shadow:none}
-.home-projet .conseiller-sig__who{display:none}
-.home-projet .conseiller-sig__text{gap:0}
-.home-projet .conseiller-sig__hook{color:#fff;font-size:24px;line-height:1;margin:0}
-```
-Mobile ≤600px : vérifier que l'accroche ne déborde pas (réduire à ~21px si besoin), pas de contour avatar.
-**Notes :** photo et texte d'accroche inchangés (la home garde son hook actuel). Pas de tiret cadratin, accolades équilibrées.
-**Critères :** pill = photo sans contour + accroche Square Peg blanche 24px, lisible ; plus de « Le conseil de Robin » ; le titre reste dominant.
-**👉 Robin :** valider sur test. Si OK → généralisation (modale + fiche + page conseils) avec ce format, accroche contextuelle par page (home = actuel ; fiche = « Je t'aide à choisir la bonne variante » ; etc.).
-
-</details>
-
-## ✅ [FAIT 2026-06-10 — sur test] Pill Conseiller home — mini format B1 (commit `595874f`)
-**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :** tailles de `.home-projet .conseiller-sig*` réduites au format **B1** — avatar **34px**, `gap:10px`, `padding:5px 18px 5px 5px`, `__text gap:1px`, eyebrow **9px** (letter-spacing .14em), accroche Square Peg **18px** (`line-height:1`). Mobile ≤600px : hook **16px** + `max-width:100%`. **Markup, textes, photo, centrage inchangés.** Toujours scopé home → modale + pill fiche produit intactes. Accolades 3732/3732, pas de tiret cadratin.
-**👉 Robin :** valider sur test (le titre « Pour quelle pièce » doit reprendre la vedette). Si OK → généralisation (modale + fiche + page conseils) avec ce format B1 et lignes du bas contextuelles.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Pill Conseiller home — réduire en mini format B1 (trop grosse en V1)
-**Date :** 2026-06-10 · **Priorité :** normale · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod après validation Robin.
-**Contexte :** la V1 appliquée (commit `99c6903`) est **trop grosse/visible** sur la home : elle écrase le titre « Pour quelle pièce… ». Robin valide le **format B1** (mini pill, mêmes style/couleurs, juste réduit) → mockup `mockups/mockup-conseiller-pill-B-squarepeg.html` variante **B1**. L'accroche reste en **Square Peg**.
-**À faire :** ajuster UNIQUEMENT les valeurs de taille de la règle home `.home-projet .conseiller-sig*` (ajoutée en `99c6903`). Remplacer par :
-```css
-.home-projet .conseiller-sig{
-  display:inline-flex;align-items:center;gap:10px;
-  background:var(--color-wood-dark);
-  border-radius:60px;
-  padding:5px 18px 5px 5px;
-  margin:0 0 18px;
-}
-.home-projet .conseiller-sig__avatar{width:34px;height:34px;border:2px solid rgba(255,255,255,.18);box-shadow:none}
-.home-projet .conseiller-sig__text{gap:1px;text-align:left}
-.home-projet .conseiller-sig__who{color:#e0a878;font-size:9px;letter-spacing:.14em}
-.home-projet .conseiller-sig__hook{color:#fff;font-size:18px;line-height:1;margin-top:0}
-```
-Mobile ≤600px : la pill est déjà petite, vérifier juste qu'elle ne déborde pas (réduire le hook à ~16px si besoin). Rien d'autre ne change (markup, textes, photo, centrage). Pas de tiret cadratin, accolades équilibrées.
-**Critères :** signature nettement plus discrète, le titre reprend la vedette, accroche en Square Peg lisible.
-**👉 Robin :** valider sur test. Si OK → généralisation (modale + fiche + page conseils) avec ce format B1 et lignes du bas contextuelles.
-
-</details>
-
-## 🔧 À faire — actions Robin (post go-live)
-1. **Vérifier la home en prod** (atelier-sapi.fr) : photos `2026/02`/`2026/04`/`2026/05`/`2026/06` affichées ; **card Sur mesure** (photo tirée de la catégorie `creations-sur-mesure` → si mauvaise/absente, mettre l'image voulue dans le champ ACF **Image collection** de la catégorie) ; **logo Région** affiché ; **logos presse alignés** ; **photo Assemblage en miroir** au survol de l'étape 04.
-2. **Tester en prod** : inscription newsletter + form « Échanger avec Robin » fiche produit → réception Brevo.
-3. **Re-soumettre le sitemap** dans Google Search Console.
-4. **Brevo** : maj séquence d'accueil −10 % pour inclure les sources `surmesure` + `ficheproduit`.
-5. **Passe Yoast** (pas encore faite) : titre + meta description de la home — Claude Code peut préparer une proposition au prochain run.
-6. ~~(optionnel) nettoyage CSS mort résiduel~~ → ✅ **EN PROD (2026-06-10)** (commit `7534d2a`). Validé Robin, déployé.
-
-## ✅ [FAIT 2026-06-10 — sur test] Suppression complète du système bento LEGACY (CSS + JS)
-**Branche `test-theme-sapi-maison`, poussé sur test.** −869 lignes CSS / −68 lignes JS (cinetique.js) / −1 entrée scroll-dots.js. **Accolades CSS équilibrées 3724/3724**, JS balancé (parens/braces OK). Méthode : audit + grep boundary de CHAQUE classe (markup `.php` + JS `.js`, hors `/mockups/`) avant suppression.
-
-**🗑️ Retiré — JS :**
-| Fichier | Retiré |
-|--------|--------|
-| `cinetique.js` | bloc « Bento Cards Animation on Scroll » (`.bento-card` IntersectionObserver) ; bloc « Product Cards Parallax » (`.bento-product`/`.product-image` tilt souris) ; entrée cache `heroImage:'.bento-hero .bento-bg'` + son bloc parallax déjà commenté (DISABLED). Le reste du fichier (notifications, parallax shop/catégorie, particules canvas, smooth-scroll…) **intact**. |
-| `scroll-dots.js` | entrée morte `{container:'.process-inner', child:'.process-step'}` (plus aucun élément → ne matchait rien). |
-
-**🗑️ Retiré — CSS (0 usage markup ET JS confirmé) :** tout le système legacy « CINÉTIQUE Bento Grid » + ses media queries (1200px / 768px ×2 / 540px / 375px / reduced-motion / mobile slider) :
-`.bento-container` · `.bento-card`(+hovers, +`:focus-visible` du groupe) · `.bento-bg` / `.bento-bg-img`(+`--bottom-right`) · `.bento-label` · `.bento-text` · `.bento-corner-info` · `.bento-statement` · `.bento-product`(+`.product-image`/`.product-overlay`/`.product-name`/`.product-cat` descendants) · `.bento-product-small`(+`.product-image-small`/`.product-overlay-small`/`.product-name-small` descendants) · `.bento-stats` · `.bento-process` · `.bento-hero` / `.bento-storytelling` / `.bento-atelier` (MQ seulement).
-**+ companions orphelins** (0 usage, n'existaient QUE dans le markup bento supprimé, donc retirés pour finir la « suppression complète ») : `.hero-cta-row`, `.corner-label`, `.corner-price`, `.statement-inner/number/text/author`, `.product-info-reveal`, `.product-price-tag`, `.stat-block`(+`::after`/strong/span/hovers), `.stat-content`, `.stat-hover`(+img/text), `.process-header`, `.process-number`, `.process-title`, `.process-inner`(+`::before`), `.process-step`(+hovers), `.step-num`, `.step-text`, `.step-image-img`.
-
-**✅ CONSERVÉ (vérifié présent + raison) :**
-| Classe | Raison |
-|--------|--------|
-| `.hero-bento` | wrapper `.home-creations` (front-page.php:636) — 3 règles intactes (base + 2 MQ). |
-| `.bento-bestseller-badge` | badge « Star » sur `.creation-star` (front-page.php:646). |
-| `.product-badge` (base) | **live** : badges Promo/Nouveau des fiches/cartes produit (`content-product.php`). Le retirer décalait visuellement les badges → GARDÉ. |
-| `.hero-cta` / `.hero-cta--wood` | **live** : CTA « Voir toutes les créations » + « Découvrir l'artisan » (front-page.php). |
-| `.storytelling-text` | **live** : réutilisé par la section L'atelier (refonte #7). |
-| `.process-*` de `page-sur-mesure.php` | ce sont `.surmesure-process-*` (namespace distinct) — **non touchés**. `.progress-step .step-number` (stepper modale Conseiller) = classe distincte, **non touchée**. |
-
-**🔎 Pièges vérifiés :** page **« Star du moment »** utilise son propre namespace `star-storytelling__*` (PAS `process-*`/`step-*`/`bento-*`) → aucun risque. Commentaires de traçabilité `.bento-cta*`/`.bento-actu*`/`.bento-giftcard*`/`.bento-conseil*` (historique des refontes #9/DA#7) laissés en place (exacts, non trompeurs).
-**Reste 0 référence** à un sélecteur retiré dans tout le markup/JS live (grep final = NONE).
-
-**👉 Robin :** vérifier sur test — home (desktop **+ mobile**), page « Star du moment », une catégorie, une fiche produit (badges Promo/Nouveau OK) + **console F12 sur la home = 0 erreur**. Puis « go » → merge master + prod manuel. ⚠️ J'ai légèrement **étendu au-delà des seuls `.bento-*`** (companions orphelins `.stat-*`/`.process-*`/`.statement-*`/etc., tous 0 usage) pour vraiment finir le nettoyage — si tu préfères que je n'en retire qu'une partie, dis-le.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Suppression complète du système bento LEGACY (CSS + JS, hors home)
-**Date :** 2026-06-10 · **Priorité :** basse (maintenance, aucune urgence) · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. **Master/prod = SEULEMENT après validation Robin sur test.**
-**Contexte :** suite du nettoyage CSS (`7534d2a`). Le vieux système bento « CINÉTIQUE » (cartes `.bento-card`/`.bento-hero`/`.bento-bg`/`.bento-container`/`.bento-storytelling`/`.bento-process`/etc.) n'est **plus émis dans aucun markup** depuis la refonte, mais son CSS est resté « par prudence » car `cinetique.js` **poke encore ces sélecteurs** (`querySelector('.bento-hero .bento-bg')`, `querySelectorAll('.bento-card')`…) — code mort qui ne matche plus rien. On retire le tout d'un coup, CSS **et** JS.
-
-**⚠️ À CONSERVER absolument (encore utilisés, NE PAS supprimer) :**
-- `.hero-bento` → wrapper de la section `.home-creations` (markup actuel).
-- `.bento-bestseller-badge` → badge « Star du moment » sur `.creation-star`.
-- Tout le reste de `cinetique.js` qui ne concerne PAS le bento (autres animations/sections) : ne toucher QUE les blocs bento.
-
-**À faire :**
-1. **Audit `cinetique.js`** : lister tous les blocs/sélecteurs liés au bento legacy (`.bento-card`, `.bento-hero`, `.bento-bg`, `.bento-product`, `.bento-container`, etc.). Confirmer par grep markup que ces éléments n'existent plus dans le DOM rendu (front-page + autres templates). 
-2. **Retirer le code JS mort** correspondant (handlers hover/parallax/tilt des bento cards, init bento…), en gardant le reste du fichier intact. Vérifier qu'aucune autre partie du JS n'en dépend.
-3. **Retirer le CSS** désormais totalement orphelin : tous les `.bento-*` SAUF `.hero-bento` et `.bento-bestseller-badge` (grep chacun avant : 0 markup ET 0 JS après l'étape 2 → supprimer). Inclure leurs media queries + commentaires obsolètes.
-4. **Vérifs :** accolades CSS équilibrées ; `cinetique.js` valide (pas d'erreur de syntaxe) ; **console navigateur sur la home test = 0 erreur JS** ; home (desktop + mobile), page « Star du moment », une catégorie, une fiche produit = rendu strictement inchangé.
-
-**Livrable / critères :** tableau « retiré (CSS) / retiré (JS) / conservé » ; 0 erreur console ; rendu identique partout ; `.hero-bento` + `.bento-bestseller-badge` intacts. En cas de doute sur un bloc JS partagé → garder et le signaler.
-**👉 Robin :** vérifier sur test (visuel + ouvrir la console F12 sur la home pour confirmer 0 erreur), puis go → merge master + prod manuel.
-
-</details>
-
-## ✅ [FAIT 2026-06-10 — sur test] Signature Conseiller → pill bois sombre (V1) — HOME (commit `99c6903`)
-**Résultat (branche `test-theme-sapi-maison`, poussé sur test) :** `.conseiller-sig` restylée SCOPÉE à la home (`.home-projet .conseiller-sig*`) en capsule bois sombre — `inline-flex`, fond `--color-wood-dark`, radius 60px, avatar 60px bordé clair (`rgba(255,255,255,.18)`), eyebrow tan `#e0a878`, accroche blanche 28px. **Markup et textes inchangés** (ligne haut « Le conseil de Robin », ligne bas = le hook actuel de la home). Centrage OK sans rien ajouter : `.room-picker-inner` est déjà `flex`/`align-items:center` → la pill `inline-flex` se centre toute seule. **Réduction mobile ≤600px** (gap/padding réduits, avatar 48px, hook 21px, `max-width:100%` anti-débordement). Accolades 3732/3732. **Modale Conseiller (`.conseiller-card--modal`) + pill fiche produit NON touchés** (réservés à l'étape suivante).
-⚠️ **Coordination :** 1re tentative écrasée par la fenêtre bento (édition concurrente du même `style.css`). Refait proprement une fois le bento mergé en prod.
-**👉 Robin :** valider le rendu de la pill sombre sur la home test (desktop + mobile). Si OK → on lance la généralisation (modale tous états + pill fiche produit + page conseils) avec la même V1 et lignes du bas contextuelles.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Signature Conseiller → pill bois sombre (V1) — HOME d'abord
-**Date :** 2026-06-10 · **Priorité :** normale · **Branche :** `test-theme-sapi-maison` (auto-deploy test). Push auto. Master/prod = après validation Robin.
-**Mockup de référence :** `mockups/mockup-conseiller-signature-20-variantes.html` → **variante V1** (capsule bois sombre + photo ronde).
-**Contexte :** Robin valide V1 pour la signature « Le conseil de Robin ». 1re étape : l'appliquer SUR LA HOME pour voir (section `.home-projet`). La généralisation (modale tous états + fiche produit) = tâche SUIVANTE, **ne PAS y toucher ici**. Règle de contenu : **ligne du haut TOUJOURS « Le conseil de Robin »** ; **ligne du bas contextuelle** (home = le hook actuel du room-picker ; ex. fiche produit = « Je t'aide à choisir la bonne variante »).
-
-**À faire :** restyler `.conseiller-sig` SCOPÉ à la home (`.home-projet .conseiller-sig*`) — markup et textes INCHANGÉS, juste l'habillage capsule sombre. Ajouter dans `style.css` (après les règles `.conseiller-sig` existantes) :
-```css
-/* ===== Signature Conseiller — V1 pill bois sombre (home) ===== */
-.home-projet .conseiller-sig{
-  display:inline-flex;align-items:center;gap:16px;
-  background:var(--color-wood-dark);
-  border-radius:60px;
-  padding:10px 26px 10px 10px;
-  margin:0 0 18px;
-}
-.home-projet .conseiller-sig__avatar{
-  width:60px;height:60px;border:2px solid rgba(255,255,255,.18);box-shadow:none;
-}
-.home-projet .conseiller-sig__who{color:#e0a878;} /* eyebrow tan chaud sur fond sombre */
-.home-projet .conseiller-sig__hook{color:#fff;font-size:28px;}
-```
-**Centrage :** la pill doit rester centrée dans la bande crème. `.conseiller-sig` passe en `inline-flex` → vérifier que son conteneur (`.room-picker-inner` / `.home-projet`) est bien `text-align:center` (a priori oui). Sinon, ajouter `.home-projet .room-picker-inner{text-align:center}` ou envelopper. Vérifier aussi le rendu mobile (la pill ne doit pas déborder ; réduire police/padding ≤600px si besoin).
-
-**Notes :** ne PAS toucher au markup ni aux textes (la ligne du bas reste celle déjà en place sur la home). Photo : laisser l'image actuelle de l'avatar. Pas de tiret cadratin. Accolades équilibrées. **NE PAS toucher** à la signature dans la modale ni à la pill fiche produit (étape suivante).
-**👉 Robin :** valider le rendu de la pill sombre sur la home test, puis on lance la généralisation (modale + fiche produit + page conseils) avec la même V1 et les lignes du bas contextuelles.
-
-</details>
-
-## ✅ EN PROD (2026-06-10) — nettoyage CSS mort + suppression pill « Signature »
-Déployés ensemble sur atelier-sapi.fr (master `0d114b1`) :
-- **Nettoyage CSS mort** post-refonte (`7534d2a`) — détail dans la tâche ci-dessous.
-- **Suppression du pill « Signature »** des cards produit (`0d114b1`) : badge `.badge-signature` + logique `$is_signature`/`is_featured()` + CSS retirés de `content-product.php` et `style.css`. Badges **Promo** et **Nouveau** conservés. (Le statut WooCommerce « mis en avant » reste utilisable ailleurs ; on a juste arrêté d'en faire un pill.)
-
-## ✅ [EN PROD 2026-06-10] Nettoyage CSS mort post-refonte home (commit `7534d2a`)
-**Résultat (branche `test-theme-sapi-maison`, poussé sur test — zéro régression).** Méthode : grep de chaque candidat dans tout le markup/JS (`*.php` + `*.js`, hors mockups, hors `style.css`).
-
-**Constat clé :** la **refonte (#1/#6/#7) avait déjà retiré la quasi-totalité des blocs morts** (confirmé par les commentaires de traçabilité dans `style.css`). La plupart des candidats (`bento-room-picker`, `process-flip/tile/ribbon`, `home-atelier--band`, `atelier-duo/story/photo/media/maps-link`, `map-card`, `bento-giftcard`, `giftcard-*`, `bento-actu`, `bento-conseil`, `home-divers`, `cta-button`) → **déjà absents** de `style.css` (ne restent que des commentaires).
-
-**🗑️ Retiré (0 occurrence markup + 0 JS) :**
-| Classe | Ce qui a été retiré |
-|--------|---------------------|
-| `.bento-cta` | règle mobile dédiée (768px) + 2 entrées dans des sélecteurs groupés |
-| `.bento-content` | 2 règles mobiles (768px, 375px) |
-| `.bento-title` | 2 règles mobiles (768px, 375px) |
-| `.bento-product-featured` | 1 règle mobile (768px) |
-→ −34 lignes, accolades équilibrées **3843/3843**.
-
-**✅ GARDÉ car référencé (règle « ≥1 usage → garder ») :**
-- `bento-bg`, `bento-card`, `bento-hero`, `bento-product` → **référencés dans `cinetique.js`** (le système bento legacy « CINÉTIQUE » est encore poké par le JS ; le retirer entièrement = toucher au JS, **hors périmètre** de cette tâche CSS-only).
-- `bento-bestseller-badge`, `hero-bento` → utilisés dans le markup PHP.
-- `bento-container` / `bento-bg-img` / `bento-storytelling` / `bento-process` / `bento-statement` / `bento-stats` / `bento-atelier` / `bento-product-small` → **gardés par prudence** (colonne vertébrale structurelle du système bento référencé + warning explicite du task).
-
-**🔎 Warning du task levé :** la page **« Star du moment »** (`page-la-star-du-moment.php`) utilise son **propre namespace `star-storytelling__*`** — elle ne réutilise **ni** `bento-storytelling`/`bento-process`, **ni** `storytelling-*`/`process-*`/`step-*`/`atelier-label`. Aucun risque de ce côté.
-
-**💡 Reste possible (tâche SÉPARÉE, non faite ici) :** retirer **tout** le système bento legacy d'un coup (CSS **+** le code mort correspondant dans `cinetique.js` : `querySelector('.bento-hero .bento-bg')`, `querySelectorAll('.bento-card')`…). Hors périmètre « CSS-only » de cette tâche.
-
-**👉 Robin :** vérifier sur test que rien n'a bougé (home desktop+mobile, page Star, une catégorie, une fiche produit) → puis « go » pour merge master + prod. Si tu veux que je retire aussi le bento legacy complet (CSS+JS), dis-le.
-
-<details><summary>Énoncé original</summary>
-
-**Date :** 2026-06-10 · **Priorité :** basse (maintenance) · **Branche :** `test-theme-sapi-maison` (auto-deploy test pour valider). Push auto. **Master = SEULEMENT après validation Robin sur test** (puis merge + prod manuel comme d'hab).
-**Objectif :** supprimer de `style.css` les règles devenues ORPHELINES après la refonte home (anciennes sections remplacées), SANS toucher à rien d'utilisé. Tâche cosmétique/perf : **zéro changement visuel**, en cas de doute on GARDE.
-
-**Méthode OBLIGATOIRE — vérif avant chaque suppression :**
-Pour CHAQUE classe candidate, grep le token de classe dans TOUT le repo hors `style.css` : `grep -rn "nom-de-classe" --include=*.php --include=*.js --include=*.html .` (inclure `woocommerce/`, `inc/`, `template-parts/`, `assets/`). 
-- 0 occurrence en markup/JS → règle CSS **morte → supprimer**.
-- ≥1 occurrence → **garder**, même si ça paraît lié à la home.
-
-**⚠️ Pièges de classes PARTAGÉES (à NE PAS supprimer, vérifier d'abord) :**
-- `page-la-star-du-moment.php` réutilise des classes `storytelling-*` / `process-*` / `atelier-label` / éventuellement `bento-storytelling` / `bento-process` / `step-*` → **probablement à GARDER**. Grep impératif.
-- `.bento-bestseller-badge` est RÉUTILISÉ (Star de « Créations du moment ») → GARDER.
-- `.hero-bento` est RÉUTILISÉ (section `.home-creations`) → GARDER.
-- `.section-header-kinetic` / `.section-title-kinetic` / `.section-num` / `.collection-card--surmesure` / `.creation-star*` / `.product-card-cinetique` / `.conseiller-sig*` / `.home-projet*` / `.home-atelier--lumiere` + ses enfants / `.loc-card*` / `.home-cadeau-actus` + enfants / `.newsletter--band` + enfants → tous UTILISÉS, GARDER.
-
-**Candidats probables (à confirmer par grep, supprimer SI 0 usage) :**
-`.bento-room-picker`, `.process-flip*`, `.process-tile*`, `.process-ribbon*`, `.home-atelier--band`, `.atelier-duo`, `.atelier-story*`, `.atelier-photo*`, `.atelier-media`, `.atelier-maps-link`, `.map-card*`, `.bento-giftcard`, `.giftcard-badge`, `.giftcard-info`, `.bento-actu*`, `.home-divers`, `.bento-cta`, `.cta-title`, `.cta-button`, `.bento-hero`, `.bento-content`, `.bento-title`, `.bento-category`, `.bento-product-featured*`, `.bento-conseil*`.
-(⚠️ pour `.bento-bg` / `.bento-bg-img` : grep d'abord, encore utilisés par d'autres cartes éventuelles ? sinon supprimer. `.bento-container` / `.bento-card` : grep — si plus aucun markup ne les utilise après refonte, supprimer, sinon garder.)
-
-**À faire :**
-1. Lister chaque candidat, grep, classer gardé/supprimé.
-2. Supprimer UNIQUEMENT les règles 100 % orphelines (bloc + media queries associées + commentaires obsolètes).
-3. Ne PAS toucher au JS, au PHP, ni aux classes utilisées.
-4. Vérifs : accolades CSS équilibrées ; **comparer visuellement sur test** la home (desktop + mobile), la page « Star du moment », une page catégorie et une fiche produit → strictement identiques.
-
-**Livrable / critères :** un **tableau gardé vs supprimé** (avec le nb d'occurrences trouvées) dans le résultat ; accolades équilibrées ; rendu inchangé partout ; aucune classe utilisée supprimée par erreur.
-**👉 Robin :** vérifier sur test que rien n'a bougé visuellement, puis « go » → merge master + déploiement prod manuel.
-
-</details>
-
-<details><summary>✅ [FAIT 2026-06-10 — EN PROD] GO-LIVE refonte home — énoncé original</summary>
-
-## [TÂCHE] 🚀 GO-LIVE refonte home — vérifier les branches PUIS merge master + prod
-**Date :** 2026-06-09 · **Priorité :** haute
-**Contexte :** La refonte home (DA #1→#8 + mobile + Yoast) est validée sur test, branche `feature/refonte-home` (dernier commit `17db187`). Robin donne le GO pour la prod, MAIS demande de **vérifier les branches d'abord** : `feature/refonte-home` a été créée **depuis `test-theme-sapi-maison`** (pas master), donc le merge vers master peut embarquer la divergence test↔master, y compris le chantier audit filtre PHP qui bloquait historiquement le merge test→master.
-
-**À faire — DANS CET ORDRE, avec PAUSE obligatoire :**
-
-### Étape 1 — AUDIT des branches (lecture seule, AUCUN push)
-- `git fetch` puis :
-  - `git log --oneline master..feature/refonte-home` (tous les commits qui atterriraient dans master)
-  - `git diff --stat master...feature/refonte-home` (fichiers touchés)
-  - Isoler ce qui n'est PAS la refonte home : repérer tout changement sur le filtre méga-filtre / prompts IA / Conseiller backend / autres pages, et tout WIP non fini.
-- Vérifier l'écart `feature/refonte-home` vs `test-theme-sapi-maison` (`git log --oneline test-theme-sapi-maison..feature/refonte-home`) pour confirmer que la branche = test + refonte, rien d'autre d'inattendu.
-- **Produire un rapport clair** dans la réponse : « voici ce qui partirait en prod au-delà de la home », + un verdict « prêt / pas prêt » avec les points douteux listés.
-
-### Étape 2 — ⛔ PAUSE : validation Robin
-NE PAS merger master tant que Robin n'a pas confirmé le rapport de l'étape 1 (il revoit avec toi en session). Master = jamais de push sans accord explicite (règle projet).
-
-### Étape 3 — Merge + prod (seulement après « go » explicite de Robin)
-- Merger `feature/refonte-home` → `master` (merge commit, message clair « Refonte home juin 2026 »), `git push origin master`.
-- **Déploiement prod** : le workflow `deploy-prod.yml` est en `workflow_dispatch` (manuel, pas d'auto sur push master). Donc après le push master, **Robin lance « Deploy to Production » depuis l'onglet GitHub Actions** (ou réactive le trigger si décidé). `gh` n'est pas installé en local → ne pas tenter de déclencher le workflow en CLI, l'indiquer à Robin.
-
-### Étape 4 — Post-déploiement (actions Robin, à rappeler)
-1. Vérifier la home en prod (atelier-sapi.fr), notamment que les images `2026/03` + `2026/06` (atelier, expédition, Robin shooting, carte-de-visite) s'affichent bien (elles existent en prod).
-2. Tester en prod : une inscription newsletter + le form « Échanger avec Robin » d'une fiche produit → réception Brevo.
-3. Re-soumettre le sitemap dans Google Search Console.
-4. Brevo : maj séquence d'accueil −10 % pour inclure les sources `surmesure` + `ficheproduit`.
-
-**Critères de succès :** rapport de branches livré et validé ; après go Robin, master à jour avec la refonte ; prod déployée ; checklist post-déploiement rappelée à Robin.
-**👉 Robin :** revoir le rapport de branches avec Claude Code, puis donner le « go » pour le merge + lancer le workflow prod.
-
-</details>
-
----
-
-> **Série refonte DA (juin) — une tâche par section, validée sur test avant la suivante.** Mockups de référence dans `mockups/mockup-da-*.html`, décisions verrouillées dans `mockups/DECISIONS-MOCKUPS-DA.md` (section « ÉTAT VERROUILLÉ »). Focus DESKTOP (mobile = passe dédiée ensuite, dégrader proprement suffit). Ordre : **Atelier → Hero → Conseiller → Collections → Avis → Carte localisation → Cadeau+Actus → Newsletter** + 2 correctifs (voile Olivia, wording réassurance). Branche `feature/refonte-home`, push auto, jamais master.
-
-## ✅ [FAIT 2026-06-08 — sur test] DA #2 — Hero : naming card verre dépoli + dots sous le nom (commit `51baabb`)
-**Résultat (branche `feature/refonte-home`, poussé sur test) :**
-- **Markup** (front-page.php) : `.naming-card` restructurée en 2 rangées — `.naming-card__row` (flèche prev · `#carousel-naming-link` · flèche next) puis `.carousel-dots` **en dessous**. Wrapper `.card-controls` supprimé. JS carrousel inchangé (mêmes sélecteurs, juste déplacés dans le DOM).
-- **CSS** : fond **verre dépoli sombre** (`rgba(40,33,27,.30)` + `blur(14px)` + bordure `rgba(255,255,255,.22)`, radius 22), `flex-direction:column`. Flèches + nom en **cream** (`--color-warm`). Dots **centrés sous le nom**, visibles sur sombre : inactif `rgba(255,255,255,.45)`, actif **orange allongé** (width 20, radius 10).
-- **Cleanup** : règles `.card-controls` mortes supprimées (`display:contents`, ordering, `display:flex`), commentaires obsolètes corrigés. Grep `card-controls` → plus que des libellés à jour.
-- **Vérifs** : grep 0 usage `.card-controls` en php/css (hors commentaires) ; CSS accolades 3786/3786 ; dots ≤520px toujours masqués (refonte #11 conservée).
-
-### 👉 Action Robin
-Valider sur test (desktop) : naming card en verre dépoli sombre, texte cream lisible, flèches+nom sur une rangée, dots centrés sous le nom (actif orange allongé). Puis → **DA #3 (Conseiller)**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] DA #2 — Hero : naming card en verre dépoli + dots sous le nom
-**Date :** 2026-06-08 · **Priorité :** haute · **⛔ Prérequis :** DA #1 validé par Robin.
-**Mockup de référence :** `mockups/mockup-da-01-hero.html` (traitement verre dépoli de la variante B).
-**Décision Robin :** garder le carrousel et la structure. Changer UNIQUEMENT la naming card : (1) remplacer son fond blanc translucide par un **verre dépoli** (fond sombre translucide + flou) ; (2) déplacer les **dots SOUS le nom** (plus dans la rangée entre les flèches).
-
-**À faire :**
-1. **Markup** (front-page.php ~l.474-495) — restructurer `.naming-card` en 2 rangées (retirer le wrapper `.card-controls`) :
-```php
-<div class="naming-card">
-  <div class="naming-card__row">
-    <button type="button" class="carousel-arrow carousel-arrow-prev" aria-label="Slide précédente">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <a class="naming-link" href="#" id="carousel-naming-link" aria-label="Découvrir le modèle affiché"></a>
-    <button type="button" class="carousel-arrow carousel-arrow-next" aria-label="Slide suivante">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-  </div>
-  <div class="carousel-dots">
-    <?php for ($i = 0; $i < $total_slides; $i++) : ?>
-      <button type="button" class="carousel-dot<?php echo $i === 0 ? ' active' : ''; ?>" aria-label="Aller à la slide <?php echo ($i + 1); ?>"></button>
-    <?php endfor; ?>
-  </div>
-</div>
-```
-(Le JS carrousel cible `.carousel-dot`, `#carousel-naming-link`, `.carousel-arrow-prev/next` : juste déplacés dans le DOM → rien à toucher côté JS.)
-
-2. **CSS** — remplacer la règle `.naming-card` actuelle (fond `rgba(255,255,255,.8)`) par :
-```css
-.naming-card{
-  pointer-events:auto;
-  background:rgba(40,33,27,.30);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  border:1px solid rgba(255,255,255,.22);
-  border-radius:22px;
-  padding:14px 22px;
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-  width:520px;max-width:calc(100vw - 32px);
-}
-.naming-card__row{display:flex;align-items:center;gap:14px;width:100%}
-```
-Puis : garder `.naming-link` (déjà `color: var(--color-warm)`, flex:1, centré) ; ajouter `.naming-card .carousel-arrow{color:var(--color-warm)}` ; centrer les dots `.naming-card .carousel-dots{justify-content:center}`. Réconcilier les 2 définitions `.carousel-dot` existantes en UNE seule, visible sur fond sombre : inactif `background:rgba(255,255,255,.45);border:none;width:7px;height:7px;border-radius:50%`, actif `.carousel-dot.active{background:var(--color-orange);width:20px;border-radius:10px}`.
-
-**Notes :** `.card-controls` n'existe plus → grep et supprimer sa règle CSS si morte. Le nom est déjà au format formatter (#12/P3), ne pas y retoucher. Dots masqués ≤520px mobile : déjà fait, garder. Pas de tiret cadratin, accolades équilibrées.
-
-**Critères :** naming card en verre dépoli sombre (texte cream lisible), flèches + nom sur une rangée, dots centrés EN DESSOUS du nom, dot actif orange allongé.
-
-### 👉 Action Robin
-Valider sur test (desktop). Puis → DA #3 (Conseiller).
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-08 — sur test] DA #3 — Conseiller : signature de Robin + réchauffe (commit `d43d6d8`)
-**Résultat (branche `feature/refonte-home`, poussé sur test) :**
-- **Markup** (front-page.php, `.room-picker-inner`) : l'eyebrow « Ton projet » est remplacé par le bloc **`.conseiller-sig`** (pastille ronde Robin `2025/05/Robin-Sapi-A.jpg` + « Le conseil de Robin » + accroche Square Peg « Dis-moi pour quelle pièce, je te conseille »). Sous-titre **`.room-picker-sub`** tutoyé ajouté sous le `<h2>`. Chips (`.room-card`/`data-piece`), « ou », champ libre + **bouton flèche** intacts (pas de bouton « Conseille-moi »).
-- **CSS** : composant **`.conseiller-sig*` nommé génériquement** (réutilisable au chantier suivant). Réchauffe : grain bois discret en fond (`.home-projet-section::before` z-index 0, contenu `.home-projet` z-index 1). Sous-titre **scopé `.home-projet .room-picker-sub`** (la version globale l.11162 sert la modale Conseiller → non touchée). Chips réchauffées au hover : crème chaud `#f4ead3` + ombre, en plus du border orange existant ; `background` ajouté à la transition.
-- **Pièges traités** : token correct **`--shadow-card-hover`** (le `--shadow-hover` du mockup n'existe pas). `.room-picker-title` déjà `var(--color-wood-dark)` (l.11627). `.section-eyebrow` gardé défini (orphelin en php mais réservé).
-- **Vérifs** : CSS accolades 3799/3799 ; tutoiement ; pas de tiret cadratin ; comportement `data-room-picker` / champ libre inchangé.
-
-### 👉 Action Robin
-Valider sur test (purger le cache page LSCache pour voir le nouveau markup). Si la signature plaît → chantier suivant (hors home) = la généraliser (modale tous états + page conseils + pill fiche produit). Puis home → **DA #4 (Collections)**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] DA #3 — Conseiller « Pour quelle pièce ? » : signature de Robin + réchauffe
-**Date :** 2026-06-08 · **Priorité :** haute · **⛔ Prérequis :** DA #2 validé.
-**Mockup de référence :** `mockups/mockup-da-02-conseiller.html` (variante A).
-**Décision Robin :** variante A (signature en en-tête). Structure conservée (chips + champ libre). Réchauffe via tokens globaux. Composant signature nommé GÉNÉRIQUEMENT (`conseiller-sig*`) car il sera généralisé ensuite (modale tous états + room picker page conseils + pill fiche produit = chantier SUIVANT, pas cette tâche).
-
-**À faire :**
-1. **Markup** — dans `.room-picker-inner` (front-page.php ~l.508), REMPLACER `<span class="section-eyebrow">Ton projet</span>` par le bloc signature, juste avant le `<h2 class="room-picker-title">` :
-```php
-<div class="conseiller-sig">
-  <span class="conseiller-sig__avatar"><?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
-  <span class="conseiller-sig__text">
-    <span class="conseiller-sig__who">Le conseil de Robin</span>
-    <span class="conseiller-sig__hook">Dis-moi pour quelle pièce, je te conseille</span>
-  </span>
-</div>
-```
-Garder le `<h2 class="room-picker-title">`. Juste après le titre (avant `.room-picker-cards`), ajouter :
-```php
-<p class="room-picker-sub">Choisis une pièce, je te propose une sélection adaptée. Ou raconte-moi ton projet en quelques mots.</p>
-```
-NE PAS toucher aux chips (`.room-card`, `data-piece`), au « ou », ni au champ libre + son bouton flèche (`.room-picker-freetext__submit` : GARDER le bouton flèche actuel, PAS de bouton texte « Conseille-moi » — wording rejeté par Robin, l'accroche signature porte déjà le message).
-
-2. **CSS** :
-```css
-/* ===== Conseiller — signature réutilisable (Robin) ===== */
-.conseiller-sig{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:18px}
-.conseiller-sig__avatar{width:72px;height:72px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:var(--shadow-card);flex-shrink:0}
-.conseiller-sig__img{width:100%;height:100%;object-fit:cover;display:block}
-.conseiller-sig__text{display:flex;flex-direction:column;text-align:left}
-.conseiller-sig__who{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-wood)}
-.conseiller-sig__hook{font-family:var(--font-display);font-size:32px;line-height:1;color:var(--color-wood-dark);margin-top:2px}
-/* ===== Conseiller — réchauffe de la bande ===== */
-.home-projet-section{position:relative}
-.home-projet-section::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.045) 0,rgba(139,115,85,.045) 1px,transparent 1px,transparent 7px);pointer-events:none;z-index:0}
-.home-projet{position:relative;z-index:1}
-.room-picker-sub{color:var(--color-wood-mid);font-size:15px;margin:0 auto 22px;max-width:560px}
-```
-Réchauffe des chips (hover crème chaud + ombre, en plus du border orange déjà là) :
-```css
-.home-projet .room-card{box-shadow:var(--shadow-card)}
-@media (hover:hover){.home-projet .room-card:hover{background:#f4ead3;box-shadow:var(--shadow-hover)}}
-```
-Vérifier que `.room-picker-title` est bien `var(--color-wood-dark)` (pas noir pur).
-
-**Notes :** photo Robin = provisoire (portrait carré propre à venir ; `object-fit:cover` rond gère le recadrage approximatif). Vérifier que le grain `::before` ne couvre pas le contenu (z-index). Tutoiement. Pas de tiret cadratin. Accolades équilibrées. `.section-eyebrow` reste défini (réutilisé ailleurs), on ne supprime que son usage ici.
-
-**Critères :** signature de Robin (pastille ronde + « Le conseil de Robin » + accroche Square Peg) en tête de section, sous-titre tutoyé, chips réchauffées au hover, grain bois discret. On comprend tout de suite que c'est « le conseil de Robin ». Comportement Conseiller (data-room-picker, champ libre) intact.
-
-### 👉 Action Robin
-Valider sur test. Si la signature plaît → chantier suivant (hors home) = la généraliser (modale + page conseils + fiche produit). Puis home → DA #4 (Collections).
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-08 — sur test] DA #4 — Collections : scrim allégé + carte « Sur mesure » + voile Star (commit `781141b`)
-**Résultat (branche `feature/refonte-home`, poussé sur test) :**
-- **Scrim allégé** (`.collection-card .collection-details`) : opacités du dégradé de pied réduites d'~1/3 — base `0.9/0.7/0.35` → `0.6/0.45/0.22`, hover `0.92/0.75/0.4` → `0.62/0.5/0.27`. La photo respire, le titre reste lisible.
-- **Carte « Sur mesure »** : ajoutée **en dernier** dans `.collections-grid` (front-page.php), `.collection-card collection-card--surmesure` → `/sur-mesure/`, photo `2025/09/Vincent-Ambiance3.jpg`, « Ton projet unique » + flèche. Réutilise `.collection-card` (hérite du peek 23.5% + hover), pas de CSS dédié nécessaire.
-- **Voile Star** : un `.creation-star::after` existait déjà (dégradé `transparent 55% → .65`). Plutôt que dupliquer, j'ai **mis à jour son dégradé** vers la version progressive de la tâche (`to top, rgba(40,33,27,.55) 0% → .12 32% → transparent 55%`). `position:relative` et badge/label en `z-index:2` étaient déjà en place.
-- **Vérifs** : CSS accolades 3799/3799 ; pas de tiret cadratin ; pas de changement site-wide (scopé collections home + Star).
-
-### 👉 Action Robin
-Valider sur test : scrim collections plus léger, carte « Sur mesure » en fin de carrousel, nom de la Star lisible. Puis → **DA #5 (Ils en parlent)**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] DA #4 — Collections : scrim allégé + catégorie « Sur mesure » + voile Star
-**Date :** 2026-06-08 · **Priorité :** haute · **⛔ Prérequis :** DA #3 validé.
-**Mockup :** `mockups/mockup-da-03-collections.html` variante A. **Décisions Robin :** variante A (nom sur image, PAS de changement site-wide) + carte « Sur mesure » → `/sur-mesure/` + correctif voile local sur la Star (créations du moment).
-
-**À faire :**
-1. **Scrim allégé** : alléger d'environ un tiers le dégradé sombre de pied de carte (lire `.collection-card` / `.collection-details`, réduire l'opacité du gradient qui porte le titre). La photo respire plus.
-2. **Carte Sur mesure** : après le `<?php endforeach; ?>` de `.collections-grid` (~l.565), ajouter EN DERNIER :
-```php
-<a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="collection-card collection-card--surmesure">
-  <div class="collection-visual">
-    <?php echo sapi_image('2025/09/Vincent-Ambiance3.jpg', 'large', ['class' => 'collection-visual-img', 'loading' => 'lazy', 'alt' => 'Luminaire sur mesure, Atelier Sâpi']); ?>
-  </div>
-  <div class="collection-details">
-    <h3>Sur mesure</h3>
-    <div class="collection-meta"><span class="collection-count">Ton projet unique</span><span class="collection-btn">→</span></div>
-  </div>
-</a>
-```
-3. **Voile Star** : la carte `.creation-star` (~l.579) porte le nom blanc sur bois clair (contraste limite). Ajouter :
-```css
-.creation-star{position:relative}
-.creation-star::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(40,33,27,.55) 0%,rgba(40,33,27,.12) 32%,transparent 55%);z-index:1;pointer-events:none}
-.creation-star .bento-bestseller-badge,.creation-star-label{z-index:2}
-```
-**Critères :** scrim plus léger, carte « Sur mesure » en fin de carrousel, nom de la Star lisible. Pas de tiret cadratin.
-**👉 Robin :** valider → DA #5.
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-08 — sur test] DA #5 — Ils en parlent : papiers à ombre douce + grain bois (commit `5f19fb4`)
-**Résultat (branche `feature/refonte-home`, poussé sur test) :**
-- **Cartes sans bordure** : `.home-avis .testimonial-card` — `border` retirée (était `1px solid var(--color-gray-light)`), fond blanc + `box-shadow: var(--shadow-card)` conservés. Le **hover** (`translateY(-2px)` + `--shadow-card-hover`) est déjà fourni par la règle de base `.testimonial-card:hover` → effet « petits papiers posés ». Token correct `--shadow-card-hover` (le `--shadow-hover` de l'énoncé n'existe pas).
-- **Réchauffe sans aplat crème** : `.home-avis` passe en `position:relative`, grain bois en filigrane via `::before` (`repeating-linear-gradient` 92deg rgba bois .04, `z-index:0`, `pointer-events:none`), contenu remonté avec `.home-avis > * { position:relative; z-index:1 }`. Fond reste transparent (pas de crème).
-- **Inchangés** : badge Google, avis FR + avatars initiales (#12), zone presse `$press_refs` (markup non touché).
-- **Vérifs** : tout scopé `.home-avis` → **base `.testimonial-card` (fiche produit) intacte** (vérifié : garde sa bordure + fond crème). CSS accolades 3802/3802 ; pas de tiret cadratin.
-
-### 👉 Action Robin
-Valider sur test : avis = papiers blancs à ombre douce (sans bordure, relief au survol) sur fond clair texturé bois, badge + logos presse intacts. Vérifier qu'une **fiche produit** n'a pas bougé. Puis → **DA #6 (Carte localisation)**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] DA #5 — Ils en parlent : papiers à ombre douce (sans bordures), fond réchauffé
-**Date :** 2026-06-08 · **Priorité :** haute · **⛔ Prérequis :** DA #4 validé.
-**Mockup :** `mockups/mockup-da-05-avis.html` variante A. **Décision Robin :** variante A, garder les logos presse. PAS de fond crème.
-
-**À faire :** (scopé `.home-avis`, NE PAS toucher aux styles partagés fiche produit)
-1. **Cartes sans bordure** : lire `.home-avis .testimonial-card` ; retirer la `border`, la remplacer par `box-shadow: var(--shadow-card)` (hover `var(--shadow-hover)`), fond blanc. Effet « petits papiers posés ».
-2. **Réchauffe sans aplat crème** : grain bois en filigrane sur `.home-avis` :
-```css
-.home-avis{position:relative}
-.home-avis::before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.04) 0,rgba(139,115,85,.04) 1px,transparent 1px,transparent 7px);pointer-events:none;z-index:0}
-.home-avis > *{position:relative;z-index:1}
-```
-3. **Conserver** badge Google, avis FR + avatars initiales (#12), zone presse `$press_refs`.
-**Critères :** papiers blancs à ombre douce sur fond clair texturé bois, badge + logos presse intacts, fiche produit INCHANGÉE (vérifier). Pas de tiret cadratin.
-**👉 Robin :** valider → DA #6.
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-08 — sur test] DA #6 — Carte localisation : mini-carte bois (variante C) (commit `32d0a82`)
-**Résultat (branche `feature/refonte-home`, poussé sur test) :**
-- **Markup** (`.quote-band`) : `.map-card` (fausse grille + pin pulse) remplacé par **`.loc-card`** — mini-carte SVG bois illustrée (fond, routes, bâtiments, pin orange avec ombre) + **invitation Square Peg** « À 15 min de Lyon, viens voir où ça se fabrique » en overlay bas, + pied (titre « Venir me voir à l'atelier » / adresse « 3 Rue Pierre Termier · Collonges-au-Mont-d'Or » / « Itinéraire → »). Lien Maps inchangé, bas-droite de la bande citation.
-- **CSS** : bloc `.loc-card*` (token correct `--shadow-card-hover`, hovers wrappés `@media (hover:hover)`, flèche qui glisse au survol). Mobile ≤900px : card en flux centrée sous la citation.
-- **Cleanup** : bloc `.map-card*` + keyframes `mapPinPulse` supprimés — **grep `map-card`/`mapPinPulse` = 0** (php + css).
-- **Note** : la `.loc-card` est posée à `right:42px` (spec mockup variante C), pas alignée sur la gouttière 1600 comme l'ancienne — me dire si tu veux l'aligner sur le contenu. Citation/photo de Robin non touchées.
-- **Vérifs** : CSS accolades 3798/3798 ; pas de tiret cadratin.
-
-### 👉 Action Robin
-Valider sur test : mini-carte bois soignée + invitation Square Peg, cliquable Maps, en bas-droite de la bande citation. Puis → **DA #7 (Cadeau + Actus)**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] DA #6 — Carte localisation : mini-carte mixte (variante C)
-**Date :** 2026-06-08 · **Priorité :** haute · **⛔ Prérequis :** DA #5 validé.
-**Mockup :** `mockups/mockup-da-06-carte-localisation.html` variante C. On ne touche PAS à la citation/photo de Robin.
-
-**À faire :** dans `.quote-band`, REMPLACER le bloc `<a class="map-card"> … </a>` (~l.796-808) par :
-```php
-<a class="loc-card" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer" aria-label="Venir me voir à l'atelier, voir l'itinéraire sur Google Maps">
-  <div class="loc-media">
-    <svg viewBox="0 0 520 280" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect width="520" height="280" fill="#E7DCC8"/>
-      <path d="M -20 60 C 130 100, 190 30, 330 110 S 520 140, 560 120 L 560 190 C 420 170, 320 220, 200 190 S 40 220, -20 200 Z" fill="#D5C5A9"/>
-      <g stroke="#C4B393" stroke-width="6" fill="none" stroke-linecap="round"><path d="M 60 0 L 130 100 L 270 140 L 360 280"/><path d="M 0 170 L 210 140 L 430 80 L 520 100"/></g>
-      <g fill="#DCCDB3"><rect x="100" y="110" width="26" height="20" rx="3"/><rect x="310" y="92" width="28" height="22" rx="3"/><rect x="210" y="170" width="24" height="18" rx="3"/></g>
-      <g transform="translate(265,128)"><ellipse cx="0" cy="34" rx="14" ry="4" fill="rgba(74,63,53,.18)"/><path d="M 0 30 C -16 6, -16 -10, 0 -10 C 16 -10, 16 6, 0 30 Z" fill="#E35B24"/><circle cx="0" cy="-2" r="6" fill="#FBF6EA"/></g>
-    </svg>
-    <div class="loc-invite">À 15 min de Lyon, viens voir où ça se fabrique</div>
-  </div>
-  <div class="loc-foot">
-    <div><div class="loc-foot__ttl">Venir me voir à l'atelier</div><div class="loc-foot__adr">3 Rue Pierre Termier · Collonges-au-Mont-d'Or</div></div>
-    <span class="loc-foot__go">Itinéraire <span class="loc-foot__arr">→</span></span>
-  </div>
-</a>
-```
-CSS (remplacer `.map-card*` par) :
-```css
-.loc-card{position:absolute;right:42px;bottom:36px;z-index:3;width:340px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-card);background:#fff;text-decoration:none;color:inherit;transition:.28s}
-.loc-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
-.loc-media{position:relative;height:150px;overflow:hidden}
-.loc-media svg{width:100%;height:100%;object-fit:cover;display:block}
-.loc-invite{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(to top,rgba(74,63,53,.9),transparent);padding:26px 16px 12px;color:#fff;font-family:var(--font-display);font-size:20px;line-height:1}
-.loc-foot{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.loc-foot__ttl{font-weight:700;font-size:14.5px;color:var(--color-wood-dark)}
-.loc-foot__adr{font-size:12px;color:var(--color-wood-mid);margin-top:2px}
-.loc-foot__go{color:var(--color-orange);font-weight:600;font-size:13px;white-space:nowrap}
-.loc-card:hover .loc-foot__arr{transform:translateX(4px);display:inline-block}
-@media (max-width:900px){.loc-card{position:relative;right:auto;bottom:auto;width:auto;margin:30px auto 0}}
-```
-Grep `.map-card` → 0 après (markup + CSS).
-**Critères :** fausse grille remplacée par mini-carte bois soignée + invitation Square Peg, cliquable Maps, en bas-droite de la bande citation. Pas de tiret cadratin.
-**👉 Robin :** valider → DA #7.
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-08 — sur test] DA #7 — Cadeau + Actus : objet iconique vs journal (variante C) (commit `c29b536`)
-**Résultat (branche `feature/refonte-home`, poussé sur test) :**
-- **Markup** : section `.hero-bento.home-divers` / `.bento-container` remplacée par **`.home-cadeau-actus`** — `.gift-object` (bloc **orange iconique sans photo** : halo, badge « Offrir de la lumière », glyphe ✦, titre Square Peg, texte, CTA blanc) + `.news-journal` (**card journal claire** : photo, « Le journal de l'atelier · date », titre, chapô = `get_the_excerpt()` tronqué 26 mots, « Lire l'article → ») + **`.ca-allnews`** (« Voir toutes les actus → » **sorti de la card, centré dessous**). `$gift_card['url']` + WP_Query `flash-actu` conservés.
-- **CSS** : nouveau bloc scopé `.home-cadeau-actus` (grille `.78fr/1.22fr`, mobile 1 col ≤880px). **Tokens corrigés** : `--shadow-card-hover` (pas `--shadow-hover`) et `--color-dark` (pas `--color-ink`) qui n'existent pas dans le thème.
-- **Cleanup** : blocs morts supprimés — `.bento-giftcard*`, `.giftcard-badge/info/price`, `.bento-actu*`, règles grille `.home-divers`, + retrait des 3 classes (`.bento-giftcard/.bento-actu/.bento-conseil`) des media queries bento partagées. **Grep php/css = 0** (hors 1 commentaire). CSS accolades 3799/3799.
-- **Note** : glyphe ✦ = lampe provisoire (OK selon énoncé). Pas de tiret cadratin.
-
-### 👉 Action Robin
-Valider sur test : cadeau orange compact iconique vs actus journal clair, CTA actus hors card centré dessous — les deux ne se ressemblent plus. Puis → **DA #8 (Newsletter)**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] DA #7 — Cadeau + Actus : « objet iconique vs journal » (variante C)
-**Date :** 2026-06-08 · **Priorité :** haute · **⛔ Prérequis :** DA #6 validé.
-**Mockup :** `mockups/mockup-da-07b-cadeau-actus.html` variante C (validée « parfaite »). Cadeau = bloc orange iconique (sans photo) ; actus = card journal claire ; CTA « Voir toutes les actus » SORTI de la card, centré dessous.
-
-**À faire :** remplacer le contenu de `<section class="hero-bento home-divers"><div class="bento-container"> … </div></section>` (~l.812-856) par :
-```php
-<section class="home-cadeau-actus">
-  <div class="ca-grid">
-    <?php if ($gift_card) : ?>
-    <a href="<?php echo esc_url($gift_card['url']); ?>" class="gift-object">
-      <span class="gift-object__halo" aria-hidden="true"></span>
-      <span class="gift-object__badge">Offrir de la lumière</span>
-      <span class="gift-object__body">
-        <span class="gift-object__lamp" aria-hidden="true">✦</span>
-        <span class="gift-object__title">La carte cadeau</span>
-        <span class="gift-object__text">Tu hésites sur le modèle ? Offre une carte cadeau : la bonne personne choisira son luminaire, allumé à la main rien que pour elle.</span>
-        <span class="gift-object__cta">Offrir une carte cadeau <span class="arr">→</span></span>
-      </span>
-    </a>
-    <?php endif; ?>
-    <?php
-    $last_actu = new WP_Query(['posts_per_page'=>1,'post_status'=>'publish','category_name'=>'flash-actu','orderby'=>'date','order'=>'DESC']);
-    if ($last_actu->have_posts()) : $last_actu->the_post();
-    ?>
-    <a href="<?php the_permalink(); ?>" class="news-journal">
-      <span class="news-journal__photo"><?php if (has_post_thumbnail()) echo get_the_post_thumbnail(get_the_ID(), 'large', ['loading'=>'lazy','alt'=>get_the_title()]); ?></span>
-      <span class="news-journal__body">
-        <span class="news-journal__meta"><span class="news-journal__eyebrow">Le journal de l'atelier</span><span class="news-journal__date">· <?php echo esc_html(get_the_date('j F Y')); ?></span></span>
-        <span class="news-journal__title"><?php echo esc_html(get_the_title()); ?></span>
-        <span class="news-journal__chapo"><?php echo esc_html(wp_trim_words(get_the_excerpt(), 26)); ?></span>
-        <span class="news-journal__read">Lire l'article <span class="arr">→</span></span>
-      </span>
-    </a>
-    <?php wp_reset_postdata(); endif; ?>
-  </div>
-  <div class="ca-allnews"><a href="<?php echo esc_url(home_url('/actus/')); ?>" class="ca-allnews__btn">Voir toutes les actus <span class="arr">→</span></a></div>
-</section>
-```
-CSS (variante C, scopé) :
-```css
-.home-cadeau-actus{max-width:1400px;margin:0 auto;padding:5rem 3rem}
-.ca-grid{display:grid;grid-template-columns:.78fr 1.22fr;gap:26px;align-items:stretch}
-.gift-object{position:relative;border-radius:20px;overflow:hidden;background:linear-gradient(150deg,#E35B24 0%,#c4481b 100%);color:#fff;padding:40px 36px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-card);text-decoration:none;transition:.28s}
-.gift-object:hover{box-shadow:var(--shadow-hover)}
-.gift-object__halo{position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,222,170,.55),transparent 68%);pointer-events:none}
-.gift-object__badge{position:relative;z-index:2;align-self:flex-start;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:50px;padding:7px 15px;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
-.gift-object__body{position:relative;z-index:2;display:block}
-.gift-object__lamp{font-size:46px;line-height:1;display:block;margin:18px 0 6px}
-.gift-object__title{font-family:var(--font-display);font-size:54px;line-height:.9;display:block;margin-bottom:12px}
-.gift-object__text{font-size:14.5px;color:#ffeede;max-width:320px;display:block;margin-bottom:24px}
-.gift-object__cta{display:inline-flex;align-items:center;gap:9px;background:#fff;color:var(--color-wood-dark);font-weight:600;font-size:14.5px;border-radius:50px;padding:13px 26px}
-.news-journal{display:flex;flex-direction:column;background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);text-decoration:none;color:inherit;transition:.28s}
-.news-journal:hover{box-shadow:var(--shadow-hover)}
-.news-journal__photo{display:block;height:230px;overflow:hidden}
-.news-journal__photo img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
-.news-journal:hover .news-journal__photo img{transform:scale(1.04)}
-.news-journal__body{padding:28px 34px 30px;display:block}
-.news-journal__meta{display:flex;align-items:center;gap:12px;color:var(--color-wood)}
-.news-journal__eyebrow{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
-.news-journal__date{color:var(--color-wood-mid);font-size:12.5px;font-weight:500}
-.news-journal__title{font-weight:700;font-size:25px;color:var(--color-wood-dark);line-height:1.2;display:block;margin:10px 0}
-.news-journal__chapo{font-size:14.5px;color:var(--color-ink);display:block;margin-bottom:16px}
-.news-journal__read{color:var(--color-orange);font-weight:600;font-size:14.5px;display:inline-flex;gap:7px;align-items:center}
-.ca-allnews{display:flex;justify-content:center;margin-top:22px}
-.ca-allnews__btn{display:inline-flex;align-items:center;gap:9px;background:transparent;border:1.5px solid var(--color-wood);color:var(--color-wood-dark);font-weight:600;font-size:14.5px;border-radius:50px;padding:13px 26px;text-decoration:none}
-.ca-allnews__btn:hover{background:var(--color-wood);color:#fff}
-.home-cadeau-actus .arr{display:inline-block;transition:transform .25s}
-.gift-object:hover .arr,.news-journal:hover .arr,.ca-allnews__btn:hover .arr{transform:translateX(4px)}
-@media (max-width:880px){.ca-grid{grid-template-columns:1fr}.home-cadeau-actus{padding:3rem 1.25rem}}
-```
-Cleanup : supprimer `.home-divers`, `.bento-giftcard`, `.giftcard-badge`, `.giftcard-info`, `.bento-actu*` si plus utilisés (grep .php).
-**Notes :** glyphe `✦` = lampe provisoire OK ; chapô = `get_the_excerpt()` tronqué 26 mots ; CTA cadeau → `$gift_card['url']`. Pas de tiret cadratin.
-**Critères :** cadeau orange compact iconique vs actus journal clair, CTA actus hors card centré dessous. Les deux ne se ressemblent plus.
-**👉 Robin :** valider → DA #8.
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-08 — sur test] DA #8 — Newsletter : bande bois chaud (variante B) (commit `3449982`)
-**Résultat (branche `feature/refonte-home`, poussé sur test) :**
-- **Markup** : `.newsletter-kinetic` devient `.newsletter--band` — photo atelier `2025/04/IMG_5851.jpg` en fond (flou + opacity .16) + `.newsletter__veil` bois + `.newsletter__inner` (centré : eyebrow « La lettre de l'atelier », titre Square Peg « Reste dans la lumière », sous-titre tutoyé, **form + script AJAX `#newsletter-form` conservés à l'identique**, fineprint « Désinscription en un clic… »). Ancien header « 06 Restez informés » retiré.
-- **CSS** : bloc `.newsletter--band` (dégradé bois chaud `#a98a64→#8B7355`, radius 18, min-height 380, centré). Titre `text-transform:none` (anti-uppercase global). **Bouton orange / input blanc** conservés. Feedback AJAX posé sur **pastille blanche** pour lisibilité sur le bois (le JS pose la couleur du texte).
-- **Vérifs** : JS intact (`id="newsletter-form"` + `getElementById('newsletter-form')`) → inscription Brevo non touchée. CSS accolades 3811/3811 ; pas de tiret cadratin.
-- **Note** : ambiance bois chaud/clair, distincte de l'atelier sombre (écart creusé comme voulu).
-
-### 👉 Action Robin
-Valider sur test : newsletter bois chaud lumineux, aérée, centrée, photo atelier en filigrane, seul point chaud = bouton orange. **Tester une inscription** (feedback Brevo lisible sur le bois). **Série DA #1→#8 terminée.** Restent : correctif réassurance (ci-dessus), **passe mobile**, **passe Yoast**, **go-live**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] DA #8 — Newsletter : fond bois chaud + photo filigrane (variante B)
-**Date :** 2026-06-08 · **Priorité :** haute · **⛔ Prérequis :** DA #7 validé.
-**Mockup :** `mockups/mockup-da-08-newsletter.html` variante B. Bois chaud/clair (l'atelier est sombre → on creuse l'écart).
-
-**À faire :** dans `<section class="newsletter-kinetic">` (~l.859), GARDER le `<form>` + son `<script>` AJAX, refondre l'habillage :
-```php
-<section class="newsletter-kinetic newsletter--band">
-  <?php echo sapi_image('2025/04/IMG_5851.jpg', 'large', ['class' => 'newsletter__bg', 'loading' => 'lazy', 'alt' => '']); ?>
-  <div class="newsletter__veil" aria-hidden="true"></div>
-  <div class="newsletter__inner">
-    <span class="newsletter__eyebrow">La lettre de l'atelier</span>
-    <h2 class="newsletter__title">Reste dans la lumière</h2>
-    <p class="newsletter-subtitle">Une fois par mois, je te raconte un nouveau modèle, un coin de l'atelier, une astuce déco. Pas de spam, juste l'essentiel.</p>
-    [GARDER ICI le <form class="newsletter-form" id="newsletter-form"> existant à l'identique : honeypot + input email + bouton S'inscrire + .newsletter-feedback + le <script> AJAX]
-    <p class="newsletter__fineprint">Désinscription en un clic. Je ne partage jamais ton adresse.</p>
-  </div>
-</section>
-```
-(Retirer l'ancien `.section-header-kinetic` « 06 Restez informés » au profit de cet en-tête centré.)
-CSS :
-```css
-.newsletter--band{position:relative;overflow:hidden;background:linear-gradient(135deg,#a98a64,#8B7355);border-radius:18px;min-height:380px;display:flex;align-items:center;justify-content:center;text-align:center;padding:70px 24px}
-.newsletter--band .newsletter__bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(3px);transform:scale(1.06);opacity:.16}
-.newsletter--band .newsletter__veil{position:absolute;inset:0;background:rgba(139,115,85,.55);z-index:2}
-.newsletter--band .newsletter__inner{position:relative;z-index:3;max-width:560px}
-.newsletter--band .newsletter__eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#ffe7cc;display:block;margin-bottom:12px}
-.newsletter--band .newsletter__title{font-family:var(--font-display);font-size:clamp(2.6rem,5vw,3.2rem);font-weight:400;color:#fff;line-height:1;margin-bottom:12px}
-.newsletter--band .newsletter-subtitle{color:#fbf2e4;font-size:15.5px;margin-bottom:30px}
-.newsletter--band .newsletter__fineprint{font-size:12px;color:#f3e8d8;margin-top:16px;opacity:.85}
-```
-Bouton « S'inscrire » reste orange (#12), input fond blanc. Vérifier la lisibilité du feedback AJAX sur fond bois.
-**Notes :** ne PAS casser le JS (id `newsletter-form`, AJAX Brevo). Pas de tiret cadratin, accolades équilibrées.
-**Critères :** newsletter bois chaud lumineux, aérée, centrée, photo atelier en filigrane flou, seul point chaud = bouton orange. Ambiance distincte de l'atelier sombre. Inscription Brevo OK.
-**👉 Robin :** valider. Restera : correctif réassurance (ci-dessous), passe mobile, passe Yoast, go-live.
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-08 — sur test] DA — Correctif réassurance : wording humain (single-line)
-**Résultat (branche `feature/refonte-home`, poussé sur test) :** retour Robin → **une seule accroche par item, sans sous-ligne** (la version accroche+sous-ligne testée jugée « trop lourde »). Wording final validé par Robin dans `inc/template-robin-bandeau-v2.php` :
-- Livraison rapide en 48-72h (camion)
-- Façonné main à Lyon sous 5 jours (engrenage, `.is-mobile-hidden`)
-- 30 jours pour changer d'avis (retour, `.is-mobile-hidden`)
-- Paiement sécurisé (cadenas)
-CSS `.reassurance-text/.label/.sub` (scopé `.robin-bandeau`) supprimé. ⚠️ NE PAS confondre avec le `.reassurance-text` GLOBAL (functions.php + style.css ~15941) = autre composant (panier/fiche), intact. Ordre DOM + mobile (camion + cadenas) inchangés. CSS 3811/3811.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] DA — Correctif réassurance : wording artisan (desktop)
-**Date :** 2026-06-08 · **Priorité :** normale · indépendant.
-Dans `inc/template-robin-bandeau-v2.php` (4 items réassurance), wording artisan validé (accroche + sous-ligne) :
-- « Façonné main à Lyon » / en moins de 5 jours
-- « Chez toi en 48-72h » / expédié avec soin
-- « Tu changes d'avis ? » / retours sous 30 jours
-- « Paiement tranquille » / transaction sécurisée
-⚠️ Mobile potentiellement trop long → wording desktop, ajustement mobile dans la passe mobile. Si le template n'a pas de sous-ligne, ajouter un `<span>` secondaire ou se limiter aux accroches. Tutoiement, pas de tiret cadratin.
-**👉 Robin :** valider.
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-08 — sur test] DA #1 — L'atelier : immersion par la lumière (commit `043a0ec`)
-**Résultat (branche `feature/refonte-home`, poussé sur test) :** la section `.home-atelier` passe de la bande crème (#15) à une **bande sombre immersive** (mockup-da-04c).
-- **Markup** : `<section class="home-atelier home-atelier--lumiere" id="home-atelier">` — pile de 6 couches `.home-atelier__bg` (défaut + 1/étape, chacune une `sapi_image` `large`), double voile (`__veil` latéral + `__veil-bottom`), colonne texte sombre `__inner` (52%, header « 04 L'atelier » + eyebrow + titre Square Peg + 2 paragraphes verbatim **avec les 4 liens catégories inline** + CTA `hero-cta--wood`), et les **5 pills d'étape** (`<button class="atelier-step">`) en bas-droite avec la phrase manuscrite en `title`.
-- **CSS** : nouveau bloc « immersion par la lumière » (voiles, crossfade `.is-on` opacity .6s, pills glassmorph orange au hover/focus). Liens SEO stylés clairs (souligné warm → orange au hover, anti-bleu). Mobile ≤900px : colonne empilée, pills statiques.
-- **JS** : IIFE ajoutée dans le bloc de scripts final — `mouseenter`/`focus`/`click` d'une pill → crossfade vers sa photo ; `mouseleave`/`focusout` du ruban → retour au fond défaut.
-- **Cleanup** : supprimé `.home-atelier--band`, ancien `.home-atelier__bg` (image unique), `.process-ribbon*`, `.process-tile*` (0 usage php confirmé par grep). `.atelier-band-title` redéfini scopé `--lumiere`, `.storytelling-text*` gardés.
-- **Vérifs** : grep classes mortes → 0 dans les .php ; CSS accolades 3787/3787 ; PHP non lintable en local (php absent) mais blocs foreach/endforeach équilibrés, swap propre.
-- ⚠️ **Photos `2026/03/` et `2026/06/` = 404 sur le TEST** (clone d'avril) → couches Assemblage/Expédition vides sur test, **OK en prod**. Le fond par défaut `2025/04/A7404411.jpg` existe.
-
-### 👉 Action Robin
-Valider sur `test.atelier-sapi.fr` (survole/clique les étapes → le fond se fond vers la photo de l'étape ; sortie du ruban → retour au défaut). Fournir une vraie photo de fond chaude si `A7404411` ne convient pas (variable `$atelier_default_img`). Une fois validé → **DA #2 (Hero)**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] DA #1 — L'atelier : immersion par la lumière (fond qui change au survol des étapes)
-**Date :** 2026-06-08 · **Priorité :** haute
-**Mockup de référence (à OUVRIR) :** `mockups/mockup-da-04c-atelier.html`.
-
-**Contexte :** Refonte de la section `.home-atelier` (front-page.php ~l.627-661). On abandonne la bande à voile crème. Nouveau principe : grande image immersive en fond + **colonne texte sombre franche à gauche (toujours lisible)** ; au survol d'une des 5 pills d'étape (en bas à droite), le fond **crossfade** vers la photo de cette étape. Les 4 liens catégories restent des liens texte INLINE dans le paragraphe (déjà le cas). Plus de titre « Mon processus artisanal », plus de tuiles : les étapes deviennent les pills interactives.
-
-**À faire :**
-
-### A. Markup — remplacer le `<section class="home-atelier home-atelier--band"> … </section>` (l.627-661) par :
-```php
-<!-- L'atelier — immersion par la lumière (refonte DA, mockup-da-04c) -->
-<?php
-$atelier_default_img = '2025/04/A7404411.jpg'; // fond par défaut = luminaire allumé (modifiable ; sinon une photo d'atelier chaude)
-// $process_steps : [num, label, photo, alt, phrase manuscrite] — repris à l'identique de l'existant
-$process_steps = [
-  ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi",          "Tout commence par un trait de crayon"],
-  ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire',                 "Le laser suit mon dessin au dixième près"],
-  ['03', 'Finitions',     '2025/09/Poncage.jpg',                 "Ponçage manuel d'un luminaire en bois, Atelier Sâpi",  "Le ponçage, c'est ma méditation"],
-  ['04', 'Assemblage',    '2026/03/Robin-a-lassemblage.jpg',     'Robin assemble un luminaire dans son atelier à Lyon',  "Chaque pièce s'emboîte sans une vis"],
-  ['05', 'Expédition',    '2026/06/Expedition.jpg',              "Luminaire emballé prêt pour l'expédition, Atelier Sâpi","Emballé comme si c'était pour ma mère"],
-];
-?>
-<section class="home-atelier home-atelier--lumiere" id="home-atelier">
-  <div class="home-atelier__bgstack" aria-hidden="true">
-    <span class="home-atelier__bg is-on" data-key="default"><?php echo sapi_image($atelier_default_img, 'large', ['class' => 'home-atelier__bgimg', 'alt' => '', 'loading' => 'lazy']); ?></span>
-    <?php foreach ($process_steps as $i => $step) : ?>
-      <span class="home-atelier__bg" data-key="<?php echo (int)($i + 1); ?>"><?php echo sapi_image($step[2], 'large', ['class' => 'home-atelier__bgimg', 'alt' => '', 'loading' => 'lazy']); ?></span>
-    <?php endforeach; ?>
-  </div>
-  <div class="home-atelier__veil" aria-hidden="true"></div>
-  <div class="home-atelier__veil-bottom" aria-hidden="true"></div>
-
-  <div class="home-atelier__inner">
-    <div class="section-header-kinetic"><span class="section-num">04</span><h2 class="section-title-kinetic">L'atelier</h2></div>
-    <span class="atelier-eyebrow">L'atelier · Lyon</span>
-    <h3 class="atelier-band-title">Des sculptures lumineuses</h3>
-    <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
-    <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
-    <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta hero-cta--wood">Découvrir l'artisan</a>
-  </div>
-
-  <div class="atelier-steps" id="atelier-steps">
-    <?php foreach ($process_steps as $i => $step) : ?>
-    <button type="button" class="atelier-step" data-bg="<?php echo (int)($i + 1); ?>" title="« <?php echo esc_attr($step[4]); ?> »">
-      <span class="atelier-step__n"><?php echo esc_html($step[0]); ?></span>
-      <span class="atelier-step__t"><?php echo esc_html($step[1]); ?></span>
-    </button>
-    <?php endforeach; ?>
-  </div>
-</section>
-```
-⚠️ Le helper `$sapi_cat_url` est déjà défini juste au-dessus (l.621), le garder. Garder le texte SEO + le CTA `hero-cta--wood` à l'identique.
-
-### B. CSS — remplacer le bloc `.home-atelier--band` / `.atelier-band-title` / `.process-ribbon*` / `.process-tile*` par :
-```css
-/* ===== Refonte DA — L'atelier immersion par la lumière (mockup-da-04c) ===== */
-.home-atelier--lumiere{position:relative;overflow:hidden;min-height:620px;display:flex;align-items:stretch}
-.home-atelier--lumiere .home-atelier__bgstack{position:absolute;inset:0;z-index:0}
-.home-atelier--lumiere .home-atelier__bg{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
-.home-atelier--lumiere .home-atelier__bg.is-on{opacity:1}
-.home-atelier--lumiere .home-atelier__bgimg{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-.home-atelier--lumiere .home-atelier__veil{position:absolute;inset:0;z-index:1;background:linear-gradient(95deg,rgba(40,33,27,.95) 0%,rgba(40,33,27,.92) 32%,rgba(40,33,27,.6) 52%,rgba(40,33,27,.14) 74%,rgba(40,33,27,0) 100%)}
-.home-atelier--lumiere .home-atelier__veil-bottom{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(40,33,27,.7) 0%,rgba(40,33,27,.18) 26%,transparent 46%)}
-.home-atelier--lumiere .home-atelier__inner{position:relative;z-index:2;width:52%;padding:60px 56px 150px;display:flex;flex-direction:column;justify-content:center;color:#fff;max-width:none;margin:0}
-.home-atelier--lumiere .section-header-kinetic{padding:0;max-width:none;margin:0 0 .5rem}
-.home-atelier--lumiere .section-title-kinetic,.home-atelier--lumiere .section-num{color:#fff}
-.home-atelier--lumiere .atelier-eyebrow{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#f0b07e}
-.home-atelier--lumiere .atelier-band-title{font-family:var(--font-display);font-weight:400;font-size:clamp(2.6rem,5vw,4.1rem);line-height:.92;color:#fff;margin:8px 0 18px}
-.home-atelier--lumiere .storytelling-text{color:#ece3d6;max-width:460px}
-.home-atelier--lumiere .storytelling-text--seo a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(240,176,126,.6);padding-bottom:1px}
-.home-atelier--lumiere .storytelling-text--seo a:hover{color:#f0b07e;border-bottom-color:var(--color-orange)}
-.home-atelier--lumiere .hero-cta{margin-top:6px}
-.atelier-steps{position:absolute;z-index:3;right:30px;bottom:30px;max-width:64%;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}
-.atelier-step{display:flex;align-items:center;gap:10px;background:rgba(40,33,27,.55);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:8px 18px 8px 8px;cursor:pointer;transition:.25s;font-family:inherit}
-.atelier-step:hover,.atelier-step:focus-visible{background:rgba(227,91,36,.92);border-color:var(--color-orange);transform:translateY(-2px)}
-.atelier-step__n{width:28px;height:28px;border-radius:50%;background:var(--color-orange);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:.25s;flex-shrink:0}
-.atelier-step:hover .atelier-step__n,.atelier-step:focus-visible .atelier-step__n{background:#fff;color:var(--color-orange)}
-.atelier-step__t{color:#f3ead9;font-size:13px;font-weight:600;transition:.25s}
-.atelier-step:hover .atelier-step__t,.atelier-step:focus-visible .atelier-step__t{color:#fff}
-@media (max-width:900px){
-  .home-atelier--lumiere{flex-direction:column;min-height:auto}
-  .home-atelier--lumiere .home-atelier__inner{width:100%;padding:48px 26px 24px}
-  .atelier-steps{position:static;max-width:none;justify-content:flex-start;padding:0 26px 36px}
-}
-```
-
-### C. JS — ajouter dans le bloc de scripts inline en bas de front-page.php (pattern IIFE existant) :
-```js
-(function(){
-  var sec = document.getElementById('home-atelier'); if(!sec) return;
-  var layers = {}; sec.querySelectorAll('.home-atelier__bg').forEach(function(el){ layers[el.dataset.key] = el; });
-  function show(k){ Object.keys(layers).forEach(function(x){ layers[x].classList.remove('is-on'); }); (layers[k]||layers['default']).classList.add('is-on'); }
-  var steps = sec.querySelector('.atelier-steps');
-  sec.querySelectorAll('.atelier-step').forEach(function(b){
-    b.addEventListener('mouseenter', function(){ show(b.dataset.bg); });
-    b.addEventListener('focus', function(){ show(b.dataset.bg); });
-    b.addEventListener('click', function(){ show(b.dataset.bg); }); // tap mobile
-  });
-  if(steps){
-    steps.addEventListener('mouseleave', function(){ show('default'); });
-    steps.addEventListener('focusout', function(e){ if(!steps.contains(e.relatedTarget)) show('default'); });
-  }
-})();
-```
-
-### D. Cleanup
-Supprimer de `style.css` les règles désormais mortes : `.home-atelier--band`, l'ancienne `.home-atelier__bg` (image unique pleine section), `.process-ribbon`, `.process-ribbon-title`, `.process-tile`, `.process-tile__img`, `.process-tile__photo`, `.process-tile__label` (grep d'abord : 0 usage dans les .php après refonte). Garder `.atelier-band-title` (réutilisé, redéfini ci-dessus) et `.storytelling-text*`.
-
-**Notes / pièges :**
-- Photos d'étapes `2026/03/` et `2026/06/` = 404 sur le TEST (clone d'avril) → sur test certaines couches seront vides, c'est OK sur la prod. Robin peut les uploader sur le test pour prévisualiser.
-- Vérifier que `sapi_image` accepte `'class'` (oui) ; on met le `data-key` sur le `<span>` parent, pas sur l'`<img>`, donc pas de souci de passthrough d'attribut.
-- Section désormais SOMBRE (plus crème) : l'ourlet P20 ne s'y applique pas. Pas de tiret cadratin. Accolades PHP/CSS équilibrées avant push.
-- Mobile : non fignolé (passe dédiée plus tard), juste dégrader proprement (colonne empilée, pills statiques).
-
-**Critères de succès :**
-- Section atelier sombre immersive, colonne texte gauche 100 % lisible, fond = luminaire allumé par défaut.
-- Survol/clic d'une pill d'étape (bas-droite) → le fond crossfade vers la photo de l'étape ; sortie du ruban → retour au fond par défaut.
-- 4 liens catégories inline dans le paragraphe (maillage SEO) fonctionnels, stylés clairs (pas bleus).
-- Plus aucune trace des tuiles/ribbon ni du titre « Mon processus artisanal » ; CSS mort purgé.
-
-### 👉 Action Robin
-Valider sur `test.atelier-sapi.fr` (survole les étapes). Penser à fournir une vraie photo de fond par défaut chaude si A7404411 ne te convient pas (variable `$atelier_default_img`). Une fois validé → DA #2 (Hero).
-
-</details>
-
----
-
-## ↩️ RETOUR COWORK — Refonte home : série + ajustements terminés (2026-06-05, sur test)
-**Branche `feature/refonte-home`** (tout poussé, déployé sur test.atelier-sapi.fr ; **jamais mergé master**). Dernier commit `80306cd`.
-
-**✅ Fait depuis le dernier point :**
-- **Série DA #12 → #15 complète** (détails dans les entrées FAIT ci-dessous) : polish #12, room picker #13, bande citation Robin #14, bande atelier immersive #15.
-- **Vague d'ajustements validés par Robin** (commits successifs) :
-  - **Section L'atelier** : photo de fond `2025/05/Retouchee1.jpg`, textes alignés à gauche + titre sans majuscules, conteneur calé sur le standard (1600px), vignettes process +30% + titre « Mon processus artisanal », photos process Finitions/Assemblage/Expédition mises à jour.
-  - **Créations du moment** : photos des 2 cards droite agrandies (min-height 400, dominantes) + textes centrés et agrandis.
-  - **Avis « Ils en parlent »** : passé en **fond blanc** (cassait 3 bandes crème d'affilée) ; liens « Laisser un avis / Voir les N avis » déplacés en haut à droite, plus discrets.
-  - **Zone presse « Ils parlent de nous »** créée dans la section avis — **5 références** : Maisons Actuelle, L'univers de la maison, Le Progrès, Région Auvergne-Rhône-Alpes, Collonges-au-Mont-d'Or (logos N&B → couleur au survol, cliquables). Pilotée par le tableau `$press_refs` (1 ligne/réf : name/url/logo) → **facile à compléter**.
-  - **Room picker** : ajout « **Chambre enfant** » (icône nounours, slug `chambre-enfant`) ; chips un peu plus larges ; **effet photo-au-survol retiré proprement** (revenu à la bande crème simple).
-  - **H2 home** plus épais (Montserrat 700).
-
-**⚠️ À FAIRE / SAVOIR CÔTÉ ROBIN :**
-1. **Images `2026/06/` cassées sur le TEST** (zone presse + photo Expédition) : le test est un **clone d'avril**, il n'a pas ces fichiers (vérifié curl : 200 prod / 404 test). **OK sur la prod**. Pour prévisualiser sur test → uploader ces images dans la médiathèque du site de test.
-2. **Cache avis** : transient 6h sur `sapi_get_google_reviews()` — le tri « français d'abord » (P14) ne se voit qu'après vidage/expiration.
-3. **Brevo (rappel ancien)** : maj séquence d'accueil −10 % pour inclure `surmesure` + `ficheproduit`.
-
-**RESTE pour finir la refonte home (dans l'ordre) :** zone presse OK → **passe mobile complète** → **passe Yoast** (titre/meta home) → **go-live** (merge master + déploiement prod + re-soumission GSC). + nettoyage CSS mort résiduel (fragments `.bento-*`, `.process-*`, `.home-atelier-bg`).
-
----
-
-> **Série refonte home #12 → #15 (06/06)** — issue de l'audit DA trié point par point avec Robin (`mockups/AUDIT-DA-HOME-JUIN-2026.md`, ses verdicts après chaque `>>`). Exécuter DANS L'ORDRE, une tâche à la fois, push après chacune. Focus DESKTOP (la passe mobile viendra après) : les refontes de sections doivent juste dégrader proprement en mobile, sans fignolage. Jamais master.
-
-## ✅ [FAIT 2026-06-05 — sur test] Refonte home #12 — Polish DA validé (commits `bb68a2f` + `51a4f59`)
-**Résultat :** P3+P9 formatter (carousel aligné ; article→Square Peg entier ; format prénom/surnom restreint aux 4 cat luminaires via `data-categories`/`data-product-cat`, **sans toucher au PHP mes-creations** — accessoires en Montserrat simple) ; P6 hover icône room cards orange (home) ; P7 zoom doux de l'IMG collections (1.04, fini le zoom du wrapper) ; P8 pieds des 3 cards créations alignés (flex) ; P13 avatars avis → **initiales sur disque** (scopé `.home-avis`, fiche produit garde ses photos) ; P14 avis **français d'abord** (`lang` exposé par `sapi_get_google_reviews`, tri stable + heuristique accents ; home : shuffle puis usort stable fr-d'abord) ; P18 **curseur custom supprimé** (markup+JS+CSS, 0 ref) ; P19 bouton newsletter orange (hover assombri) ; P20 ourlet `border-top` sur les bandes crème.
-⚠️ **Cache avis** : `sapi_get_google_reviews()` a un transient 6h — le tri fr-d'abord (P14) ne prendra effet qu'après expiration/vidage du cache (P13 initiales OK immédiatement). À vider côté Robin si besoin de voir P14 tout de suite.
-**Vérifs** : accolades front 73/73, functions 891/891, CSS 3738/3738. Commits par chemins explicites (WIP mes-creations autre fenêtre intact).
-
-<details><summary>Énoncé original</summary>
-
-**À faire :**
-1. **P3 Naming card hero** : un seul format pour toutes les slides produit : prénom/surnom officiel (formatter), SANS flèche « → » dans le texte (doublon des chevrons). Slides promo : titre libre inchangé. (Voir la construction dans `homepage-carousel.js` + `SAPI_CAROUSEL_DATA`.)
-2. **P9 Formatter** (`assets/product-name-formatter.js`) — 2 règles nouvelles : (a) si le premier mot est un article (La, Le, L'), tout le nom en Square Peg (fini « LA » criard sur La Merveilleuse) ; (b) le formatage prénom/surnom ne s'applique QU'AUX produits des 4 catégories luminaires (suspensions, appliques, lampesaposer, lampadaires) ; les autres (accessoires, ex. Ampoule Poire) restent en Montserrat simple. Pour (b), exposer la catégorie dans le markup là où c'est nécessaire (attribut `data-product-cat` sur les conteneurs de nom, côté PHP) plutôt que deviner côté JS. Vérifier ensuite hero + créations + /mes-creations/ + 1 page catégorie : aucun nom ne doit régresser.
-3. **P6 Hover room cards** : `.home-projet .room-card:hover .room-card-icon { background: rgba(227, 91, 36, 0.12); color: var(--color-orange); }`. *(Sera repris tel quel dans la refonte #13 de la section : appliquer quand même, ça servira de base.)*
-4. **P7 Collections** : au hover de `.collection-card`, zoom doux du visuel : `.collection-card:hover .collection-visual-img { transform: scale(1.04); }` + transition 0.6s, dans `@media (hover: hover)`.
-5. **P8 Créations** : aligner les pieds des 3 cards. Scopé `.creations-grid` UNIQUEMENT : `.creations-grid .product-card-link { display: flex; flex-direction: column; height: 100%; }`, `.creations-grid .product-media { flex: 1; }`, infos/CTA calés en bas.
-6. **P13 Avis** : scopé `.home-avis`, remplacer les `<img>` avatars Google par des initiales sur disque 36px : fond `var(--color-warm)`, texte `var(--color-wood)`, font-weight 700. Zéro bleu Google.
-7. **P14 Avis** : avis en français d'abord (vérifier si `sapi_get_google_reviews()` expose un code langue, sinon heuristique sur le texte ; tri stable, l'anglais après).
-8. **P18 Curseur custom** : SUPPRIMER markup `.cursor-custom` (front-page.php), CSS et JS associés (grep `cursor-custom|cursor-dot|cursor-outline` → 0 partout).
-9. **P19 CTA** : état CIBLE à vérifier/imposer : « Toutes les créations » = orange ; « Découvrir l'artisan » = bois (`hero-cta--wood`) ; bouton newsletter « S'inscrire » = orange (`.newsletter-submit-kinetic`, hover assombri).
-10. **P20 Bandes crème** : `border-top: 1px solid rgba(147, 125, 104, 0.1);` sur `.section-band--warm` et `.home-projet-section`.
-
-**Pièges :** scopes stricts (fiche produit/catégories/page Star intactes, sauf l'effet voulu du formatter P9-b). Aucun tiret cadratin. Accolades équilibrées. Après push : vérifier 1 fiche produit + /mes-creations/ + 1 catégorie.
-**👉 Robin :** revue desktop rapide, puis lancer #13.
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-05 — sur test] Refonte home #13 — Room picker immersif photographique (commit `bff5718`)
-**Résultat :** « Ton projet » devient une bande photographique immersive.
-- **Data** : 1 photo d'ambiance par pièce via taxonomie `media_room` (slugs alignés salon/cuisine/chambre/bureau/entree/escalier — le `?piece=` y mappe déjà), 6 `WP_Query` attachments (`fields=ids`, `no_found_rows`), fallback par pièce → **fond défaut (salon)**, fallback dur si rien tagué.
-- **Markup** : `<section class="home-projet-section home-projet--immersif">` min-height 560, couches `.projet-bg` empilées (1/pièce + `--default`, `opacity 0`/`.on 1`, transition 0.7s) + `.projet-scrim` sombre. Room cards → **chips pills** (fond blanc translucide, radius 50, icône 18px, texte wood-dark). **Câblage Conseiller intact** (mêmes `<a>` href + `data-piece` + `data-room-picker`/`data-room-picker-freetext`).
-- **JS** : crossfade au `mouseenter` d'une chip (**lazy** : `background-image` posé au 1er survol via `data-bg`), retour au défaut au `mouseleave`. **Desktop only** (`hover:hover`) ; mobile = fond défaut fixe.
-- **Typo fond sombre** : h2 blanc + shadow, eyebrow warm, « ou »/filets blancs translucides, input freetext blanc translucide. P20 (ourlet) désactivé sur cette section.
-- **Vérifs** : accolades PHP 89/89, CSS 3758/3758. ⚠️ Perf : 6 requêtes attachments `orderby rand` (OK car homepage page-cachée ; variété par chargement).
-
-**MAJ (révision, commit `c980b18`)** : retour Robin — deux photos (hero + section) s'enchaînaient, trop lourd. Nouvelle approche **validée** : au **repos = bande crème classique** (texte sombre, cards blanches, ourlet P20) ; au **survol d'une chip**, la photo de la pièce apparaît **derrière** et le « fond » crème devient un **voile semi-transparent** (`.projet-veil` rgba warm .8) par-dessus. Plus de fond photo par défaut, plus de scrim sombre / chips pills / texte blanc. Crossfade lazy + câblage Conseiller inchangés.
-
-### 👉 Action Robin
-Valider sur test (desktop : survol Salon/Cuisine/etc. → la photo de la pièce transparaît sous le voile crème ; mobile : bande crème fixe). ⚠️ **Dépend des photos taguées `media_room`** : pièce sans photo → retombe sur le fond salon ; me dire lesquelles manquent. Voile à 0.8 — ajustable si tu veux la photo plus/moins présente. Puis **lancer #14**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #13 — Room picker photographique (idée B validée)
-**Date :** 2026-06-06 · **Branche :** `feature/refonte-home` · **Priorité :** haute
-**Cible visuelle :** `mockups/mockup-16-immersion-B-C-D.html`, section « IDÉE B ». ⚠️ C'est une cible, pas du code à copier : réutiliser les variables/classes du thème.
-
-**Contexte :** La section « Ton projet » passe de chips blanches sur bande crème à une **bande photographique immersive** : photo d'ambiance en fond, scrim sombre, chips pills blanches, et au survol d'une chip le fond crossfade vers une ambiance de la pièce correspondante. Le câblage Conseiller (`data-room-picker`, `data-piece`, `data-room-picker-freetext`) ne doit PAS bouger.
-
-**À faire :**
-1. **Data** : pour chacun des 6 slugs du room picker (salon, cuisine, chambre, bureau, entree, escalier), récupérer 1 photo d'ambiance via la taxonomie `media_room` (attachments tagués, chantier S28). Lister d'abord les slugs réels des termes `media_room` (get_terms) et mapper. Fallback par pièce : une photo d'ambiance générique (la même que le fond par défaut). Fond par défaut : une ambiance chaude au choix parmi les taguées salon.
-2. **Markup** : conserver la structure logique actuelle de `.home-projet-section` (eyebrow, h2, cards/chips, « ou », freetext) mais : section pleine largeur `min-height: 560px`, couches de fond empilées (1 div par pièce + 1 défaut, `background-size: cover`, `opacity 0`, `.on { opacity: 1 }`, transition 0.7s) + scrim `linear-gradient(180deg, rgba(31,24,18,.55), rgba(31,24,18,.3) 45%, rgba(31,24,18,.55))`. Les room cards deviennent des chips pills (fond `rgba(255,255,255,.92)`, radius 50px, texte wood-dark, icône conservée en 18px) — MÊMES balises `<a>` avec MÊMES attributs href/data-piece.
-3. **JS** : au `mouseenter` d'une chip, activer la couche de fond correspondante ; au `mouseleave` de la section, retour au fond défaut. **Lazy** : ne définir le `background-image` d'une couche qu'au premier survol (data-src), sauf le fond défaut (chargé direct). Desktop only (`hover: hover`) ; en mobile/touch : fond défaut fixe, chips inchangées, aucun crossfade.
-4. **Typo sur fond sombre** : h2 blanc + text-shadow léger ; eyebrow en `var(--color-warm)` ; « ou » et filets en blanc translucide ; input freetext fond `rgba(255,255,255,.94)`.
-5. **Cleanup** : les styles `.home-projet`/`.room-card` de l'ancienne version qui ne servent plus → adapter, ne pas laisser de mort. L'ourlet P20 ne s'applique plus à cette section (elle n'est plus crème).
-
-**Critères :** survol Salon/Cuisine/etc. = l'ambiance change derrière (vraies photos taguées), wording et comportements Conseiller intacts, lisibilité parfaite du h2 et des chips, mobile propre (fond fixe). Perf : une seule image chargée à l'arrivée.
-**👉 Robin :** valider sur test, puis lancer #14.
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-05 — sur test] Refonte home #14 — Bande citation Robin pleine page + card carte (commit `7536ff7`)
-**Résultat (dispo A) :**
-- **Section** entre « Ils en parlent » et le bento divers : photo de Robin en fond via `sapi_image` (variable **`$quote_band_img = '2025/05/Robin-Sapi-A.jpg'` PROVISOIRE** — changer ce chemin suffit) + scrim 90deg `rgba(31,24,18,.72→.45→.2)`. min-height 72vh.
-- **Contenu** (max-width 1180, padding généreux, aligné gauche) : guillemet « Square Peg 96px orange ; citation « sauce pour les pâtes » Square Peg blanc clamp(2.4–4rem) ; signature **Robin** / artisan · Lyon ; CTA orange pill « Les conseils de Robin » → `/conseils-eclaires/` + lien discret souligné « Faire connaissance → » → `/lumiere-dartisan/` (stylés explicitement, anti a:hover bleu).
-- **Card carte** (absolute bas-droite, 280px, blanc translucide, radius 14, ombre) : mini-carte **SVG inline** (4 routes `#DECDAF`/`#E8DCC8` sur `#F5EFE4`) + **pin orange avec pulse CSS** (sur span wrapper pour que le `::after` rende) + « Venir me voir à l'atelier » + « Collonges-au-Mont-d'Or… » + « Itinéraire → » vers Maps (`target=_blank rel=noopener`). **Pas d'iframe.** Mobile (≤900px) : card en flux centrée sous la citation.
-- **Bento divers** : carte **Conseil retirée** → reste **Carte cadeau (span 8) + Flash actu (span 4)** en desktop ; mobile = 1 colonne (giftcard `1/-1` base conservée, override 8/4 en `min-width:769px` pour éviter le bug mobile). _À ajuster sur rendu si le 8/4 ne plaît pas._
-- **Cleanup** : bloc CSS `.bento-conseil*` supprimé (0 usage php). Fragments media-query `.bento-conseil` laissés (CSS mort inoffensif).
-- **Vérifs** : `img` global = `height:auto` sans `!important` → `.quote-band__bg { height:100% }` (classe) gagne, image de fond OK. Accolades PHP 89/89, CSS 3775/3775.
-
-### 👉 Action Robin
-Valider sur test (desktop : citation lisible sur la photo, card carte cliquable bas-droite ; mobile : citation puis card empilées). ⚠️ **Photo PROVISOIRE** — prévoir la vraie photo de Robin (je changerai `$quote_band_img`). Tu peux aussi me dire si tu préfères l'agencement bento **8/4** ou autre. Puis **lancer #15**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #14 — Bande citation Robin pleine page + card carte (mockup-17, disposition A)
-**Date :** 2026-06-06 · **Branche :** `feature/refonte-home` · **Priorité :** haute
-**Cible visuelle :** `mockups/mockup-17-citation-robin-pleine-page.html`, **disposition A** (citation à gauche, photo lisible à droite). Robin ajustera scrim/cadrage avec la photo finale.
-
-**Contexte :** La citation « sauce pour les pâtes » (actuelle card Conseil du bento) devient une **bande pleine largeur sur photo de Robin**, avec la card carte « Venir me voir à l'atelier » posée dessus (décision P12). Le bento divers ne garde que Carte cadeau + Flash actu.
-
-**À faire :**
-1. **Nouvelle section** entre « Ils en parlent » et le bento divers : `min-height: 72vh`, photo de fond = `2025/05/Robin-Sapi-A.jpg` (PROVISOIRE, sera remplacée — prévoir un point d'entrée simple pour changer l'image), scrim `linear-gradient(90deg, rgba(31,24,18,.72), rgba(31,24,18,.45) 50%, rgba(31,24,18,.2))`.
-2. **Contenu** (z-index au-dessus, max-width 1180 centré, padding généreux, aligné gauche) : guillemet « en Square Peg ~96px `var(--color-orange)` ancré au-dessus de la 1re ligne ; citation en Square Peg blanc `clamp(2.4rem, 4.6vw, 4rem)`, max-width ~620px, text-shadow léger : « Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage ! » ; signature « **Robin** / artisan de l'Atelier Sâpi · Lyon » ; CTA orange pill « Les conseils de Robin » → `/conseils-eclaires/` + lien discret souligné blanc cassé « Faire connaissance → » → `/lumiere-dartisan/` (styler explicitement, piège a:hover bleu).
-3. **Card carte** (absolute bas-droite, ~280px, fond `rgba(255,255,255,.96)`, radius 14, ombre) : mini-carte ILLUSTRÉE en SVG inline (3-4 routes en courbes `#DECDAF`/`#E8DCC8` sur fond `#F5EFE4`, reprendre les paths du mockup-17) + pin orange avec pulse CSS ; texte « Venir me voir à l'atelier » + « Collonges-au-Mont-d'Or, à 15 min de Lyon · sur rendez-vous » + lien « Itinéraire → » vers `https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9` (`target="_blank" rel="noopener noreferrer"`). Pas d'iframe Google (perf + RGPD). Mobile : la card passe en flux sous la citation, centrée.
-4. **Bento divers** : supprimer la card Conseil (`bento-conseil`). Réagencer : Carte cadeau `grid-column: 1 / -1` (bannière) + Flash actu… lire les spans restants et proposer l'agencement le plus propre (ex. actu en 12 dessous, ou giftcard 8 + actu 4). À ajuster sur rendu, le noter dans le résultat.
-5. **Cleanup** : styles `.bento-conseil*` orphelins → grep puis supprimer si 0 usage. P16 (guillemets) est rendu obsolète par cette refonte : ne rien faire dessus.
-
-**Critères :** l'enchaînement Ils en parlent → bande citation (voix + visage + lieu) → bento → newsletter se lit naturellement ; citation lisible sur la photo ; card carte cliquable ; bento à 2 cards propre ; mobile dégrade proprement (citation puis card empilées).
-**👉 Robin :** valider sur test (et prévoir la vraie photo), puis lancer #15.
-
-</details>
-
----
-
-## ✅ [FAIT 2026-06-05 — sur test] Refonte home #15 — L'atelier en bande immersive voile crème (commit `594568a`)
-**Résultat :** la section L'atelier abandonne le duo texte/photo → bande immersive calquée sur `.category-editorial`.
-- **Image de fond** pleine section via `sapi_image` (variable **`$atelier_band_img = '2026/02/Bandeau-2.jpg'` PROVISOIRE** — changer ce chemin suffit, Robin fournira une photo d'atelier) z0 + **voile `::before` crème EXACTEMENT comme `.category-editorial`** (gradient 135deg .92/.88/.92) z1. **Variante sombre en commentaire CSS** (`.home-atelier--band::before`) pour basculer.
-- **Contenu centré** (max-width 1000, z2) : header « 04 L'atelier », titre Square Peg « Des sculptures lumineuses » clamp(2.6–3.6rem), **2 paragraphes verbatim** (storytelling + SEO avec ses 4 liens intacts), CTA « Découvrir l'artisan » `hero-cta hero-cta--wood`.
-- **Ruban process** : 5 cartes flip → **5 vignettes** (`flex:1`, blanc translucide .85, radius 12, `--shadow-card`) photo 110px + label « 01 Dessin ». **Phrases manuscrites conservées en attribut `title`** (tooltip natif). Flips supprimés (markup + CSS + JS tap).
-- **Cleanup CSS mort** (0 usage php confirmé) : `.atelier-duo/-story/-photo/-media/-maps-link/-label/-story-title`, `.process-flip*`, `.home-atelier--photo-bg` (ancien test), `.home-atelier` retiré des groupes #8 padding.
-- **Mobile** : vignettes 2 colonnes, padding réduit.
-- **Vérifs** : `.home-atelier__bg { height:100% }` (classe) bat `img{height:auto}` → image OK. Accolades PHP 85/85, CSS 3758/3758.
-
-### 👉 Action Robin
-Valider sur test (image perceptible sous le voile crème, texte lisible, 4 liens SEO, ruban 5 vignettes + survol = tooltip phrase). ⚠️ **Image PROVISOIRE** `2026/02/Bandeau-2.jpg` — fournis une vraie photo d'atelier (je change `$atelier_band_img`). Variante sombre dispo en 1 ligne si tu préfères. **Série #12→#15 terminée.** Restent : **zone presse** (dès que tu fournis les références), **passe mobile complète**, **passe Yoast**, **go-live**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #15 — Bande atelier immersive, voile crème (idée C validée)
-**Date :** 2026-06-06 · **Branche :** `feature/refonte-home` · **Priorité :** haute
-**Cible visuelle :** `mockups/mockup-16-immersion-B-C-D.html`, section « IDÉE C », **voile crème** (choix Robin : même design que le storytelling des pages catégories). Garder la variante sombre EN COMMENTAIRE CSS pour pouvoir basculer.
-
-**Contexte :** La section L'atelier abandonne le duo texte/photo : elle devient une bande immersive calquée sur `.category-editorial` (image de fond + voile crème quasi-opaque + contenu centré). La photo de Robin n'y figure plus (elle vit dans la bande citation #14). Les 5 cartes flip du process sont remplacées par un ruban de vignettes.
-
-**À faire :**
-1. **Section** : conserver le header kinetic « 04 L'atelier » et le helper `$sapi_cat_url`. Remplacer le contenu par : image de fond pleine section (PROVISOIRE : `2026/02/Bandeau-2.jpg`, remplaçable facilement — Robin fournira une photo d'atelier) en `position: absolute; inset: 0; object-fit: cover; z-index: 0` + voile `::before` EXACTEMENT comme `.category-editorial::before` (gradient 135deg `rgba(254,253,251,.92)` / `rgba(251,246,234,.88)` / `rgba(250,246,240,.92)`, z-index 1). Variante sombre en commentaire : `rgba(40,31,23,.82)/rgba(58,46,35,.74)/rgba(40,31,23,.85)`.
-2. **Contenu** (z-index 2, max-width 1000 centré) : titre Square Peg « Des sculptures lumineuses » (`clamp(2.6rem, 5vw, 3.6rem)`, wood-dark) ; les 2 paragraphes EXISTANTS repris verbatim (storytelling + SEO avec ses 4 liens et leurs styles) ; CTA « Découvrir l'artisan » en `hero-cta hero-cta--wood`.
-3. **Ruban process** : 5 vignettes (`flex: 1`, fond `rgba(255,255,255,.85)`, radius 12, ombre `--shadow-card`) : photo 110px (les 5 photos actuelles des flips) + label « 01 Dessin » etc. Les phrases manuscrites des versos sont conservées en attribut `title` de chaque vignette (tooltip natif), on ne les perd pas. SUPPRIMER les cards flip (`.process-flip*` markup + CSS + JS tap) après grep.
-4. **Retraits** : `.atelier-duo`, `.atelier-media/.atelier-photo` (photo de Robin), `.atelier-maps-link` s'il reste, `.atelier-story*` devenus inutiles → adapter/supprimer le CSS mort (grep avant).
-5. **Mobile** : vignettes en 2 colonnes wrap, padding réduit. Propre sans fignolage.
-
-**Critères :** bande immersive fidèle au design category-editorial (image perceptible sous le voile crème), texte parfaitement lisible, 4 liens SEO intacts, ruban process avec les 5 photos + tooltips, plus aucune trace des flips ni de l'ancienne photo, CSS mort purgé.
-**👉 Robin :** valider sur test. Ensuite : zone presse (dès que tu fournis les références), passe mobile complète, passe Yoast, go-live.
-
-</details>
-
-## ✅ [FAIT 2026-06-05 — sur test] Refonte home #11 — Corrections audit design (commits `b211e21` A-C + `f1399a2` D-E)
-**A. 🚨 Fix bloquant mobile** : `.home-divers .bento-giftcard` `span 12` → **`1 / -1`** (survit au passage 1 colonne mobile → fini la citation Conseil écrasée à 175px).
-**B. Hiérarchie CTA** : variante `.hero-cta--wood` (bois) appliquée à « Découvrir l'artisan » ; « Toutes les créations » reste orange → 1 seul CTA orange navigation par écran.
-**C. Collections desktop** : cards `30%`→`23.5%` (peek de la 5e) + flèches prev/next dans le header (réutilise `.carousel-arrow`, scopées light, JS `scrollBy`), masquées en mobile.
-**D. Hero carousel** : 1 produit/catégorie (2e interleave retiré → promos + 4 produits) ; **photos portrait écartées** (`wp_get_attachment_metadata`, `width>=height`, sinon photo/produit suivant) ; overlay renforcé ton chaud `rgba(31,24,18,.45→.72)` ; dots naming card masqués `≤520px` (nom complet).
-**E. Quick wins** : footer `&mdash;`→`&middot;` ; bandeau réassurance mobile = **2 items FIXES** (Livraison 48-72h + Paiement sécurisé) via `.is-mobile-hidden` statique dans le template + randomisation JS désactivée (`bandeau-reassurance.js`) ; newsletter **centrée desktop** + padding vertical réduit (6/3→4/2.5rem) ; hover room-cards home en **accent orange** (global reste wood) ; alt texts nettoyés (0 tiret cadratin visible).
-**Fichiers** : front-page.php, style.css, footer.php, inc/template-robin-bandeau-v2.php, assets/bandeau-reassurance.js. Accolades PHP 72/72, CSS 3739/3739. **NON créé** : zone presse (attend contenu Robin).
-⚠️ Contexte multi-fenêtre : commits faits avec chemins explicites pour ne pas emporter le WIP mes-creations de l'autre fenêtre. Reste du CSS mort `.home-atelier--photo-bg` (test annulé) à nettoyer plus tard.
-
-### 👉 Action Robin
-Re-revue desktop + **mobile 390px** sur test (bento divers 1 colonne lisible, bandeau 2 items, nom modèle entier, collections peek+flèches, CTA artisan bois, newsletter centrée). Ensuite : zone presse (quand tu fournis les parutions), passe Yoast, go-live.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #11 — Corrections audit design (bug mobile bloquant + CTA + collections + hero + quick wins)
-**Date :** 2026-06-05
-**Priorité :** haute (contient un bug mobile bloquant)
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-**Contexte :** Audit design complet réalisé sur le rendu réel de test (desktop + mobile 390px). Robin valide la correction de tout en une tâche. La zone presse du mockup attend du contenu réel : NE PAS la créer ici.
-
-**À faire :**
-
-### A. 🚨 Fix bento divers cassé en mobile (bloquant)
-Diagnostic confirmé : `.home-divers .bento-giftcard { grid-column: span 12; }` (style.css ~l.8177, HORS media query, spécificité 0,2,0) bat le reset mobile `.bento-giftcard { grid-column: span 1; }` (~l.11987, 0,1,0) → la grille garde 12 tracks en mobile, la citation Conseil s'écrase dans une colonne de 175px.
-**Fix** : dans le bloc `@media (max-width: 768px)` existant, ajouter `.home-divers .bento-giftcard { grid-column: span 1; }` (ou passer la règle ~8177 en `grid-column: 1 / -1;` qui survit au passage 1 colonne — au choix, mais vérifier le résultat).
-**Vérif** : à 390px, carte cadeau / citation Conseil / flash actu empilées en 1 colonne pleine largeur, citation lisible.
-
-### B. Hiérarchie CTA — règle : 1 seul CTA orange « navigation » par écran
-1. Créer la variante :
-```css
-.hero-cta--wood { background: var(--color-wood); }
-@media (hover: hover) { .hero-cta--wood:hover { background: var(--color-wood-dark); } }
-```
-(si `.hero-cta` utilise `var(--gradient-cta)`, la variante doit l'écraser : `background: var(--color-wood);` suffit, vérifier au rendu.)
-2. Appliquer `hero-cta hero-cta--wood` au CTA « Découvrir l'artisan » (`.atelier-story`). « Toutes les créations » (`.creations-cta`) RESTE orange.
-
-### C. Collections desktop — affordance du carrousel
-Deux volets :
-1. **Peek** : passer les cards de `flex: 0 0 30%` à `flex: 0 0 23.5%` (desktop uniquement) → 4 cards entières + un bord de 5e visible = on comprend qu'il y a une suite. (Mobile inchangé.)
-2. **Flèches** : ajouter des flèches prev/next en desktop sur `.collections-kinetic` (réutiliser les styles/SVG des `.carousel-arrow` de la naming card hero, posées à droite du header de section), avec un petit JS `scrollBy({ left: ±largeur_card, behavior: 'smooth' })` sur `.collections-grid`. Masquées en mobile (les dots existants suffisent).
-
-### D. Hero carousel — 5 slides max, cadrage, mobile
-1. **Réduire à 1 produit par catégorie** (au lieu de 2) : dans la prep data de `front-page.php`, ne garder que `$products_by_category[$cat_slug][0]` (supprimer la 2e boucle d'interleave) → promos + 4 slides produits.
-2. **Écarter les photos portrait** : dans la boucle de sélection, vérifier les dimensions via `wp_get_attachment_metadata($image_id)` et ne retenir la photo que si `width >= height` (sinon essayer la photo ambiance suivante du produit ; si aucune paysage, passer au produit suivant de la catégorie).
-3. **Overlay slides claires** : renforcer le bas du `.carousel-overlay` à `rgba(31, 24, 18, 0.45)` minimum (lisibilité du texte blanc sur photos claires type La Merveilleuse).
-4. **Mobile ≤520px** : masquer les dots de la naming card (`.naming-card .carousel-dots { display: none; }` dans la MQ) pour que le nom du modèle s'affiche en entier ; garder les flèches.
-
-### E. Quick wins
-1. **Footer** : remplacer le tiret cadratin du copyright (« — Tous droits réservés ») par « · ». Puis grep `—` et `–` sur les fichiers du thème modifiés par la refonte : doit retourner 0 dans les contenus visibles.
-2. **Bandeau réassurance mobile** : actuellement 2 items ALÉATOIRES parmi 4 (`inc/template-robin-bandeau-v2.php`). Remplacer par 2 items FIXES : « Livraison 48-72h » + « Paiement sécurisé » (les plus vendeurs). Desktop : 4 items inchangés.
-3. **Newsletter** : centrer la section en desktop (header + sous-titre + form), elle flotte à gauche dans une fin de page très vide. Au passage, réduire légèrement son padding vertical pour compenser la hauteur prise par la section atelier (#10).
-4. **Hover room-cards** : vérifier que `.room-card:hover` applique bien `border-color: var(--color-orange)` (ou wood) + `translateY(-2px)` + `--shadow-card-hover` sur la home ; si l'orange n'y est pas, l'ajouter scopé `.home-projet .room-card:hover`.
-
-**Notes / pièges :**
-- NE PAS créer la zone presse (attend le contenu de Robin). NE PAS toucher aux styles fiche produit / catégories / page Star.
-- Micro-liens « Découvrir → » des cards en orange 13px : signalés sous AA par l'audit, mais on NE CHANGE PAS (cohérence avec /mes-creations/), juste le noter.
-- Aucun tiret cadratin. Accolades équilibrées. Vérifier le rendu 390px ET desktop après chaque volet.
-
-**Critères de succès :**
-- Mobile 390px : bento divers en 1 colonne lisible ; nom du modèle entier dans la naming card ; bandeau = Livraison 48-72h + Paiement sécurisé.
-- Desktop : « Découvrir l'artisan » en bois (1 seul CTA orange navigation par écran) ; collections avec peek + flèches fonctionnelles ; newsletter centrée.
-- Hero : max 5-6 slides (promos + 4 produits), aucune photo portrait, texte lisible sur slides claires.
-- Footer sans tiret cadratin.
-
-### 👉 Action Robin
-Re-revue desktop + mobile sur test. Ensuite il restera : la zone presse (quand tu fournis les parutions), la passe Yoast, et le go-live.
-
-</details>
-
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #10 — Section L'atelier (photo/lien dissociés, process flip, plus haute)
-**Résultat (branche `feature/refonte-home`, commit `eb59991`) :**
-1. **Photo / lien Maps dissociés** : `.atelier-photo` passe de `<a>` à `<div>` (label « L'atelier · Lyon » overlay conservé) ; lien discret `.atelier-maps-link` (« Voir l'atelier sur Google Maps → ») sous la photo ; photo + lien dans un `<div class="atelier-media">` (1 seul enfant de grille). Lien stylé bois→orange au hover (anti `a:hover` bleu global).
-2. **Eyebrow retiré** : `<span class="section-eyebrow">Mon atelier à Lyon</span>` supprimé du markup. **Classe `.section-eyebrow` conservée** dans style.css (réutilisable).
-3. **Process → 5 cartes à retourner** (variante H) : `.process-flips`/`.process-flip` (rotateY 3D). **Flip au survol** (desktop), **au tap** (mobile) et **au clavier** (Enter/espace) via JS inline dans l'IIFE existant. Cleanup : `.process-strip`/`.process-tile*` (#7) supprimés (0 occurrence repo). **MAJ (commit `c3ab939`)** : faces inversées sur retour Robin → **recto = fond bois clair + numéro en grand + titre de l'étape**, **verso = photo** (au survol). Phrase manuscrite retirée.
-4. **Section plus haute** : `.atelier-photo` min-height 300→**440** ; `.atelier-duo` gap 40→**56** ; `.hero-bento.home-atelier` **padding-bottom 5.5rem** (padding-top 6rem de #8 conservé) ; cartes process à 210px + margin-top 48px.
-- **Vérifs** : accolades PHP 67/67, CSS 3716/3716 ; `.atelier-photo` = `<div>` ; markup eyebrow retiré, CSS section-eyebrow gardé.
-
-### 👉 Action Robin
-Revue de la section L'atelier sur test (desktop + **mobile : teste le flip au tap**) : photo non cliquable + lien Maps discret dessous, plus d'eyebrow, 5 cartes qui se retournent (phrase manuscrite au verso), section nettement plus haute. Si OK : passe Yoast, puis **go-live**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #10 — Section L'atelier : photo/lien dissociés, process en cartes à retourner, section plus haute
-**Date :** 2026-06-04
+## [TÂCHE] Anti-spam formulaires de contact — time-trap + filtre junk + rate limit Conseiller
+**Date :** 2026-08-05
 **Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
+**Branche :** test uniquement (`test-theme-sapi-maison`), Robin valide avant prod. Fichier concerné : `functions.php` + `page-contact.php` (thème, pas de snippet).
 
-**Contexte :** Retours Robin sur la section 04 L'atelier + choix validé pour le process : **variante H, cartes à retourner** (recto photo de l'étape, verso une phrase manuscrite de Robin sur fond bois sombre). Les 5 phrases ci-dessous sont VALIDÉES par Robin, les reprendre exactement.
+**Contexte :** nuit du 4→5 août, rafale de spam de bot sur les formulaires de contact (email `testing@example.com`, message `555`/`20`, noms aléatoires type `UZJglwlz`, ~11 envois entre 02h21 et 03h31). Les 3 formulaires ont DÉJÀ nonce + honeypot (champ `website`) + rate limit 5/h/IP (sauf le Conseiller). Le bot les contourne : il **change d'IP** à chaque envoi (défait le rate limit par IP) et **ignore le honeypot** (parse le form, saute le champ caché). Il faut donc ajouter une couche que la rotation d'IP ne casse pas, **sans friction pour les vrais clients** et **sans dépendance externe** (pas de captcha pour l'instant, on le garde en réserve).
 
-**À faire :**
-
-### 1. Dissocier la photo de l'atelier et le lien Google Maps
-Actuellement `.atelier-photo` est un `<a>` vers Maps : photo de Robin + clic sortant = mélange confus.
-- Transformer `.atelier-photo` en `<div>` (plus de lien sur la photo). Le label « L'atelier · Lyon » reste en overlay.
-- Sous la photo, ajouter un petit lien discret :
-```php
-<a class="atelier-maps-link" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer">Voir l'atelier sur Google Maps →</a>
-```
-(Envelopper photo + lien dans un `<div class="atelier-media">` pour rester un seul enfant de grille.)
-```css
-.atelier-maps-link {
-  display: inline-block;
-  margin-top: 10px;
-  font-size: 0.85rem;
-  color: var(--color-wood);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-@media (hover: hover) {
-  .atelier-maps-link:hover { color: var(--color-orange); }
-}
-```
-(⚠️ styler le lien explicitement : piège connu du `a:hover` global bleu.)
-
-### 2. Supprimer l'eyebrow « Mon atelier à Lyon »
-Retirer le `<span class="section-eyebrow">Mon atelier à Lyon</span>` de `.atelier-story` (il encombre ; le signal géo vit déjà dans le texte, le label photo et le lien Maps). GARDER la classe `.section-eyebrow` dans style.css (réutilisable ailleurs).
-
-### 3. Process → cartes à retourner (variante H validée)
-REMPLACER le bloc `.process-strip` (tuiles + labels) par :
-```php
-<div class="process-flips">
-  <?php
-  $process_steps = [
-    ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi",      "Tout commence par un trait de crayon"],
-    ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire',             "Le laser suit mon dessin au dixième près"],
-    ['03', 'Finitions',     '2025/03/P_SLM_XL_det5.jpg',           "Finitions manuelles d'un luminaire en bois",       "Le ponçage, c'est ma méditation"],
-    ['04', 'Assemblage',    '2025/05/Robin-Sapi-A.jpg',            'Robin assemble un luminaire dans son atelier à Lyon', "Chaque pièce s'emboîte sans une vis"],
-    ['05', 'Expédition',    '2025/07/Claudine-bandeau-1.jpg',      "Luminaire Claudine prêt pour l'expédition",        "Emballé comme si c'était pour ma mère"],
-  ];
-  foreach ($process_steps as $step) : ?>
-  <div class="process-flip" tabindex="0" role="button" aria-label="Étape <?php echo esc_attr($step[0] . ' : ' . $step[1]); ?>">
-    <div class="process-flip-inner">
-      <div class="process-flip-front">
-        <?php echo sapi_image($step[2], 'large', ['alt' => $step[3], 'class' => 'process-flip-photo', 'loading' => 'lazy']); ?>
-        <span class="process-flip-label"><span class="process-flip-num"><?php echo esc_html($step[0]); ?></span> <?php echo esc_html($step[1]); ?></span>
-      </div>
-      <div class="process-flip-back">
-        <p>« <?php echo esc_html($step[4]); ?> »</p>
-      </div>
-    </div>
-  </div>
-  <?php endforeach; ?>
-</div>
-```
-```css
-/* ===== Refonte home — process en cartes à retourner ===== */
-.process-flips {
-  display: flex;
-  gap: 16px;
-  margin-top: 48px;
-}
-.process-flip {
-  flex: 1;
-  height: 210px;
-  perspective: 800px;
-  cursor: pointer;
-}
-.process-flip-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.55s cubic-bezier(0.3, 0.7, 0.3, 1);
-  transform-style: preserve-3d;
-}
-@media (hover: hover) {
-  .process-flip:hover .process-flip-inner { transform: rotateY(180deg); }
-}
-.process-flip.is-flipped .process-flip-inner { transform: rotateY(180deg); }
-.process-flip-front,
-.process-flip-back {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.process-flip-photo { width: 100%; height: 100%; object-fit: cover; }
-.process-flip-label {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  padding: 10px;
-  color: var(--color-white);
-  background: linear-gradient(transparent, rgba(40, 30, 20, 0.55));
-  font-size: 12px;
-  font-weight: 600;
-}
-.process-flip-num { font-weight: 700; letter-spacing: 0.1em; opacity: 0.9; margin-right: 4px; }
-.process-flip-back {
-  background: var(--color-wood-dark);
-  color: var(--color-warm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px;
-  text-align: center;
-  transform: rotateY(180deg);
-}
-.process-flip-back p {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  line-height: 1.1;
-  margin: 0;
-}
-@media (max-width: 880px) {
-  .process-flips { flex-wrap: wrap; }
-  .process-flip { flex: 1 1 30%; height: 180px; }
-}
-@media (max-width: 520px) {
-  .process-flip { flex: 1 1 45%; }
-}
-```
-JS (tap mobile + clavier) — inline en bas de front-page.php, dans le pattern IIFE existant :
-```js
-document.querySelectorAll('.process-flip').forEach(function (card) {
-  card.addEventListener('click', function () { card.classList.toggle('is-flipped'); });
-  card.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('is-flipped'); }
-  });
-});
-```
-Cleanup : supprimer les règles `.process-strip` / `.process-tile*` de #7 (devenues orphelines, vérifier par grep).
-
-### 4. Section plus haute
-- `.atelier-photo { min-height: 440px; }` (au lieu de 300) ;
-- `.atelier-duo { gap: 56px; }` ;
-- `.home-atelier { padding-bottom: 5.5rem; }` (le padding-top 6rem de #8 reste) ;
-- les cartes process à 210px + margin-top 48px participent. Résultat attendu : la section respire et s'impose comme un moment fort de la page.
-
-**Notes / pièges :**
-- Phrases du verso : guillemets français « » comme indiqué, AUCUN tiret cadratin.
-- Les 5 photos sont les mêmes qu'avant (sapi_image), seuls les conteneurs changent.
-- Mobile : vérifier le flip au tap, et que les versos Square Peg restent lisibles (taille à ajuster si débordement).
-- Rien d'autre dans la section ne bouge (titre, textes, CTA, paragraphe SEO intacts).
-
-**Critères de succès :**
-- Photo atelier non cliquable, lien « Voir l'atelier sur Google Maps → » discret dessous, fonctionnel, jamais bleu.
-- Plus d'eyebrow au-dessus du titre.
-- 5 cartes process : photo + numéro/titre au recto, phrase manuscrite sur fond bois au verso ; flip au survol (desktop), au tap (mobile), au clavier (Enter/espace).
-- Section nettement plus haute (photo 440px, gaps augmentés), équilibre desktop + mobile OK.
-
-### 👉 Action Robin
-Revue de la section sur test (desktop + mobile, teste le flip au tap). Si OK : passe Yoast, puis go-live.
-
-</details>
-
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #9 — Créations = Star + best-sellers + 5 ajustements
-**Résultat (branche `feature/refonte-home`, commit `409bafc`) :**
-1. **Naming card hero** : `rgba(255,255,255,0.8)` + `backdrop-filter: blur(8px)` → légèrement translucide, lisible sur photo.
-2. **Bandeau réassurance** : `@media(min-width:601px){ .home-repositioned-bar .reassurance-bar-inner { gap:48px } }` → items plus espacés sur la home **desktop only** (mobile reste compact, autres pages inchangées).
-3. **Room-picker** : `.home-projet` élargi à **1100px**, titre `white-space:nowrap` en `@media(min-width:769px)` (1 ligne desktop, retour ligne mobile OK), `.home-projet .room-card` **230→300px** (~+30%).
-4. **« Les créations du moment » refondue** :
-   - **Data** (`front-page.php`) : `$star_id` initialisé à 0 (robustesse) ; query best-sellers `meta_key=total_sales`, `orderby=meta_value_num DESC`, `post__not_in=[$star_id]`. Collecte enrichie par produit (`ambiance_id` fallback thumbnail, `hover_id`=1re galerie WC, `category` singulier, `is_variable`+prix) — pattern `archive-product.php`.
-   - **Markup** : `bento-container` remplacé par `.creations-grid` (2fr 1fr 1fr) = **Star en grande photo immersive** (`.creation-star`, overlay dégradé bas pour lisibilité, nom formaté + catégorie en blanc) + **2 best-sellers en `.product-card-cinetique`** identiques aux pages catégories (photo ambiance, hover allumé, nom/cat/prix, « Découvrir », badge « Best-seller ») + **CTA pill compact centré** (`.creations-cta > .hero-cta`). Plus aucune carte bento ni bandeau CTA pleine largeur.
-   - **Formatter** : `.creation-star .product-name` ajouté aux 2 tableaux de `product-name-formatter.js` (et anciens `.bento-product-featured h3` / `.bento-hero .bento-title` morts retirés).
-   - **Cleanup CSS** : blocs orphelins **supprimés** `.bento-hero(+::before)`, `.bento-content`, `.bento-title`, `.bento-category`, `.bento-product-featured*`, `.bento-cta*`, `.cta-title`. **Gardés** : `.bento-bg-img` (carte cadeau), `.hero-cta`, `.bento-bestseller-badge` (réutilisé Star+Best-seller), `.bento-label/-text` (hors scope). **Laissés** : fragments media-query `.bento-*` (CSS mort inoffensif, 0 match) → cleanup dédié.
-5. **Section Créations aérée** : `.home-creations .section-header-kinetic { margin-bottom:2rem }` + grid gap 2rem + CTA margin-top 2.5rem.
-- **Vérifs** : accolades PHP 63/63, CSS 3704/3704 ; classes partagées intactes ; aucune réf data obsolète.
-
-**MAJ post-revue (commits `765d1c3`, `9666312`) :**
-- Retiré les pills **« Best-seller »** des 2 cards (la Star garde « Star du moment »).
-- Les 2 cards de droite ne sont plus des best-sellers mais les **2 produits les plus RÉCENTS** parmi **lampes à poser / lampadaires / appliques** (suspensions exclues), **forcément de 2 catégories différentes** (verrou `$fp_used_cats`, tri `date DESC`, Star toujours exclue).
-
-### 👉 Action Robin
-Re-revue des 5 points sur test (desktop + mobile) : surtout **« Créations du moment »** (Star grande photo + 2 produits récents de 2 catégories ≠, sans pill, + CTA compact ; jamais la Star en doublon) et le room-picker (titre 1 ligne ?). Coup d'œil fiche produit/catégorie (inchangées). Si OK : passe Yoast, puis **go-live**.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #9 — Ajustements design (revue Robin) + refonte « Créations du moment » en Star + best-sellers
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-
-**Contexte :** Nouvelle salve de retours Robin + décision sur le contenu de « Les créations du moment » : fini les produits au hasard, on affiche la **Star du moment + les 2 best-sellers** (tri `total_sales`, même pattern que les pages catégories, cf. `taxonomy-product_cat.php` l.59). Et le CTA bandeau orange pleine largeur est BEAUCOUP trop grand : remplacé par une pill compacte centrée.
+Les 3 handlers concernés dans `functions.php` / `page-contact.php` :
+1. `page-contact.php` (POST classique) → mail `[Atelier Sapi] Nouveau message de …` — a déjà honeypot + rate limit.
+2. `sapi_ajax_robin_contact()` (AJAX) → mail `[Mon Projet] Demande de contact` — a déjà honeypot + rate limit.
+3. `sapi_ajax_guide_contact()` (AJAX) → mail `[Robin Conseiller] Message de …` — a honeypot mais **PAS de rate limit** (à ajouter).
 
 **À faire :**
 
-### 1. Naming card hero — légèrement transparente
-`.naming-card` : `background: rgba(255,255,255,0.8);` et remettre un léger flou pour la lisibilité sur photo : `-webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);`. Le reste (radius 50px, largeur fixe, ellipsis) ne bouge pas.
+**1. Time-trap (piège temporel) signé — sur les 3 formulaires.**
+Un bot poste en < 1 s, un humain jamais. Rejeter toute soumission trop rapide.
+- Générer au **rendu** du formulaire un timestamp signé côté serveur pour éviter qu'un bot n'envoie simplement `time()` courant : `$ts = time();` + `$sig = hash_hmac('sha256', $ts, wp_salt('auth'));`. Transmettre `sapi_ts` + `sapi_tsig` (deux champs cachés pour `page-contact.php`, deux valeurs ajoutées aux données localisées `wp_localize_script` pour les 2 formulaires AJAX, renvoyées dans le POST).
+- À la soumission : vérifier que `$sig` correspond (rejet silencieux sinon), puis que `time() - $ts` est **≥ 3 s** ET **≤ 3600 s**. Hors bornes → rejet silencieux (`wp_send_json_error(['message' => 'Spam'])` côté AJAX, ou traité comme le honeypot côté page-contact). Le seuil de 3 s est prudent : le questionnaire du Conseiller et la page contact prennent bien plus longtemps à remplir. Choisir un `$ts` cohérent pour l'AJAX = l'instant de chargement de page (dwell time naturel avant envoi).
 
-### 2. Bandeau réassurance — écarter les éléments
-Scopé home via le hook existant : `.robin-bandeau.home-repositioned-bar .reassurance-bar-inner { gap: 48px; }` (lire la valeur actuelle du gap et viser ~×2 ; si l'espacement vient d'autre chose que `gap`, adapter avec le même scope). Mobile : ne pas écarter (garder le compact existant ≤600px).
+**2. Filtre anti-junk — sur les 3 formulaires (rester CONSERVATEUR, ne jamais bloquer un vrai client).**
+Après sanitize, rejeter (silencieusement, comme un spam) si :
+- le domaine de l'email est un domaine de test/réservé : `example.com`, `example.org`, `example.net`, `test.com` (liste en dur, facile à étendre).
+- le message est **vide, purement numérique** (`/^\s*\d+\s*$/`) ou **plus court que 5 caractères** hors espaces. (Un vrai message de projet fait toujours plus.)
+- ⚠️ NE PAS filtrer sur la présence d'URL ni sur des mots-clés : un client légitime peut coller un lien Pinterest ou un nom de modèle. On veut zéro faux positif.
 
-### 3. Room-picker — H2 sur UNE ligne + cards +30%
-1. Élargir le conteneur (principe charte : élargir avant de réduire la police) : `.home-projet { max-width: 1100px; }`. Puis desktop only : `@media (min-width: 769px) { .home-projet .room-picker-title { white-space: nowrap; } }`. Vérifier qu'à 1280px de viewport le titre tient sur une ligne ; sinon réduire le clamp à `clamp(1.5rem, 2.6vw, 2.1rem)` SUR CE TITRE uniquement. Mobile : retour à la ligne autorisé.
-2. Cards réponses : `.home-projet .room-card { max-width: 300px; }` (230 → 300, ~+30 %). Vérifier l'équilibre de la rangée (3×2 ou 6×1 selon la largeur, pas de carte orpheline moche).
-
-### 4. « Les créations du moment » — refonte complète : Star en grande photo + 2 best-sellers en cards classiques + CTA compact
-**Disposition cible (validée Robin, cf. mockup-15)** : la Star = grande carte photo immersive à gauche (2fr), les 2 best-sellers = **cards produit CLASSIQUES** `.product-card-cinetique` (celles des pages catégories : photo ambiance + hover allumé, nom formaté, catégorie, prix, « Découvrir ») à droite (1fr + 1fr). Plus AUCUNE carte bento dans cette section.
-
-**A. Data** (`front-page.php`, bloc `// Featured products for Bento grid`) : remplacer la query aléatoire par un tri best-sellers, en excluant la Star :
-```php
-$featured_query = new WP_Query([
-  'post_type'      => 'product',
-  'posts_per_page' => 8,
-  'post_status'    => 'publish',
-  'meta_key'       => 'total_sales',
-  'orderby'        => 'meta_value_num',
-  'order'          => 'DESC',
-  'post__not_in'   => !empty($star_id) ? [(int) $star_id] : [],
-  'tax_query'      => [
-    [
-      'taxonomy' => 'product_cat',
-      'field'    => 'slug',
-      'terms'    => ['suspensions', 'appliques', 'lampesaposer', 'lampadaires'],
-      'operator' => 'IN',
-    ],
-  ],
-]);
-```
-(⚠️ vérifier que `$star_id` défini dans le bloc Star plus haut est accessible ici ; sinon le stocker dans une variable dédiée.) Dans la boucle de collecte (break à 2), enrichir les données par produit pour alimenter les cards cinetique, en MIRRORANT la prep de `woocommerce/archive-product.php` (~l.440-477) : `ambiance_id` (photo ambiance 1, fallback thumbnail), `hover_id` (même logique que l'archive : image galerie WC « modèle allumé »), `category` (1re catégorie hors uncategorized, au singulier comme le bloc Star), `is_variable` + prix min.
-
-**B. Markup** : dans `.home-creations`, REMPLACER le `<div class="bento-container">…</div>` par :
-```php
-<div class="creations-grid">
-
-  <?php if ($star_product_data) : ?>
-  <a href="<?php echo esc_url($star_product_data['url']); ?>" class="creation-star">
-    <?php echo wp_get_attachment_image($star_product_data['image_id'], 'woocommerce_single', false, ['class' => 'creation-star-img', 'loading' => 'lazy', 'alt' => $star_product_data['name'] . ', star du moment']); ?>
-    <span class="bento-bestseller-badge">Star du moment</span>
-    <div class="creation-star-label">
-      <h3 class="product-name"><?php echo esc_html($star_product_data['name']); ?></h3>
-      <?php if ($star_product_data['category']) : ?><p><?php echo esc_html($star_product_data['category']); ?></p><?php endif; ?>
-    </div>
-  </a>
-  <?php endif; ?>
-
-  <?php foreach ($featured_products as $fp) : ?>
-  <div class="product-card-cinetique" data-product-id="<?php echo esc_attr($fp['id']); ?>" data-piece-swap data-piece-swap-type="ambiance" data-piece-swap-size="large">
-    <a href="<?php echo esc_url($fp['url']); ?>" class="product-card-link">
-      <div class="product-media<?php echo !empty($fp['hover_id']) ? ' has-hover-image' : ''; ?>">
-        <span class="bento-bestseller-badge">Best-seller</span>
-        <span class="product-image-main"><?php echo wp_get_attachment_image($fp['ambiance_id'], 'large', false, ['alt' => $fp['name'], 'loading' => 'lazy']); ?></span>
-        <?php if (!empty($fp['hover_id'])) : ?>
-          <span class="product-image-hover"><?php echo wp_get_attachment_image($fp['hover_id'], 'woocommerce_thumbnail', false, ['alt' => $fp['name'] . ' - ambiance', 'loading' => 'lazy']); ?></span>
-        <?php endif; ?>
-      </div>
-      <div class="product-info">
-        <h3 class="product-name"><?php echo esc_html($fp['name']); ?></h3>
-        <?php if (!empty($fp['category'])) : ?><p class="product-category"><?php echo esc_html($fp['category']); ?></p><?php endif; ?>
-        <div class="product-price">
-          <?php if (!empty($fp['is_variable'])) : ?><span class="price-from">À partir de</span><?php endif; ?>
-          <span class="price-value"><?php echo wp_kses_post($fp['price']); ?></span>
-        </div>
-      </div>
-      <div class="product-actions"><span class="btn-view">Découvrir ⇾</span></div>
-    </a>
-  </div>
-  <?php endforeach; ?>
-
-</div>
-<div class="creations-cta">
-  <a href="<?php echo home_url('/mes-creations/'); ?>" class="hero-cta">Toutes les créations</a>
-</div>
-```
-
-**C. CSS** :
-```css
-/* ===== Refonte home — grille Créations du moment (star photo + cards classiques) ===== */
-.creations-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 2rem;
-  align-items: stretch;
-}
-.creation-star {
-  position: relative;
-  display: block;
-  border-radius: 16px;
-  overflow: hidden;
-  min-height: 420px;
-}
-.creation-star-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.creation-star .bento-bestseller-badge,
-.creations-grid .product-media .bento-bestseller-badge {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  z-index: 2;
-}
-.creations-grid .product-media { position: relative; }
-.creation-star-label {
-  position: absolute;
-  left: 18px;
-  bottom: 16px;
-  color: var(--color-white);
-  z-index: 2;
-}
-.creation-star-label p { margin: 2px 0 0; font-size: 0.85rem; opacity: 0.92; }
-.creations-cta { text-align: center; margin-top: 2.5rem; }
-@media (max-width: 880px) {
-  .creations-grid { grid-template-columns: 1fr 1fr; }
-  .creation-star { grid-column: 1 / -1; min-height: 280px; }
-}
-@media (max-width: 520px) {
-  .creations-grid { grid-template-columns: 1fr; }
-}
-```
-(Vérifier que `.product-card-cinetique` rend bien hors `.product-grid` ; si une règle de layout manque, l'ajouter scopée `.creations-grid .product-card-cinetique`, ne pas toucher aux règles globales. Le nom sur la photo Star doit rester lisible : si la photo est claire, ajouter un léger dégradé bas via `.creation-star::after` comme le carousel le fait avec `.carousel-overlay`.)
-
-**D. Formatter noms produits (règle design system)** : ajouter le sélecteur `.creation-star .product-name` dans les tableaux `selectors` de `assets/product-name-formatter.js` (les `.product-card-cinetique` y sont déjà). Le prénom/surnom de la Star doit s'afficher formaté comme partout.
-
-**E. Cleanup** : `.bento-cta`, `.bento-hero`, `.bento-product-featured*`, `.bento-content`, `.bento-title`, `.bento-category` : grep .php sur chacun, supprimer les règles CSS de ceux à 0 usage (lister gardés/supprimés). ⚠️ `.bento-bestseller-badge` RESTE (réutilisé).
-
-### 5. Aérer « Les créations du moment »
-La nouvelle grille a déjà `gap: 2rem` + CTA à 2.5rem. Ajouter :
-```css
-.home-creations .section-header-kinetic { margin-bottom: 2rem; }
-```
-(L'ensemble doit respirer nettement plus qu'avant.)
-
-**Notes / pièges :**
-- Scopes stricts : rien ne bouge sur fiche produit / catégories / page Star / modale.
-- Aucun tiret cadratin. Accolades équilibrées. Vérifier le rendu mobile de chaque point.
+**3. Rate limit manquant sur le Conseiller.**
+Ajouter dans `sapi_ajax_guide_contact()` (après le honeypot) l'appel déjà utilisé ailleurs :
+`if (!sapi_check_form_rate_limit('guide_contact')) { wp_send_json_error(['message' => 'Trop de messages envoyés. Réessayez plus tard.']); return; }`
 
 **Critères de succès :**
-- Bulle hero légèrement translucide avec flou, lisible sur toutes les slides.
-- Items du bandeau nettement plus espacés sur la home, inchangés ailleurs et en mobile.
-- H2 room-picker sur une ligne en desktop ; cards réponses ~300px.
-- Créations du moment : Star en GRANDE PHOTO immersive (2fr, badge + nom formaté en overlay) + 2 best-sellers réels en CARDS CLASSIQUES `.product-card-cinetique` identiques à celles des pages catégories (photo ambiance, hover allumé, nom formaté, catégorie, prix, « Découvrir »), badges « Best-seller », jamais la Star en doublon.
-- CTA pill compact centré, plus aucun bandeau CTA pleine largeur, plus aucune carte bento dans la section, section aérée.
-- Nom de la Star formaté prénom/surnom (sélecteur ajouté au formatter).
+- Une soumission normale (humain, > 3 s, message réel, email valide) passe sur les 3 formulaires.
+- Une soumission instantanée (< 3 s) est rejetée.
+- Un email `@example.com` ou un message `555` / `20` est rejeté.
+- Le Conseiller a maintenant un rate limit actif.
+- Le honeypot et les nonces existants restent en place (on ajoute, on ne retire rien).
+- Rejets **silencieux** côté bot (pas d'indice exploitable), messages d'erreur clairs seulement pour les vrais cas (email invalide, etc.).
+- Console 0 erreur ; aucun impact sur la home ni le catalogue.
+
+### 📐 ÉTAT DES LIEUX + PLAN CLAUDE CODE (2026-08-06) — EN ATTENTE décision périmètre (Robin demande à Cowork)
+
+**Rien codé.** Audit de `functions.php` : les appels WC dangereux sont dans des **callbacks sur hooks toujours joués** (piège : `is_product()`/`is_shop()`/`is_cart()`/`WC()` sont elles-mêmes des fonctions WC → un `if (is_product())` non gardé plante aussi).
+
+**🔴 A — 6 points FATALS (front + admin écran blanc sans WC) :**
+| # | Fonction | Hook | Ligne |
+|---|---|---|---|
+| A1 | `sapi_maison_structured_data` | wp_head | 1618 (+ WC_Shipping_Zones) |
+| A2 | `sapi_maison_open_graph` | wp_head | 1681 |
+| A3 | `sapi_maison_meta_description` | wp_head | 1724/1736 (elseif) |
+| A4 | filtre `document_title_parts` | `<title>` de CHAQUE page | 2237 |
+| A5 | `sapi_render_mini_cart_contents` | header.php:121 (toutes pages) | 1958 — garde header.php **inefficace** |
+| A6 | callback `admin_init` (checkout Elementor) | admin_init | 1500 — **déclencheur exact de l'incident** |
+
+**🟠 B — risque moindre (ne plante que si appelé) :** endpoint REST public `sapi/v1/products/search` (l.5894, atteignable publiquement) ; 3 handlers AJAX panier (add_to_cart/buy_now/update_mini_cart_qty) ; recently-viewed (l.598, déjà protégé de fait par `is_singular('product')`).
+
+**🟢 C — déjà gardés (~13 blocs) :** enqueue assets, footer cross-sells, cart count, fragments, body_class, modale conseiller, coupon welcome, endpoint order-received. On n'y touche pas.
+
+**PLAN :** gardes **additives** (early-return `class_exists('WooCommerce')`/`function_exists()` ou `class_exists &&`), **zéro changement de comportement quand WC est actif**. A6→garde ; A1/A2→garde en tête ; A3→`class_exists &&` sur 2 elseif ; A4→garde en tête du filtre ; A5→early-return propre (mini-panier vide neutre) au lieu de la garde inefficace.
+
+**❓ DÉCISION À TRANCHER (Robin ↔ Cowork) :** périmètre **A seul** (les 6 fatals) OU **A + B** (recommandé : + endpoint REST public + 3 AJAX panier + recently-viewed explicite → thème 100% résilient). Sur **go** → je code par sous-étapes sur `test-theme-sapi-maison`, puis test de résilience (désactiver WC sur test) + smoke-test, puis cherry-pick sélectif vers master.
+
+### ✅ FAIT SUR TEST (2026-08-06) — périmètre A+B validé par Robin, 6 commits atomiques
+- `6bf268d` A6 : garde `wc_get_page_id` sur callback admin_init (le déclencheur).
+- `7822ca3` A1+A2 : garde `class_exists('WooCommerce')` en tête de `structured_data` + `open_graph` (wp_head).
+- `5456d5a` A3 : `class_exists &&` sur les elseif `is_product_category`/`is_shop` de `meta_description` (homepage reste couverte).
+- `06085cd` A4 : garde en tête du filtre `document_title_parts` (joué sur chaque `<title>`).
+- `ad75dcf` A5 : early-return neutre dans `sapi_render_mini_cart_contents` (la garde de header.php `function_exists('sapi_render_mini_cart_contents')` était toujours vraie → inefficace ; mini-panier vide sans lien shop si WC absent).
+- `27612a1` B : endpoint REST public `sapi_product_search` + 3 handlers AJAX panier (add_to_cart/buy_now/update_mini_cart_qty, erreur gracieuse) + garde explicite recently-viewed.
+
+Gardes **additives** (early-return / `class_exists &&`) → **zéro changement quand WC actif**. Accolades équilibrées. Smoke-test WC actif : pages 200, 0 erreur PHP.
+
+**⚠️ RESTE (Robin) : TEST DE RÉSILIENCE.** Robin désactive WooCommerce sur test → doit constater : **front + /wp-admin accessibles** (mode dégradé, sans blocs boutique), **plus aucun `undefined function` du thème dans debug.log**. Puis réactive WC → tout identique.
+
+**Décision Robin : périmètre = functions.php uniquement** (les templates `woocommerce/*` ne rendent que si WC est actif → risque assumé).
+
+**✅ POUSSÉ EN PROD (master) le 2026-08-06 — cherry-pick sélectif des 6 commits (functions.php uniquement, fast-forward). Déployé + audit prod OK (pages 200, 0 erreur PHP, mini-panier + endpoint REST OK).**
+- Branche locale `prod-wc-hardening` = `origin/master` + les 6 commits de blindage, cherry-pick **propre** (0 conflit).
+- Diff vs master vérifié = **functions.php uniquement**, 27 ajouts / 3 suppr., **que des gardes additives** (aucune autre modif de test). Accolades équilibrées.
+- Recette pour recréer si besoin : `git checkout -B prod-wc-hardening origin/master && git cherry-pick 6bf268d 7822ca3 5456d5a 06085cd ad75dcf 27612a1`.
+- **Sur go Robin** → `git push origin prod-wc-hardening:master` (fast-forward) puis Robin lance le workflow prod. **Rien ne part sans son go.**
+
+---
+
+**Note :** si le spam persiste après déploiement prod malgré cette couche, l'étape suivante est Cloudflare Turnstile (captcha invisible, gratuit, non-Google, RGPD ok). Ne pas l'implémenter maintenant.
+
+### ✅ RÉPONSE CLAUDE CODE — FAIT SUR TEST (2026-08-05, commit `68d1561`, en attente validation Robin)
+
+**Les 3 couches sont en place, ajoutées au nonce + honeypot + rate limit existants (rien retiré).**
+
+**Helpers ajoutés (functions.php, à côté de `sapi_check_form_rate_limit`) :**
+- `sapi_time_trap_new()` → `['ts','sig']` (timestamp + HMAC-sha256 avec `wp_salt('auth')`), à générer au rendu.
+- `sapi_time_trap_valid($ts,$sig,$min=3,$max=DAY_IN_SECONDS)` → `hash_equals` sur la signature + délai humain.
+- `sapi_is_junk_contact($email,$message,$require_message=false)` → domaines test (example.com/.org/.net, test.com) + message numérique-seul / <5 car. ; **ne filtre jamais** sur URL ni mots-clés.
+
+**Câblage par formulaire :**
+- **page-contact.php** (POST, `fullname`/`email`/`message` tous requis) : time-trap (elseif après honeypot) + junk (`require_message=true`) + 2 champs cachés signés dans le form.
+- **sapi_ajax_robin_contact()** (single-product, email requis / **message optionnel**) : time-trap + junk (`require_message=false`) + champs cachés dans le form + append JS (`sapi_ts`/`sapi_tsig`).
+- **sapi_ajax_guide_contact()** : time-trap + **rate limit `guide_contact` (celui qui manquait)** + junk (`require_message=false`).
+
+**⚠️ 2 points à connaître :**
+1. **`sapi_ajax_guide_contact()` est ORPHELIN** : aucun JS ne l'appelle et son nonce `sapi-guide-contact` **n'est créé nulle part** (c'est le contact du quiz V1 retiré en Tâche 7) → il rejette déjà 100% des appels au nonce. J'y ai quand même mis les 3 couches (défense, sans le retirer, comme demandé), mais **il ne protège rien d'actif** aujourd'hui. Les 2 formulaires **réellement vivants** sont page-contact + robin_contact. Si vous voulez, on pourra le supprimer proprement plus tard.
+2. **Borne haute du time-trap : 24 h (DAY_IN_SECONDS) et non 3600 s.** Raison = **zéro faux positif** (règle cardinale) : le `$ts` signé est rendu dans le HTML ; si la page /contact ou produit est servie en **cache** (LiteSpeed o2switch), un vrai client pourrait dépasser 1 h → rejeté à tort. Le nonce de ces mêmes formulaires tolère déjà ~12-24 h, on s'aligne. **Le vrai levier anti-bot reste la borne basse à 3 s** (inchangée). Si vous préférez 3600 s strict, c'est un seul paramètre à changer — dites-le.
+
+**À tester par Robin sur test :**
+- Envoi normal (humain, > 3 s, vrai message, email valide) → passe sur `/contact` et sur « Contacter Robin » (fiche produit).
+- Email `@example.com` ou message `555`/`20` → rejeté (silencieux côté robin_contact = la fiche affiche quand même « envoyé » mais **aucun mail** ne part ; côté /contact = message « Spam détecté »).
+- Honeypot + nonces toujours actifs ; home + catalogue inchangés ; console 0 erreur.
+- ⚠️ Je n'ai **pas** de moyen de simuler un vrai bot ici — la validation « le spam s'arrête » se fera à l'usage après prod. Si ça persiste → Turnstile (réserve).
+
+### 🔎 AUDIT COMPLET DES FORMULAIRES + NETTOYAGE (2026-08-05, commit `863fcc3`) — demandé par Robin
+
+**Combien de questionnaires ?** UN seul actif : le **Robin Conseiller** (parcours à étapes, modale, boutique/fiches). L'ancien « quiz V1 » a été retiré (Tâche 7) ; ses handlers restaient en code mort (supprimés ci-dessous).
+
+**Tous les formulaires visibles sont fonctionnels** (aucun cassé). Inventaire + anti-spam :
+| Formulaire | Fonctionnel | Anti-spam |
+|---|---|---|
+| Contact `/contact` | ✅ | nonce+honeypot+rate limit + time-trap+junk |
+| « Contacter Robin » (fiche produit) | ✅ | idem |
+| « Échangeons ensemble » (modale Conseiller, `megafilter_surmesure`) | ✅ | nonce+honeypot+rate limit **+ time-trap+junk AJOUTÉS ce commit** |
+| Sur-mesure `/sur-mesure` | ✅ | nonce+honeypot+rate limit **+ time-trap+junk AJOUTÉS (commit `d23b9bd`)** |
+| Newsletter (home + popup cookie) | ✅ | nonce+honeypot+rate limit |
+| Inspiration (email→Brevo, `/inspiration`) | ✅ | nonce (pas de honeypot/rate limit, mais email seul, pas de message libre — risque faible) |
+| Recherches (404/search/room-pickers) | ✅ | GET WordPress, hors périmètre spam |
+
+→ Découverte : le **contact de la modale Conseiller** était un **4ᵉ formulaire de contact vivant** non listé dans la tâche. Il est maintenant au même niveau que les autres.
+
+**✅ CODE MORT SUPPRIMÉ (~473 lignes, 0 appelant, 0 référence, validé Robin)** : `sapi_ajax_guide_contact`, `sapi_ajax_guide_refine`, `sapi_ajax_conseils_products`, `sapi_ajax_robin_conseil_step`, `sapi_ajax_robin_filter_products` (+ leurs `add_action`). Helpers partagés **conservés** (dont `sapi_guide_pick_four`/`diversify_format`, gardés exprès). Vérifié : tous les `wp_ajax_*` restants pointent vers une fonction existante ; accolades équilibrées.
+
+**Reste (optionnel, non fait)** : ajouter honeypot + rate limit au formulaire Inspiration (risque faible). À voir si Robin veut.
+
+### ✅ POUSSÉ EN PROD (master) le 2026-08-05 — cherry-pick SÉLECTIF
+Robin a validé les 4 formulaires sur test (les 4 mails de test reçus = zéro faux positif). **Go prod donné, uniquement les modifs formulaires.**
+- Cherry-pick propre de **3 commits** sur master (par-dessus le catalogue) : `68d5af7` (anti-spam 3 formulaires) + `68f84ab` (contact modale + suppression 5 handlers morts) + `ed5b0de` (sur-mesure). Fast-forward.
+- Diff master vérifié = **exactement 5 fichiers** (functions.php, page-contact.php, single-product.php, sapi-modal-conseiller.js, page-sur-mesure.php) — **aucun** autre commit de test (immersion, état B, Tâche 5, emails, mode vacances **restent sur test**).
+- Contrôles : helpers présents, 5 handlers morts retirés, handlers vivants intacts, accolades équilibrées, tous les `wp_ajax_*` résolvent.
+- **⚠️ RESTE À ROBIN : lancer le workflow GitHub Actions « Deploy to Production »** (manuel) pour mettre en ligne. Rien n'est déployé tant qu'il ne l'a pas lancé.
+
+---
+
+> **REFONTE FILTRAGE CONSEILLER — décisions d'architecture (11/06/2026).** Les tâches ci-dessous REMPLACENT les anciennes (qui supposaient un filtrage en double PHP/JS, désormais périmé).
+> **Cap :** filtrage 100% côté serveur (PHP), un seul cerveau, **suppression du filtrage JavaScript** (le JS ne fait plus qu'afficher). Le filtre serveur est appelé à **2 moments** : (1) au chargement de `/mes-creations/` avec une pièce, (2) à la fermeture de la modale (questionnaire terminé OU abandonné en cours). L'IA (Sonnet) n'ajoute qu'un **commentaire** en fin de questionnaire.
+> **Source de vérité du comportement voulu :** `assets/guide-filtrage-simulateur.html` (simulateur jouable + éditeur de règles, à ouvrir). Doc d'appui : `assets/guide-filtrage-impact.html`.
+> **Toutes les tâches :** branche test uniquement, jamais master, Robin valide avant prod.
+
+## 🖥️ RECETTE DESKTOP VALIDÉE PAR ROBIN (2026-08-25) — refonte /mes-creations/ + filtrage Conseiller
+
+Robin a passé le parcours complet sur `test.atelier-sapi.fr` en **desktop : tout passe**. Cela lève les 3 points qui restaient en attente de validation depuis juin :
+1. **4a + 4b** — room-picker serveur en état A + suppression du filtrage JS (`73d365f`, `682a82a`) ✅
+2. **Commentaire IA en fin de modale** — loader 3 points puis texte tapé dans la phrase de l'immersion (`a5cffcc`, `332f1f8`, `0d2c0bd`) ✅
+3. **Fondu doux du slider au moment 2** — fin du « flash » signalé par Robin (`664e9d5`) ✅
+
+Vérifié aussi : question « table » absente du parcours (T2), règle cuisine (ni lampe à poser ni lampadaire), admin *Règles de filtrage* + aperçu live == site, reset OK, home et catalogue sans régression.
+
+**⏳ RESTE : la recette MOBILE** (en cours côté Robin). Points de vigilance identifiés en lisant le CSS, à confirmer sur appareil réel :
+- `.mescreations-immersion { height: 100vh }` (style.css l.24683) et `.mescreations-immersion-track { height: 250vh }` (l.24675) — **pas de `dvh`**. Sur iOS Safari, `100vh` ignore la barre d'URL → risque de bas de bloc coupé, et le recalcul de `vh` quand la barre se rétracte peut faire sauter le scroll-pinning (`--reveal`). Le projet utilise déjà `height:100vh; height:100dvh` ailleurs (`.mobile-menu-overlay`) — pattern à reprendre si confirmé.
+- Scroll lock pendant la machine à écrire = `overflow:hidden` sur html+body (`sapi-mescreations-immersion.js` l.333-335). Connu pour être inopérant au toucher sur iOS ; filet de sécurité 9 s présent (l.349).
+- Slider horizontal (cards à 82 % sous 600px) vs scroll vertical de la page pendant le pinning : conflit de geste possible. Flèches masquées si pas d'overflow (l.182-188).
+
+**Pas de cherry-pick vers master avant le feu vert mobile de Robin.**
+
+### 📱 RECETTE MOBILE — 1ʳᵉ passe (2026-08-25) : 4 constats, 4 correctifs livrés sur test
+
+**Validé d'emblée sur iPhone :** scroll bien bloqué pendant la machine à écrire ; révélation au scroll **fluide, sans saut** (le calcul `--reveal` via `window.innerHeight` encaisse bien la barre d'adresse) ; swipe horizontal du slider nickel ; texte lisible.
+
+**Corrigé — commits `fadfb5c` (CSS) + `41cdb9c` (JS) :**
+
+1. **Indice du bas caché par la barre d'adresse iOS.** Ancrages bas décalés de `--safe-bottom: calc(100lvh - 100svh)` = exactement la hauteur de la barre, et `0` partout ailleurs (desktop, barre rétractée). **⚠️ Ne PAS passer le bloc en `100svh`** : il serait plus court que le viewport barre rétractée → bande de fond visible sous le hero. Le bloc reste en `100vh`, seuls les ancrages bougent.
+2. **Room-picker de `/mes-creations/` trop gros en mobile.** Trois règles à spécificité `0,2,0` écrasaient les réglages mobiles de la home (`0,1,1`) : cartes en 2 colonnes au lieu de 3, titre `clamp(1.6rem…)` = 25,6px au lieu de 20px, padding vertical `clamp(40px…)`. Bloc mobile aligné sur la home, breakpoint porté de 600 à **768px** (celui de la home). **RÈGLE : un hero qui réutilise des classes globales doit reprendre AUSSI leurs médias mobiles, sinon sa spécificité les annule.**
+3. **Densité du slider (mobile + desktop).** Trois causes mesurées sur 390×844 : (a) la phrase tombait sur le **minimum** du clamp desktop — `3.6vw` ne vaut que 14px sur 390px, donc `1.85rem` = 29,6px → ~10 lignes, la moitié de l'écran, collision avec le titre de la sélection ; (b) les flèches étaient **dans le flux flex** : 2×36px + 2×10px = **92px, 24 % de la largeur** → il ne restait que ~27px de la card suivante (d'où la mince bande sur la capture) ; (c) cards à ~60 % texte / 40 % photo. → phrase en `clamp(1.15rem, 5vw, 1.75rem)`, flèches superposées en absolu, textes du slider resserrés et photo agrandie (25vh base / 20vh / 15vh selon la hauteur d'écran). **Tout est préfixé `.mescreations-immersion__slider` : `.product-card-cinetique` est partagé avec le catalogue.**
+4. **Texte IA en retard sur la sélection (moment 2).** Deux requêtes de vitesses très différentes lancées à des moments différents : sélection ~300 ms après la fermeture, conseil IA 1 à 4 s plus tard. `sapi:advice-loading` porte désormais les réponses → l'immersion **précharge** sa sélection dès le début du calcul IA (ses 300 ms disparaissent dans les ~1,9 s d'animation de sortie) et ne l'affiche qu'à `sapi:advice-ready`. **Décision Robin : on attend le conseil DANS TOUS LES CAS**, pas de plafond. Sûr par construction — `fetchAdviceFromIA` a un timeout de 25 s et un `.catch` résolvant à `null`, donc l'événement est toujours émis, échec IA compris. Garde-fou du rechargement (changement de pièce) porté de 4 s à **26 s** : à 4 s il coupait une IA simplement lente et la page repartait sans le conseil. Abandon en cours de questionnaire → pas d'appel IA → mise à jour immédiate, comportement inchangé.
+
+**Vérifié côté machine :** les deux JS parsent (jsc), accolades CSS équilibrées, assets bien déployés sur test (`--safe-bottom` ×8, `pendingSelection` ×7, `advice-loading` avec detail).
+
+### 📱 RECETTE MOBILE — 2ᵉ passe (2026-08-25) : 3 acquis, 5 points ouverts
+
+**Rien n'a été codé pour ces 5 points** — Robin reprend la main avec Cowork. Tout ce qui suit est du diagnostic prêt à l'emploi.
+
+**✅ Acquis, ne plus y toucher :** la fluidité du scroll-pinning est **intacte** après les correctifs (c'était le risque principal) ; l'indice « Découvre ta sélection » est bien visible au chargement ; le slider est nettement mieux (photos plus grandes, card suivante visible).
+
+---
+
+**1. ⏳ Room-picker `/mes-creations/` encore moins compact que la home.** — *cause trouvée*
+
+Le correctif `fadfb5c` a aligné les colonnes, le titre et le padding, mais **pas la structure interne de la carte**. En mobile, la home bascule ses cartes en **ligne horizontale** via un bloc préfixé `.home-projet` ([style.css:7969-7986](style.css#L7969), `@media max-width:768px`) :
+
+| | Home mobile (`.home-projet`) | `/mes-creations/` aujourd'hui |
+|---|---|---|
+| Disposition carte | `flex-direction: row` — icône à gauche, label à droite | colonne (icône au-dessus) |
+| Icône | **34px** (svg 18px) | **60px** (svg par défaut) |
+| Label | **11,5px**, aligné à gauche | **14px**, centré |
+| Padding carte | `0.55rem 0.7rem` | `1rem 0.75rem` |
+
+Ces règles étant préfixées `.home-projet`, elles ne s'appliquent tout simplement pas au hero de `/mes-creations/`. **Piste :** ajouter les mêmes déclarations préfixées `.mescreations-picker-hero` dans son bloc `@media (max-width: 768px)`. L'icône 60→34px est le plus gros gain de hauteur (×7 cartes). **Mieux encore :** factoriser ce bloc mobile en un sélecteur commun aux deux contextes — c'est la 2ᵉ fois que le hero rate un réglage mobile de la home (cf. règle consignée en 1ʳᵉ passe).
+
+**2. ✅ Indice du bas au chargement — corrigé et validé.**
+
+**3. ⏳ « Voir le catalogue complet » maintenant trop haut.** — *régression causée par le correctif 1, cause comprise*
+
+`--safe-bottom = 100lvh - 100svh` est une constante : elle vaut **toujours** la hauteur de la barre d'adresse, même quand la barre est rétractée. Or les deux indices n'apparaissent pas au même moment :
+- « Découvre ta sélection » s'affiche **au chargement**, barre **visible** → le décalage est juste ✅
+- « Voir le catalogue complet » s'affiche **après le scroll**, barre **rétractée** → le décalage n'a plus lieu d'être → il paraît trop haut ❌
+
+**Deux pistes :**
+- **(a) la plus simple, sans risque** — n'appliquer `--safe-bottom` qu'à `.mescreations-immersion__hint--reveal` (et à `__selection`), pas à `__hint--catalogue`, qui n'apparaît que barre rétractée.
+- **(b) la plus exacte** — `calc(100dvh - 100svh)` : décalage **dynamique**, égal à la portion de barre réellement visible (0 quand rétractée). ⚠️ `dvh` recalcule pendant le scroll ; ici ce n'est qu'un petit élément absolu, pas le layout — le risque de saut est faible, mais **à vérifier au doigt**, la fluidité du pinning est l'acquis à ne pas perdre.
+
+**4. ⏳ Slider — trois retouches demandées par Robin.**
+- **Première photo mal centrée** : il faut de la marge avant la 1ʳᵉ card. Le slider est en `padding: 4px 2px 8px` et hérite du `padding: 0 16px` de `__selection`, pendant que la flèche gauche est superposée à `left: -2px`. **Piste :** `padding-left` sur `.mescreations-immersion__slider` **+ `scroll-padding-left` de la même valeur**, sinon le `scroll-snap-align: start` recalera la card contre le bord et annulera l'effet.
+- **Prix à centrer** : `.mescreations-immersion__slider .product-price { text-align: center }` (⚠️ préfixe obligatoire — `.product-card-cinetique` est partagé avec le catalogue).
+- **Card plus haute** : marge disponible côté `product-media` (aujourd'hui 25vh base / 20vh sous 840px / 15vh sous 700px). Augmenter en surveillant le point 3 — une card plus haute remonte vers la phrase et peut recréer une collision.
+
+**5. ⏳ Moment 2 — l'ancienne sélection reste visible pendant l'attente du conseil.** — *demande produit de Robin, pas un bug*
+
+La révélation simultanée fonctionne (validé). Mais pendant que l'IA calcule, on reste scrollé sur l'ancienne sélection, ce qui la donne à voir alors qu'elle est périmée.
+
+**Ce que Robin veut :** au déclenchement du recalcul, **la page remonte** pour n'afficher que le décor + les 3 points de chargement, avec le futur texte en grand — puis le visiteur **re-scrolle** pour découvrir la nouvelle sélection. On rejoue la chorégraphie d'arrivée à chaque affinage.
+
+**Piste :** sur `sapi:advice-loading` (ou à la fermeture de la modale), `scrollTo` vers le haut du track pour ramener `--reveal` à 0. À concevoir avec soin :
+- interaction avec `lockScroll()`/`unlockScroll()` ([sapi-mescreations-immersion.js:333](assets/sapi-mescreations-immersion.js#L333)) — le scroll est déjà verrouillé pendant la machine à écrire ;
+- le swap des cards a lieu à `advice-ready` ; si on remonte à `advice-loading`, le swap se fait hors écran, ce qui est **idéal** (plus besoin du fondu) ;
+- ne pas rendre le retour en haut brutal : `behavior: 'smooth'` + respect de `prefers-reduced-motion` (`reduceMotion` existe déjà dans le fichier) ;
+- cas du **changement de pièce** : la page se recharge déjà, ne rien ajouter.
+
+---
+
+**État :** les 4 correctifs de la 1ʳᵉ passe sont sur test (`fadfb5c`, `41cdb9c`) et validés par Robin, hors la régression du point 3. **Toujours pas de cherry-pick vers `master`.**
+
+### 🛠️ RECETTE MOBILE — 2ᵉ passe CODÉE PAR COWORK (2026-08-25) — les 4 points ouverts
+
+> **Nouveau process à partir d'ici :** Cowork écrit le code, **Robin commit et push lui-même** (GitHub Desktop) sur `test-theme-sapi-maison`, puis sur `master` quand il estime que c'est bon. Cowork ne lance **aucune** commande git (pas même `git status` : ça laisse un `index.lock` qui bloque GitHub Desktop). Cherry-pick ou manip git → Claude Code.
+
+**Fichiers touchés : 2.** `style.css` et `assets/sapi-mescreations-immersion.js`. Aucun PHP.
+
+**Point 1 — Room-picker `/mes-creations/` mobile : résolu par FACTORISATION, pas par recopie.**
+La cause profonde n'était pas « il manque des règles » mais l'ordre de déclaration : `.home-projet .room-card` (l. ~7 970) et `.mescreations-picker-hero .room-card` (l. ~24 640) ont la **même spécificité 0,2,0**, et une media query n'en ajoute pas — donc le bloc du hero, déclaré ~16 700 lignes plus bas, écrase la home en silence. C'est ce qui a produit les deux régressions de suite.
+- Le bloc mobile de la home devient un **bloc partagé** (sélecteurs `.home-projet …, .mescreations-picker-hero …`) : disposition ligne, icône 34px (svg 18px), label 11,5px à gauche, padding `0.55rem 0.7rem`, 2 colonnes, gap. **La home ne change pas d'un pixel** — on ajoute un sélecteur à ses règles, on ne les modifie pas.
+- Le bloc mobile du hero ne garde plus que ce qui lui est propre (enveloppe, titre, sous-titre) et porte l'avertissement « ne pas redéclarer `.room-card` ici ».
+- Le calage **desktop** des cartes du hero est enfermé dans `@media (min-width: 769px)` — sans ça il continuait d'écraser le bloc partagé en mobile.
+- Gain de hauteur : 7 cartes passent de 3 rangées à ~117px (icône 60px, disposition colonne) à 4 rangées à ~52px, soit ~375px → ~240px.
+- **Effet de bord voulu : il n'est désormais plus possible de régler la carte d'un côté sans l'autre.** Le piège est fermé, pas seulement contourné.
+
+**Point 3 — `--safe-bottom` : option (b) retenue par Robin.** `calc(100lvh - 100svh)` → `calc(100dvh - 100svh)`, `@supports` élargi à `(height: 100dvh) and (height: 100svh)`. `dvh` suit la barre d'adresse en temps réel : décalage plein au chargement (barre visible, « Découvre ta sélection » bien placé), nul après le scroll (barre rétractée, « Voir le catalogue complet » revient à sa place). Le pinning reste piloté par `vh` et `window.innerHeight` côté JS → **non touché**. Bénéfice collatéral : le bloc sélection descend d'autant au moment où il s'affiche, ce qui finance la card plus haute du point 4.
+⚠️ **C'est le point à vérifier au doigt en priorité** : `dvh` se recalcule pendant le scroll. Seuls des éléments en position absolue en dépendent, et l'entrée du bloc sélection (opacity + translateY) masque son glissement — mais la fluidité du pinning est l'acquis à ne pas perdre. Si ça bouge, le repli est (a) : n'appliquer `--safe-bottom` qu'à `__hint--reveal` et `__selection`.
+
+**Point 4 — Slider, les 3 retouches.**
+- *Marge avant la 1ʳᵉ card* : `padding-left: 20px` **+ `scroll-padding-left: 20px`** sur `.mescreations-immersion__slider` (mobile uniquement). Les deux valeurs doivent rester égales — sans `scroll-padding-left`, `scroll-snap-align: start` recale la card contre le bord au premier snap et annule le décalage. **C'est le seul chiffre à bouger pour ajuster le cadrage.**
+- *Prix centré* : `justify-content: center` et **non** `text-align` — `.product-price` est un flex (« À partir de » + montant sur la baseline). Aligné sur ce que fait déjà `.creations-grid` juste en dessous, donc la colonne reste cohérente. **Appliqué desktop + mobile** (comme le prévoyait le diagnostic) : à revoir d'un œil en desktop, c'est une ligne à retirer si tu préfères l'ancien.
+- *Card plus haute* : `product-media` 26 → **30vh** (≤768px), 20 → **23vh** (max-height 840), 15 → **17vh** (max-height 700). **Réglage à surveiller** : la card est ancrée par le bas, l'agrandir la fait remonter vers la phrase et peut recréer la collision corrigée en 1ʳᵉ passe. Si ça touche, redescendre le 30vh — c'est le seul levier.
+- Tout est préfixé `.mescreations-immersion__slider` (vérifié : **zéro** règle non préfixée, `.product-card-cinetique` reste intact pour le catalogue).
+
+**Point 5 — Chorégraphie rejouée au moment 2.** Nouvelle fonction `rewindToTop()` : remonte en haut du track → `--reveal` repasse à 0 → il ne reste que le décor, les 3 points et le futur texte en grand ; le visiteur re-scrolle pour découvrir la nouvelle sélection. Le swap des cards se fait alors **hors écran**.
+- ⚠️ **Déclenché sur `sapi:conseiller-closed`, PAS sur `sapi:advice-loading`** — alors même que ce dernier est « le déclenchement du recalcul ». Raison : à cet instant la modale tient encore le verrou de scroll (`overflow:hidden` sur html+body jusqu'à t+1100 ms de sa séquence de sortie) et un `scrollTo` n'aurait **aucun** effet. `conseiller-closed` est émis après le déverrouillage et **toujours avant** `advice-ready` (`dispatchConseillerClosed()` précède `finishAdvice()` dans `sapi-modal-conseiller.js`) → l'ordre remontée-puis-révélation est garanti par construction, pas par un timing.
+- Placé **après** le test de signature : si la sélection ne change pas, la page ne bouge pas.
+- **Pas de verrou de scroll** pendant la frappe du conseil, contrairement à la séquence de chargement : bloquer la page juste après une interaction se lit comme un plantage, et le verrou par `overflow` est de toute façon inopérant au toucher sur iOS. Au pire le visiteur scrolle pendant la frappe et découvre la nouvelle sélection un peu plus tôt — **jamais l'ancienne**, qui est le défaut qu'on corrige.
+- Le fondu de `applySelectionHtml` est **conservé** : il couvre le cas où le conseil arrive avant la fin du scroll smooth.
+- **Abandon en cours de questionnaire : la remontée s'applique aussi**, via la constante `REWIND_ON_ABANDON = true` en tête de fonction. C'est un affinage comme un autre et le défaut y est identique. **Un seul mot à passer à `false`** si tu préfères le réserver au questionnaire terminé.
+- Changement de pièce → inchangé (rechargement de page, rien d'ajouté).
+
+**Vérifié côté machine :** les deux JS parsent (`node --check`), accolades CSS équilibrées (3861/3861), aucune règle slider non préfixée, markup du room-picker (`room-card-icon`/`room-card-label`) identique home ↔ `/mes-creations/`.
+
+**À recetter par Robin sur test, dans cet ordre :**
+1. **La fluidité du scroll-pinning** (l'acquis à ne pas perdre) — c'est le seul vrai risque du lot, à cause du passage en `dvh`.
+2. `/mes-creations/` sans pièce en mobile : room-picker aussi compact que la home, cartes en ligne.
+3. **La home en mobile : rigoureusement inchangée** (le bloc partagé la touche par construction, donc c'est le contrôle qui compte).
+4. Les deux indices du bas : « Découvre ta sélection » au chargement, « Voir le catalogue complet » après scroll — les deux bien placés.
+5. Slider : 1ʳᵉ photo cadrée, prix centré, card plus haute sans collision avec la phrase. **Et le catalogue `/mes-creations/` en dessous, inchangé.**
+6. Moment 2 : finir le questionnaire → la page remonte, les 3 points s'affichent, le conseil se tape, on re-scrolle et la sélection est la nouvelle. Puis rejouer en **abandonnant** en cours de questionnaire.
+7. Desktop : prix centré dans le slider (seul changement desktop du lot).
+
+**Toujours pas de cherry-pick vers `master`.**
+
+### 🔬 DIAGNOSTIC DISPOSITION (2026-08-25, après recette mobile de la 2ᵉ passe)
+
+Robin a recetté sur iPhone et envoyé 4 captures. Deux défauts, **de natures différentes** — c'est ce qui rend le diagnostic utile.
+
+**A. `--safe-bottom` était écrit à l'envers (ma faute, corrigée).**
+Sémantique réelle des unités, contre-intuitive : `svh` = viewport chrome **déployé** (le plus petit), `lvh` = chrome **rétracté** (le plus grand, `== vh` sur iOS), `dvh` = état courant. Donc `100dvh - 100svh` vaut **0 quand la barre masque le bas** et **la hauteur de barre quand elle est rétractée** : l'inverse exact du besoin. Symptômes constatés : chevron de « Découvre ta sélection » coupé barre déployée (capture C), bloc sélection remonté de 90px pour rien barre rétractée (capture D), card coupée par le bas (capture B).
+→ **Corrigé en `calc(100vh - 100dvh)`**, `@supports` réduit à `(height: 100dvh)` (plus besoin de garde `svh`, ni de repli desktop où `vh == dvh`). Le sens des trois unités est désormais écrit en toutes lettres dans `style.css` au-dessus de la règle.
+
+**B. Le chevauchement « Voir le catalogue complet » × card est STRUCTUREL — `--safe-bottom` ne peut ni le causer ni le corriger.**
+`__selection` et `__scrollhint` portent la **même** variable : elle s'annule dans l'écart qui les sépare. Cet écart vaut, quel que soit l'état de la barre :
+`écart = X vh − 24px (bottom du hint) − 36px (hauteur du hint) = X vh − 60px`
+
+| contexte | X | 100vh | écart |
+|---|---|---|---|
+| desktop | 10vh | ~900 | **+30px** → passe (d'où la recette desktop verte) |
+| largeur ≤600 | 8vh | ~750 | **0px** → contact |
+| **hauteur ≤840 (l'iPhone de Robin)** | 7vh | ~750 | **−7px** → chevauchement |
+| hauteur ≤700 (iPhone SE) | 6vh | ~660 | **−20px** |
+
+Une position en `vh` moins un coût fixe en `px` : la soustraction **diverge** quand l'écran rétrécit. Les valeurs 10/8/7/6vh ne sont pas quatre réglages, ce sont quatre tentatives de rattraper la même divergence. **Aucune cinquième valeur ne referme le problème** — elle le déplace vers l'appareil suivant. À traiter en passant les 3 zones du hero (texte / sélection / indice) **en flux** (flex column) : deux frères en flux ne peuvent pas occuper le même pixel, la garantie devient structurelle.
+
+**C. Piège de préséance : `@media (max-height: 840px)` gagne sur presque tous les iPhones.**
+Il est déclaré APRÈS `@media (max-width: 768px)`, et le viewport large d'un iPhone fait ~750-800px de haut, donc < 840. Conséquence : `product-media` y vaut **23vh**, pas les 30vh du bloc mobile — **le réglage 26→30vh de la 2ᵉ passe n'a rien changé sur l'appareil de Robin**, c'est le 20→23vh qui a agi. Deux chiffres qui ressemblent tous deux à « hauteur de card en mobile », un seul actif.
+
+**D. Le texte du conseil IA n'est borné par rien.** Le « max 300 caractères » de `functions.php` (~l. 4019) est une **consigne de prompt**, jamais appliquée à la réception. C'est le seul élément du système sans borne, et la zone texte dimensionne tout le reste du hero.
+
+**Décision Robin : étape 0 seule** (le correctif de signe), recette, puis on reparle de la refonte. Motif : séparer ma bourde du vrai sujet, pour ne pas recetter deux chantiers mêlés. **Attendu après ce commit :** captures C et D réglées, chevauchement B **toujours présent** (c'est normal, hors de portée de ce correctif).
+
+**Plan de refonte gardé sous le coude (5 étapes, CSS mobile uniquement, desktop intouché) :** 1) les 3 zones en flex column, `__inner` perd son `top` animé ; 2) `padding-bottom: calc(100vh - 100svh)` sur la scène **remplace et supprime** `--safe-bottom` (valeur statique → plus aucun recalcul pendant le scroll) ; 3) la photo de card absorbe l'espace restant (`flex:1 1 auto` + `min-height`), ce qui **supprime les 4 hauteurs en vh** ; 4) écrans très courts + borne du texte IA, ce qui **supprime les 2 blocs `max-height`** et le piège C ; 5) facultatif, unifier desktop. Bilan : de 7 chiffres réglés à la main à 1. `applyScroll()` n'est touché par aucune étape — `--reveal` reste calculé sur `window.innerHeight`, validé.
+**Risque principal identifié :** aujourd'hui les 3 zones sont hors flux, donc rien de ce qui leur arrive ne peut provoquer de reflow pendant le pinning. Les remettre en flux rend la scène sensible aux variations de hauteur (images de card qui chargent, swap AJAX du moment 2). Parade prévue : hauteur des zones imposée par le conteneur, pas par le contenu. **À vérifier au doigt, pas au raisonnement** — c'est l'acquis principal qui est en jeu.
+
+### ✅ ÉTAPE 0 VALIDÉE PAR ROBIN (2026-08-25) — puis MESURES SUR LE SITE : la refonte en flux est ABANDONNÉE
+
+**Étape 0 validée sur iPhone.** Retour Robin : « les écarts avec la barre du bas et des mouvements fonctionnent très bien ». À retenir : **il apprécie explicitement que les éléments SUIVENT la barre en temps réel**, pas seulement qu'ils soient bien placés. Toute proposition qui figerait ce mouvement est une régression de confort, pas une simplification neutre.
+
+**Puis on a mesuré la vraie page** (test.atelier-sapi.fr, dans des iframes aux dimensions réelles des viewports iOS). Trois découvertes qui renversent le plan de refonte :
+
+**1. Le viewport CSS d'un iPhone n'est PAS la taille de son écran.** Un iPhone 14 « 390×844 » donne un viewport CSS de **390×752** sous Safari. Conséquence directe : `@media (max-height: 840px)` s'applique sur **tous** les iPhones. Le `30vh` de hauteur de card du bloc mobile n'a **jamais** été actif sur un téléphone — c'est le `23vh` qui gouverne. Le commentaire du fichier a été corrigé pour le dire.
+
+**2. Le « grand vide » de 280px n'est PAS une ressource.** Il n'existe que barre **rétractée** et disparaît intégralement barre déployée — c'est exactement la marge que la barre consomme (la sélection porte `--safe-bottom`, le bloc texte non). Il n'y a donc rien à redistribuer : c'est déjà la marge de sécurité du pire état.
+
+**3. Un chevauchement HAUT existe en production, invisible sur l'écran de Robin.** À 390×752 barre déployée (iPhone 12→15 standard), « MA SÉLECTION POUR TA CUISINE » s'écrit **par-dessus** le bouton « Décrire mon projet » (−50px). −69px sur un 13 mini, −19px sur un SE. Robin ne l'a jamais vu parce que son viewport fait 838px.
+
+**➡️ La refonte en flux est ABANDONNÉE, et pour une raison plus forte que le risque de reflow initialement identifié.** Le débat « svh statique vs dvh dynamique » supposait qu'il existe une hauteur de contenu tenant dans les deux états de barre. Les mesures disent le contraire : barre déployée, le budget vertical est **nul ou négatif sur la moitié des iPhones**. Un layout en flux devrait donc **compresser** quelque chose à chaque transition de barre — photo de card qui change de hauteur, phrase qui se recoupe en lignes, tout le bloc qui sursaute. En absolu, la même contrainte se traduit par des blocs qui **glissent** l'un vers l'autre sans jamais se redimensionner : c'est fluide, et c'est précisément ce que Robin vient de valider. **On garde l'absolu, on corrige l'unité.**
+(La 3ᵉ voie — `transform: translateY()` sur le seul `__scrollhint` — tient techniquement mais ne sert à rien tant que rien n'est en flux : `bottom` ne provoque aucun reflow de voisin. Gardée en réserve.)
+
+### 📋 LOT 1 — ancrage bas déterministe (PLAN, NON CODÉ, en attente du go de Robin)
+
+**Le correctif de fond :** l'ancrage de la sélection passe de `vh` à **px**. L'écart card ↔ indice valait `X vh − 55,5px` (+3px sur un grand iPhone, −3 sur un iPhone 14, −19 sur un SE) ; il vaut désormais **+15px constant sur tous les écrans et dans les deux états de barre**.
+- Supprimé : `bottom: calc(8vh + …)` du bloc `@media (max-width: 600px)`. L'ancrage est décidé en **un seul endroit**.
+- Ajouté **en toute fin de `style.css`** : bloc `@media (max-width: 768px)` avec `--hint-band: 33px` et `--selection-bottom: 63px`, plus la compaction de l'intérieur de la bande d'indice (chevron 18→16px, interligne 1,5→1,2, gap 5→3). L'indice **garde ses 24px** d'écart au bord d'écran, et `--safe-bottom` reste porté par les deux blocs → le mouvement validé est intact.
+- **Un seul chiffre à ajuster** pour l'air sous les cards : `--selection-bottom`. +1px = +1px d'air.
+- ⚠️ **L'EMPLACEMENT EN FIN DE FICHIER EST OBLIGATOIRE.** Les blocs `@media (max-height: 840px/700px)` déclarent `bottom` sur le même élément à spécificité égale ; une media query n'ajoute pas de spécificité, donc le plus bas gagne. Remonté ailleurs → sans effet sur iPhone, symptôme « rien n'a changé du tout ». Leurs `7vh`/`6vh` sont **conservés exprès** : morts sur mobile, vivants sur une fenêtre desktop basse (cas courant), et le desktop est en recette validée.
+
+**Recette Robin, `?piece=cuisine` :**
+1. Haut de page, barre déployée puis rétractée : l'indice et son chevron toujours entièrement visibles, à la même distance du bord. Le chevron est un peu plus petit et plus près du texte — voulu.
+2. Descendre jusqu'aux cards : « Voir le catalogue complet » **nettement sous** la card, avec de l'air. Le bas de la card n'est plus coupé.
+3. **Déployer / rétracter la barre plusieurs fois, cards visibles** : les cards et l'indice glissent **ensemble**, l'air entre eux ne change pas.
+4. Scroller lentement haut→bas puis remonter, dans les deux états de barre : aucun à-coup.
+5. Desktop + `/nos-creations/` : rigoureusement identiques (contrôle qui a manqué deux fois).
+
+**Vocabulaire pour décrire un problème :** « ça **glisse** » = comportement voulu. « ça **saute** quand la barre change » = reflow, à signaler immédiatement (ne devrait pas arriver, rien n'est passé en flux).
+
+### ⏳ LOT 2 PRÊT, NON CODÉ — tenue du contenu sur écrans courts (le bug invisible chez Robin)
+
+Corrige le chevauchement HAUT constaté à 390×752 / 375×720 / 375×618 barre déployée. Deux blocs `@media (max-width: 768px) and (max-height: 780px | 700px)` : phrase réduite, `scale` du bloc texte à pleine révélation porté de 0,72 à 0,64 (une **transform** : pas de re-coupe de lignes, pas de reflow, et l'état d'arrivée `--reveal: 0` strictement inchangé), photo de card 23→21vh. **Rien ne s'applique au-dessus de 780px de haut → l'écran de Robin n'est pas concerné et ne doit RIEN voir changer.**
+⚠️ Robin ne peut pas recetter ce lot sur son téléphone : le test principal est justement que **rien ne bouge** chez lui. La vérification réelle demande un iPhone plus petit (mini, SE, 12→15 non-Plus).
+Résultat mesuré lots 1+2 : plus aucun chevauchement, ni haut ni bas, sur 430×838 / 390×752 / 375×720 / 375×618, dans les deux états de barre.
+**Résidu connu assumé :** viewport > 840px de haut ET < 768px de large (en pratique : site ajouté à l'écran d'accueil en plein écran sur un grand iPhone) → la card garde 30vh et il reste ~8px de contact barre déployée. Pas de 4ᵉ réglage pour ça tant que ce n'est pas constaté.
+
+---
+
+## 🏗️ REFONTE DU HERO IMMERSIF — MODÈLE À ZONES (plan validé, NON CODÉ, 2026-08-25)
+
+> **Ni le lot 1 ni le lot 2 ci-dessus ne seront codés** : le modèle à zones les rend sans objet. Ils restent consignés pour la trace du raisonnement.
+
+### D'où ça vient
+**Le modèle est de Robin**, pas de l'analyse technique. Son objection de départ : « ça me gêne qu'on se base sur un écran iPhone seulement, notre système doit être compatible avec tous les écrans ». Elle est juste, et c'est une objection de **méthode** : raisonner à partir d'appareils mesurés produit des seuils bricolés (`max-height: 840px`, `700px`) qui sont exactement le symptôme d'un modèle qui ne tient pas debout tout seul.
+
+**Sa description :** deux écrans (A = phrase seule, B = phrase + sélection) et des conteneurs qui se partagent la hauteur. Écran A : conteneur 1 centré (pill + texte + bouton) et conteneur 2 collé en bas (indice de scroll). Écran B : conteneur 1 réduit à ~1/3, conteneur 3 au milieu (carrousel), conteneur 2 toujours en bas mais avec un autre texte et une autre action.
+
+**Ce que ça a débloqué :** l'analyse avait écarté le flux au motif que « barre déployée, le budget vertical est nul ou négatif, donc le layout devra comprimer quelque chose à chaque transition de barre ». Robin répond « le texte a dû réduire, **on peut autoriser** ». La taille du texte était tenue pour intouchable ; elle ne l'est pas. Sur ce point comme sur la méthode, il avait raison et l'analyse avait tort.
+
+**Maquette validée par Robin** (ouverte en local sur Mac) : `mockups/immersion-zones-v1.html`. ⚠️ Test local = la **structure** est validée, PAS le comportement de la barre d'adresse iOS, qui ne se vérifiera qu'après portage.
+
+### Les deux mécaniques qui font tenir le modèle
+1. **Hauteur constante + décalage par transform.** La couche de contenu a `height: 100svh` (constante) → les zones ne se redistribuent JAMAIS quand la barre bouge. Elle est décalée par `transform: translateY(calc(100dvh - 100svh))` pour épouser la zone visible → le mouvement validé le 25/08 est conservé.
+   **L'argument décisif n'est pas « une transform est gratuite »** (`dvh` change en continu pendant l'animation de barre, donc il y a bien un recalcul de style par frame). Le vrai argument : aujourd'hui `--safe-bottom` est une **custom property déclarée sur `.mescreations-immersion`** → chaque frame invalide le style de **tout le sous-arbre** ET déclenche 4 recalculs de position. Le modèle ramène ça à **un élément, une propriété non-layout**. → **Le nouveau modèle est strictement MOINS CHER que ce que Robin a déjà validé comme fluide.** Vérifiable, contrairement au slogan.
+   ⚠️ Vérifier la cohérence avec le commentaire l. 24746 : `100dvh - 100svh` (décalage vers le bas depuis le haut) et `100vh - 100dvh` (remontée depuis le bas) donnent **le même bord bas**. Les deux formules concordent — **à écrire dans le CSS, sinon un relecteur « corrigera » un faux bug.**
+2. **A et B ne sont pas deux mises en page.** On construit pour B (l'état contraint) ; A s'obtient par `translateY` + `scale` du même bloc de texte. Portée réelle de « si ça tient en B, ça tient partout » : **portrait, largeur ≤ 768px** (voir lot D).
+
+### ⚠️ Ce que le modèle NE tient PAS, et qu'il ne faut pas répéter
+« Deux frères en flux ne peuvent pas occuper le même pixel » est vrai des **boîtes**, pas du **rendu**. Formulation juste : *le chevauchement entre zones devient impossible, et les ruptures restantes sont **contenues et silencieuses** au lieu d'être étalées à l'écran.* On passe de 8 nombres gouvernant des collisions **couplées** (bouger la hauteur de card déplaçait la card vers le texte) à 4 nombres à **effet local et visible**. C'est le vrai gain. Ne pas prétendre mieux.
+
+### 🎯 Décisions produit de Robin (à respecter, elles ne sont pas techniques)
+- **Ordre de sacrifice quand ça ne tient pas : le TEXTE cède, pas le carrousel.** Le texte réduit jusqu'à son plancher puis se coupe. Le carrousel garde sa place. (À noter : l'analyse recommandait l'inverse ; Robin a tranché autrement, c'est son arbitrage commercial — les créations sont ce qui vend.)
+- **Technique de coupe : FONDU, pas ellipse.** Un « … » sur du multi-lignes exige de fixer un **nombre de lignes** = un nombre réglé à la main de plus. Le fondu s'adapte seul à la place disponible. Décision assumée, à juger à l'œil en recette.
+- **Paysage petits écrans : BASCULE de mode, pas compromis.** Écran A = texte seul. Écran B = carrousel seul. Plus simple à coder que le compromis, et plus lisible qu'un budget où la card ferait 29px de haut.
+
+### ⚠️ Conséquence structurelle à connaître (dite à Robin avant la recette)
+**Dans ce modèle, la hauteur des cards dépend de la longueur de la phrase.** Un conseil long donne des photos plus petites. Aujourd'hui les deux sont indépendants. C'est le prix du modèle, accepté en connaissance de cause.
+
+### 🔴 LA FAUTE RATTRAPÉE : surcharger, ne JAMAIS supprimer
+Le premier jet du portage annonçait « supprimer les 4 ancrages `bottom` et les 4 hauteurs `vh` ». **Ça aurait cassé le desktop**, qui est en recette validée : ce sont des **règles de base**, actives en desktop (l. 24929 `__scrollhint`, l. 24983 `__selection`, l. 25036 `product-media`). Un `position: absolute` sans `top` ni `bottom` retombe à sa position statique = en haut du hero, par-dessus le texte. Et il y a **5** ancrages, pas 4 : 24929, 24983, 25130, 25207, 25212.
+**`display: contents` protège le desktop de ce qu'on AJOUTE, pas de ce qu'on RETIRE.**
+→ Règle du chantier : **toutes** les neutralisations se font par surcharge dans le bloc mobile (`position: static`, `bottom: auto`, `height: auto`, `flex: …`). Zéro suppression de règle de base.
+→ `--safe-bottom` : **déplacer sa déclaration sous `@media (min-width: 769px)`** plutôt que la supprimer. Desktop intact à l'identique, coût de recalcul mobile éliminé, aucune règle desktop touchée.
+
+---
+
+## ✅ LOT A CODÉ (2026-08-25) — en attente de recette Robin
+
+**2 fichiers.** `woocommerce/archive-product.php` (le conteneur, ouvert ET fermé) + `style.css` (règle de base `display: contents`, `--safe-bottom` déplacé sous `min-width: 769px`, nouveau bloc mobile en toute fin de fichier).
+
+**Écart assumé par rapport au découpage prévu :** le dimensionnement de la phrase en `svh` a été inclus dans le lot A, alors qu'il était prévu au lot C. Raison : sans lui, la phrase garde son `clamp()` en `vw` (22,4px sur mobile), la zone 1 mange tout le budget et le lot A serait **inévaluable** — Robin verrait des cards minuscules et conclurait à tort que le modèle échoue. La conversion de la pill et du bouton, le fondu de coupe et la borne serveur restent au lot C.
+
+**Points de vigilance intégrés au code (chacun commenté sur place) :**
+- `flex: 1 1 0` sur la zone 3 (et non `1 1 auto`) : sinon la hauteur dépendrait du contenu et la zone 1 bougerait pendant les ~220 ms où `swapCards()` vide le slider.
+- `position: relative` sur la zone 2 (et non `static`) : ses deux indices sont en absolu, en `static` ils se recolleraient au bas du hero = chevron coupé, le défaut de la 1ʳᵉ passe réintroduit.
+- Hauteur explicite sur la zone 2 : des enfants absolus ne mesurent rien, sans hauteur elle ne réserverait que son padding.
+- `min-height: 190px` sur la zone 3 : c'est ce plancher qui fait céder le TEXTE en premier plutôt que les cards (décision Robin).
+- Repli `height: 100vh` avant `100svh` : si `svh` est inconnu, `height` tomberait à `auto` = rupture dure.
+- `will-change` transféré sur la couche, retiré de `__inner` en mobile.
+- Nouveau bloc placé en **dernier** du fichier (vérifié : l. 25273, après les `max-height` l. 25231/25238).
+
+**Vérifié machine :** `<div>` du hero équilibrés (10/10), conteneur ouvert 1× et fermé 1×, accolades CSS 3871/3871, aucun commentaire non fermé, les 5 ancrages `bottom` et les hauteurs `vh` de base **toujours présents** (desktop intact).
+
+**Reste à vérifier en recette, non vérifiable machine :** le `padding-top: 64px` contre la hauteur réelle du header en état `.is-scrolled` (la pill peut passer dessous) ; le `backdrop-filter` du bouton à l'intérieur d'un ancêtre promu (le backdrop peut se vider) ; et bien sûr la fluidité du pinning.
+
+### ✅ RECETTE LOT A — VALIDÉE PAR ROBIN + 3 retours traités (2026-08-25)
+
+**Les 5 points de contrôle passent :** fluidité « parfaite », **plus aucun chevauchement**, pill sous le header OK, bouton inchangé, desktop sans changement. **Le modèle à zones tient.**
+
+**A — Le bloc texte débordait en largeur en écran A.** Cause : le bloc est agrandi de 22 % depuis son centre ; à pleine largeur il sortait de 11 % de chaque côté (pill et bouton coupés). Corrigé par `width: 82%` (= 100 / 1,22). ⚠️ **Les deux nombres doivent rester en phase** — c'est écrit dans le CSS. Une largeur en % est constante → aucun recalcul pendant le scroll, contrairement à un padding interpolé.
+
+**B — « Pourquoi c'est la hauteur du carrousel qui dépend du texte et pas l'inverse ? »** Robin a raison, et c'était incohérent avec son propre arbitrage. **Inversé :** la zone 3 est désormais **servie en premier, à hauteur fixe** (`--imm-selection-h: 40svh`, en svh donc constante) et la zone 1 prend le reste. Un conseil long ne rapetisse plus les photos — c'est lui qui se réduit puis se coupe. `--imm-selection-h` devient LE réglage du bloc : « quelle part de l'écran revient au carrousel ».
+
+**C — Titre « Ma sélection » trop collé au-dessus, trop loin des cards.** Deux causes distinctes :
+- trop collé au bouton → `padding-top` sur la zone 3 ;
+- trop loin des cards → **les cards ne remplissaient pas leur zone** : `.mescreations-immersion__slider-wrap` est en `align-items: center` (règle de base), donc le slider était centré et gardait la hauteur intrinsèque des cards, creusant un vide au-dessus ET en dessous.
+→ **Le cœur du LOT B a été avancé ici**, parce que C n'était pas corrigeable sans lui : `align-items: stretch`, slider en `height: 100%`, et la chaîne de hauteurs de la card (`.product-card-cinetique` **et** `a.product-card-link` en flex-colonne, `product-media` en `flex: 1 1 auto` avec plancher 70px, `product-info`/`product-actions` en `flex: 0 0 auto`). ⚠️ **Le lien intermédiaire est indispensable** : sans lui la chaîne est rompue et rien ne se passe. Les hauteurs `vh` de base restent en place pour le desktop, elles sont neutralisées ici.
+
+**Vérifié machine :** accolades 3876/3876, aucune règle de card non préfixée dans le nouveau bloc (zéro fuite vers `/nos-creations/`), les 4 hauteurs `vh` de base toujours présentes.
+
+**Reste du LOT B :** plancher sur `.mescreations-immersion__pcard--sur` (la card la plus haute du slider, en px fixes, sans plancher — c'est elle qui casse en premier).
+
+### ✅ AGRANDISSEMENT DES CARDS (2026-08-25) — propositions 1 et 2 de Robin
+
+Robin : « je trouve les cards toujours trop petites ». Trois propositions ; les deux premières sont faites, la 3ᵉ est une décision produit (voir plus bas).
+
+**Prop. 1 — rééquilibrage du texte des cards.** Tout ce qui est gagné ici part **directement dans la photo**, puisqu'elle absorbe l'espace restant. Levier le moins cher.
+- **Bouton « Découvrir » masqué en mobile** : il ne servait à rien, `product-actions` est **à l'intérieur** du `<a class="product-card-link">` qui enveloppe toute la card (vérifié dans `sapi_immersion_render_product_card()`) — taper n'importe où ouvrait déjà la fiche. ~45px rendus.
+- **Hiérarchie inversée corrigée** : le nom du modèle (11,5px) était plus petit que le prix (16,8px). C'est le nom qu'on vend. Nom → 0,95rem, prix → 0,9rem, « à partir de » → 0,62rem.
+- **Le grand vide au-dessus du prix** venait de `.product-card-cinetique .product-price { margin-top: auto }` (règle de base) : `.product-info` étant en flex-colonne avec `flex: 1`, ce `auto` poussait le prix tout en bas. Neutralisé.
+- ⚠️ `!important` nécessaire sur `.product-name` : la règle mobile plus haut en porte un ; à spécificité égale, seul un `!important` **plus bas** gagne.
+
+**Prop. 2 — plus de place au carrousel.** `--imm-selection-h` 40 → **48svh** ; bande d'indice 42+24 → **34+18px** ; `padding-top` de la zone 3 resserré.
+⚠️ **Précision utile consignée dans le CSS** : le grand écart entre le bouton « Décrire mon projet » et les cards **n'est pas** un padding — c'est l'espace **inutilisé de la zone 1** (elle prend le reste, son contenu est calé en haut, la marge tombe en bas). Le seul geste qui le réduit est d'augmenter `--imm-selection-h`, qui resserre ET agrandit les cards d'un coup.
+
+**Gain calculé sur 390×752 : ~+120px pour la photo, soit environ le double de sa taille actuelle.**
+
+### ✅ PROP. 3 CODÉE — la zone 1 SORT de l'écran au scroll (2026-08-25)
+
+**Décision Robin, formulée précisément :** « le haut sort jusqu'à ce que le carrousel s'affiche entièrement, ça dépendra donc de la taille de l'écran. »
+
+**Elle SIMPLIFIE le système au lieu de le compliquer** — c'est ce qui la rend meilleure, et je ne l'avais pas vu en la présentant comme un simple arbitrage produit. **Un bloc qui s'en va n'a plus besoin de rétrécir.** Trois réglages disparaissent d'un coup :
+- le `scale(1.22)` d'agrandissement au repos ;
+- le `width: 82%` qui existait UNIQUEMENT pour compenser le débordement de ce scale (retour A) ;
+- `--imm-a-drop`, qui servait à recentrer le bloc au repos.
+Le texte est maintenant simplement **centré** dans l'espace disponible, puis il s'en va.
+
+**Mise en œuvre :**
+- Zone 1 **hors flux** (`position: absolute`), bornée par `top: 64px` ET `bottom: 52px` → elle ne prend aucune place au carrousel, et **ne peut toujours pas chevaucher l'indice** (elle est bornée, et son `overflow: hidden` coupe un texte trop long au lieu de pousser).
+- `translateY(calc(var(--reveal) * -100%))` : **le `-100%` se rapporte à la hauteur de l'élément lui-même**, pas à l'écran. La sortie fait donc exactement ce qu'il faut et **s'adapte seule à chaque taille d'écran** — la demande de Robin obtenue sans mesurer quoi que ce soit en JS. Plus un fondu, pour qu'il ne survole pas le carrousel pendant la traversée.
+- Couche en `justify-content: flex-end` : carrousel et indice calés en bas, l'espace libre tombe en haut, là où flotte la zone 1. C'est ce qui fait que le carrousel « s'affiche entièrement ».
+- `--imm-selection-h` 48 → **56svh** (la zone 1 ne lui dispute plus la place) et phrase plus généreuse (`clamp(1.05rem, 3.1svh, 1.9rem)`), puisqu'elle n'a plus à cohabiter avec le carrousel.
+
+**Résultat calculé sur 390×752 : card de ~377px dont ~317px de photo**, contre ~180px de card totale avant le lot A. Bande de texte en écran A : 636px.
+
+**⚠️ Conséquence assumée, signalée à Robin avant qu'il tranche :** en écran B, le visiteur ne voit plus le conseil, ni la pill, **ni le bouton « Décrire mon projet »** — qui est l'entrée du questionnaire, donc un chemin de conversion. Robin a choisi cette voie en connaissance de cause. Si les statistiques du Conseiller baissent après la mise en prod, **c'est la première cause à examiner**, et la parade existe : ressortir le bouton de la zone 1 pour l'ancrer au-dessus du carrousel.
+
+**⚠️ Trois nombres doivent rester en phase** (commenté sur place) : `padding-top: 64px` de la couche, `top: 64px` de la zone 1, et `bottom: 52px` de la zone 1 = hauteur de la bande d'indice (34 + 18).
+
+### ✅ CARROUSEL CENTRÉ, PHOTO EN 3/4 (2026-08-25) — suite directe de la prop. 3
+
+Robin, en voyant le grand vide laissé par la zone 1 : « si ça disparaît complètement, il faut centrer le carrousel et lui faire occuper l'espace ! »
+
+**⚠️ ERREUR DE MA PART, corrigée avant de coder — à retenir.** J'avais proposé « photo carrée, ~330px » et Robin l'avait choisie. Le chiffre était faux : **une photo carrée ne peut pas être plus haute que la card n'est LARGE**, et la largeur est plafonnée par l'écran. À 78 % de largeur elle ferait **279px — plus PETITE que les ~315px du moment**, à l'opposé de la demande. Corrigé auprès de Robin avec le tableau des trois combinaisons :
+
+| largeur de card | photo carrée | aperçu de la card suivante |
+|---|---|---|
+| 78 % (actuel) | 279px | 68px, confortable |
+| 88 % | 315px | 25px, mince bande |
+| 96 % | 344px | quasi nul |
+
+**Règle générale à garder : photo carrée + grande + aperçu visible → il faut en abandonner un des trois.** Le rapport de forme est le seul levier qui rende de la hauteur SANS toucher à la largeur, donc sans manger l'aperçu.
+
+**Décision Robin après correction : trois quarts, cards inchangées à 78 %.**
+
+**Ce que ça donne (390×752) :** card 279px de large → **photo 372px** (contre ~315 avant, ~150 avant le lot A), card totale 442px, bloc centré avec ~77px d'air en haut et en bas, aperçu de la suivante conservé à 61px.
+
+**Un réglage de moins :** `--imm-selection-h` **supprimé**. La zone 1 étant hors flux, le carrousel occupe tout l'espace libre (`flex: 1 1 auto`) et son bloc y est centré (`justify-content: center`). La taille des cards est désormais donnée par le **rapport de forme de la photo** — un réglage qui se juge à l'œil, au lieu d'un pourcentage d'écran.
+
+**Dégradation prévue sur écran court :** `flex: 0 1 auto` + `min-height: 60px` sur la photo → c'est elle qui cède sur sa hauteur (le ratio n'est plus tenu) plutôt que la card qui déborde. Le nom et le prix restent toujours visibles.
+
+### ✅ CARROUSEL PLEINE LARGEUR, CARD ACTIVE CENTRÉE (2026-08-25)
+
+Robin : « supprimer les marges latérales, les cards coupées au bord de l'écran » + « la card actuelle doit être centrée ».
+
+**Répartition : `12vw` de padding + `76vw` de card + `12vw` = 100.**
+⚠️ **Tout est en `vw`, jamais en `%`, et c'est obligatoire** : un `flex-basis` en % se calcule sur la **boîte de contenu** du slider (padding déduit), un padding en % sur la **largeur du parent**. Les deux références diffèrent → en %, `12 + 76 + 12` ne ferait pas 100. En `vw` tout se rapporte à l'écran et l'addition tombe juste. Les trois valeurs doivent toujours totaliser 100.
+
+**Résultat (390px) :** card 296px de large → **photo 395px** (contre 372, et ~150 avant le lot A). Morceau visible de chaque côté : **29px, symétrique**.
+
+**Le padding latéral du slider n'est pas décoratif** : c'est lui qui permet à la **première** et à la **dernière** card de venir au centre. Sans lui, elles resteraient collées à leur bord. Vérifié : première card centrée ⇔ `scrollLeft = 0`.
+
+**JS — `cardOffsets()` renvoie désormais la POSITION DE SCROLL cible, plus l'offset brut.** Les deux diffèrent depuis que la card est centrée en mobile alors qu'elle est calée à gauche en desktop. **Le mode n'est PAS déterminé par un test de largeur d'écran mais par la lecture du `scroll-snap-align` réellement appliqué** (`center` vs `start`) : le JS suit donc automatiquement la feuille de style, sans dupliquer un point de rupture ni risquer un désaccord entre les deux fichiers. `applyScroll()` reste intact.
+
+**⚠️ À vérifier en recette :** que la **dernière** card (la sur-mesure orange) vient bien au centre. Le `padding-right` d'un conteneur de défilement flex est historiquement ignoré par certains navigateurs ; le `scroll-snap-align: center` devrait suffire à rendre la position atteignable, mais ça se constate.
+
+## 🖥️ MODÈLE À ZONES ÉTENDU AU DESKTOP (2026-08-25) — décision Robin
+
+Robin, après validation du mobile : « en desktop, il faut qu'on augmente la hauteur des cards + réduire l'écart entre le bouton et le conteneur du dessous ».
+
+**Constat qui a motivé l'extension plutôt qu'un réglage :** le desktop était devenu la moitié fragile. Mesuré : il ne restait que **~13px** entre le bas des cards et l'indice. Les cards ne pouvaient donc grandir que **vers le haut**, c'est-à-dire en mangeant l'écart que Robin voulait réduire — les deux demandes étaient le même geste, mais avec ~70px de marge avant collision, marge qui **dépend de la longueur du conseil** (3 lignes en cuisine, 4 en chambre d'enfant → négatif). Exactement le mécanisme corrigé sur mobile. Robin a choisi l'extension du modèle.
+
+**Restructuration :** le modèle à zones passe en **règle de base** (`.mescreations-immersion__layer` devient une vraie couche flex partout, `display: contents` supprimé). Le bloc `@media (max-width: 768px)` ne garde plus que les **différences** du mobile : header 64px, zone 1 hors flux qui sort de l'écran, phrase en svh, carrousel pleine largeur en vw, photo en 3/4, bande d'indice resserrée. **Aucune règle du modèle n'est dupliquée entre les deux** — deux copies finissent toujours par diverger.
+
+**⚠️ PIÈGE MAJEUR, rattrapé au calcul avant livraison.** Le passage en flux **à lui seul aurait RÉDUIT** la photo desktop (197 → ~178px), soit l'inverse de la demande. Cause : la zone 1 était visuellement réduite à 72 % par un `scale`, donc elle occupait 28 % de moins que sa hauteur réelle. En flux, elle prend sa hauteur **naturelle** — donc plus de place qu'avant. **Le flux ne crée pas d'espace, il ne fait que supprimer le risque de chevauchement.** Il a fallu dégonfler la zone 1 en parallèle :
+- `gap` du bloc texte 18 → 12px ;
+- pill : `margin-bottom` 16 → 0 (la marge de `.conseiller-sig--v1`, partagée avec la home, s'**additionnait** au `gap` — neutralisée en préfixé, la home garde la sienne) ;
+- bouton : `margin-top` 6 → 0 ;
+- phrase : `clamp(1.85rem, 3.6vw, 2.75rem)` → `clamp(1.3rem, 2.2vw, 1.85rem)`, dimensionnée pour l'état ANCRÉ (avant, la taille était celle du repos et le `scale` la réduisait) ;
+- bande d'indice : `margin-bottom` 24 → 16px.
+
+**Résultat calculé (1300×790) : photo ~243px contre 197** (+23 %), et **l'écart bouton → titre passe de ~104px à 20px**, réglé par un seul `padding-top` sur la zone 3 — le seul endroit qui le gouverne désormais.
+
+**Ce qui a disparu du desktop :** le `top: calc(50% - reveal*39vh)` animé (propriété de **layout**, donc recalcul à chaque frame de scroll) est remplacé par un `translateY` (compositeur). Le desktop devrait être **plus fluide qu'avant**, pas seulement plus robuste.
+
+**Inertes désormais, à nettoyer plus tard :** les 5 `bottom: calc(… + var(--safe-bottom))` et les 4 hauteurs `product-media` en vh. Neutralisés par les règles de base, laissés en place volontairement — le nettoyage est un chantier à part, après validation de la recette desktop.
+
+**Recette desktop à refaire entièrement** (elle était validée sur l'ancien modèle) : arrivée, scroll complet aller-retour, fluidité, pièce au conseil le plus long (`?piece=chambre-enfant`), flèches du carrousel, dernière card, et `/nos-creations/` inchangé.
+
+### ✅ 4 retours desktop + retour des dots (2026-08-25)
+
+**1. Zone de texte plus large.** `max-width` de la phrase 20 → **27em**. Bénéfice caché : moins de lignes → zone 1 plus courte → cards plus hautes. Reste le garde-fou du `scale` (27em × 1,2 ≈ 930px, très en deçà des 1272px utiles).
+
+**2. Titres produit plus grands.** `product-name` 0,78 → **1,05rem**, prix 1,2 → 1rem, catégorie 0,68 → 0,75rem. Le nom était **plus petit que le prix** : hiérarchie inversée, c'est le nom du modèle qu'on vend. Ajouté aussi le `margin-top: 0` sur le prix en desktop (il n'était qu'en mobile) — la règle de base `margin-top: auto` y creusait un vide.
+
+**3. Plus d'air autour du carrousel.** `padding` de la zone 3 : **24px en haut, 16px en bas**. C'est le seul endroit qui gouverne ces deux écarts maintenant que les zones sont en flux.
+
+**4. Dots remis (mobile + desktop).** Conteneur `[data-immersion-dots]` dans le markup, **contenu généré en JS** : le nombre de cards varie selon la pièce ET change au moment 2, un rendu PHP obligerait à les régénérer côté serveur aussi = deux sources pour la même chose. Ils partagent `cardOffsets()` avec les flèches → un dot cliqué amène la card exactement où une flèche l'aurait amenée, centrée ou non selon ce que le CSS a décidé. Masqués s'il n'y a rien à faire défiler. Reconstruits après `swapCards()`.
+
+**⚠️ ARBITRAGE À CONNAÎTRE — ces trois demandes COÛTENT de la hauteur.** Plus de marges (+20px) et des dots (+24px) se prennent sur la photo, puisque le carrousel absorbe l'espace restant. Compensé en partie par la phrase élargie et par la bande d'indice resserrée (42+24 → 34+14), mais le solde reste négatif : **photo ~199px contre 243px** dans la version que Robin venait de valider.
+**Le levier pour revenir à ~239px : masquer le bouton « Découvrir » en desktop aussi**, comme en mobile — `product-actions` est à l'intérieur du `<a>` qui enveloppe toute la card, donc cliquer n'importe où ouvre déjà la fiche. Une ligne. **Robin a tranché : on garde le bouton en desktop, les ~199px lui conviennent.**
+
+**Mobile — carrousel réduit après le retour des dots (décision Robin).** Les dots ajoutaient ~24px au bloc et le carrousel paraissait trop haut. Ratio de la photo `3 / 4` → `4 / 5` : photo 395 → 370px, air 53 → 66px de chaque côté.
+
+### ✅ MOBILE — la hauteur des cards dépend maintenant AUSSI de la hauteur d'écran
+
+Question de Robin, puis constat : « en mobile, il faudrait que la hauteur des cartes dépende aussi de la hauteur de l'écran, non ? » Il avait raison — la hauteur ne venait que de la **largeur** (via le rapport de forme), donc sur un téléphone plus haut l'espace en trop devenait de l'air au lieu d'agrandir la photo. En desktop, à l'inverse, le carrousel absorbait déjà l'espace restant.
+
+**On ne pouvait pas simplement faire remplir la card comme en desktop** : c'est exactement ce qui produit la bande verticale étirée (une vue de pièce recadrée en fente, luminaire hors cadre) — le cadrage écarté plus haut dans ce chantier.
+
+**Solution : `height: clamp(60px, 49svh, 101vw)` sur la photo.**
+- `49svh` = la taille voulue, proportionnelle à la **hauteur** d'écran (= les 370px actuels sur un iPhone de 752). **C'est LE chiffre à toucher** pour agrandir ou réduire les cards en mobile.
+- `101vw` = **plafond de FORME**, calculé depuis la largeur de card (76vw × 4/3) : la photo ne peut jamais dépasser un format 3/4. ⚠️ **Lié au 76vw** — si la largeur de card change, ce plafond doit suivre.
+- `60px` = plancher absolu.
+
+**Comportement mesuré :**
+
+| appareil | photo | forme | ce qui décide |
+|---|---|---|---|
+| iPhone 14 (390×752) | 368px | 0,80 | la hauteur |
+| iPhone Pro Max (430×838) | 411px | 0,80 | la hauteur |
+| iPhone SE (375×618) | 303px | 0,94 | la hauteur |
+| Android haut (360×900) | 364px | 0,75 | le **plafond de forme** |
+
+Sur l'appareil de Robin, rien ne change (368 ≈ 370). Le gain est sur les grands téléphones ; le garde-fou joue sur les écrans étroits et hauts, où la photo se serait déformée.
+
+---
+
+## ⚓ ANCRAGE AU DÉFILEMENT — 3 positions (demande Robin, 2026-08-25)
+
+Robin veut trois positions d'arrêt : (1) le conseil en grand, (2) le carrousel révélé, (3) le haut du catalogue. Et il proposait de **tout refaire en deux vues plein écran successives**.
+
+### Avis de l'agent : garder l'architecture, ajouter l'ancrage
+**Le diagnostic de Robin est juste** — la page n'a aujourd'hui aucun endroit où elle veut s'arrêter ; on peut relâcher le doigt à `--reveal: 0.37` et rester sur un état que personne n'a dessiné. Même méthode que ses deux intuitions précédentes : supprimer un continuum d'états non spécifiés.
+
+**Mais deux vues ne peuvent pas partager la photo de fond.** Trois issues, toutes mauvaises : deux photos (ça se lit « on change d'image », pas « la photo se floute ») ; une photo `fixed` (le comportement iOS qu'on a passé la journée à contourner) ; ou un fond `sticky` dans un conteneur englobant — **soit l'architecture actuelle avec d'autres noms**. La simplification promise n'existe que si on abandonne l'effet.
+
+**Contre-intuitif et vérifiable : l'architecture actuelle est PLUS stable pour l'ancrage que deux vues.** Le track est en `vh`, unité qui ignore la barre d'adresse → les positions d'arrêt ne bougent jamais. Deux sections plein écran auraient leurs points d'ancrage définis par leur hauteur ; en `dvh` ils se déplaceraient quand la barre se rétracte — or sur iOS la barre se rétracte PARCE QU'ON SCROLLE. Boucle où scroller déplace la cible.
+
+**Question décisive posée à Robin :** « si le flou se faisait tout seul en une demi-seconde au lieu de suivre ton doigt, le regretterais-tu ? » → **« Oui, j'y tiens. »** Donc on garde le modèle actuel. (Si la réponse avait été non, la refonte de Robin était la bonne : plus courte, sans track, sans `--reveal`, avec des points d'arrêt gratuits.)
+
+### ⚠️ ERREUR DE L'AGENT, corrigée avant de coder
+Il annonçait un **plateau de 150vh** et en déduisait qu'il fallait raccourcir le track à 200vh, présenté comme « une condition, pas un réglage ». **Faux.** Le calcul : track 250vh, scène 100vh → épinglage sur **150vh** ; la révélation finit à 100vh → **plateau = 50vh**, pas 150.
+Conséquence : **raccourcir à 200vh donnerait un plateau de ZÉRO** — le hero commencerait à partir à l'instant même où la révélation se termine, sans aucun endroit où se poser. Ce serait une régression de confort, et surtout invisible à la lecture du plan.
+→ **Track laissé à 250vh.** Son argument (« la page paraîtra collée entre les points 2 et 3 ») ne vaut que pour un ancrage CSS `mandatory` ; on part sur un ancrage JS, dont on fixe nous-mêmes le seuil d'accroche. La longueur de la page se rejugera à l'œil au lot 2, une fois les aimants en place.
+**Leçon : recalculer les chiffres d'un avis avant de bâtir dessus, même quand le reste de l'analyse est solide.**
+
+### ✅ LOT 1 CODÉ — la fondation, SANS aucun aimant
+Livré seul et à recetter seul : c'est le seul lot qui touche à la fluidité, et une régression noyée dans un lot double serait indiagnosticable.
+
+**Le cœur : faire coïncider par construction « la révélation est finie » et « le point d'ancrage 2 ».**
+Un **repère** de 1px, invisible et hors flux, est posé en CSS à `top: 100vh` dans le track (`[data-immersion-mark]`). `applyScroll()` lit sa position au lieu d'utiliser `window.innerHeight`.
+⚠️ **Pourquoi c'est nécessaire** — 4ᵉ épisode de la série des pièges d'unités : sur iOS, `window.innerHeight` **suit** la barre d'adresse (752px) alors que le `100vh` du CSS l'**ignore** (838px). 86px d'écart, invisibles tant qu'ils tombent dans le plateau, mais qui **deviendraient la position d'arrêt elle-même** dès qu'on ancre sur ce point : la page se calerait sur une révélation à ~90 %, texte encore visible, photo pas tout à fait floue. Et l'écart varie avec l'état de la barre → le défaut apparaîtrait et disparaîtrait tout seul.
+La distance ne dépend que de `vh`, donc constante : mesurée au chargement, à 600 ms (polices/images) et aux redimensionnements — **jamais à chaque image de scroll**.
+`scrollToReveal()` (l'indice « Découvre ta sélection ») utilise la même distance → il amène exactement à la fin de la révélation.
+
+**Trois corrections de détail repérées par l'agent :**
+- `overscroll-behavior-x: contain` sur le slider : en butée sur la dernière card, iOS enchaînait sinon sur le scroller parent — un swipe de trop aurait relâché la page vers le catalogue.
+  ⚠️ **RÉGRESSION LIVRÉE PUIS CORRIGÉE — à ne pas refaire.** Écrit d'abord en `overscroll-behavior: contain` (sans axe), ce qui **s'applique aux DEUX axes**. Or `overflow-x: auto` fait aussi de l'élément un scroller **vertical** — l'autre axe passe automatiquement de `visible` à `auto` — même quand il n'a rien à faire défiler en hauteur. Le `contain` y bloquait donc la propagation vers la page : **le scroll vertical ne fonctionnait plus dès que le doigt ou le pointeur était sur le carrousel**, en mobile comme en desktop. Constaté par Robin en recette. Toujours borner l'axe sur un scroller à une seule direction.
+- `scroll-margin-top` du catalogue borné en mobile (90 → 64px) : le header n'a pas la même hauteur, le catalogue se calait 26px trop bas. Sert aussi à la future 3ᵉ position d'ancrage.
+- Commentaire périmé de `archive-product.php` corrigé : il affirmait encore « en desktop cette div n'existe pas / `display: contents` », faux depuis l'extension du modèle. Exactement le type de commentaire qui fait « corriger » un faux bug.
+
+**Règle posée pour le lot 2 :** la scène épinglée ne doit **JAMAIS** être une cible d'ancrage — un sticky est perpétuellement « déjà aligné » pour le moteur, ce qui donne blocage ou tremblement selon le navigateur. Cibles : le track, le repère, le catalogue.
+
+### ✅ LOT 2 CODÉ — les aimants (2026-08-25)
+
+**Un seul fichier : `assets/sapi-mescreations-immersion.js`.** Aucun CSS, aucun markup.
+
+**La règle d'accroche n'est pas la même partout — c'est le cœur du réglage :**
+- **DANS la zone de révélation** (du haut du track au repère) : on accroche **toujours** vers l'une des deux extrémités, quelle que soit la distance. Un état à moitié révélé n'est jamais un état voulu.
+- **AU-DELÀ** : libre. Le plateau après la révélation est identique au pixel près, donc il n'y a rien à corriger, et le visiteur qui descend vers le catalogue ne doit jamais se sentir retenu. Seule exception : une accroche à l'approche du catalogue (30 % de hauteur d'écran).
+→ **C'est cette asymétrie qui évite l'effet « page collante »** que l'agent redoutait avec un ancrage CSS uniforme.
+
+**Pourquoi en JS et pas `scroll-snap-type` :** le CSS ne sait pas **s'abstenir**. Il faut ne pas ancrer dans quatre situations — verrou de la machine à écrire, modale ouverte, remontée du moment 2 en vol, geste ayant fait défiler le carrousel.
+**Astuce qui couvre les deux premières d'un coup :** le verrou de scroll est posé par `overflow: hidden` sur `html`, par notre machine à écrire **et** par la modale Conseiller. Un seul test (`scrollLocked()`) suffit.
+
+**Détails qui comptent :**
+- **Tous** les scrolls verticaux du fichier passent désormais par `programmaticScrollTo()` (les deux indices + `rewindToTop`) : sans ce drapeau, l'ancreur se déclencherait à la fin de leur animation et se battrait avec elle — deux animations sur le même axe = rebond. Vérifié : plus aucun `window.scrollTo` ni `scrollIntoView` non encadré.
+- **Annulation dès que le visiteur reprend la main** (`touchstart`, `wheel`, `keydown`). ⚠️ Un simple `window.scrollTo(x, y)` ne suffit PAS à annuler : `html` porte un `scroll-behavior: smooth` global (style.css l. 128) qui animerait même ce saut. On neutralise la propriété le temps de l'appel (`jumpTo()`). C'est la réponse à l'arbitrage « smooth global vs animations de calage » soulevé par l'agent.
+- **Geste dans le carrousel** : on teste le **déplacement** de `scrollLeft`, pas la cible du toucher. Un doigt posé sur les cards qui tire la page vers le bas est un scroll vertical légitime et doit s'ancrer comme les autres ; seul un swipe horizontal effectif désactive l'accroche.
+- **`prefers-reduced-motion` → aucun ancrage.** Déplacer la page sous quelqu'un qui a demandé moins d'animation serait à contresens.
+- La scène épinglée n'est **jamais** une cible : les positions sont calculées (haut du track, repère, catalogue moins son `scroll-margin-top`).
+
+**Réglages, tous deux nommés en tête de bloc :** `SNAP_IDLE` (150 ms d'immobilité avant de considérer le geste fini) et `SNAP_CATCH` (0,30 hauteur d'écran = distance d'accroche au catalogue).
+
+**À recetter en priorité :** le **moment 2** (fermeture de la modale → relâchement du `overflow` → `rewindToTop()` → arrivée exacte en position 1 → retape du conseil → remplacement des cards). C'est la seule séquence où deux scrolls pourraient partir dans la même image.
+
+### ✅ CORRECTIF — « il manque l'aimant de la 3ᵉ partie » (Robin, recette du lot 2)
+
+**Il n'était pas cassé, il mordait à peine.** L'ancre `#mes-creations-catalogue` existe bien. Le problème était géométrique : **150vh entre les positions 2 et 3** (soit une poussée et demie) pour une distance d'accroche de 30vh. Une poussée normale survolait la fenêtre d'accroche, donc l'aimant ne se déclenchait jamais.
+
+**LE correctif, et il est unique :** l'accroche vise désormais **la plus proche des trois positions sur tout le hero**, au lieu d'une fenêtre étroite autour du catalogue. La bascule 2↔3 se fait donc à mi-chemin (75vh), ce qu'une poussée mobile ordinaire (100 à 200vh) dépasse largement. Au-dessus du hero et une fois entré dans le catalogue, la page redevient libre — on ne retient jamais quelqu'un qui lit.
+
+**⚠️ SUR-CORRECTION LIVRÉE PUIS ANNULÉE — la leçon la plus utile de la séquence.**
+J'ai d'abord changé **deux** choses : la règle d'accroche **et** le raccourcissement du track (250 → 200vh), en croyant que l'écart de 150vh entre les positions 2 et 3 était en cause. Robin l'a vu dans la minute : « tu as retiré le stop / pause avant de passer au catalogue normal ! »
+Le raccourcissement **supprimait le plateau** (`hauteur - 200vh`), c'est-à-dire la zone après la révélation où la scène reste épinglée et où l'écran ne bouge pas. Cette pause a deux fonctions : scroller un peu sans que rien ne se passe, et **masquer le va-et-vient du hero quand l'aimant ramène un petit geste en arrière**.
+→ **Track remis à 250vh.** La règle d'accroche seule suffisait, et elle fonctionne très bien avec cette longueur.
+
+**Ce que ça dit du raisonnement de l'agent :** son conseil de raccourcir reposait sur un chiffre faux (plateau annoncé à 150vh, réel 50vh). J'ai eu raison de vérifier le chiffre, puis tort d'y revenir en croyant avoir trouvé une autre justification. **La longueur du track n'a jamais été le problème** — c'était la règle d'accroche depuis le début. Vérifier un chiffre ne suffit pas : il faut aussi vérifier que la conclusion ne survit pas pour de mauvaises raisons.
+
+### ✅ TROIS RETOURS DE RECETTE (2026-08-25, fin de journée)
+
+**1. Pause trop courte → track 250 → 300vh (plateau 50 → 100vh).**
+⚠️ Allonger la pause éloigne mécaniquement la position 3 (l'écart 2→3 passe à 200vh) : sans rien d'autre, il aurait fallu pousser un écran entier avant que la page accepte d'aller au catalogue. **D'où un BIAIS DIRECTIONNEL ajouté à l'aimant** : au lieu de viser la position la plus proche, il suit le sens du geste et bascule vers l'étape suivante dès **35 %** du trajet en descendant (règle symétrique en remontant). **C'est ce qui découple les deux réglages** — sans lui, « pause plus longue » et « catalogue facile à atteindre » sont en opposition directe.
+
+**2. Contraste derrière le conseil → voile local, pas un scrim plus sombre.**
+Assombrir le scrim général aurait terni **toute la pièce**, or c'est la photo qui vend. Le voile est un `::before` sur le bloc texte : dégradé ovale flouté, `inset` négatif pour s'éteindre au-delà du texte sans bord visible, `z-index: -1` avec `isolation: isolate` sur le parent pour rester derrière le texte. Il suit le bloc (même transform, même sortie d'écran en mobile) puisqu'il en est le pseudo-élément. ⇦ Le premier `rgba` règle l'intensité.
+
+**3. Plus de tirets longs dans les textes IA — traité sur TROIS niveaux.**
+- **La cause racine était dans les exemples** : `guide-prompt-exemples.txt` en contenait **26**. On apprenait littéralement au modèle à en produire. Nettoyés (26 → 0), avec trois règles distinctes : plages chiffrées `10–20` → `10-20`, titres de section → ` - `, incises en phrase → virgule.
+- **Règle explicite** ajoutée en fin de `guide-prompt-regles.txt` (les 2 tirets qui y restent sont ceux de la règle elle-même, qui doit montrer ce qu'elle interdit).
+- **Garde-fou serveur `sapi_strip_long_dashes()`**, appliqué aux **5** points de sortie de texte IA (conseil final, messages de la modale, messages de contact). ⚠️ **Nécessaire parce qu'une consigne de prompt n'est PAS une contrainte** — précédent dans ce fichier : la limite « max 300 caractères » du conseil, écrite dans le prompt et jamais appliquée nulle part. Le trait d'union normal est préservé (mots composés, sur-mesure, plages).
+- Vérifié : les conseils pré-écrits par pièce (`sapi_megafilter_get_generic_advices`) étaient déjà propres.
+
+### ✅ TROIS CORRECTIFS DESKTOP (2026-08-25)
+
+**1. Le « ? » tombait seul sur sa ligne** (titre du room-picker). Cause : la typographie française impose une espace avant les ponctuations doubles, mais **une espace ordinaire est un point de césure**. Remplacée par une **espace insécable (U+00A0)** dans les **trois** fichiers qui portent la phrase : `archive-product.php`, `front-page.php`, `page-conseils-eclaires.php`. Vérifié caractère par caractère.
+→ **À refaire pour toute phrase se terminant par ? ! : ou ;** ajoutée au site.
+
+**2. « CHAMBRE ENFANT » aligné à gauche** alors que les autres libellés paraissaient centrés. Cause : la carte est un flex centré, donc **la boîte du libellé se réduit à la largeur de sa plus longue ligne** — la boîte était bien centrée, mais la 2ᵉ ligne se collait à gauche à l'intérieur. Visible uniquement sur les libellés à deux lignes, d'où le fait que ça n'ait sauté aux yeux que sur celui-là. `text-align: center` ajouté sur `.room-card-label`. Les blocs mobiles (spécificité 0,2,0) repassent volontairement à `left` pour la disposition en ligne, ils ne sont pas touchés.
+
+**3. Le 3ᵉ aimant masquait le titre « Toutes mes créations »** derrière le bandeau de réassurance. Cause : `scroll-margin-top` ne connaissait que le **header**, alors que le bandeau est repositionné en **sticky sous le header** sur cette page (mécanisme repris de la home). Il manquait donc sa hauteur.
+→ Nouvelle fonction `stickyOffset()` : **mesure** la hauteur de tout ce qui est `fixed`/`sticky` en haut (header + bandeau) plutôt que de l'écrire en dur — les deux hauteurs diffèrent entre mobile et desktop, et le bandeau peut changer de contenu. Le `scroll-margin-top` du CSS reste le plancher (il sert aux sauts d'ancre natifs), la mesure le complète. Corrige du même coup l'indice « Voir le catalogue complet », qui partage `catalogueSnapY()`.
+
+**⚠️ CORRIGÉ UNE 2ᵉ FOIS — « mieux mais toujours pas pile poil » (Robin). Deux erreurs se cumulaient :**
+1. **J'additionnais un chevauchement.** `hauteur du header + hauteur du bandeau` suppose que le bandeau se colle SOUS le header. Faux : il a sa propre position d'accroche (`position: sticky; top: 80px`, style.css l. 1390), qui ne vaut pas la hauteur réelle du header. La zone commune était comptée deux fois.
+   → `stickyOffset()` prend maintenant, pour chaque élément épinglé, **`top` (là où il se fige) + sa hauteur = son bord bas**, et garde **le plus bas des deux**. Exact quelles que soient les valeurs, mobile comme desktop.
+2. **Aucun air.** `.mes-creations-catalogue` porte `margin-top: 44px` — l'espace prévu par le design. Mais une marge est **au-dessus** du bloc : en calant le bord, elle passait derrière la barre et le titre arrivait collé.
+   → On cale désormais la **marge haute** sous la barre, pas le bord. On reprend la valeur du design plutôt que d'inventer un espacement de confort.
+
+### ✅ L'INDICE DEVIENT UN BOUTON — et les deux boutons changent de place (Robin)
+
+Robin : l'indice « Découvre ta sélection » est trop peu visible. Il devient un **bouton blanc plein**, sous la phrase de Robin. Puis il a poussé la réorganisation plus loin :
+
+- **Bouton blanc « Découvrir ma sélection »** → dans le bloc texte, sous la phrase. C'est l'action **principale**, et la hiérarchie était inversée : elle était un petit texte gris en bas d'écran pendant que l'action secondaire était un bouton.
+- **Bouton translucide « Décrire mon projet »** → déplacé **au-dessus du carrousel**, dans la zone sélection.
+
+**⚠️ Ce déplacement corrige un défaut que j'avais signalé et qu'on avait accepté.** Quand le bloc texte s'est mis à sortir de l'écran en mobile (prop. 3), on perdait en écran B l'entrée du questionnaire, donc un chemin de vente — noté à l'époque comme « première cause à examiner si les stats du Conseiller baissent ». En le mettant au-dessus des propositions, Robin le rend visible **exactement au moment où le visiteur juge la sélection**, donc où l'envie de l'affiner naît. Le défaut est refermé.
+
+**Effet sur les hauteurs : neutre en desktop.** La zone 1 perd le bouton, la zone 3 le gagne ; la zone 3 étant en `flex: 1 1 0`, elle récupère ce que la zone 1 libère. Les cards ne bougent pas.
+
+**Indice du bas : la flèche seule**, sans texte (décision Robin) — le libellé ferait doublon avec le bouton. Il garde un `aria-label`, puisqu'il n'a plus de texte visible. L'indice 2 (« Voir le catalogue complet ») garde le sien, c'est une autre action.
+
+**Piège traité :** `__describe` portait un état d'entrée (`opacity: 0` + `.is-in` posé en JS). Dans sa nouvelle zone, plus personne ne lui donne `.is-in` — il serait resté **définitivement invisible**. L'état d'entrée a été transféré au bouton blanc ; le translucide est désormais révélé par l'opacité de la zone sélection, pilotée par `--reveal`.
+
+**Ajustement suivant (Robin) : le bouton translucide passe SOUS le carrousel.** Ordre final de la zone sélection : titre → carrousel → dots → bouton. Logique : on ne propose d'affiner qu'après avoir montré. Et le carrousel remonte d'autant (~53px).
+Avec, `padding-top` de la zone sélection 24 → **12px** : en desktop, la zone 1 prenant sa hauteur naturelle et la zone 3 tout le reste, **ce padding EST l'écart entre la phrase de Robin et le titre de la sélection** — il n'y a aucun espace résiduel ailleurs, donc c'est le seul levier. +12px rendus aux cards, en plus des 53 gagnés par le déplacement.
+
+### ✅ « UN GESTE = UN ÉCRAN » + PLAFOND À 5 PROPOSITIONS (2026-08-25)
+
+**1. Scroll en carrousel — deux comportements, un seul mot pour basculer.**
+Robin : « sur l'écran A, un scroll vers le bas (quel qu'il soit) fait passer à l'écran B, puis à C, puis normal. Et pareil au retour. Un peu comme un carrousel. »
+
+⚠️ **Cette demande rouvre un arbitrage tranché le matin même.** Un vrai carrousel signifie que la page prend la main dès le geste amorcé, donc que **la révélation se joue sur une horloge et non plus sous le doigt** — précisément ce que Robin avait dit regretter (« oui, j'y tiens, il doit suivre le doigt »). Signalé avant de coder. Sa réponse : « montre-moi les deux ».
+
+- **Version DOUCE, livrée par défaut** (`CAROUSEL_HARD = false`). Le doigt pilote la révélation pendant tout le geste ; c'est au **relâchement** que la page va **toujours exactement à l'étape suivante**, jamais zéro ni deux. Mécanisme : on mémorise l'étape d'où **part** le geste (`gestureFrom`, posé au `touchstart` et au premier mouvement), et c'est ce point de départ — non la position atteinte — qui décide de l'arrivée. C'est ce qui garantit « une étape », même quand l'élan du téléphone a emporté la page plus loin.
+  Faiblesse assumée : sur un geste très violent, la page dépasse puis revient.
+- **VRAI CARROUSEL** (`CAROUSEL_HARD = true`). Écouteurs `wheel`/`touchmove` **non passifs** qui annulent le geste natif et lancent la transition, rendue **ininterruptible** (`cancelProgrammatic()` devient inopérant). Net, sans retour en arrière. Les écouteurs ne sont posés QUE dans ce mode : un écouteur non passif sur le scroll coûte cher, on ne le paie pas si on ne s'en sert pas. Deux exclusions indispensables : geste parti du carrousel (sinon le swipe horizontal des cards serait annulé) et les quatre fenêtres déjà exclues en douce.
+
+Le biais directionnel de la version précédente (35 % du trajet) **disparaît** : il devient sans objet dès lors que l'arrivée se calcule depuis l'étape de départ.
+
+**2. Plafond à 5 propositions.** `sapi_immersion_max_products()` = **4 modèles**, la carte « Créons ensemble » (sur-mesure) occupant le 5ᵉ emplacement. Elle est rendue par le template et conservée par `swapCards()`, donc toujours présente.
+⚠️ **Le plafond s'applique APRÈS le classement par priorité**, aux deux points de rendu (chargement + endpoint du moment 2) : couper avant reviendrait à garder 4 modèles au hasard puis à les ordonner, au lieu de garder les **4 meilleurs**.
+Lecture retenue de la demande : « 5 au total, dont sur-mesure en dernier ». Si Robin voulait 5 modèles **plus** la carte, c'est un seul chiffre à changer.
+
+### ✅ LE VRAI CARROUSEL EST RETIRÉ — audit + simplification (2026-08-25)
+
+Robin, après l'avoir essayé : « on est un peu au milieu du gué, le scroll continue sur le mouvement suivant s'il est trop long ». Puis, après l'audit : « **on peut oublier mes demandes précédentes pour faire quelque chose de simple et propre. Je pense au flou contrôlé sur l'image et à la pause. Le plus important c'est quelque chose de propre qui fonctionne.** »
+
+**⚠️ POURQUOI LE VRAI CARROUSEL NE POUVAIT PAS MARCHER — à relire avant toute tentative de le réintroduire.**
+Mon diagnostic était faux : je croyais que `preventDefault` s'arrêtait trop tôt. Il arrivait **trop tard**. **Le navigateur décide au TOUT PREMIER `touchmove` si le geste est un défilement**, et une fois qu'il a décidé, il ignore silencieusement toute annulation ultérieure (les `touchmove` suivants passent en `cancelable: false`). Or un seuil de déclenchement, si petit soit-il, laisse forcément passer les premiers mouvements.
+→ **Le mode ne prenait la main que sur les gestes VIOLENTS** (premier mouvement > seuil) et échouait précisément sur les gestes posés. C'est mot pour mot le symptôme de Robin, et c'est l'inverse de sa demande (« un mouvement quel qu'il soit »).
+La seule mécanique correcte serait `touch-action: pan-x pinch-zoom` en CSS (consulté quand le doigt se pose, jamais trop tard, et qui permettrait au passage de **supprimer** l'écouteur non passif — donc meilleur pour la fluidité). Mais c'est un **verrou dur** : si le JS ne fait pas son travail, la page devient impossible à faire défiler dans le hero. Écarté au profit de la simplicité.
+
+**Régression que le code embarquait et qui n'a jamais été livrée :** l'exclusion du carrousel se faisait sur **la cible du toucher**. Avec un verrou CSS, un doigt posé sur les cards qui tire la page vers le bas — geste légitime, explicitement voulu — n'aurait **plus rien fait du tout**. Il faut exclure sur la **direction dominante** du geste, jamais sur la cible.
+
+**🐛 CINQUIÈME PIÈGE (série des unités, du flux, de l'overscroll) : `touchcancel` n'était géré nulle part.**
+iOS l'émet **à la place** de `touchend` dans des cas quotidiens : balayage depuis le bord, centre de contrôle, appel entrant, appui long sur une image (les cards en sont), second doigt — et surtout **quand le navigateur reprend le geste à son compte pour scroller**, c'est-à-dire la situation même de cette page.
+Sans lui, `touching` restait `true` **pour le reste de la vie de la page** : l'ancrage mourait **sans erreur, sans symptôme immédiat**, et redevenait normal au rechargement. La forme exacte du « ça marche, et parfois ça ne marche plus », la plus chère à diagnostiquer en recette. **Corrigé et livré seul**, avant tout le reste.
+
+**Fuite du même genre, corrigée avec :** `maybeSnap()` sortait sans remettre `gestureFrom` à zéro. En mode dur, `progScroll` étant vrai à chaque fin de geste, **tous** les gestes passaient par cette sortie : l'origine du geste précédent restait en mémoire et faussait le calcul de l'étape d'arrivée (saut en arrière, ou de deux étapes). Toutes les sorties anticipées la remettent désormais à zéro — sauf celle du doigt encore posé, où le geste continue légitimement.
+
+**Le drapeau de scroll programmatique se lève désormais À L'ARRIVÉE, pas après un délai.** Il l'était par un `setTimeout(700)` — une supposition sur une durée que le navigateur possède. Le trajet carrousel → catalogue fait 200 % de hauteur d'écran (~1 500px sur téléphone) : l'animation y dépasse facilement 700 ms, le drapeau retombait **en plein vol**, l'ancreur prenait une position intermédiaire pour origine et lançait une **seconde** transition. Le délai ne subsiste qu'en filet ultime (2 500 ms, onglet en arrière-plan).
+
+**Trois nombres épars fondus en deux, nommés :** `GESTE_MINIMUM` (8px — en dessous, il ne s'est rien passé) et `TOLERANCE_ARRIVEE` (4px — on se considère posé sur une étape). Avec `SNAP_IDLE` et `SNAP_CATCH`, le bloc n'a plus que quatre réglages, tous nommés en tête.
+
+**Ce qui reste, et c'est tout :** le doigt pilote la révélation, la page complète toujours exactement une étape au relâchement, et la pause de 100vh masque le dépassement des gestes violents. Simple, et sans écouteur non passif nulle part.
+
+### ✅ TRANSITION À DURÉE MAÎTRISÉE (2026-08-25)
+
+Robin : « le scroll est juste trop lent entre les deux premiers écrans ».
+
+**Cause : la durée ne nous appartenait pas.** On laissait faire `behavior: 'smooth'`, dont **la durée grandit avec la distance** et varie selon le navigateur. Le trajet phrase → carrousel fait 100 % de hauteur d'écran (~838px, soit 600-800 ms) ; celui vers le catalogue en fait 200 % et durait encore plus.
+
+→ **Animation maison en `requestAnimationFrame`, `DUREE_TRANSITION = 420 ms`, décélération cubique.** La durée est désormais **la même pour toutes les étapes quelle que soit la distance** : c'est ce qui donne la sensation d'un pas régulier. ⇦ Un seul chiffre : monter = plus posé, descendre = plus sec.
+
+**⚠️ PIÈGE ÉVITÉ, à connaître absolument si on retouche à ça :** il faut neutraliser le `scroll-behavior: smooth` global (style.css l. 128) **pendant toute la durée de l'animation**, pas seulement le temps d'un appel comme le faisait `jumpTo()`. Chaque image appelle `scrollTo` ; avec le smooth actif, **chaque appel déclencherait sa propre mini-animation** et la page ramperait sans jamais arriver. Le symptôme serait « c'est devenu tout mou » — et on l'imputerait à la durée, donc à la mauvaise cause.
+
+**Bénéfices annexes :** le drapeau de scroll programmatique a maintenant **un seul propriétaire** (l'animation le lève à sa dernière image) — plus de délai à deviner, plus de risque qu'il retombe en vol. Le filet de 2 500 ms ne sert que si l'onglet passe en arrière-plan. Et l'annulation (doigt, molette, clavier) arrête l'animation **là où elle en est**, sans saut : `--reveal` suivant la position réelle, il n'y a rien à resynchroniser.
+
+`prefers-reduced-motion` → saut instantané, aucune animation.
+
+## 🔧 MODALE CONSEILLER — AUDIT DES PARCOURS + 10 CORRECTIFS (2026-08-25)
+
+Robin a signalé deux défauts d'UX et demandé un audit complet des parcours. L'agent a cartographié **9 rendus visuels**, tous les points d'entrée et le cycle de vie du projet mémorisé. Les deux défauts avaient des causes plus profondes qu'ils ne le montraient, et il en a trouvé un troisième, grave, invisible à l'écran.
+
+### 🐛 1. La réponse périmée avant le message du visiteur (signalé par Robin)
+**Vu par Robin :** il tape « une grande suspension pour une salle de bain », la conversation s'ouvre sur « Pour un salon, je te propose des luminaires à ampoule entourée… », PUIS son message. Robin lui parle avant qu'il ait parlé, et d'autre chose.
+
+**Cause : la bulle n'a pas été écrite pour ce parcours.** Conçue pour « Préciser avec Robin » depuis le récapitulatif — où elle a du sens : on vient de lire le conseil et on demande à l'affiner — elle a été **réutilisée telle quelle** pour le champ libre, où la prémisse est fausse : le visiteur décrit un projet NEUF.
+**Aggravant, et c'était le vrai bug :** la bulle était empilée dans `state.chat.conversation`, donc **renvoyée à l'IA** aux tours suivants. Le modèle lisait une phrase que Robin n'a jamais dite, affirmant que le projet était un salon, et restait ancré sur la mauvaise pièce.
+→ Bulle supprimée de ce chemin (gardée pour `refineFromS3`). Le fil commence par le message du visiteur.
+
+### 🐛 2. LA FAUSSE MÉMOIRE — le défaut qui survivait à la correction visible
+`submitFreetext` déclare « nouvelle description complète, on remplace les chips », vide `state.answers`… puis appelle `applyFiltersBatch`, qui termine par `sapiProject.update()` — **une FUSION**. Vider l'état côté JS ne supprime rien dans le navigateur.
+Cas réel : mémoire « salon », le visiteur écrit « salle de bain ». Cette pièce **n'existe pas dans les sept du référentiel**, l'extraction ne renvoie donc rien pour `piece`, et « salon » survit. **Les deux coexistaient, l'ancien gagnait** : chips « Salon » à l'écran, IA nourrie de « salon », sélection finale de salon.
+→ `applyFiltersBatch(filters, replaceAll)` : le chemin du texte libre appelle `set()` au lieu d'`update()`. **Sans ce second correctif, le premier n'aurait fait que cacher le symptôme.**
+
+**⚠️ CORRIGÉ UNE 2ᵉ FOIS — le premier correctif avait un trou, trouvé en recette par Robin.**
+Test : « une petite lampe pour une salle de bain » → « il m'a proposé une sélection mais n'a pas enregistré la pièce et m'a donc resservi le projet précédent ».
+Cause : le remplacement était conditionné à `if (Object.keys(filters).length)`. **Quand l'extraction ne renvoie RIEN — ce qui est exactement le cas quand le visiteur nomme une pièce absente du référentiel — la branche était sautée et l'ancien projet survivait intact.** Le pire des cas, puisque c'est précisément là que le visiteur a décrit autre chose.
+→ Remplacement rendu **inconditionnel**, dans la branche de succès. Sur ce chemin le message EST une description de projet par construction (le champ dit « Décris ton projet en quelques mots ») : il n'existe aucun cas où l'on voudrait conserver l'ancien. Placé dans la branche de succès pour qu'une panne réseau ou une erreur IA ne détruise pas le projet du visiteur.
+**Leçon : un correctif conditionné à « l'IA a compris quelque chose » laisse toujours passer le cas où elle n'a rien compris — et c'est souvent celui qui compte.**
+
+### ✅ DEUX SORTIES AU LIEU D'UNE — la règle « pas de pièce → contact » était trop grossière
+
+**Recette Robin :** conversation sur une suspension de salle de bain → l'IA comprend « sortie au-dessus du miroir » = sortie murale, propose les appliques, l'encart affiche « Au mur · Standard ». Clic sur « Voir la sélection » → **formulaire de contact**.
+
+**Ce n'était pas un bug mais ma règle appliquée à la lettre, et elle était fausse :**
+- Le projet **n'était pas vide** : deux critères, et **le moteur de filtrage n'a jamais eu besoin de la pièce** — il se règle d'abord sur la sortie électrique. « Au mur » suffit à déduire les appliques.
+- Mon message « je n'ai pas assez d'éléments » s'affichait **juste au-dessus** d'un encart qui en listait un. Contradiction visible à l'écran.
+- **Cause de fond :** la page de sélection est indexée sur la pièce. `/mes-creations/?piece=salon` existe ; **aucune URL ne dit « appliques murales, pièce inconnue »**. Il y avait quelque chose à montrer, mais nulle part où l'envoyer.
+- Et l'IA posait déjà la bonne question : « tu veux qu'on regarde les appliques, ou tu veux en parler directement avec Robin ? » **Un seul bouton devait donc deviner lequel des deux chemins prendre.**
+
+**Décision Robin : deux boutons, comme l'IA les proposait.**
+- **« Voir les appliques et plafonniers »** → le catalogue filtré (`?product_cat=`), qui sait déjà se filtrer et pré-activer sa pastille. On réutilise une page existante au lieu d'en inventer une.
+- **« En parler à Robin »** → l'écran contact.
+- Quand la **pièce est connue**, le second bouton reste **masqué** : un seul chemin a du sens et on ne dilue pas l'action principale.
+
+**Mise en œuvre :** l'endpoint chat renvoie désormais `catalog_cat` + `catalog_label`, **la catégorie déduite quand il n'en trouve qu'UNE seule**. Le libellé du bouton est alors réécrit avec son nom, pour qu'il promette exactement ce qu'il donne. Plusieurs catégories → catalogue complet, ce qui reste honnête : on ne prétend pas cibler.
+
+⚠️ **Le motif à retenir : quand une décision est ambiguë, ne pas la prendre à la place du visiteur.** La règle « pas de pièce → contact » essayait de deviner ; deux boutons suppriment la devinette. C'est aussi ce que la conversation venait de proposer, donc ce à quoi il s'attendait.
+
+### ✅ LE TEXTE ET LES IMAGES NE PARLAIENT PAS DU MÊME PROJET
+
+**Recette Robin :** conversation sur un couloir avec sortie murale → arrivée sur `/mes-creations/?piece=entree`. Le conseil affiché dit « **Voici ma sélection d'appliques pour ton couloir** » — juste, il tient compte de la sortie murale. Mais le slider affiche des **suspensions**, et la pill dit « pour ton entrée ».
+
+**Cause : la page ne connaît QUE la pièce.** Le rendu serveur part de `['piece' => $imm_piece]` **et rien d'autre** (`archive-product.php` ~l.126) : c'est une sélection « niveau pièce », prévue dès l'origine pour être affinée ensuite par le **moment 2**, c'est-à-dire à la fermeture de la modale, sans rechargement.
+**Or le chemin que je viens de créer RECHARGE la page.** Le moment 2 n'a donc jamais lieu : la page arrive neuve, avec la seule pièce, et le reste du projet (sortie murale, hauteur) est ignoré. Le conseil, lui, avait été calculé avec **toutes** les réponses — d'où le désaccord entre le texte et les images.
+
+⚠️ **Ce n'est pas un bug introduit, c'est une limite ancienne rendue visible par un chemin neuf.** Le commentaire du fichier l'annonçait : « taille/style viendront affiner via AJAX serveur à l'étape suivante ». Personne n'avait prévu qu'on puisse ARRIVER sur cette page avec un projet déjà complet.
+
+→ **`refineFromStoredProject()` au chargement de l'immersion** : on rejoue l'affinage à partir du projet mémorisé, en réutilisant **exactement** le mécanisme du moment 2 (même endpoint, même dédup, même remplacement de cards). Le carrousel étant invisible à ce stade (`--reveal` à 0), le remplacement ne se voit pas.
+**La signature de dédup fait le tri toute seule** : si le projet ne contient que la pièce, elle est identique à la baseline et aucune requête n'est envoyée. Aucun coût sur le chemin normal (clic sur une carte-pièce).
+
+### ✅ FICHE PRODUIT — LA PILL DIT « C'EST LE MIEUX » TANT QUE LA VERSION RECOMMANDÉE EST AFFICHÉE
+
+⚠️ **Cette section a d'abord décrit une approche ABANDONNÉE.** Elle disait « J'ai choisi pour ton projet », « sans jamais revenir en arrière », « observer l'effet » — trois fois le contraire du code. Un document qui explique l'inverse de ce qui tourne est pire que pas de document. Relu et réécrit le 26/08.
+
+**LA RÈGLE, en une phrase :** la pill dit « **C'est le mieux pour ton projet** » quand **chaque** menu de variation affiche exactement la valeur recommandée. Sinon, « Je t'aide à choisir la bonne version ».
+
+C'est un message d'**ÉTAT**, pas d'action — décision Robin. Conséquence voulue : **la pill REVIENT** si le visiteur s'éloigne puis retombe sur la version recommandée. Il n'y a donc aucun verrou, aucun historique, juste une comparaison refaite à chaque changement.
+
+⚠️ **La capsule est mono-ligne : 36 caractères MAXIMUM.** Au-delà, les jambages du Square Peg se touchent sur iPhone. Le texte actuel fait 30 caractères, mesuré à 274 px contre 313 px pour le texte normal.
+
+**Le mécanisme, en trois pièces :**
+1. **`sapi-product-preselect.js` DÉCLARE** sa recommandation dans `data-sapi-recommandation` sur le formulaire (`{nomDuMenu: valeurOption}`), **en une fois, avant d'appliquer**.
+2. **`sapi-help-pill.js` COMPARE** l'écran à cette étiquette. Il ne connaît aucune règle métier.
+3. **Le déclencheur est `found_variation` / `reset_data`** — événements jQuery de WooCommerce, écoutés sur le formulaire, débounce 300 ms. Ils couvrent indifféremment le plugin de pastilles, les menus natifs, le lien « Effacer » et les écritures de la présélection : **une seule porte au lieu de trois**. Ce motif tourne déjà sur cette page pour le prix et la photo.
+
+⚠️ **L'étiquette suit le PROJET, pas seulement le chargement.** Elle n'était écrite qu'au démarrage : un visiteur qui refaisait son projet puis fermait la modale **par la croix** laissait la pill affirmer que l'écran était le meilleur pour un projet qui n'existait plus. `rafraichirEtiquette()` est abonné à `sapiProject` et **réécrit sans jamais appliquer** — aucun menu touché, donc aucun risque de reprendre son choix au visiteur.
+
+⚠️ **Ordre des abonnés :** la pill est notifiée AVANT la présélection (ordre d'enqueue). Ce sont les 300 ms de débounce qui rendent ça sûr. **Ne jamais brancher `rendre` directement sur `subscribe`.**
+
+**DEUX APPROCHES ONT ÉCHOUÉ AVANT CELLE-CI. Ne pas les refaire :**
+- **Deviner en observant les événements**, avec `isTrusted` pour séparer l'humain du code. Deux raisons mesurées : quand la valeur est déjà bonne, `applyOption` **n'émet rien** — il n'y avait donc rien à observer, et la pill se taisait devant la recommandation affichée. Et **`isTrusted` ne sépare pas ce qu'on croit** : le bouton radio du plugin émet un `change` natif ET trusted même déclenché par script, tandis que la pastille image n'émet aucun `change`. Deux attributs de la même page, deux comportements opposés.
+- **`[class*="wvs-"]` pour attraper les pastilles** : le plugin pose ses classes jusque sur le `<body>`, donc `closest()` remontait et **n'importe quel clic de la page** armait le verrou.
+
+**Découvertes sur le site, à garder :**
+- **`.material-option` n'existe pas sur la fiche produit.** Le plugin *WooCommerce Variation Swatches* gagne sur le filtre du thème (`functions.php:2133`) : tout le code de pastilles maison — thème + `cinetique.js:359` + `shop.js:120` — est **mort sur cette page**.
+- L'essence est rendue en `<li class="variable-item">` **sans contrôle nommé** ; le plugin recopie la valeur via jQuery, invisible d'un écouteur natif.
+- **La prod servait encore l'ancien fichier** (347 octets contre 12 Ko) : recetter sur `test.`, pas sur `atelier-sapi.fr`.
+
+**Correction annexe, mesurée :** la présélection tournait deux fois, et la seconde passe **reprenait au visiteur le choix qu'il venait de faire**, entre ~2,2 s et ~3,0 s après l'arrivée. Elle ne remplit plus que ce qui est encore vide (`seulementVides`).
+
+**Décision Robin du 26/08 — « Pas de préférence » de style → PEUPLIER.** Le visiteur n'a pas refusé de choisir, il a délégué. Sans ça, la pill ne pouvait jamais s'allumer pour lui. ⚠️ **Reporté dans les TROIS copies de la table** (`sapi-product-preselect.js`, `sapi-photo-swap.js`, `sapi-modal-conseiller.js`) : elles pilotent la présélection, la photo et le récap, et divergentes elles montrent une photo de peuplier sous un récap qui annonce l'okoumé. Un style **absent** reste sans recommandation, volontairement.
+
+---
+
+### 📍 ÉTAT AU SOIR DU 27/08 — CE QUI RESTE
+
+**Douze lots livrés et recettés dans la journée.** Le fil conducteur : le site disait souvent le contraire de ce qu'il faisait, sans jamais planter.
+
+**À faire au déploiement, dans l'ordre :**
+1. `php -l functions.php` sur test, ou ouvrir une page. Beaucoup de PHP a bougé.
+2. **Robin Conseiller → Règles de filtrage.** Si « Réglages personnalisés actifs », mettre **Pas de préférence → Peuplier** et enregistrer. C'est le seul correctif qui ne s'applique pas seul : une valeur sauvegardée écrase le défaut en bloc.
+3. En prod : vider le cache de page ET Autoptimize, puis vérifier qu'un lien `?piece=salon&sortie=mur` affiche des appliques. **La recette sur test ne peut pas le prouver** — test n'a ni cache ni Autoptimize.
+4. Prévenir que les chiffres du tableau de bord **baissent la première semaine** : trois frontières de lecture, toutes dans le même sens.
+
+**Ce qui reste, par ordre de valeur :**
+
+*Le tableau de bord ment encore sur trois chiffres.* `advice_text` n'est jamais enregistré (`finalize()` passe avant `setAdviceText()`, et remet `hasStarted` à faux). `home_picker` restera à zéro tant que la modale n'existe pas sur l'accueil — la branche est du code mort. `matching_product_ids` est définitivement vide : le scan DOM a été retiré, il faut que le serveur rattache la liste qu'il calcule déjà.
+
+*Deux sujets catalogue, pas du code.* Le plus grand format (110 cm sur Gaston) n'est recommandé qu'aux escaliers ouverts, jamais à une grande pièce. Et sur les modèles à deux tailles, « standard » et « grand » donnent le même résultat. Le site suppose trois tailles par modèle ; le catalogue en a deux à quatre.
+
+*RGPD, ce qui n'est pas traité.* Les écritures partent avant tout consentement (Complianz n'est consulté nulle part), rien n'est mentionné dans la politique de confidentialité, et **le snippet Pinterest envoie l'IP complète** — ce chantier n'y a pas touché.
+
+*Décisions de Robin en attente.* La péremption du projet mémorisé (un projet de trois semaines est traité comme celui d'il y a une minute). Le vocabulaire « couloir » vs « entrée ». Où afficher `fallback_notes` dans le hero.
+
+*Dette technique connue.* `justify-content: center` sur le corps de la modale : tout débordement rogne le HAUT, sans recours. `SessionTracker` : ordre `finalize`/`advice`. `shop.js` lit encore `sapiMegaFilter`, supprimé. Vestiges CSS (`.conseiller-card--mon-projet`, `.conseiller-cards-zone`) et `.why-sapi-recap`, ~30 lignes de markup qui ne peuvent plus s'afficher.
+
+---
+
+### ✅ TABLEAU DE BORD — CINQ CHIFFRES REDRESSÉS (2e passe)
+
+1. **« Quiz complétés » comptait des réponses d'anciennes visites.** `openModal()` recopie le projet mémorisé, le premier changement d'écran enregistre, et la ligne partait « salon / grande / plafond / moderne » alors que le visiteur n'avait rien répondu. L'identifiant étant régénéré à chaque page, ouvrir la pastille sur quatre fiches produit produisait **quatre lignes identiques marquées quiz complet**.
+   → `REPONSES_DE_CETTE_SESSION` + `noterReponse()`. Rien n'est envoyé tant que le visiteur n'a pas répondu aujourd'hui.
+   → ⚠️ `noterValidation()` sur « Voir ma sélection » et « Appliquer cette sélection » : **une confirmation vaut une réponse**. Sans ça, le visiteur fidèle qui revient, valide et repart disparaissait des statistiques — on supprimait les doublons ET les vrais retours.
+
+2. **« Contacts envoyés » comptait des mails jamais reçus.** Le client marquait avant l'appel serveur, rien ne rétractait. Étaient comptés les rejets honeypot, time-trap et anti-junk — qui répondent `success` **en silence par conception**, donc que le client ne peut pas distinguer — plus les échecs de `wp_mail`.
+   → **Seul le serveur sait.** `sapi_megafilter_marquer_contact_envoye()`, appelée après un `wp_mail()` réussi. Le client transmet son `session_id` et n'affirme plus rien.
+   → ⚠️ **Contrôle de forme TOLÉRANT** (`{8,32}`) : le repli sans `crypto` produit 19 caractères, pas 16. Un `{16}` strict rejetait 100 % de ces visiteurs en silence — on aurait remplacé un sur-comptage par un sous-comptage.
+
+3. **Deux fuseaux horaires.** La liste utilisait `date()`, le détail `wp_date()` : la même session s'affichait à 14:03 et à 16:03. → `sapi_megafilter_date_fr()` partout, affichage **tel que stocké**. Le stockage n'est PAS touché : l'aligner créerait une frontière entre anciennes et nouvelles lignes.
+
+4. **Les libellés ne correspondaient plus aux réponses.** Deux tables recopiées à la main, douze entrées fantômes. → `sapi_megafilter_admin_labels()`, construite depuis `sapi_guide_get_steps()`.
+   ⚠️ **`inc/guide-data.php` N'EST PAS CHARGÉ EN ADMIN** — tous ses `require_once` sont front ou AJAX. Sans le `require_once` ajouté, la fonction rendait un tableau vide, **le mettait en cache**, et le tableau affichait les slugs bruts : pire que ce qu'elle remplace. Le cache n'est désormais posé que sur un succès.
+
+5. **Le delta « vs période précédente » ignorait tous les filtres.** Filtrer sur « Salon » comparait les sessions salon de cette semaine à TOUTES celles de la précédente. → clause reconstruite avec les mêmes filtres, période exceptée.
+
+⚠️ **À DIRE À ROBIN — TROIS FRONTIÈRES DE LECTURE.** La première semaine après le déploiement, **tous les chiffres baissent, et c'est le signe que ça marche** :
+- `contact_submitted` : avant = « il a cliqué Envoyer », après = « Robin a reçu le mail » ;
+- `answers_completed` / `piece` / `style` : avant = « il y avait un projet en mémoire », après = « il a répondu ou validé aujourd'hui » ;
+- les deltas ne sont comparables qu'entre périodes situées **du même côté** du déploiement.
+
+---
+
+### ✅ TABLEAU DE BORD — TROIS CHIFFRES QUI MENTAIENT (1re passe)
+
+Audit complet demandé par Robin : « est-ce que les parcours sont bien sauvegardés et affichés ? » Réponse : **non**, et le problème n'était pas des chiffres manquants mais des chiffres **faux sans le dire**. Trois correctifs retenus, les moins risqués.
+
+1. **La recherche promettait « texte libre » et interrogeait une colonne vide.** `ai_freetext_input` n'était écrite par personne — le serveur savait la traiter depuis toujours, le client ne l'envoyait jamais. Ajout de `ai_chat_messages`, `contact_subject`, `contact_message` à la clause, **et** envoi effectif de `ai_freetext_input`.
+   → C'est ce qui rend enfin trouvables les **pièces hors périmètre** : une demande pour une salle de bain n'a pas de `piece`, n'entre dans aucun agrégat, n'a aucun filtre — mais les mots sont dans la conversation. Chercher est le seul chemin vers l'information la plus utile du tableau : **ce que les gens demandent et que Robin ne vend pas.**
+
+2. **Le compteur `freetext` valait 0 depuis toujours.** `init()` retirait `?freetext=` de l'URL **puis** ouvrait la modale 100 ms plus tard ; `detectEntryPoint()` relisait une URL déjà nettoyée. Capture dans `ENTREE_FREETEXT` au tout premier instant du script. ⚠️ **Ne pas déplacer cette lecture.**
+
+3. **`contact_triggered` valait toujours `contact_submitted`.** Il n'était envoyé que dans le payload du submit. La pastille « Abandon » du tableau était donc du code mort, et celui qui atteignait le formulaire sans l'envoyer était indiscernable de celui qui fermait la modale — c'est-à-dire exactement la population qu'on vient d'y router.
+
+⚠️ **Défaut créé puis attrapé en relecture — cinquième exemplaire du motif du §4.** En ajoutant `ai_chat_messages` à la recherche, j'ouvrais une recherche **aveugle aux accents** : `wp_json_encode` sans `JSON_UNESCAPED_UNICODE` stockait « éclairage » sous la forme `éclairage`. Requête valide, résultat vide, aucune erreur — et Robin aurait vu le mot écrit noir sur blanc dans le détail, l'affichage décodant le JSON. Corrigé, **mais seulement pour les lignes écrites après ce commit.**
+
+⚠️ **À DIRE À ROBIN, sinon il lira le tableau de travers :** les « Abandon » n'existent **qu'à partir de ce déploiement**. Les sessions antérieures gardent l'ancienne sémantique et n'en porteront jamais, quoi qu'il se soit passé. Il les verra apparaître d'un coup et pourra croire à une dégradation du parcours : c'est simplement la mesure qui commence.
+
+**Non traité, et documenté dans `questions_ouvertes.md` :** « Quiz complétés » compte des réponses héritées du localStorage d'une visite précédente ; « Contacts envoyés » compte les rejets anti-spam (qui répondent « ok » en silence) ; `home_picker` est structurellement impossible ; deux fuseaux horaires cohabitent ; l'IP complète part chez ip-api.com **en HTTP non chiffré**, sans consentement ni durée de conservation, alors que le PDF catalogue purge à 30 jours.
+
+---
+
+### ✅ PIÈCE HORS PÉRIMÈTRE — LE BOUTON QUI PROMETTAIT UNE SÉLECTION INEXISTANTE
+
+**Recette Robin :** « Une lampe pour ma salle de bain » dans le chat. L'IA pose une question de clarification (la vasque, la prise) — elle n'a proposé **aucune** sélection — et « VOIR LA SÉLECTION » s'affiche quand même. Il renvoie vers les modèles du **projet précédent**.
+
+**Deux défauts empilés :**
+1. `revealChatCta()` était appelé après **chaque** réponse, sans jamais regarder s'il y avait quelque chose à voir.
+2. Sur la page d'immersion, `case 'apply'` ne prenait pas le garde-fou « sans pièce » (`immersionIsOnPage()` court-circuitait) : il repartait en moment 2, et la page derrière n'ayant jamais changé de pièce, elle re-servait l'ancienne sélection.
+
+⚠️ **Un bouton qui promet une sélection inexistante est pire qu'un bouton absent** : le visiteur clique, tombe sur des modèles sans rapport, et croit que c'est ce que le site lui recommande.
+
+**⚠️ DÉCISION ROBIN — elle REMPLACE les deux boutons de la veille.** « Toutes les pièces qui ne sont pas dans le room-picker » sortent du périmètre. Le picker couvre déjà les synonymes (« Entrée / Couloir », « Salon / Salle à manger », « Bureau / Atelier ») : **un couloir n'est donc PAS hors périmètre, il est une entrée.** Hors périmètre = salle de bain, garage, terrasse, cave, véranda — humidité et sécurité électrique sur du bois, seul Robin peut juger.
+
+→ **Sans pièce : un seul bouton, vers Robin.** Le bouton contact quitte son style fantôme quand il est seul en piste — le style secondaire signifierait « il y a mieux ailleurs », et il n'y a rien.
+→ **La règle de périmètre est posée dans LES DEUX prompts** (extraction freetext ET chat). C'est le prompt d'extraction qui traite le premier message, donc celui qui avait laissé passer la salle de bain. Deux règles divergentes = deux comportements selon que le visiteur parle une ou deux fois.
+→ Consigne explicite : **ne pas rabattre sur une pièce approchante.** Une salle de bain n'est pas une cuisine ; mieux vaut ne rien proposer que proposer à côté.
+
+**Code retiré (il n'a plus de chemin) :** `goToCatalogue()`, `state.chat.catalogCat/catalogLabel`, et côté serveur `catalog_cat`/`catalog_label` avec leur bloc de calcul. C'était la sortie « catalogue filtré » d'hier, que cette décision rend inatteignable.
+
+⚠️ **Ce que j'en retiens sur ma propre méthode :** deux fois en deux jours j'ai confondu « connaît-on la pièce » et « y a-t-il quelque chose à montrer ». Une fois dans chaque sens. Ce sont deux questions distinctes, et le code les nomme désormais séparément — `projectPiece()` et `projectHasCriteria()`.
+
+---
+
+### ✅ ÉTAPE 1 — LE DÉCOR SORT DU MÊME CALCUL QUE LA SÉLECTION
+
+**Le problème de fond, nommé après une passe d'agent :** il n'y avait pas de page de sélection mal indexée. **Il y avait une page de PIÈCE, et la sélection y était un effet de bord.** Deux objets portaient le même mot et le template les avait soudés dans `$imm_piece` :
+- **la sélection** = le résultat du moteur, fonction de six critères — et `piece` est le **moins déterminant** : `sapi_guide_get_categories()` choisit sur `sortie` d'abord, la pièce ne sert qu'à retirer les lampes à poser en cuisine ;
+- **le décor** = photo, possessif, titre. Fonction d'**un** critère, la pièce.
+
+⚠️ **Le critère le plus déterminant du moteur est précisément celui que l'URL ne sait pas exprimer.**
+
+Tant que les deux sortaient d'endroits différents, ils pouvaient se contredire — et ils l'ont fait. L'endpoint d'affinage ne renvoyait que `html` et `count` : **aucun affinage ne POUVAIT corriger le décor.** Ce n'était pas un oubli, c'était structurel. Mon correctif précédent avait réparé les images ; la pill, elle, ne pouvait pas l'être.
+
+→ **`sapi_immersion_build_context($answers)`** : une fonction, trois appelants (template, endpoint du moment 2, et la suite). Elle rend produits + catégorie dominante + possessif + titre + phrase + notes de repli. Le précédent existait déjà et il est bon : `sapi_immersion_render_product_card()` est la source unique du markup d'une card. Même réflexe pour le décor.
+→ L'endpoint renvoie le paquet complet ; le JS applique le décor **dans le même creux du fondu** que les cards. À aucun instant l'écran ne montre un titre et des produits qui se contredisent.
+→ **Le titre dit la catégorie dès qu'elle est certaine** — une seule catégorie déduite. Deux ou plus, et « mes appliques » serait un mensonge : on retombe sur le titre neutre.
+
+**Deux pièges évités en chemin, tous deux par le calcul avant livraison :**
+- `d'%s` donnait « ma sélection **d'suspensions** » — l'élision ne vaut que devant une voyelle. Reformulé en « Mes %s pour… », qui n'a plus le problème du tout.
+- À 13 px capitales espacées, « Ma sélection de lampes à poser pour ta chambre d'enfant » faisait 517 px pour 327 px utiles sur iPhone → deux lignes, photo rognée. « Mes lampes à poser pour… » ramène à 404 px, soit **le pire cas qui existait déjà** avant ce chantier (« Ma sélection pour ta chambre d'enfant » = 348 px). Aucune régression de mise en page.
+
+**Disponible mais PAS encore affiché : `fallback_notes`.** Le moteur sait quand il a relâché une contrainte et le dit à l'IA ; le hero jetait l'information, donc le visiteur voyait un compromis présenté comme un idéal. La donnée remonte maintenant jusqu'au JS. **Où l'afficher est une décision de Robin** — la mise en page du hero est calibrée au pixel, je n'y ajoute pas un élément visible sans son accord.
+
+**Reste, et c'est cosmétique :** la pill et le titre disent « pour ton entrée » alors que le visiteur a dit « couloir » — l'extraction a mappé couloir sur la plus proche des sept pièces. Le conseil IA, lui, reprend le mot du visiteur. Léger décalage de vocabulaire, à trancher avec Robin s'il le juge gênant (une pièce « couloir » distincte, ou un libellé qui reprend le mot du visiteur).
+
+### 🐛 3. Le CTA « Voir la sélection pour mon projet » ne menait nulle part (signalé par Robin)
+**Vu par Robin :** Robin annonce des filtres appliqués, le bouton promet la sélection, le clic ferme la modale et ramène au room-picker. Rien n'a bougé.
+
+**Cause :** la sortie de la modale a été conçue pour `/mes-creations/` **en mode immersion** — elle émet des événements que le hero écoute. Mais le hero n'existe que si l'URL porte `?piece=`. Or le champ libre envoie vers `?freetext=` **sans pièce** : ni hero, ni slider, aucun auditeur. Le bouton appelait aussi Sonnet (25 s, payant) pour un texte affiché nulle part, et cherchait une card supprimée en Tâche 4b.
+**Quand le filtrage est passé côté serveur, seul le chemin de l'immersion a été rebranché** — et la recette de l'époque ne vérifiait que l'**ouverture** du champ libre, jamais sa sortie.
+→ Sans immersion et avec une pièce connue : **redirection vers `/mes-creations/?piece=`**, exactement là où mène un clic sur la carte de cette pièce. `advice_text` étant stocké avant, le hero le reprend et le tape — **l'appel IA n'est donc plus perdu, il devient utile**.
+→ **Sans pièce du tout : bascule sur l'écran CONTACT** (décision Robin). C'est le seul moment du parcours où le visiteur a décidé quelque chose : on ne le laisse pas sur une page vide.
+
+### 🐛 4. GRAVE ET INVISIBLE — l'IA du chat croyait le catalogue vide
+`buildFilterMeta()` lisait `window.sapiMegaFilter`, **objet supprimé** avec le filtrage navigateur. Il tombait silencieusement sur son repli et envoyait une liste **vide**. Le prompt affichait « PRODUITS PRÉSENTÉS AU VISITEUR (0) : (aucun) », et la consigne qui suit dit : « si aucun produit présenté, propose chaleureusement le sur-mesure ».
+→ **Dans CHAQUE conversation, Robin orientait vers le sur-mesure des visiteurs pour qui il avait des modèles en stock.** Rien ne plantait, l'IA répondait simplement à côté.
+**Le correctif était DÉJÀ ÉCRIT et commenté quinze lignes plus loin**, sur l'endpoint conseil — il n'avait été posé que sur **un des deux** endpoints. Recopié sur `sapi_ajax_megafilter_chat` : la sélection est recalculée par le moteur réel, le POST n'est plus lu.
+⚠️ **Même piège que `$sapi_filter_rules` : « rien de cassé » voulait dire « rien ne s'applique ».** Troisième occurrence de ce motif dans ce chantier — le repli silencieux d'un objet disparu.
+
+### 🐛 5 à 10 — états qui fuient et libellés qui mentent
+- **`editFromS3` fuyait d'une ouverture à l'autre** : ouvrir le récap, cliquer une chip, se raviser, fermer → à la session suivante, arrivé au bout du questionnaire, on retombait sur le récap et **le conseil n'était jamais calculé**. Remis à zéro dans `openModal`.
+- **`chat.conversation` fuyait** de même : le tracking pouvait réémettre la conversation précédente. Vidée à l'ouverture.
+- **Cul-de-sac** : récap → chip → « Étape précédente » renvoyait sur un S0 « projet vide » alors qu'il était complet, sans retour possible. `determineInitialState()` peut renvoyer `s3-carrefour`, que `renderS0Hybrid` ne sait pas traiter. Routé vers le récap.
+- **« Voir la sélection pour mon projet » (récap)** descendait vers `#sapi-product-grid`, le **catalogue complet non filtré**. Même routage que le CTA du chat désormais.
+- **« Modifier mon projet »** (fiche produit) **efface tout le projet** → renommé « Recommencer mon projet ».
+- **« Précise ton projet en quelques mots… »** alors que le texte **remplace** → renommé « Décris ton projet… ».
+
+### ⚠️ Sujets non traités, à décider avec Robin
+- **Aucune péremption du projet mémorisé.** `created_at`/`updated_at` sont écrits mais jamais relus : un projet vieux d'une semaine est traité comme celui d'il y a une minute. C'est ce qui rendait le défaut 1 si brutal.
+- **Pas de pièce « salle de bain »** dans le référentiel (7 pièces). Un visiteur qui la nomme ne peut jamais être compris. **Sujet catalogue, pas code.**
+- **Aucun retour possible depuis la conversation** vers le questionnaire guidé : le visiteur qui clique le champ texte par erreur a perdu le parcours guidé pour cette session.
+- **Tracking faussé** : `home_picker` restera toujours à zéro (la modale n'est jamais rendue sur la home), `freetext` aussi (le paramètre d'URL est effacé avant d'être lu), et `advice_text` n'apparaît jamais dans les sessions abouties (`finalize()` s'exécute avant l'écriture du conseil).
+- **Code mort** : `data-action="open-modal"`/`data-modal-state` ne sont plus lus, l'entrée `state:'s3'` n'est plus émise, `buildFilterMeta`/`sapiShopRefilter`/`.conseiller-card--mon-projet` sont des vestiges.
+
+### ✅ MODALE CONSEILLER — refonte de la densité mobile (2026-08-25)
+
+Robin : « sur mobile il faut vraiment faire de la place dans la modale, dans toutes les modales, et dans tous les états. **Le texte est bien, mais tout le reste est trop gros et la zone de texte se retrouve trop petite.** »
+
+**Audit chiffré (agent) sur l'écran le plus contraint, le chat texte libre, iPhone 390×844 :**
+- **417px de décor pour 284px de lecture — près de 60 % de l'écran ne disait rien.**
+- En largeur, **six boîtes emboîtées** ne laissaient que **155px de texte utile**, soit ~23 caractères par ligne : une réponse de Robin y prenait treize lignes. **C'est la largeur perdue qui se payait en hauteur**, et personne ne l'avait regardée.
+- Inventaire : **9 rendus visuels distincts** (7 `[data-screen]` + 2 sous-états contact). Le seul élément commun aux neuf est la pill de Robin → le réglage le plus transversal du fichier.
+
+**Les quatre leviers, par rentabilité :**
+1. **`.conseiller-card--modal { padding: 0 }` — une ligne, +68px de haut et +56px de large.** Le meilleur rapport du lot. Ce rembourrage était **hérité et jamais voulu** : la classe ne déclarait pas de `padding`, elle prenait donc le `36px 28px 32px` de `.conseiller-card`, une règle écrite pour les cards de `/mes-creations/`. Head, body et foot portent déjà le leur.
+   ⚠️ **Ne JAMAIS corriger à la source** : `.conseiller-card` habille aussi la card « Conseil de Robin », la card « Mon projet », la card Sur-mesure de la grille produit et la pill « Comment choisir ? ». L'override reste dans le bloc mobile de la modale.
+2. **Plein écran** (+64 v, +40 h) : le voile de 32px tout autour n'a pas de sens sur téléphone. ⚠️ `env(safe-area-inset-*)` sur head et foot **obligatoire** une fois le plein écran posé, sinon le bouton du pied passe sous l'indicateur d'accueil des iPhone à encoche.
+3. **Suppression du cadre clair autour du chat** (+36 v, **+65 h**) : la troisième boîte repérée par Robin. Sur 390px elle ne dessinait rien.
+4. **Boutons d'action compactés** (+27 v) : « VOIR LA SÉLECTION POUR MON PROJET » repasse **sur une ligne**, et le gain se retrouve sur quatre écrans d'un seul réglage.
+
+Plus les finitions transversales (pill, marges intérieures, écart entre blocs, rembourrage du champ) et par écran (récap, contact, fiche produit, séparateur « ou »).
+
+**Résultat : décor 417 → 177px, zone de lecture 284 → 524px (+85 %), largeur du texte 155 → ~314px (~23 caractères par ligne → ~46).**
+
+⚠️ **AUCUNE TAILLE DE TEXTE DE CONTENU N'A ÉTÉ TOUCHÉE**, ni aucune police de champ (règle des 16px = contrainte iOS). Tout le gain vient des marges. C'était la consigne de Robin et c'est ce qui rend le résultat sûr.
+
+**🐛 BUG RÉEL TROUVÉ AU PASSAGE — la dernière bulle restait coupée.**
+`scrollChatToBottom()` visait `.modal__body` en dur, avec le commentaire « Round 4 — le scrollable est .modal__body ». C'était vrai à l'écriture. Depuis, une passe CSS a posé `flex: 1` + `overflow-y: auto` sur `.chat-bubbles` : **c'est ce cadre qui débordait**, `.modal__body` avait exactement la hauteur de son contenu, et lui écrire un `scrollTop` ne faisait **rien**. **Une modification CSS avait silencieusement invalidé une hypothèse JS** — et le symptôme (texte coupé en plein milieu) passait pour un manque de place.
+→ Le code **cherche** désormais le premier ancêtre qui déborde réellement, en s'arrêtant à la carte de la modale. Il survit aux deux mises en page : le cadre en desktop, le corps en mobile depuis qu'on a retiré le cadre.
+
+**⚠️ PIÈGE APPAIRÉ, traité :** la croix de fermeture et la pill ne se croisaient que grâce à **8px de dégagement vertical**. Le head en perdant 48, elles se seraient chevauchées. La croix est donc réduite (36 → 32px) et remontée (12 → 8px) **dans le même geste** — les deux réglages ne doivent jamais être dissociés.
+
+**Piège évité :** un bloc `@media (max-width: 720px)` situé après contient `.conseiller-chat-bubble`, `.conseiller-chat-footer`, `.conseiller-freetext__input` — noms presque identiques mais **autres composants** (le chat inline de la card, hors modale). L'éditer en croyant toucher la modale n'aurait rien produit et aurait cassé un composant qui n'a rien demandé.
+
+### ✅ MOMENT 2 — remontée instantanée et bouton synchronisé (2026-08-25)
+
+Robin, sur la modification d'un projet : « le bouton *Découvrir ma sélection* doit toujours apparaître après l'écriture du texte IA » et « il faut tout de suite remonter en haut, là on reste quelques secondes sur l'ancienne sélection, ce qui fait bizarre ».
+
+**1. La remontée devient INSTANTANÉE et INVISIBLE — meilleure que ce que je croyais possible.**
+J'avais écrit noir sur blanc qu'on ne pouvait pas remonter dès `sapi:advice-loading` parce que la modale tient le verrou de scroll (`overflow: hidden` sur html+body jusqu'à t+1100 ms de sa séquence de sortie) et qu'un `scrollTo` n'aurait aucun effet. C'était exact, mais **je n'avais pas exploité le fait que la modale COUVRE l'écran** : on peut lever le verrou le temps d'un **saut instantané que personne ne voit**, et le remettre aussitôt.
+→ Quand la modale s'efface (~1,9 s plus tard), **la page est déjà en haut, sur les trois points**. Aucun mouvement visible, donc mieux qu'une remontée animée. Les quelques secondes passées devant l'ancienne sélection disparaissent complètement.
+`rewindToTop()` sur `sapi:conseiller-closed` reste, mais devient un **filet** : il ne sert plus qu'à l'abandon en cours de questionnaire (où aucun conseil n'est calculé, donc `advice-loading` n'est jamais émis). Dans le cas terminé, il sort immédiatement — on est déjà en haut. Commentaire du fichier corrigé, il affirmait le contraire.
+
+**2. Le bouton blanc suit le texte.** Masqué dès le début du recalcul, il ne revient qu'**à la fin de la frappe** du conseil — exactement comme à l'arrivée sur la page. Avant, il réapparaissait dès que la remontée ramenait `--reveal` à 0, donc **pendant que les trois points tournaient** : il proposait d'aller découvrir une sélection qui n'était pas encore la bonne. `revealChars()` reçoit désormais un callback, utilisé pour le rappeler.
+
+---
+
+## 🎠 CARROUSEL AUTOMATIQUE — état final du scroll (2026-08-25)
+
+Robin : « il faut vraiment qu'on simplifie et qu'on passe à un scroll automatique comme un carrousel : quand on est en haut, le clic sur le bouton *Découvrir ma sélection* ou un début de scroll doivent avoir le même effet : on passe rapidement et automatiquement à l'état suivant. Pareil pour l'étape suivante. »
+
+**⚠️ ARBITRAGE TRANCHÉ POUR DE BON, après trois allers-retours dans la journée : le flou NE SUIT PLUS LE DOIGT.** Il se joue pendant la transition de 420 ms. Robin l'a confirmé explicitement après reformulation, en connaissance de la conséquence. **Ne pas ressortir l'argument « tu avais dit que tu y tenais »** : la question a été posée trois fois, la réponse est celle-ci.
+
+**Ce que ça donne :** trois états, aucun état intermédiaire atteignable. Un début de geste vers le bas = une étape. Le bouton et le geste sont le même déclencheur. Symétrique au retour. Une fois dans le catalogue, défilement normal.
+
+### La mécanique, et pourquoi elle est en CSS
+**`touch-action: pan-x pinch-zoom` sur le hero**, posé par une classe ajoutée en JS.
+- **Pourquoi pas en JS** : le navigateur décide au **tout premier `touchmove`** si un geste est un défilement, et ignore ensuite toute annulation (`cancelable: false`). C'est exactement ce qui faisait échouer la première tentative de carrousel **sur les gestes posés** tout en la faisant marcher sur les gestes violents. `touch-action` est consulté quand le doigt **se pose** : jamais trop tard.
+- **Pourquoi `pan-x pinch-zoom` et surtout pas `none`** : le slider des cards est un **descendant** du hero et `touch-action` se compose le long des ancêtres. `none` tuerait le swipe horizontal — et le pincer-zoomer avec, ce qui est une régression d'accessibilité.
+- **Pourquoi posé par le JS** : c'est un verrou **dur**. Si le script ne tourne pas, la classe n'existe pas et la page reste défilable. Jamais écrit en dur dans le CSS de base. Retiré aussi en `prefers-reduced-motion`.
+
+**La molette n'est PAS concernée par `touch-action`** → annulation explicite par `preventDefault` (qui, elle, fonctionne pour `wheel`). **Écouteur posé sur le hero et non sur `window`** : il ne coûte rien au reste du site, et rien du tout une fois qu'on est dans le catalogue.
+
+**Pavé tactile :** il émet son inertie en continu pendant une à deux secondes. Sans temps de calme, une poussée franchirait plusieurs étapes. On annule le défilement à chaque événement, mais on ne franchit une étape qu'après un silence de `REPOS_ENTRE_DEUX_PAS` (140 ms). ⇦ À monter si une poussée en franchit deux.
+
+**Clavier traité** (flèches, espace, Page suivante/précédente) : sans ça, il traversait le hero en défilement natif et atterrissait entre deux états. Ignoré si le focus est dans un champ.
+
+**Recalage de secours conservé** : on ne peut plus s'ARRÊTER entre deux étapes, mais on peut y ENTRER autrement — un geste parti du catalogue (le verrou ne vaut que pour les gestes nés dans le hero), une restauration de position au rechargement, une rotation. Dans ces cas, recalage sur l'étape la plus proche.
+
+### Simplification obtenue
+Supprimés : `touching`, `gestureFrom`, `noteGestureStart()`, `skipNextSnap`, `gestureInSlider`, `sliderStartLeft`, `currentStep`, `cancelProgrammatic()`, les écouteurs `touchend`/`touchcancel` au niveau du document, et le biais directionnel. **Le fichier fait 948 lignes contre ~1 000 avant, pour un comportement plus simple à décrire.**
+
+**Track 300vh → 200vh, plateau ZÉRO.** ⚠️ C'est le carrousel qui l'autorise : la pause servait à pouvoir s'arrêter après la révélation, or on ne peut plus s'arrêter entre deux étapes. **Ne pas rallonger « pour la pause » ni raccourcir davantage sans avoir d'abord retiré le carrousel** — les deux réglages vont ensemble. Un raccourcissement tenté AVANT le carrousel avait été vu immédiatement par Robin.
+
+### ⏳ LOT 2 — spécification d'origine (non codé)
+Ancrage **en JavaScript**, pas en CSS : c'est le seul qui sache **s'abstenir**. Il doit être neutralisé dans quatre fenêtres — verrou de la machine à écrire, modale ouverte, `rewindToTop()` en vol, et geste initié dans le carrousel. Prévoir un drapeau « scroll programmatique » honoré par `rewindToTop()`, `scrollToReveal()` et `scrollToCatalogue()`, et l'annulation au `touchstart`. Arbitrer aussi le `scroll-behavior: smooth` global (l. 128) : deux animations de scroll sur le même axe = rebond. Recette dédiée au moment 2, séquence la plus fragile de la page.
+
+---
+
+## LOT A — Le socle : les trois zones en flux (mobile portrait) — spécification
+
+**`woocommerce/archive-product.php`** : un conteneur `.mescreations-immersion__layer` autour des trois zones existantes (`__inner`, `__selection`, `__scrollhint`), aujourd'hui frères directs. Une balise ouvrante, une fermante. **Un `<div>` NU** — voir la contrainte a11y ci-dessous.
+
+**`style.css`, règle de base (hors media query)** : `.mescreations-immersion__layer { display: contents; }`
+Un élément en `display: contents` ne génère aucune boîte, ne peut donc pas être bloc conteneur d'un descendant absolu : les zones continuent de se résoudre contre `.mescreations-immersion` (sticky, donc positionné) **exactement comme aujourd'hui**. Corollaire : `position`, `z-index`, `transform`, `overflow`, `will-change` posés sur le conteneur sont **ignorés en desktop** → il faut que TOUT soit déclaré dans le bloc mobile, rien dehors.
+⚠️ **Base = `contents`, mobile = override** — et surtout PAS l'inverse (`contents` enfermé dans `min-width: 769px`), qui laisserait le desktop sans règle du tout après une réorganisation du fichier. Cette version dégrade vers le comportement actuel, donc vers le connu.
+⚠️ **JAMAIS de `role`, `aria-*`, `tabindex` ni landmark sur ce conteneur.** `display: contents` le retire de l'arbre d'accessibilité et lui vole son rôle sémantique (bug corrigé Chrome 89 / Safari 16 / iOS 17, mais le parc reste). Sur un `div` nu l'impact est nul ; un `aria-label` ajouté un jour disparaîtrait **en desktop seulement** = bug asymétrique par breakpoint, invisible en recette visuelle. À écrire en commentaire dans le markup.
+
+**`style.css`, bloc `@media (max-width: 768px)`** — placé **APRÈS** les blocs `max-height: 840px / 700px` existants, OU ces blocs bornés en `min-width: 769px`. Non négociable : ils redéclarent `__phrase{font-size}`, `__inner{gap}`, `__describe` **sans borne de largeur**, donc un SE en paysage les matche ET matche `max-width: 768px` → à spécificité égale, le dernier déclaré gagne, et le dimensionnement en `svh` serait **silencieusement écrasé par le `clamp()` en `vw`**, précisément dans le cas le plus contraint. Même traitement pour `@media (max-width: 600px)` (l. 25127, redéclare `__selection{bottom}` et `__inner{gap}`).
+- **La couche** : `height: 100vh` (repli obligatoire) **puis** `height: 100svh` ; `transform: translateY(calc(100dvh - 100svh))` ; `will-change: transform` ; `display: flex; flex-direction: column` ; `padding-top` = hauteur réelle du header fixe.
+  ⚠️ Le repli n'est pas décoratif : si `100dvh` est inconnu, la `transform` est invalidée et tombe → dégradation propre. Mais **si `100svh` est inconnu, `height` tombe à `auto`** → plus de hauteur définie, `flex: 1` ne distribue rien, `height: 100%` des cards ne résout plus = **rupture dure**. Le parc WordPress voit des WebViews d'applications tierces.
+- **Zone 1** (`__inner`) : `position: static; bottom: auto; top: auto; flex: 0 0 auto`. Retirer le `top` animé (propriété de layout) au profit d'un `translateY`. **Retirer aussi `will-change: transform, top` (l. 24812) en mobile** : il est transféré sur la couche, on n'empile pas deux calques promus imbriqués.
+- **Zone 3** (`__selection`) : `position: static; bottom: auto; flex: 1 1 0; min-height: 0`.
+  ⚠️ **`flex: 1 1 0`, PAS `1 1 auto`.** Avec `basis: auto`, la hauteur de la zone dépend encore de son contenu → pendant les ~220 ms où `swapCards()` vide le slider, la base change et **la zone 1 bouge**. `basis: 0` = « exactement ce qui reste », quel que soit le contenu. C'est la vraie expression de « la zone 3 absorbe ».
+- **Zone 2** (`__scrollhint`) : `position: static; bottom: auto; flex: 0 0 auto` **et une hauteur réservée**.
+  ⚠️ **Les deux indices sont en `position: absolute` à l'intérieur** : sans hauteur explicite, la zone ne réserve que son padding et le chevron déborde sous la barre d'adresse — on réintroduirait littéralement le défaut corrigé en 1ʳᵉ passe.
+- **`--safe-bottom`** : déclaration déplacée sous `@media (min-width: 769px)`.
+
+**L'invariant à obtenir, et à vérifier :**
+> *La seule chose au monde qui puisse déplacer une frontière de zone est la longueur de la phrase de Robin. Photos, swap AJAX, reformatage des noms, flèches : tout le reste est absorbé.*
+
+**Bonne nouvelle vérifiée dans le CSS :** `.product-image-main` / `.product-image-hover` sont en `position: absolute; inset` (l. 12449-12460) → elles ne contribuent pas à la hauteur intrinsèque de `.product-media` → **le moment de chargement d'une image est structurellement sans effet**. Ce n'est pas une hypothèse. De même, le reformatage des noms par `product-name-formatter.js` fait grandir `.product-info` et la photo rend la hauteur : la card ne change pas de hauteur, les frontières ne bougent pas.
+
+**Recette Robin :** scroller lentement haut→bas puis remonter, barre déployée puis rétractée → aucun à-coup ; le vocabulaire à employer est « ça **glisse** » (voulu) vs « ça **saute** » (reflow, à signaler). Puis desktop et `/nos-creations/` **rigoureusement identiques**.
+
+**⚠️ Vérifier aussi :** le `padding-top` contre la hauteur réelle du header, en état `.is-scrolled` (header opaque) — aujourd'hui `__inner` est centré et ne peut pas toucher le header ; en flux, il est posé à `padding-top` et la pill peut passer dessous. Et le `backdrop-filter` du bouton (l. 24888) à l'intérieur d'un ancêtre promu : combinaison historiquement fragile, le backdrop peut se vider. Risque faible (le bouton vit déjà dans un ancêtre transformé) mais c'est une ligne de recette.
+
+## LOT B — La card en flux (le vrai markup, la couche invisible)
+
+⚠️ **Le markup réel ne ressemble pas à celui de la maquette** : il y a un `<a class="product-card-link">` entre `.product-card-cinetique` et les blocs, et **quatre** enfants (`product-media`, `product-info`, `product-actions`), pas deux. `.product-card-cinetique` n'est PAS `display: flex` en contexte immersion (il ne l'est que sous `.creations-grid`, l. 8434). **C'est la couche que la maquette masque, et celle qui, oubliée, ferait échouer silencieusement toute la promesse.**
+- Card **et** lien en flex-colonne ; lien en `flex: 1 1 auto; min-height: 0` ; `product-info` **et** `product-actions` en `flex: 0 0 auto` ; `product-media` en `flex: 1 1 auto; min-height: <plancher>`.
+- Neutraliser les 4 hauteurs `product-media` en `vh` **par surcharge** dans le bloc mobile (`height: auto`), jamais par suppression.
+- **Plancher sur `.mescreations-immersion__pcard--sur`** : c'est la card la plus haute du slider (24px de padding + ~121px de texte en px fixes, l. 25066) et elle n'a aucun plancher → **c'est elle qui casse en premier**.
+- Tout préfixé `.mescreations-immersion__slider` — `.product-card-cinetique` est partagé avec `/nos-creations/`.
+
+**Recette :** `/nos-creations/` et le catalogue sous le hero strictement identiques. Slider : swipe, flèches, dernière card sur-mesure.
+
+## LOT C — Le texte : budget vertical, coupe en fondu, borne serveur
+
+- **Phrase, pill et bouton dimensionnés en `svh`** (préfixés). ⚠️ Dans la maquette les 3 éléments sont en `svh` ; sur le site réel **2 sur 3 sont en px fixes ET partagés** : `.conseiller-sig--v1` (l. 8014 — avatar 34px, accroche 24px, `margin-bottom: 16px` qui s'additionne au `gap`) et `__describe` (13,5px). Plancher réel de la zone 1 ≈ 62px de pill + ~40px de bouton, soit **~40 % plus lourd que la maquette validée par Robin**. Sans cette conversion, « le texte s'adapte au budget vertical » ne vaut que pour un tiers de la zone. `.conseiller-sig--v1` est partagé avec la home et `/conseils-eclaires/` → **préfixer impérativement**.
+- **Coupe en fondu** sur les dernières lignes de la phrase (décision Robin, cf. plus haut).
+- ⚠️ **`__phrase { min-height: 2.4em }`** (l. 24838) devient un **plancher de flex** dans le nouveau modèle (un `min-height` explicite bat le `min-height: auto`). Nécessaire pour l'état « 3 points » du loader, mais c'est lui qui décide du point de troncature. À traiter consciemment.
+- **`functions.php` : troncature dure du conseil IA.** Le « max 300 caractères » (~l. 4019) est une **instruction de prompt**, jamais appliquée — aucun `mb_substr`. Un modèle qui rend 420 caractères n'est pas un cas d'école. **C'est la garde la moins chère de tout le chantier**, et sans elle le modèle n'a aucune borne d'entrée.
+
+## LOT D — Paysage : bascule de mode (décision Robin)
+
+⚠️ **Le cas n'est pas celui qu'on croit.** Un iPhone 14 en paysage fait **844 × 390** : 844 > 768, il **sort** du bloc mobile et garde la mise en page absolue. C'est le **SE / 8 en paysage (667 × 375)** qui **entre** dans le modèle en flux, avec ~330 svh. Budget calculé : après zone 1 au plancher (~165px) et zone 2 (~46px), il reste ~56px pour la zone 3, dont 27 de titre → **29px de slider** pour une card qui ne peut pas descendre sous ~172px. Aucune zone ne se chevauche — la promesse est tenue à la lettre — et le résultat est inutilisable.
+→ **Règle `max-width: 768px` ET `max-height: ~500px`** : écran A = texte seul, écran B = carrousel seul. Bascule, pas cohabitation.
+
+---
+
+### Recette finale (appareil réel, texte le plus long)
+430×838 · 390×752 · 375×720 · 375×618 · **667×375 (SE paysage — le cas qui décide)** · une **rotation portrait↔paysage pendant que le track est épinglé** · un moment 2 complet avec swap AJAX.
+
+## [✅ FAIT — sur test] Immersion = via le room-picker (approche simple)
+L'immersion s'active sur `?piece=` valide. En pratique ces URLs viennent du room-picker (cartes = liens `?piece=`). La **reprise auto** (qui ajoutait `?piece=` sans clic pour les revenants) a été **retirée** → un revenant arrive sur le room-picker. Pas de cookie (approche cookie abandonnée car sur-compliquée + souci cache prod). Seul compromis assumé : un lien `?piece=` partagé/favori affiche l'immersion (indistinguable d'un vrai clic). Aucun impact cache prod.
+
+## [BUG ✅ CORRIGÉ — sur test] Le commentaire IA en fin de modale ne s'écrit jamais
+Cause : le commentaire Sonnet (`sapi_megafilter_advice` → `advice_text`) était bien calculé, mais son lieu d'affichage (carte « Mon projet » + `sapi-cards-conseiller.js`) a été supprimé pendant la refonte (4b/7). **Fix** : il s'affiche désormais dans la **phrase de l'immersion** — la modale émet `sapi:advice-loading` (dès le début du calcul → loader 3 points qui remplace la phrase générique) puis `sapi:advice-ready` (texte → tapé à la machine, ou repli générique si vide). En attente de validation Robin.
+
+## [TÂCHE 1] Architecture — filtrage serveur unique (fondation)
+**Priorité : HAUTE — à faire en premier, les autres en dépendent.**
+**⚠️ Demander un PLAN + un état des lieux AVANT de coder** : la branche test est en cours de refonte et instable. Plan validé par Robin, puis implémentation par sous-étapes.
+
+Objectif : une seule fonction PHP qui, à partir des réponses (pièce, taille, sortie, hauteur, style…), renvoie la sélection filtrée + classée. Appelée à 2 moments :
+- au **chargement** de `/mes-creations/?piece=X` → rendu serveur de la sélection au niveau pièce ;
+- à la **fermeture de la modale** → AJAX avec les réponses données (partielles ou complètes ; endpoint `sapi_robin_filter_products` existe déjà sur master).
+
+Retirer au JS (`sapi-cards-conseiller.js`) son rôle de moteur de filtrage : plus aucune règle métier dupliquée côté navigateur, il ne fait qu'afficher ce que le serveur renvoie.
+
+Important pour la suite : faire en sorte que TOUTES les règles vivent dans **une config unique** (étendre `$sapi_filter_rules`) lue par ce filtre — c'est ce qui rendra possible la page admin (tâche 5).
+
+**Critères de succès :** une seule logique de filtrage (PHP) ; le JS n'applique aucune règle ; les 2 points d'appel marchent ; fermer la modale en cours donne une sélection cohérente.
+
+## 📐 RÉPONSE CLAUDE CODE — ÉTAT DES LIEUX + PLAN Tâche 1 (11/06, EN ATTENTE DU GO DE ROBIN)
+
+### État des lieux du filtrage actuel (résumé)
+Le filtrage est **hybride et les règles sont TRIPLIQUÉES** :
+- **PHP** (functions.php) : `sapi_guide_get_categories` (cats par sortie + cuisine), `sapi_guide_get_ampoule_filter` (ampoule par pièce), `sapi_guide_query_products` (format vertical/horizontal + ampoule, WP_Query), `sapi_guide_collect_results` (variation essence/taille + images), `sapi_guide_pick_four` (les 4 retenus + `diversify_format`). **Règles EN DUR**, ne lisent PAS `$sapi_filter_rules`.
+- **`$sapi_filter_rules`** (l.325) : config… **lue UNIQUEMENT par le JS** (localisée), pas par le PHP.
+- **JS** (`sapi-cards-conseiller.js`) : `getAcceptedCategories`/`getAmpouleFilter`/`isVerticalAllowed`/`cardMatchesAnswers`/`computeEffectiveAnswers` (élargissement progressif) + `window.sapiMegaFilter` → `shop.js applyFilters` filtre la grille **dans le navigateur**. C'est ce qu'il faut supprimer.
+- **2 endpoints AJAX** : `sapi_ajax_guide_results` (parcours complet → produits + texte IA Sonnet) et `sapi_ajax_robin_filter_products` (renvoie juste des IDs filtrés — **existe mais n'est appelé par aucun JS aujourd'hui** → c'est le candidat pour « moment 2, fermeture modale »). Aujourd'hui la modale, à la fermeture, **re-filtre en JS** (`sapiShopRefilter`), pas via cet endpoint.
+- **Manque côté PHP vs simulateur** : la **couche PRIORITÉ/classement** (rang ampoule/catégorie/format + ordre d'importance + souple/strict) n'existe PAS en PHP — c'est la grande nouveauté. L'**élargissement progressif** n'existe qu'en JS.
+- **Déjà aligné** : le **hero immersif état B que je viens de faire utilise DÉJÀ le filtrage serveur** (`sapi_guide_query_products`) au chargement = moment 1. Et j'ai déjà **neutralisé `sapiMegaFilter` en mode immersion** (catalogue laissé au serveur). Donc /mes-creations/ en état B est déjà à moitié sur le nouveau modèle.
+
+### Plan Tâche 1 — moteur serveur unique (sous-étapes livrables sur test)
+1. **Config unique** : étendre `$sapi_filter_rules` pour contenir TOUTE la config du simulateur (objet `C`) : cats par sortie (+ secondaire), ampoule par pièce **+ préférée**, format préféré par pièce, `cuisineRemove`, `grandeSkipAmpoule`, règles vertical/horizontal, **catégorie prioritaire par sortie**, **ordre d'importance** [catégorie>ampoule>format], prio on/off, mode souple/strict, style→essence, map escalier, grandeExclut2Tailles. En PHP d'abord, **structurée pour basculer en option WordPress (DB) en Tâche 5**. Devient la **seule source**, lue par PHP ET (le strict minimum) par le JS d'affichage.
+2. **Moteur PHP unique** `sapi_conseiller_filter($answers)` qui reproduit EXACTEMENT le pipeline du simulateur : normalise (escalier→taille) → catégories (lit la config) → filtre dur (catégorie + format + ampoule) sur le catalogue → **classement priorité** (rang→score lexicographique selon l'ordre d'importance, souple/strict) → renvoie **la sélection classée** (slider immersion) **+ les 4 picks** (modale via `pick_four`). Refactorer `get_categories`/`get_ampoule_filter`/`query_products`/`collect_results` pour **lire la config** (plus de règles en dur) + ajouter la couche priorité.
+3. **Brancher les 2 appels** : (a) **chargement** immersion → remplacer l'appel actuel par le moteur (sélection classée) ; (b) **fermeture modale** → faire que `sapi_ajax_robin_filter_products` appelle le moteur et renvoie la sélection ordonnée ; brancher `sapi-modal-conseiller.js` (fermeture terminée OU abandonnée) pour appeler cet endpoint et **mettre à jour la sélection** ; le JS ne fait QUE rendre.
+4. **Couper le filtrage JS** : retirer `getAcceptedCategories`/`getAmpouleFilter`/`cardMatchesAnswers`/`computeEffectiveAnswers`/`sapiMegaFilter` de `sapi-cards-conseiller.js` et la dépendance de `shop.js` ; le JS masque/affiche selon les **IDs renvoyés par le serveur**.
+5. **Vérifs** : sélection immersion == simulateur ; fermeture modale == simulateur ; zéro règle JS résiduelle ; catalogue intact ; console 0 erreur.
+
+### Questions à trancher AVANT que je code
+1. **Élargissement progressif vs mode souple** : le simulateur « souple » ne fait que CLASSER (n'exclut jamais), mais ne relâche pas les **filtres durs** (catégorie/ampoule/format) si 0 produit. On **garde** un repli qui relâche les filtres durs quand 0 résultat (comme l'actuel `computeEffectiveAnswers` JS + les fallbacks de `query_products`), ou on accepte « 0 résultat → carte sur-mesure » ? (Reco : garder un repli serveur léger.)
+2. **Config en DB tout de suite ou en dur d'abord ?** Reco : array PHP en Tâche 1, basculé en option WordPress en Tâche 5 (sinon on code deux fois).
+3. **Sortie du moteur** : pour l'immersion = liste classée complète ; pour la modale = les 4 picks. On renvoie les deux ? (le simulateur produit les deux). 
+4. **⚠️ Branche test « instable »** : la note dit que la branche test est en cours de refonte. **Mon état B immersion EST-il cette refonte, ou une autre fenêtre Claude bosse en parallèle sur le filtrage ?** À confirmer pour ne pas se marcher dessus (cf. [[feedback_multi_claude_coordination]]).
 
 ### 👉 Action Robin
-Re-revue des 5 points sur test. Si OK : passe Yoast, puis go-live.
+Valider/ajuster ce plan + répondre aux 4 questions. Sur « go » → je code la Tâche 1 par sous-étapes (1→5), push test, validation à chaque étape. Puis Tâches 2 (règles), 3 (priorités), 4 (room-picker), 5 (admin), 6-7 (IA + nettoyage).
+
+### ✅ Avancement (validé Robin sur test)
+- **T1 moteur FONCTIONNELLEMENT COMPLET** : config unique `$sapi_filter_rules` (toute la config du simulateur) ; `sapi_conseiller_rank_products()` (couche priorité, mécanique du simulateur) ; filtre dur PHP (`get_categories`/`get_ampoule_filter`/`query_products`/`collect_results`) **lit la config** (plus de règles en dur) ; **moment 1** (chargement immersion) + **moment 2** (fermeture modale → endpoint `sapi_ajax_immersion_selection` → re-filtre+classe serveur → remplace le slider) **OK terminé ET abandonné**. Markup card = source unique (`sapi_immersion_render_product_card`). Commits `bdeaae2`, `cd20893`, `8c799ac`.
+- **⏳ Reste T1 « supprimer le filtrage JS »** : COUPLÉ à la Tâche 4 (le filtre JS `sapi-cards-conseiller.js` ne sert plus qu'à l'**état A** sans `?piece=`). À supprimer **avec** le room-picker (Tâche 4) qui remplace l'état A. Ne pas le retirer avant, sinon l'état A casse.
+- **🔧 À LISSER PLUS TARD (demandé Robin)** : la mise à jour du slider au moment 2 **flashe** (remplacement sec des cards) → faire une **transition douce** (fade-out/fade-in) au lieu d'un swap brutal.
+- **✅ MOMENT 2 FIABILISÉ + VALIDÉ** : la modale émet `sapi:conseiller-closed` (réponses finales) à **chaque** fermeture (fin + abandon) ; l'immersion l'écoute (on n'écoute plus le `subscribe` sapiProject, dont le notify dépendait du flush `pendingNotify` du resume → « ne se recharge pas tout le temps »). Baseline de dédup = sélection serveur (pièce seule) ; signature brûlée seulement si succès AJAX. **Changement de pièce** (projet recommencé) → **rechargement page** `?piece=<nouvelle>` (décor + sélection cohérents) ; même pièce + affinages → AJAX slider seul.
+- **✅ T2 (règles) FAIT + VALIDÉ** : vertical autorisé dès plafond haut, cuisine retire lampe à poser ET lampadaire, **question « table » supprimée** du parcours (colonne analytics `table_reponse` conservée). Commits `04a02df`, `0f6b477`.
+- **✅ T3 (priorités) de fait FAIT** : le classement par priorité (mécanique du simulateur) est en place et **s'applique réellement** depuis le fix config.
+- **⚠️ PIÈGE MAJEUR corrigé (commit `e1704ab`)** : `$sapi_filter_rules` était une **variable LOCALE** de la fonction d'enqueue → `global $sapi_filter_rules` renvoyait vide → tout le filtre PHP utilisait les **valeurs de repli (anciennes règles)** : priorité no-op, `cuisine_remove`/`vertical_haute` jamais lus. **Symptôme trompeur : "rien de cassé" = en fait "rien ne s'applique".** Fix : config dans une **fonction** `sapi_conseiller_get_rules()` lue partout (enqueue + filtre + endpoint), zéro global. **RÈGLE : une config partagée PHP doit vivre dans une fonction, jamais en variable locale d'enqueue.**
+
+## [TÂCHE 2] Règles de filtrage (dans le filtre serveur)
+**Priorité : HAUTE — après tâche 1.** Comportement détaillé : voir le simulateur (`guide-filtrage-simulateur.html`).
+
+Appliquer dans le filtre serveur :
+- **Vertical** : autorisé dès `hauteur === 'haute'` (toutes pièces, toutes tailles). `confortable` garde la règle actuelle (entrée ou petite pièce). Escalier : vertical OK, horizontal exclu. Horizontal exclu en petite pièce + plafond haut. Boule toujours autorisée.
+- **Supprimer la question « table »** du parcours (aucun effet sur la sélection, vérifié). Retirer l'étape de `inc/guide-data.php`, les références de libellés/`valid_keys` dans `functions.php`, et les références dans les JS de la modale. **GARDER** la colonne analytics `table_reponse` (historique) — juste arrêter de l'alimenter.
+- **Cuisine : retirer lampes à poser ET lampadaires** des catégories (généralise l'actuel « pas de lampe à poser » en cuisine).
+
+**Critères de succès :** comportement identique au simulateur (sections « Hauteur et format », « Taille », « Pièce »).
+
+## [TÂCHE 3] Priorités — couche de préférence (dans le filtre serveur)
+**Priorité : normale — après tâches 1-2.** Source de vérité : simulateur (sections Priorité, Pièce, Où installer).
+
+La préférence ne fait que **CLASSER**, elle n'exclut jamais. Chaque produit reçoit un rang par critère, combinés en un score, **mode souple** (préférés en tête, on complète avec les autres si trop peu).
+- **Ampoule** (par pièce) : chaleureux (salon/chambre/chambre-enfant/entrée) → préféré `ampoule_entouree` ; travail (cuisine/bureau) → `ampoule_degagee`. Map explicite (ne pas se reposer sur l'ordre d'un tableau).
+- **Catégorie** (par sortie) : une catégorie prioritaire optionnelle par sortie (surtout utile pour « je ne sais pas » → les 4 catégories).
+- **Format** (par pièce) : un format préféré optionnel par pièce (boule / horizontal / vertical).
+- **Ordre d'importance** réglable des 3 critères ; défaut : **catégorie > ampoule > format**.
+
+Mécanisme : un `priority_rank` (0/1) par critère → score lexicographique selon l'ordre d'importance → tri stable de la sélection ; en souple, compléter avec les rangs suivants.
+
+**Critères de succès :** reproduire le simulateur (tester salon plafond haut, cuisine, sortie « je ne sais pas »).
+
+## [TÂCHE 4] Room-picker sur /mes-creations/ pour l'arrivée sans projet
+**Priorité : normale.** **Demander un plan + un mockup avant de coder.**
+
+Mettre un room-picker sur `/mes-creations/` pour le visiteur qui arrive sans pièce. Choisir une pièce → charge la page avec cette pièce → déclenche l'appel filtre serveur (tâche 1, moment 1) → sélection au niveau pièce. Chaque arrivée passe ainsi par le même chemin serveur.
+
+**Précision Robin (11/06) — gating de l'immersion :** l'expérience immersion (plein écran) ne doit s'afficher QUE si on arrive **depuis un room-picker** (donc avec une pièce). Si on arrive autrement sur `/mes-creations/` (sans pièce), afficher le **room-picker vierge**, PAS l'immersion (sinon c'est trop envahissant).
+
+**Critères de succès :** arrivée sans pièce → room-picker vierge (pas d'immersion) ; arrivée avec pièce depuis un room-picker → immersion + sélection serveur au niveau pièce ; aucune régression depuis la home.
+
+### 📐 PLAN Tâche 4 (11/06 — décisions Robin prises, EN ATTENTE DU GO)
+**Décisions Robin :** (1) le room-picker **EST le hero** de l'état A ; (2) revenant avec projet sauvegardé → **reprise AUTO** : redirection directe vers `?piece=<pièce>` au chargement (pas de bande, pas de choix) ; (3) on **garde** le champ texte libre. Pour repartir de zéro : « Décrire mon projet » (change la pièce, recharge). Catalogue bare toujours atteignable car présent sous le hero immersif.
+**Maquette :** `mockups/mes-creations-room-picker-etatA-v1.html` (toggle nouveau/revenant en haut).
+**Sous-étape 4a — état A serveur (la feature visible) :**
+- Dans `archive-product.php`, quand `$imm_piece === ''` : remplacer le hero artisan + les cartes conseiller cachées (`.conseiller-card--conseil/--mon-projet`, pilotées en JS) par un **room-picker serveur** identique à la home (signature Robin + titre + 7 cartes `<a href="?piece=<slug>">` + « ou » + freetext). **Factoriser** `$room_choices`/`$room_icons` de `front-page.php` dans des helpers partagés (`sapi_room_choices()`/`sapi_room_icon_svg()`), pas de copier-coller.
+- Catalogue complet conservé dessous (inchangé).
+- Reprise auto : **script inline dans `wp_head`** (uniquement état A `/mes-creations/` sans pièce) qui lit `localStorage['sapiProject']`, et si `answers.piece` est dans la whitelist → `location.replace('?piece='+piece)` **avant le paint** (zéro flash). Sinon le room-picker s'affiche. `STORAGE_KEY='sapiProject'`.
+- Freetext : garder le comportement home (`?freetext=` → auto-ouvre la modale chat). **Vérifier** que l'auto-ouverture ne dépend pas de `sapi-cards-conseiller.js` (sinon la déplacer avant la coupe JS).
+**✅ 4a + 4b CODÉS + SUR TEST (en attente validation Robin).**
+- 4a : room-picker serveur en hero de l'état A + reprise auto.
+- 4b : `assets/sapi-cards-conseiller.js` **SUPPRIMÉ** (tout le moteur de filtrage JS). Filtrage 100% serveur. Config `rules` plus exposée au JS. Conseils génériques par pièce déplacés sur `sapi-modal-conseiller` (global `SAPI_CARDS_CONSEILLER` conservé, clés genericAdvice+fallbackAdvice). Dépendance modale → `['sapi-project']`. **→ Termine la Tâche 1 step 4 (« supprimer le filtrage JS »).**
+- Dead markup restant : `.conseiller-cards-zone` (branche état B, caché CSS, inerte) → à nettoyer en **Tâche 7**.
+**Sous-étape 4b — couper le filtrage JS (= fin Tâche 1 step 4) :**
+- Retirer de `sapi-cards-conseiller.js` : `getAcceptedCategories`/`getAmpouleFilter`/`cardMatchesAnswers`/`computeEffectiveAnswers`/`sapiMegaFilter` + la dépendance `shop.js applyFilters`. Le catalogue état A reste **complet** (plus de filtrage navigateur).
+- ⚠️ `sapi-cards-conseiller.js` fait aussi : délégation `data-action="open-modal"`, ouverture modale depuis room-cards/forms, peuplement carte « Mon projet ». Vérifier ce qui reste utilisé (la modale écoute `sapi:open-modal` elle-même → découplée). Garder un handler minimal « clic → dispatch sapi:open-modal » si encore nécessaire ailleurs.
+**Vérifs :** sans pièce → room-picker (carte=lien) ; clic → `?piece=` → immersion ; catalogue intact ; revenant → bande « Reprendre » ; freetext → modale ; **home inchangée** ; console 0 erreur ; zéro règle de filtrage JS résiduelle.
+
+## [TÂCHE 5] Page admin WordPress — piloter les règles de filtrage (proposition 2)
+**Priorité : normale — APRÈS tâches 1-3 (le filtre serveur et ses règles doivent exister et être centralisés).**
+**Prérequis :** toutes les règles dans une config unique persistable (cf. tâche 1). Aujourd'hui certaines sont en dur → il faut d'abord les rassembler et les stocker (options WordPress / DB) pour qu'une page puisse les éditer.
+
+Objectif : une page dans l'admin WordPress (comme le dashboard de stats du Conseiller) où Robin édite lui-même les règles, et ça s'applique au site en direct, sans repasser par du code :
+- catégories par sortie ; ampoules acceptées + préférée par pièce ; règles de format ; priorités (ampoule/catégorie/format) + ordre d'importance ; exclusions par pièce (cuisine).
+- Le filtre serveur (tâche 1) lit ces réglages depuis la DB au lieu de valeurs en dur.
+
+**Le simulateur `assets/guide-filtrage-simulateur.html` EST la maquette de cette page** (mêmes réglages, même organisation) → s'en servir comme cahier des charges UI.
+
+**Demander un plan avant de coder.** Soigner : ne pas laisser créer des combinaisons incohérentes (ex. retirer la catégorie qu'impose une sortie). Prévoir un « réinitialiser aux valeurs par défaut ».
+
+**Critères de succès :** Robin modifie une règle dans l'admin → effet immédiat sur le filtrage du site, sans toucher au code.
+
+### 📐 PLAN Tâche 5 (11/06 — décisions Robin : TOUT éditable + APERÇU LIVE intégré ; EN ATTENTE DU GO)
+**Principe clé :** l'aperçu live n'embarque PAS de moteur JS (on vient de le supprimer du front, pas question de recréer 2 cerveaux). L'aperçu appelle le **vrai moteur PHP** avec les règles en cours d'édition, injectées via un hook `apply_filters('sapi_conseiller_rules', …)` le temps de la requête. Garantit zéro divergence aperçu/prod.
+**Découpage (sous-étapes livrables sur test) :**
+1. **5.1 — Socle config en DB (sans changement de comportement) :** renommer l'array actuel en `sapi_conseiller_default_rules()` ; `sapi_conseiller_get_rules()` = deep-merge de `get_option('sapi_conseiller_rules', [])` PAR-DESSUS les défauts, puis `apply_filters('sapi_conseiller_rules', $merged)`. Option vide → 100% défauts → comportement identique.
+2. **5.2 — Page admin (menu + affichage) :** page sous le menu Conseiller (cap `manage_options`), formulaire pré-rempli reproduisant les sections du simulateur : ampoule_by_piece, ampoule_skip_when_grande, cats_by_sortie (+ secondaire), cuisine_remove/exclusions, prefs (ampoule/format/cat), prio+importance+mode, règles format booléennes, grande_exclut_2_tailles, style_essence, escalier_map. Listes de slugs valides = source unique (catégories WooCommerce, ampoules/formats/sorties/pièces depuis guide-data).
+3. **5.3 — Sauvegarde + garde-fous :** POST nonce+cap, sanitization stricte (chaque slug validé contre sa whitelist), garde-fous anti-incohérence (ex. ne pas retirer la catégorie imposée par une sortie), bouton « Réinitialiser aux défauts » (supprime l'option).
+4. **5.4 — Aperçu live (server-side) :** endpoint AJAX `sapi_admin_filter_preview` : reçoit l'état NON SAUVEGARDÉ du formulaire + des réponses (pièce + sortie/taille/etc.), pose le filtre `sapi_conseiller_rules` = règles draft, lance get_categories+query_products+rank, renvoie la sélection classée (vignettes+noms, + rang/score en debug). UI admin façon simulateur (pickers réponses → sélection).
+**Vérifs :** option absente → défauts (diff nul) ; éditer une règle → effet immédiat sur immersion + moment 2 ; aperçu live == site ; reset OK ; sanitization rejette un slug inconnu ; 0 combinaison incohérente sauvegardable.
+
+**✅ TÂCHE 5 FAITE + VALIDÉE SUR TEST (aperçu live OK, édition OK, pas de corruption).** Fichier `inc/conseiller-rules-admin.php` (require sous `is_admin()`).
+- ⚠️ **PIÈGE serveur (O2switch/WAF)** : des cases à cocher multiples avec `name="...[]"` (même nom) sont **fusionnées → 1 seule valeur conservée**. Solution : **nom UNIQUE par case** `rules[map][ligne][option]=1`, sélection = clés cochées. À réutiliser pour tout futur formulaire admin avec cases multiples.
+- ⚠️ Clé de ligne `''` (sortie par défaut) → `rules[map][][]` lue comme index numérique : encoder en sentinel `__empty`.
+- Sous-menu enregistré en **priorité 11** (après le menu parent). Reset = `delete_option('sapi_conseiller_rules')`. 5.1 socle DB (sapi_conseiller_default_rules + get_rules merge option + apply_filters) ; 5.2/5.3 page sous-menu « Règles de filtrage » (priorité 11), formulaire schema-driven, sauvegarde admin-post (nonce+cap), sanitization whitelist, garde-fous, reset ; 5.4 aperçu live via endpoint `sapi_admin_filter_preview` (règles draft injectées par filtre → vrai moteur). Libellés clarifiés (éclairage principal/appoint). Pas de binaire PHP local → vérifié par équilibrage accolades ; blast radius = admin seul.
+
+## [TÂCHE 6] Règle IA — suspension principale en grande pièce
+**✅ FAIT (sur test)** — règle « RÈGLES SUSPENSION PRINCIPALE EN GRANDE PIÈCE » ajoutée dans `assets/guide-prompt-regles.txt`.
+**Priorité : basse.** Éditer `assets/guide-prompt-regles.txt` : ajouter une règle pour que, quand une suspension est proposée comme éclairage **principal** dans une **grande pièce**, l'IA avertisse honnêtement qu'un seul luminaire peut ne pas suffire et suggère un complément (lampadaire, applique) ou un ensemble sur-mesure. (Le savoir + l'exemple existent déjà mais restent suggestifs ; une règle explicite rend l'avertissement fiable.)
+
+## [TÂCHE 7] Nettoyage legacy (quand le nouveau flux est en prod)
+**✅ FAIT (cœur) SUR TEST :**
+- Quiz V1 mort retiré : `sapi_ajax_guide_results` (+ 2 add_action) + `sapi_guide_build_system_prompt` (−198 l). Gardés : nonce `sapi-guide-results` (partagé), `sapi_guide_check_rate_limit` (partagé), `sapi_guide_pick_four` + code `diversify_format` (grappe).
+- Dead markup `.conseiller-cards-zone` retiré de l'état B d'archive-product.php (−123 l), hero artisan conservé.
+- Filtrage JS déjà supprimé en 4b.
+**⏸️ RESTE (optionnel, inoffensif — non fait par prudence) :**
+- Dictionnaires `'table'` résiduels dans des fonctions LIVE (prompts IA `sapi_megafilter_build_freetext_prompt`, KEY_LABELS, export admin) — clés jamais lues depuis le retrait de la question, mais éditer des prompts IA sans pouvoir tester la sortie = risque non justifié. À faire si Robin veut, en testant l'IA.
+- Helpers devenus orphelins par le retrait du quiz V1 : `sapi_guide_build_filter_context`, `sapi_guide_call_claude` (vs `_refine` utilisé). Morts mais inoffensifs.
+- CSS mort : règles `.conseiller-cards-zone` / `.mes-creations-section-divider` (éléments retirés). Inoffensif.
+**Priorité : basse, en dernier.** Une fois la refonte stable et validée : retirer le quiz V1 mort (`sapi_ajax_guide_results` + `sapi_guide_build_system_prompt`, plus appelé par aucun JS) et le filtrage JS s'il est entièrement remplacé. À faire prudemment, en vérifiant qu'aucun appel ne subsiste.
+**⚠️ NE PAS supprimer le code « grappe »** (`diversify_format` dans `sapi_guide_pick_four`) : il est orphelin mais c'est une idée à conserver et à réactiver plus tard — voir l'idée ci-dessous.
 
-</details>
+## [IDÉE — à explorer plus tard] Grappe / multi-ampoules comme rampe vers le sur-mesure
+Le mode « grappe » (montrer un produit de chaque format = de la diversité, + afficher la carte sur-mesure) est aujourd'hui orphelin (l'option a été retirée du questionnaire). Robin veut le **garder** : il doit servir de **support pour orienter vite le visiteur vers le sur-mesure**. L'objectif : que l'IA / le parcours puisse proposer rapidement une composition multi-ampoules ou un ensemble sur-mesure quand c'est pertinent, et le mécanisme « un de chaque format » est un bon véhicule pour donner à imaginer. À recâbler dans le nouveau système (porte d'entrée à définir) le moment venu. Le code `diversify_format` dans `sapi_guide_pick_four` est conservé exprès pour ça.
 
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #8 — 8 ajustements design (revue Robin)
-**Résultat (branche `feature/refonte-home`, commit `97ea2b1`, 100% CSS) :**
-1. **Naming card hero** : `min-width:440px` → **largeur fixe `width:520px`** + `max-width:calc(100vw-32px)`. Nom en `overflow:hidden; text-overflow:ellipsis` → la bulle ne resize plus jamais (noms longs tronqués).
-2. **Bandeau réassurance** : `.robin-bandeau.home-repositioned-bar { padding:20px }` → plus haut **sur la home uniquement** (classe ajoutée par le JS front-page), compact ailleurs.
-3. **Titre « Pour quelle pièce ? »** : `.home-projet .room-picker-title` aligné exactement sur `.section-title-kinetic` (Montserrat 600, clamp 1.6–2.4rem, wood-dark) + **neutralisé** `text-transform:none` / `letter-spacing:normal` (le global était uppercase/700).
-4. **Room cards** : `.home-projet .room-card { max-width:230px }` (global reste 200px pour modale/Conseils).
-5. **Respiration sections** : `padding-top` **6rem desktop / 3.5rem mobile** sur projet, collections, créations, atelier, avis, divers, newsletter. Bandes crème : padding **dans** le fond (crème englobant). Bento : double-classe `.hero-bento.home-*` pour battre `.hero-bento` sans souci d'ordre.
-6. **Cards catégories** : `.collections-kinetic .collection-card { aspect-ratio:2/3; max-height:660px }` → ~1/3 plus hautes (scopé home, object-fit cover déjà en place).
-7. **Titre L'atelier** : `.atelier-story-title { text-transform:none; margin:0.5rem 0 1.25rem; line-height:1.05 }` → minuscules + air. Eyebrow laissé uppercase.
-8. **Numéros de section** : `1.1rem` → **`1.5rem`** via `.section-header-kinetic .section-num` + `.home-avis .testimonials-header .section-num`. **`.section-num` global intact (0.875rem)** → fiche produit/catégories non touchées.
-- **Vérifs** : accolades CSS 3706/3706 ; `.section-num` global = 0.875rem confirmé ; aucune modif front-page.php (CSS only).
+---
 
-### 👉 Action Robin
-Re-revue rapide des 8 points sur test (desktop + mobile) + coup d'œil fiche produit/catégorie (rien ne doit bouger). Si OK : passe Yoast (titre/meta home, avec Cowork), puis **go-live** (merge → master + déploiement prod + re-soumission GSC).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #8 — Ajustements design (8 retours revue Robin sur #7)
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-**Mockup de référence :** `mockups/mockup-15-home-refonte-juin-2026.html`.
-
-**Contexte :** Revue de Robin après #7 : 8 micro-ajustements, tous scopés home. Pour chaque point, LIRE la règle actuelle avant de modifier. Aucun style partagé (fiche produit, catégories, page Star, modale Conseiller) ne doit bouger.
-
-**À faire :**
-
-### 1. Naming card hero — taille FIXE (et plus grande)
-La bulle ne doit JAMAIS s'adapter à la longueur du nom du modèle. Remplacer le `min-width: 440px` par une largeur fixe plus généreuse : `width: 520px; max-width: calc(100vw - 32px);`. Ajouter sur le naming-link (le nom du modèle) : `white-space: nowrap; overflow: hidden; text-overflow: ellipsis;` pour absorber les noms longs sans déformer la bulle. Vérifier le rendu mobile (la bulle doit rester contenue, le max-width fait le travail).
-
-### 2. Bandeau réassurance — plus haut, home uniquement
-Hook facile : le JS de front-page.php ajoute la classe `home-repositioned-bar` au bandeau sur la home. Donc :
-```css
-.robin-bandeau.home-repositioned-bar { padding-top: 20px; padding-bottom: 20px; }
-```
-(au lieu des 12px globaux ; les autres pages gardent le bandeau compact.)
-
-### 3. Titre « Pour quelle pièce cherches-tu un luminaire ? » — même police que les autres H2
-Aligner `.home-projet .room-picker-title` EXACTEMENT sur les déclarations de `.section-title-kinetic` : `font-family: var(--font-body); font-size: clamp(1.6rem, 3.4vw, 2.4rem); font-weight: 600; color: var(--color-wood-dark);`. (Lire la règle actuelle de `.room-picker-title` pour neutraliser ce qui diverge : famille, graisse, transform éventuels.)
-
-### 4. Room cards — légèrement plus larges
-`.home-projet .room-card { max-width: 230px; }` (la règle globale `.room-card` reste à 200px pour la modale/page Conseils). Vérifier que les 6 tiennent toujours bien sur 1-2 rangées en desktop.
-
-### 5. Respiration AVANT chaque titre de section — beaucoup plus d'air
-Augmenter fortement le padding-top des sections de la home pour décoller chaque header de la section précédente. Cible : **6rem desktop / 3.5rem mobile** (≤768px). Sections concernées : `.home-projet-section`, `.collections-kinetic` (home only, vérifié), `.home-creations`, `.home-atelier`, `.home-avis` (le padding-top du header), `.home-divers`, `.newsletter-kinetic`. ⚠️ Sur les bandes crème, le padding doit rester DANS le fond (le crème englobe l'air, comme le mockup). Garder les paddings horizontaux/bas actuels.
-
-### 6. Cards catégories (Collections) — plus hautes
-`.collection-visual` est en height:100% → trouver la source réelle de hauteur (`.collection-card`, la grille `.collections-grid`, ou un aspect-ratio) et l'augmenter d'environ **un tiers** en desktop. Mobile : proportionnel, sans étirement disgracieux des images (object-fit cover déjà en place a priori).
-
-### 7. Section 04 L'atelier — titre sans majuscules + air autour
-Identifier la source du `text-transform: uppercase` qui s'applique au titre « Des sculptures lumineuses » (`.atelier-story-title`) et le neutraliser : `text-transform: none;`. Ajouter de l'espace autour du titre comme dans le mockup : `margin: 0.5rem 0 1.25rem; line-height: 1.05;`. Ne pas toucher l'eyebrow (lui reste uppercase, c'est voulu).
-
-### 8. Numéros de section — plus grands (toutes les sections home)
-`.section-header-kinetic .section-num { font-size: 1.5rem; }` (remplace le 1.1rem de #7) + même taille pour le numéro du header avis : `.home-avis .testimonials-header .section-num { font-size: 1.5rem; }`. ⚠️ Toujours via ces sélecteurs scopés, JAMAIS la règle globale `.section-num`.
-
-**Notes / pièges :**
-- Aucun tiret cadratin. Accolades équilibrées. Pas de nouvelle ombre.
-- Après push : re-vérifier 30 secondes fiche produit + une catégorie (aucun changement attendu).
-
-**Critères de succès :**
-- Bulle hero : largeur identique sur toutes les slides, y compris noms longs (ellipsis).
-- Bandeau réassurance visiblement plus haut sur la home, inchangé ailleurs.
-- Titre room-picker visuellement identique aux autres H2 ; room cards plus larges.
-- Respiration nette avant chaque section (desktop + mobile), crème englobant.
-- Cards catégories ~1/3 plus hautes ; titre atelier en minuscules avec de l'air ; numéros de section nettement plus présents.
-
-### 👉 Action Robin
-Re-revue rapide des 8 points sur test (desktop + mobile). Si tout est bon : passe Yoast (avec Cowork), puis go-live.
-
-</details>
-
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #7 — Passe design profonde
-**Résultat (branche `feature/refonte-home`, commit `b027a92`) :**
-- **A. Hero naming card** : bulle blanche pleine `rgba(255,255,255,.94)` radius 50px (exit verre dépoli/backdrop-filter). **Dots ré-affichés** (étaient `display:none`) : inactif bois discret 7px, **actif = pill orange 20px**. Chevrons + naming-link en `--color-wood-dark`. Tout scopé `.naming-card` → les autres carousels (cluster CSS 6106) non touchés.
-- **B. Bandeau réassurance** (`.robin-bandeau`, global assumé) : fond **blanc**, icônes **orange**, texte **wood-mid**. ℹ️ Pas de « mode projet » dans le bandeau actuel (le JS `bandeau-reassurance.js` ne fait que randomiser 2/4 items sur mobile) → rien à corriger de ce côté.
-- **C. Titres de section** au gabarit mockup (Montserrat 600, wood-dark, clamp réduit) : `.section-title-kinetic` (vérifié **home-only**), num discret scopé `.section-header-kinetic .section-num` (global `.section-num` **NON touché** → fiche produit/catégories intactes), titre avis scopé `.home-avis .testimonials-header h2`, titre « Pour quelle pièce ? » scopé `.home-projet`.
-- **D. L'atelier recomposée** : `bento-container` remplacé par `.atelier-duo` (story texte + eyebrow + titre Square Peg + 2 paragraphes + **CTA pill orange `.hero-cta` à gauche**, photo cliquable arrondie `.atelier-photo` à droite) + `.process-strip` (5 tuiles image). **Paragraphe SEO + 4 liens catégories conservés verbatim.** Header « 04 » et helper `$sapi_cat_url` gardés.
-- **E. Cleanup orphelins** (grep `.php` d'abord) :
-  - **Supprimés** (home-only, 0 usage) : `.bento-storytelling`, `.storytelling-inner/-num/-label/-title/-link` (+hover) ; `.bento-atelier` (+`::before`) ; les 2 overrides #3 `.home-atelier .bento-storytelling/.bento-atelier`. Hover du label repointé `.bento-atelier:hover` → `.atelier-photo:hover`.
-  - **Gardés** : `.storytelling-text` (réutilisé), `.atelier-label` (réutilisé par `.atelier-photo`).
-  - **Laissés volontairement** (CSS mort inoffensif, 0 élément ne matche) : le bloc `.process-*` complet — car `.process-header` (page-sur-mesure) et `.step-num` (functions.php, sur-mesure, checkout/thankyou) y sont **partagés** ; disjoindre risquerait ces pages live. + les références groupées `.bento-storytelling/.bento-atelier/.bento-process` dans 3 media-queries grid. → **à nettoyer dans une tâche dédiée à faible risque**.
-- **Vérifs** : accolades PHP 61/61, CSS 3698/3698 ; `.process-header`/`.step-num`/`.section-num` (global) toujours définis ; nouvelles classes atelier présentes.
-
-### 👉 Action Robin
-Revue **zone par zone** sur test (mockup-15 ouvert) : hero (bulle + dots orange), bandeau blanc, titres plus discrets, **L'atelier recomposée** (duo texte/photo + frise tuiles). **Re-vérifier 3 pages non touchées** : une **fiche produit**, une **page catégorie**, la **page Star** (`/la-star-du-moment/`). Liste ce qui détonne → #7bis. Ensuite : Yoast (titre/meta home), puis go-live.
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #7 — Passe design profonde : aligner le rendu sur le mockup-15 (retours Robin)
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-**Mockup de référence :** `mockups/mockup-15-home-refonte-juin-2026.html` — OUVRIR et comparer zone par zone. Le HTML/CSS du mockup est une CIBLE VISUELLE, pas du code à copier.
-
-**Contexte :** Retour Robin sur #6 : trop léger, seule l'alternance de fonds a été appliquée. 4 écarts majeurs restent vs mockup : (1) la naming card du hero doit être une bulle blanche avec dots orange, (2) le bandeau réassurance doit être blanc avec icônes orange, (3) les titres de section sont trop gros et pas dans le bon gabarit, (4) la section L'atelier doit être ENTIÈREMENT recomposée (texte + photo côte à côte, frise de tuiles, exit les cartes bento). ⚠️ Plusieurs classes touchées sont PARTAGÉES (`.section-num` → fiche produit + catégories ; `.storytelling-*`/`.process-*`/`.atelier-label` → page-la-star-du-moment.php ; `.testimonials-header h2` → fiche produit) : scoper exactement comme indiqué.
-
-**À faire :**
-
-### A. Hero — naming card en bulle blanche, dots orange
-LIRE d'abord les règles `.naming-card`, `.carousel-dot` (2 définitions, prendre celle qui s'applique à la card du hero), `.carousel-arrow`.
-1. `.naming-card` : remplacer l'effet verre dépoli par une bulle blanche pleine : `background: rgba(255,255,255,0.94);`, supprimer le backdrop-filter, `border: none;`, `border-radius: 50px;`. Garder le `min-width` (verrou anti-resize) et le layout flex.
-2. Dots (dans la naming card) : inactif `background: rgba(147, 125, 104, 0.4); border: none; width: 7px; height: 7px;` ; `.carousel-dot.active` : `background: var(--color-orange); width: 20px; border-radius: 10px; transform: none;` (pillule étirée orange, comme le mockup).
-3. `.carousel-arrow` (chevrons) : `color: var(--color-wood-dark);` pour contraster sur le blanc. Texte du naming-link : `var(--color-wood-dark)` aussi (vérifier).
-4. Mobile : vérifier que la bulle reste propre ≤600px (min-width à adapter si elle déborde).
-
-### B. Bandeau réassurance — blanc, icônes orange
-⚠️ `.robin-bandeau` est GLOBAL (inclus via header.php sur tout le site, sticky). Le restyle s'applique partout, c'est assumé (barre neutre). LIRE les règles l.1386-1420 avant.
-1. `.robin-bandeau` : `background: var(--color-white);` (garder border-bottom, sticky, padding).
-2. `.robin-bandeau .reassurance-item svg` : couleur/stroke `var(--color-orange)`.
-3. Texte des items : `var(--color-wood-mid)`.
-4. Vérifier le mode « Mon projet » (badge bois + chips) : doit rester lisible sur blanc. Si un élément devient illisible, corriger sa couleur uniquement (pas le layout).
-
-### C. Titres de section — gabarit mockup (plus petits, Montserrat 600, wood-dark)
-1. `.section-title-kinetic` (utilisé UNIQUEMENT sur la home, vérifié) : remplacer par `font-family: var(--font-body); font-size: clamp(1.6rem, 3.4vw, 2.4rem); font-weight: 600; color: var(--color-wood-dark); margin: 0;`.
-2. `.section-header-kinetic .section-num { font-size: 1.1rem; }` — ⚠️ SCOPÉ : ne PAS toucher la règle globale `.section-num` (fiche produit + catégories l'utilisent).
-3. `.home-avis .testimonials-header h2` : même gabarit que `.section-title-kinetic` (déclarations identiques, sélecteur scopé `.home-avis`, la fiche produit garde son style).
-4. `.home-projet .room-picker-title { font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 600; color: var(--color-wood-dark); }` (scopé home).
-
-### D. L'atelier — recomposition complète (layout mockup)
-Dans `.home-atelier`, GARDER : le wrapper `<section class="hero-bento home-atelier">`, le header kinetic « 04 — L'atelier », le helper `$sapi_cat_url`. REMPLACER tout le `<div class="bento-container">…</div>` par :
-```php
-<div class="atelier-duo">
-  <div class="atelier-story">
-    <span class="section-eyebrow">Mon atelier à Lyon</span>
-    <h3 class="atelier-story-title">Des sculptures lumineuses</h3>
-    <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
-    [reprendre VERBATIM le <p class="storytelling-text storytelling-text--seo"> existant avec ses 4 liens catégories]
-    <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="hero-cta">Découvrir l'artisan</a>
-  </div>
-  <a class="atelier-photo" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer">
-    <?php echo sapi_image('2025/05/Robin-Sapi-A.jpg', 'large', ['alt' => 'Atelier Sâpi, atelier de fabrication de luminaires à Lyon', 'class' => 'atelier-photo-img', 'loading' => 'lazy']); ?>
-    <div class="atelier-label"><span>L'atelier · Lyon</span></div>
-  </a>
-</div>
-<div class="process-strip">
-  <?php
-  $process_steps = [
-    ['01', 'Dessin',        '2025/05/IMG_1928-e1761747188966.png', "Dessin d'un luminaire en bois, Atelier Sâpi"],
-    ['02', 'Découpe laser', '2025/05/IMG_7638.jpg',                'Découpe laser du bois pour luminaire'],
-    ['03', 'Finitions',     '2025/03/P_SLM_XL_det5.jpg',           "Finitions manuelles d'un luminaire en bois"],
-    ['04', 'Assemblage',    '2025/05/Robin-Sapi-A.jpg',            'Robin assemble un luminaire dans son atelier à Lyon'],
-    ['05', 'Expédition',    '2025/07/Claudine-bandeau-1.jpg',      "Luminaire Claudine prêt pour l'expédition"],
-  ];
-  foreach ($process_steps as $step) : ?>
-    <div class="process-tile">
-      <div class="process-tile-img">
-        <?php echo sapi_image($step[2], 'large', ['alt' => $step[3], 'class' => 'process-tile-photo', 'loading' => 'lazy']); ?>
-      </div>
-      <span class="process-tile-label"><?php echo esc_html($step[0] . ' · ' . $step[1]); ?></span>
-    </div>
-  <?php endforeach; ?>
-</div>
-```
-CSS à ajouter (générique, réutilisable) :
-```css
-/* ===== Refonte home #7 — Section L'atelier (layout mockup) ===== */
-.atelier-duo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  align-items: center;
-}
-.atelier-story-title {
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 4vw, 3rem);
-  font-weight: 400;
-  color: var(--color-wood-dark);
-  line-height: 1;
-  margin: 0 0 12px;
-}
-.atelier-story .hero-cta { margin-top: 1rem; }
-.atelier-photo {
-  position: relative;
-  display: block;
-  border-radius: 14px;
-  overflow: hidden;
-  min-height: 300px;
-}
-.atelier-photo-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.process-strip {
-  display: flex;
-  gap: 14px;
-  margin-top: 42px;
-}
-.process-tile { flex: 1; text-align: center; }
-.process-tile-img {
-  height: 96px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.process-tile-photo { width: 100%; height: 100%; object-fit: cover; }
-.process-tile-label {
-  display: block;
-  font-size: 12px;
-  margin-top: 8px;
-  color: var(--color-wood-mid);
-  font-weight: 500;
-}
-@media (max-width: 880px) {
-  .atelier-duo { grid-template-columns: 1fr; gap: 24px; }
-  .process-strip { flex-wrap: wrap; row-gap: 18px; }
-  .process-tile { flex: 1 1 28%; }
-}
-```
-Notes : le CTA réutilise `.hero-cta` (pill orange gradient existante, actuellement orpheline — vérifier qu'elle rend bien, sinon ajuster scopé `.atelier-story .hero-cta`). `.atelier-label` existant : vérifier son positionnement dans le nouveau contexte (il vivait dans une bento-card), corriger scopé `.atelier-photo .atelier-label` si besoin.
-
-### E. Cleanup des styles devenus orphelins (avec vérification)
-Supprimer les overrides #3 devenus inutiles : `.home-atelier .bento-storytelling` et `.home-atelier .bento-atelier`. Pour chaque ancienne classe candidate à suppression (`.bento-storytelling`, `.bento-atelier`, `.bento-process`, `.process-header`, `.process-number`, `.process-title`, `.process-inner`, `.process-step`, `.step-num`, `.step-text`, `.step-image-img`, `.storytelling-inner`, `.storytelling-label`, `.storytelling-num`, `.storytelling-title`, `.storytelling-link`) : `grep` dans TOUS les .php d'abord — ⚠️ `page-la-star-du-moment.php` en utilise certaines. Ne supprimer QUE celles à 0 usage. Lister gardées/supprimées dans le résultat.
-
-**Notes / pièges :**
-- `.storytelling-text` et `.storytelling-text--seo` restent UTILISÉS (nouveau markup) : ne pas y toucher.
-- Fiche produit, pages catégories, page Star : visuellement INCHANGÉES (vérifier les 3 sur test après push).
-- Pas de nouveau hex sauf les rgba() blancs/bois indiqués (patterns déjà présents dans le code). Aucun tiret cadratin. Accolades équilibrées.
-- En cas de blocage layout : noter et passer au point suivant, ne pas s'acharner.
-
-**Critères de succès :**
-- Hero : bulle blanche radius 50px, dots bois discrets + actif pillule orange étirée, chevrons wood-dark.
-- Bandeau réassurance blanc, icônes orange, texte wood-mid, mode projet lisible.
-- Tous les titres de section au gabarit mockup (y compris avis et « Pour quelle pièce ? »), numéros discrets ; fiche produit/catégories inchangées.
-- L'atelier : eyebrow + titre Square Peg + 2 paragraphes + CTA pill orange à gauche, photo cliquable arrondie à droite, frise de 5 tuiles image en dessous. Plus aucune carte bento dans cette section.
-- Rapport de cleanup CSS (classes supprimées vs gardées avec justification).
-- Mobile : duo empilé, tuiles process sur 2-3 colonnes, bulle hero contenue.
-
-### 👉 Action Robin
-Revue zone par zone avec le mockup ouvert à côté (hero, bandeau, titres, atelier) + re-vérifier fiche produit, une page catégorie et la page Star (non touchées). Lister ce qui détonne encore → #7bis si besoin. Ensuite : passe Yoast, puis go-live.
-
-</details>
-
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #6 — Passe design (langage mockup-15)
-**Résultat (branche `feature/refonte-home`, commit `698ef15`) :**
-- **A. Utilitaires génériques** : `.section-band--warm` (fond crème) + `.section-eyebrow` (nommés génériquement, généralisables au site, pas `home-*`).
-- **B. Alternance blanc/crème** : sections **Créations** et **Ils en parlent** enveloppées dans `<div class="section-band--warm">` (fond edge-to-edge, contenu calé). Rythme obtenu : réassurance(blanc) → Ton projet(crème) → Collections(blanc) → Créations(crème) → L'atelier(blanc) → Avis(crème) → bento divers(blanc) → Newsletter(blanc).
-- **C. Entrée projet** : bloc CSS #1 remplacé → **bandeau crème pleine largeur** (exit `::before` dashed + border-radius + fond card). Eyebrow `home-projet__eyebrow` → `section-eyebrow` (markup). Chips blanches centrées sur crème (max-width 900px).
-- **D. Ils en parlent** (tout scopé `.home-avis`, fiche produit **intacte**) : `.home-avis` passé en `background:transparent; max-width:none` pour laisser voir la bande ; header en flex aligné comme les autres sections (num+titre à gauche, badge Google `margin-left:auto`) au gabarit 1600px ; grid `align-items:start` + cards `background:white` bordure `--color-gray-light` → **hauteur au contenu** (fini le vide sous le texte) ; grid/cta recalés sur 1600px/padding 3rem. **Étoiles laissées jaune Google `#FBBC05`** (décision Robin).
-- **E. Badges** : les 4 (`bento-bestseller`, `giftcard`, `bento-actu`, `bento-conseil`) harmonisés en **pill orange flat** (`--color-orange`, blanc, 12px/600, padding 5px 13px, radius 50px, ombres/gradient retirés). Position inchangée. Vérifié : ces classes ne servent **que** dans front-page.php → 0 impact ailleurs.
-- **F. Bento divers** : classe `home-divers` ajoutée à la section ; **variante A** appliquée (carte cadeau en bannière `span 12`), **variante B** (3 cartes égales) en commentaire juste dessous.
-- **G. Mobile** : companions `@media (max-width:768px)` pour `.home-avis` (paddings réduits, override de la spécificité des règles mobile existantes) et `.home-projet`.
-- **Vérifs OK** : 2 bandes correctement ouvertes/fermées ; accolades PHP 61/61, CSS 3689/3689 ; aucune modif des styles partagés fiche produit / catégories.
-
-### 👉 Action Robin
-Revue complète sur test (desktop + **mobile**), **mockup-15 ouvert à côté** :
-1. Valider l'alternance blanc/crème + l'entrée projet en bandeau.
-2. **Trancher variante bento divers** : A (carte cadeau bannière, actuelle) ou B (3 cartes égales — à décommenter). Dis-moi.
-3. Vérifier une **fiche produit** sur test → doit être **visuellement inchangée**.
-4. Lister ce qui détonne encore → micro-tâche #6bis si besoin.
-Ensuite : passe Yoast (titre/meta home, avec Cowork), puis go-live (merge → master + déploiement prod + re-soumission GSC).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #6 — Passe design : appliquer le langage du mockup-15 (home pilote)
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-**Mockup de référence :** `mockups/mockup-15-home-refonte-juin-2026.html` — à OUVRIR et regarder avant de coder. ⚠️ NE PAS recopier son HTML/CSS tel quel : c'est une cible visuelle, le code reste celui du thème (classes existantes + variables `--color-*`).
-**Cette tâche ABSORBE le backlog 🎨 design** (qui est supprimé du queue).
-
-**Contexte :** Robin valide le mockup-15 comme cible design. La home sert de pilote : les nouvelles classes sont nommées GÉNÉRIQUEMENT (pas `home-*`) car ce langage sera généralisé au site après validation. Principe directeur du mockup : **alternance de fonds blanc/crème en bandes pleine largeur** pour rythmer le scroll, cards blanches à bordure fine sur fond crème, badges pills orange harmonisés. Tout en variables existantes (`--color-warm`, `--color-wood`, `--color-orange`, `--color-white`, `--color-gray-light`), AUCUN nouveau hex.
-
-**À faire :**
-
-### A. Utilitaires génériques (nouveau bloc CSS)
-```css
-/* ===== Design system — bandes de section (langage mockup-15, généralisable) ===== */
-.section-band--warm {
-  background: var(--color-warm);
-}
-.section-eyebrow {
-  display: block;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-size: 0.82rem;
-  color: var(--color-wood);
-  opacity: 0.85;
-  margin-bottom: 0.5rem;
-}
-```
-
-### B. Alternance de fonds — bandes pleine largeur
-Rythme cible : réassurance (blanc) → **Ton projet (crème)** → Collections (blanc) → **Créations (crème)** → L'atelier (blanc) → **Ils en parlent (crème)** → bento divers (blanc) → Newsletter (blanc).
-1. Envelopper la section `.home-creations` dans `<div class="section-band--warm"> … </div>` (le `.hero-bento` intérieur garde son max-width/padding : le fond file edge-to-edge, le contenu reste calé).
-2. Idem pour la section `.home-avis` (`.product-testimonials.home-avis`).
-3. L'atelier reste blanc (ses cartes warm font l'accent). Ne pas y toucher.
-
-### C. Entrée projet — bandeau crème pleine largeur (exit le cadre dashed)
-1. Markup : remplacer la classe `home-projet__eyebrow` par `section-eyebrow` (même élément). Rien d'autre ne bouge (room-picker + data-attributes intacts).
-2. CSS : **remplacer intégralement** le bloc `/* ===== Refonte home #1 — Section entrée projet ===== */` par :
-```css
-/* ===== Refonte home — Entrée projet (bandeau pleine largeur) ===== */
-.home-projet-section {
-  background: var(--color-warm);
-  padding: 3.5rem 2rem;
-  margin: 0;
-}
-.home-projet {
-  max-width: 900px;
-  margin: 0 auto;
-  text-align: center;
-}
-.home-projet .room-picker-cards {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  width: 100%;
-}
-@media (max-width: 768px) {
-  .home-projet-section { padding: 2.5rem 1rem; }
-  .home-projet .room-picker-cards { gap: 0.75rem; }
-  .home-projet .room-card { flex: 0 0 calc(50% - 0.5rem); max-width: none; padding: 1rem 0.75rem; }
-}
-```
-(Disparaissent : le `::before` dashed, le border-radius, le fond card, le z-index inner. Les room-cards blanches ressortent naturellement sur le crème.)
-
-### D. Ils en parlent — au diapason (retours Robin du 04/06)
-LIRE d'abord les règles existantes `.product-testimonials`, `.testimonials-header`, `.testimonial-card` (utilisées par la fiche produit : NE PAS les modifier). Toutes les corrections en sélecteurs scopés `.home-avis` :
-1. **Header sur le rythme kinetic** : num + titre alignés à gauche comme les autres sections, badge Google rejeté à droite :
-```css
-.home-avis .testimonials-header {
-  display: flex;
-  align-items: baseline;
-  gap: 2rem;
-  max-width: 1600px;
-  margin: 0 auto 1.5rem;
-  padding: 3rem 3rem 0;
-}
-.home-avis .google-reviews-badge { margin-left: auto; }
-```
-(Ajuster si la structure interne du header s'y prête mal, mais l'intention est : même gabarit visuel que `.section-header-kinetic`.)
-2. **Cards** : fond `var(--color-white)`, bordure `1px solid var(--color-gray-light)`, hauteur au contenu (plus de vide sous le texte) : `align-items: start` sur `.home-avis .testimonials-grid` + `height: auto` sur les cards si nécessaire.
-3. **Gouttières** : grid + CTA calés sur le même max-width/padding que le header (cohérence avec les autres sections).
-4. Étoiles : RESTENT jaune Google `#FBBC05` (décision Robin, crédibilité du badge). Ne pas les passer en orange.
-
-### E. Badges pills orange harmonisés (classes home only, sans risque ailleurs)
-LIRE les styles actuels de `.bento-bestseller-badge`, `.giftcard-badge`, `.bento-conseil-badge`, `.bento-actu-badge`, puis les harmoniser sur UN standard : `background: var(--color-orange)`, texte blanc, `border-radius: 50px`, `font-size: 12px`, `font-weight: 600`, `padding: 5px 13px`. Position inchangée (haut-gauche des images). Si l'un d'eux a un placement spécifique voulu, ne toucher que l'apparence.
-
-### F. Bento divers — 2 variantes, Robin tranche sur rendu
-Appliquer la variante A, laisser la B en commentaire juste en dessous :
-```css
-/* ===== Bento divers — variante A : carte cadeau en bannière ===== */
-.home-divers .bento-giftcard { grid-column: span 12; grid-row: span 1; }
-/* Variante B (3 cartes égales) — décommenter pour tester, et commenter A :
-.home-divers .bento-giftcard { grid-column: span 4; grid-row: span 2; }
-.home-divers .bento-conseil  { grid-column: span 4; }
-.home-divers .bento-actu     { grid-column: span 4; }
-*/
-```
-Ajouter la classe `home-divers` au `<section class="hero-bento">` du bento divers (celui avec Carte cadeau + Conseil + Flash actu).
-
-### G. Passe mobile (≤768px)
-Vérifier après tout le reste : bandes crème bien edge-to-edge, paddings verticaux réduits (~2.5rem), chips pièces sur 2 colonnes (déjà en place), cards avis lisibles et à hauteur du contenu, badges pas disproportionnés, aucun scroll horizontal.
-
-**Notes / pièges :**
-- AUCUNE modification des styles partagés avec la fiche produit (`.testimonial-card` & co non scopés) ni des pages catégories/sur-mesure.
-- Footer : HORS SCOPE (sujet séparé).
-- Pas de nouvelle ombre. Aucun tiret cadratin. Accolades équilibrées avant push.
-- En cas de blocage CSS/layout sur un point : ne pas s'acharner, le noter dans le résultat et passer au suivant (on changera de concept ensemble).
-
-**Critères de succès :**
-- Le scroll de la home alterne blanc/crème comme le mockup-15 : projet, créations et avis sur bandes crème pleine largeur.
-- Entrée projet sans cadre dashed, chips blanches centrées sur crème.
-- Section avis : header aligné comme les autres, badge à droite, cartes blanches à hauteur du contenu.
-- 4 badges harmonisés pill orange. Bento divers en variante A avec B commentée.
-- Fiche produit visuellement INCHANGÉE (vérifier une fiche sur test après push).
-- Mobile propre sur tous les points du G.
-
-### 👉 Action Robin
-Revue complète sur test (desktop + mobile), mockup-15 ouvert à côté. Tranche : variante A ou B pour le bento divers. Liste tout ce qui détonne encore → micro-tâche #6bis si besoin. Ensuite : passe Yoast (avec Cowork), puis go-live.
-
-</details>
-
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #5 — Passe finale SEO/technique
-**Résultat (branche `feature/refonte-home`, commit `347c32f`) :**
-- **A. Hiérarchie Hn** : `room-picker-title` h3→**h2** (Ton projet), Star `bento-title` h2→**h3**, storytelling-title h2→**h3**. Vérifié : **1 seul h1** (carousel) + **6 h2** = Ton projet, Collections, Les créations du moment, L'atelier, Ils en parlent, Restez informés. Le reste en h3+. (Page Conseils + modale gardent leur h3 : non touchées.)
-- **B. Cleanup CSS mort** : règles `.bento-room-picker` supprimées (bloc dédié + commentaire, + retrait du sélecteur dans 2 groupes en media query). **0 occurrence** de `bento-room-picker` dans tout le repo (css/php/js). Classes globales `.room-picker-inner/-title/-card` conservées (utilisées par `.home-projet`).
-- **C. Chasse références mortes (audit, sans modif)** : aucune cassée par la refonte.
-  - JS : `.bento-hero`, `.bento-product-featured`, `[data-room-picker]`, `[data-room-picker-freetext]`, `[data-piece-swap]` matchent toujours le DOM (cinetique.js, product-name-formatter.js, sapi-room-picker.js, sapi-photo-swap.js). Le h2→h3 de la Star ne casse pas le formatter (cible `.bento-title` par classe).
-  - JS inline front-page.php : le bandeau `.robin-bandeau` est bien réinséré **entre le carousel et `.home-projet-section`** ; logique header transparent intacte.
-  - `critical-css-homepage.css` (racine) = fichier **orphelin non suivi et non référencé** par le thème → pas câblé, aucun sélecteur mort actif. Non commité.
-- **D. Maillage interne — rapport** (toutes pages testées **200** sur prod, aucun lien cassé) :
-  - `/mes-creations/` (room cards `?piece=` + CTA Créations), 4 catégories `/categorie-produit/{suspensions,appliques,lampesaposer,lampadaires}/` (paragraphe SEO), `/lumiere-dartisan/` (storytelling), `/conseils-eclaires/` (carte Conseil), `/actus/` + dernier post (Flash actu), `/la-star-du-moment/` (Star). Liens externes : Google Maps (atelier), g.page (laisser un avis).
-- **Vérifs** : accolades PHP 61/61, CSS 3676/3676.
-
-### 👉 Action Robin
-1. Vérifier la home sur test : **rien ne doit changer visuellement** (le CSS supprimé était mort).
-2. **Yoast (admin)** : relire titre SEO + meta description de la page d'accueil pour coller au nouveau contenu (`luminaire bois artisanal` + Lyon s'appuient maintenant sur du vrai texte indexable).
-3. Ensuite : passe **design** (backlog 🎨), puis go-live (merge → master + déploiement prod + re-soumission GSC de la home).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #5 — Passe finale SEO + technique (Hn, maillage, cleanup)
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-**⛔ Prérequis :** #4 fait. La passe DESIGN (backlog 🎨 ci-dessous) est un chantier SÉPARÉ : ne RIEN traiter du backlog design dans cette tâche.
-
-**Contexte :** La structure cible est en place (carousel → réassurance → Ton projet → Collections 02 → Créations 03 → L'atelier 04 → Ils en parlent 05 → bento divers → Newsletter 06). #5 verrouille le volet SEO/technique : hiérarchie des titres propre, maillage interne vérifié, CSS mort nettoyé, et vérification que rien (JS, critical CSS, hooks `is_front_page()`) ne référence des éléments supprimés.
-
-**À faire :**
-
-### A. Hiérarchie Hn — 3 changements de BALISE uniquement (les classes, attributs et contenus ne bougent pas)
-Cible : H1 unique (carousel) → H2 = titres de section → H3 = titres de cartes. Vérifié : aucun sélecteur CSS ne cible ces balises (seul `.testimonials-header h2` existe et n'est pas concerné).
-1. Section Ton projet (`.home-projet`) : `<h3 class="room-picker-title">` → `<h2 class="room-picker-title">`. ⚠️ UNIQUEMENT dans `front-page.php` (la page Conseils et la modale gardent leur h3).
-2. Carte Star (`.home-creations`) : `<h2 class="bento-title product-name">` → `<h3 class="bento-title product-name">`.
-3. Carte storytelling (`.home-atelier`) : `<h2 class="storytelling-title">` → `<h3 class="storytelling-title">`.
-Résultat attendu : 1 seul h1 ; h2 = Ton projet, Collections, Les créations du moment, L'atelier, Ils en parlent, Restez informés ; tout le reste en h3+.
-
-### B. Cleanup CSS mort
-Supprimer les règles `.bento-room-picker` orphelines de `style.css` (flag de #1 : ~l.10835+, ~11844, ~11920 — re-localiser par grep, les numéros ont bougé). Vérifier ensuite : `grep -c "bento-room-picker"` = 0 dans style.css ET dans tous les .php / .js.
-
-### C. Chasse aux références mortes (JS, critical CSS, hooks front)
-La home a perdu/déplacé des éléments (room-picker du bento, Star du 1er bento, featured/CTA/atelier/process du 2e, 1er bento supprimé). Vérifier qu'aucun code ne cible l'ancien état :
-1. `assets/homepage-carousel.js` + JS chargés sur la home (cf. enqueues `is_front_page()` dans functions.php ~l.178, 213, 257, 263, 1652, 1690, 1702) : grepper les sélecteurs `.bento-room-picker`, `.bento-hero`, `data-room-picker`, `data-piece-swap` et confirmer que chaque sélecteur matche encore le DOM actuel (le room-picker et les data-piece-swap existent toujours, juste déplacés : à confirmer, pas forcément à corriger).
-2. Critical CSS homepage (bloc inline `is_front_page()` dans functions.php, fichier source `critical-css-homepage.css` à la racine) : vérifier qu'il ne référence pas de sélecteurs supprimés et que le premier viewport (carousel + bandeau) reste couvert. Pas de refonte du critical CSS ici, juste retirer les sélecteurs morts s'il y en a.
-3. Le JS inline de `front-page.php` (repositionnement `.robin-bandeau`, header transparent) : confirmer qu'il fonctionne toujours avec la nouvelle structure (le bandeau doit atterrir entre carousel et `.home-projet-section`).
-
-### D. Vérifications maillage interne (rapport, pas de modif sauf lien cassé)
-Confirmer que la home maille bien vers : les 4 catégories (`/categorie-produit/...` via le paragraphe SEO), `/mes-creations/` (CTA + room cards), `/lumiere-dartisan/` (storytelling), `/conseils-eclaires/` (carte Conseil), `/actus/` + dernier post (Flash actu), `/la-star-du-moment/` (Star), `/sur-mesure/` si présent. Lister le tout dans le résultat. Corriger uniquement si un lien est cassé (404/redirection).
-
-**Notes / pièges :**
-- NE PAS toucher au backlog design (cadre avis, dashed vs pleine largeur, spans des bentos).
-- Aucun tiret cadratin. Accolades PHP/CSS équilibrées avant push.
-
-**Critères de succès :**
-- `grep` : 1 seul `<h1` dans front-page.php ; les 6 h2 listés en A ; 0 occurrence de `bento-room-picker` dans le repo.
-- Aucune erreur JS console sur la home test (desktop + mobile), bandeau réassurance toujours positionné sous le carousel.
-- Rapport de maillage complet dans le résultat de la tâche.
-
-### 👉 Action Robin
-1. Vérifier la home sur test (rien ne doit changer visuellement, sauf si du CSS mort masquait un défaut).
-2. Côté Yoast (admin, pas Claude Code) : relire le titre SEO + meta description de la page d'accueil pour qu'ils collent au nouveau contenu (le mot-clé `luminaire bois artisanal` et Lyon peuvent maintenant s'appuyer sur du vrai texte indexable).
-3. Ensuite : passe design (backlog 🎨), puis quand tout te va, on parlera go-live (merge vers master + déploiement prod + re-soumission GSC de la home).
-
-</details>
-
-## 🎨 Backlog passe design → ABSORBÉ dans la tâche #6 ci-dessus (04/06)
-_(Entrée projet → bandeau pleine largeur tranché par Robin via mockup-15 ; avis `.home-avis` → section D de #6 ; rééquilibrage bento divers → section F de #6, variantes A/B.)_
-
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #4 — Section « Ils en parlent » (avis Google)
-**Résultat (branche `feature/refonte-home`, commit `0dda3cf`) :**
-- **Section** : `<section class="product-testimonials home-avis">` (header « 05 — Ils en parlent ») insérée **entre L'atelier et le bento divers**. `$home_reviews = sapi_get_google_reviews();` ; toute la section conditionnée à `if ($home_reviews && !empty(...['reviews']))` → home propre si l'API ne répond pas.
-- **Contenu** : badge Google (logo + étoiles sur `rating` + « X/5 · N avis »), 3 avis réels (`shuffle` + `array_slice` 3), texte tronqué à 200 car., CTA « Laisser un avis » + « Voir les N avis ». Blocs badge + boucle étoiles repris **verbatim** de single-product.php.
-- **Version simplifiée** (vs fiche produit) : pas de photo client, pas de modale, **pas de spans `testimonial-full-*`** cachés → cartes statiques.
-- **CSS** : **aucun ajout**. `.testimonial-card` n'a pas de `cursor: pointer` (juste un léger lift au hover, inoffensif) → override `cursor:default` non nécessaire. Styles `.product-testimonials*` existants suffisent.
-- **Renumérotation** : newsletter 05→**06**.
-- **Vérifs OK** : `sapi_get_google_reviews()` définie (functions.php:7880) ; ordre = Collections 02 → Créations 03 → L'atelier 04 → Ils en parlent 05 → bento divers → Newsletter 06 ; accolades PHP 61/61.
-- ⚠️ **Si la section n'apparaît pas sur test** : vérifier `SAPI_GOOGLE_API_KEY` / `SAPI_GOOGLE_PLACE_ID` dans le wp-config du site test (clone d'avril). Côté code, rien à corriger.
-
-### 👉 Action Robin
-Vérifier sur `test.atelier-sapi.fr` (desktop + mobile) que la section avis s'affiche (sinon → constantes API du wp-config test). Une fois validé → #5 (passe finale : hiérarchie Hn, maillage conseils/blog, cleanup CSS mort `.bento-room-picker`, vérif méta).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #4 — Section « Ils en parlent » (avis Google)
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-**⛔ Prérequis :** #3 fait (commit `1d3ecb8`) mais PAS ENCORE validé par Robin. Attendre son feu vert avant de lancer.
-**Mockup de référence :** `mockups/mockup-15-home-refonte-juin-2026.html` (section « Ils en parlent » — la partie presse est REPORTÉE, pas de parutions réelles à afficher pour l'instant).
-
-**Contexte :** Aucune preuve sociale sur la home aujourd'hui. La fiche produit a déjà tout ce qu'il faut : `sapi_get_google_reviews()` (Places API, cache transient 6h, note + total + pool d'avis) et les composants `.product-testimonials` / `.testimonials-grid` / `.testimonial-card` (single-product.php ~l.545-640). On réutilise ces styles à l'identique sur la home, en version SIMPLIFIÉE : pas de photo client, pas de modale (son JS est inline dans single-product.php, on ne le duplique pas), pas de spans `testimonial-full-*`.
-
-**À faire :**
-
-### A. Créer la section, entre « L'atelier » et le bento divers
-Insérer après le `</section>` qui ferme `.home-atelier` et avant le bento divers (`<!-- Hero Bento Grid (continued) -->`) :
-```php
-<!-- Ils en parlent (refonte home #4) — avis Google, réutilise les composants de la fiche produit -->
-<?php $home_reviews = sapi_get_google_reviews(); ?>
-<?php if ($home_reviews && !empty($home_reviews['reviews'])) : ?>
-<section class="product-testimonials home-avis">
-  <div class="testimonials-header">
-    <span class="section-num">05</span>
-    <h2>Ils en parlent</h2>
-    <div class="google-reviews-badge">
-      [reprendre VERBATIM le bloc .google-reviews-badge de single-product.php l.552-568 : logo Google + étoiles sur $home_reviews['rating'] + texte "X/5 · N avis"]
-    </div>
-  </div>
-
-  <div class="testimonials-grid">
-    <?php
-    $reviews_pool = $home_reviews['reviews'];
-    shuffle($reviews_pool);
-    $reviews_display = array_slice($reviews_pool, 0, 3);
-    ?>
-    <?php foreach ($reviews_display as $review) : ?>
-    <div class="testimonial-card">
-      <div class="testimonial-card-header">
-        <?php if (!empty($review['photo'])) : ?>
-        <img class="testimonial-avatar" src="<?php echo esc_url($review['photo']); ?>" alt="" width="36" height="36" loading="lazy">
-        <?php endif; ?>
-        <div class="testimonial-author-info">
-          <span class="author-name"><?php echo esc_html($review['author']); ?></span>
-          <span class="author-time"><?php echo esc_html($review['time']); ?></span>
-        </div>
-      </div>
-      <div class="testimonial-rating">
-        [reprendre VERBATIM la boucle 5 étoiles de single-product.php l.610-616]
-      </div>
-      <?php
-        $text = $review['text'];
-        $short = $text;
-        if (mb_strlen($text) > 200) {
-          $short = mb_substr($text, 0, 200);
-          $short = mb_substr($short, 0, mb_strrpos($short, ' ')) . '…';
-        }
-      ?>
-      <p class="testimonial-text"><?php echo esc_html($short); ?></p>
-    </div>
-    <?php endforeach; ?>
-  </div>
-
-  <div class="testimonials-cta">
-    <a href="https://g.page/r/CQ0YW1uBzOimEAE/review" target="_blank" rel="noopener noreferrer" class="testimonials-cta-review">Laisser un avis sur Google</a>
-    <span class="testimonials-cta-sep">·</span>
-    <a href="https://www.google.com/maps/place/?q=place_id:ChIJYyWUfZOV9EcRDRhbW4HM6KY" target="_blank" rel="noopener noreferrer">Voir les <?php echo esc_html($home_reviews['total']); ?> avis</a>
-  </div>
-</section>
-<?php endif; ?>
-```
-⚠️ PAS de spans `testimonial-full-*` cachés ni de `<!-- Modale avis Google -->` : la version home est statique (les cartes ne s'ouvrent pas). Si un style donne un `cursor: pointer` aux cards, ajouter `.home-avis .testimonial-card { cursor: default; }`.
-
-### B. Renuméroter la newsletter
-`<span class="section-num">05</span>` → `06` dans `.newsletter-kinetic`.
-
-### C. CSS — uniquement si nécessaire
-Les styles `.product-testimonials` / `.testimonials-*` existent déjà. Vérifier le rendu hors contexte fiche produit ; si l'espacement/la largeur déraillent, corriger avec des règles scopées `.home-avis { … }` UNIQUEMENT (ne pas toucher aux règles existantes, la fiche produit les utilise).
-
-**Notes / pièges :**
-- Toute la section est dans `if ($home_reviews && …)` : si l'API Google ne répond pas, la home reste propre (rien ne s'affiche). Si la section n'apparaît pas sur test, vérifier que `SAPI_GOOGLE_API_KEY` / `SAPI_GOOGLE_PLACE_ID` sont définies dans le wp-config du site test (clone d'avril).
-- La partie PRESSE du mockup est volontairement reportée (pas de parutions réelles fournies). Ne rien inventer.
-- Aucun tiret cadratin. Vérifier accolades PHP/CSS avant push.
-
-**Critères de succès :**
-- Section « Ils en parlent » (05) entre L'atelier et le bento divers : badge Google (note + nb d'avis), 3 avis réels, CTA « Laisser un avis » + « Voir les N avis ».
-- Cartes statiques (pas d'erreur JS au clic), rendu cohérent desktop + mobile.
-- Newsletter numérotée 06. Ordre final : carousel → réassurance → Ton projet → Collections 02 → Créations 03 → L'atelier 04 → Ils en parlent 05 → bento divers → Newsletter 06.
-
-### 👉 Action Robin
-Vérifier sur `test.atelier-sapi.fr` que la section avis s'affiche (sinon → constantes API du wp-config test à contrôler) et que le rendu te va. Ensuite → #5 (passe finale : hiérarchie Hn, maillage conseils/blog, cleanup CSS mort, vérif méta).
-
-</details>
-
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #3 — Section « L'atelier »
-**Résultat (branche `feature/refonte-home`, commit `1d3ecb8`) :**
-- **Section** : nouvelle `<section class="hero-bento home-atelier">` (header « 04 — L'atelier ») après « Les créations du moment ». Storytelling enrichi (label « Mon atelier à Lyon » sans le num, + paragraphe `storytelling-text--seo` verbatim avec 4 liens catégories via helper `$sapi_cat_url`) + photo atelier (verbatim) + frise process (verbatim **moins** `<span class="process-number">03</span>`).
-- **Retraits / déplacements** : 1er bento **entièrement supprimé** ; Carte cadeau déplacée en **tête** du bento divers (carte cadeau + Conseil + Flash actu). Process + Atelier retirés du 2e bento (montés dans L'atelier).
-- **Renumérotation** : newsletter 04→**05**. Plus aucun `process-number` résiduel (doublon « 03 » éliminé).
-- **CSS** : règle header généralisée `.home-creations …` → `.hero-bento .section-header-kinetic` (sert #2 et #3) ; bloc `.home-atelier` (storytelling span 7 / atelier span 5) ; liens SEO stylés bois→orange au hover (contre le `a:hover` bleu global).
-- **Vérifs OK** : ordre final = carousel → réassurance(JS) → Ton projet → Collections 02 → Créations 03 → L'atelier 04 → bento divers → Newsletter 05 ; accolades PHP 60/60, CSS 3679/3679 ; chaque carte déplacée 1× exactement.
-- ℹ️ Si le paragraphe SEO clippe en desktop (`.bento-card` overflow:hidden + rows 200px), fallback prévu `.home-atelier .bento-storytelling { grid-row: span 3; }` — **pas appliqué d'office**, à voir sur rendu.
-
-### 👉 Action Robin
-Vérifier sur `test.atelier-sapi.fr` (desktop + mobile) : rendu section L'atelier, **pas de clipping du paragraphe SEO**, les 4 liens catégories (URLs `/categorie-produit/…/`, couleur bois/orange, pas de bleu), et l'allure du bento divers. Une fois validé → #4 (« Ils en parlent » : avis Etsy + presse).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #3 — Section « L'atelier » : storytelling + photo + process + bloc texte SEO
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-**⛔ Prérequis :** #2 fait (commit `55f3888`) mais PAS ENCORE validé par Robin. Attendre son feu vert avant de lancer cette tâche.
-**Mockup de référence :** `mockups/mockup-15-home-refonte-juin-2026.html` (section « L'atelier »).
-
-**Contexte :** Le storytelling (1er bento), la photo atelier et la frise process (2e bento) racontent la même chose : l'artisan. On les réunit dans UNE section « L'atelier » placée juste après « Les créations du moment », et on y ajoute le **bloc texte SEO** (contenu rédactionnel indexable avec maillage vers les 4 catégories). C'est l'enjeu n°1 de la refonte côté référencement. Même méthode que #2 : on déplace les cartes bento existantes dans un `.bento-container` neuf, styles internes globaux, seulement 2 overrides de span.
-
-**À faire :**
-
-### A. Créer la section, juste après « Les créations du moment »
-Insérer entre le `</section>` qui ferme `.home-creations` et le `<!-- Hero Bento Grid (continued) -->` (2e bento) :
-```php
-<!-- L'atelier (refonte home #3) — storytelling + photo atelier + process + texte SEO -->
-<?php
-// URLs catégories pour le maillage interne (slugs canon : voir tax_query carousel)
-$sapi_cat_url = function ($slug) {
-  $t = get_term_by('slug', $slug, 'product_cat');
-  $l = $t ? get_term_link($t) : '';
-  return (!is_wp_error($l) && $l) ? $l : home_url('/mes-creations/');
-};
-?>
-<section class="hero-bento home-atelier">
-  <div class="section-header-kinetic">
-    <span class="section-num">04</span>
-    <h2 class="section-title-kinetic">L'atelier</h2>
-  </div>
-  <div class="bento-container">
-
-    <div class="bento-card bento-storytelling">
-      <div class="storytelling-inner">
-        <span class="storytelling-label">Mon atelier à Lyon</span>
-        <h2 class="storytelling-title">Des sculptures lumineuses</h2>
-        <p class="storytelling-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
-        <p class="storytelling-text storytelling-text--seo">Je dessine et fabrique à la commande des <a href="<?php echo esc_url($sapi_cat_url('suspensions')); ?>">suspensions</a>, <a href="<?php echo esc_url($sapi_cat_url('appliques')); ?>">appliques</a>, <a href="<?php echo esc_url($sapi_cat_url('lampesaposer')); ?>">lampes à poser</a> et <a href="<?php echo esc_url($sapi_cat_url('lampadaires')); ?>">lampadaires</a> en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main : le peuplier clair ou l'okoumé chaleureux filtrent la lumière et dessinent des ombres uniques.</p>
-        <a href="<?php echo esc_url(home_url('/lumiere-dartisan/')); ?>" class="storytelling-link">
-          <span>Découvrir l'artisan</span>
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-            <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </a>
-      </div>
-    </div>
-
-    <!-- Carte photo atelier : déplacer ici le bloc <!-- Atelier Image --> existant du 2e bento, VERBATIM (lien Maps + label « L'atelier · Lyon ») -->
-
-    <!-- Carte process : déplacer ici le bloc <!-- Process Card --> existant du 2e bento, en retirant UNIQUEMENT <span class="process-number">03</span> du process-header (numéro redondant avec le header de section) -->
-
-  </div>
-</section>
-```
-⚠️ Le storytelling ci-dessus reprend le markup existant à l'identique SAUF : (1) le label perd son `<span class="storytelling-num">01</span>` et devient « Mon atelier à Lyon » (signal géo, non redondant avec le header) ; (2) ajout du paragraphe `storytelling-text--seo`. Reprendre le texte SEO EXACTEMENT tel quel (wording validé, aucun tiret cadratin).
-
-### B. Retirer les cartes déplacées + consolider les bentos restants
-1. 1er bento : après retrait du storytelling, il ne reste QUE la Carte cadeau → **supprimer toute la section** du 1er bento, et déplacer le bloc `<!-- Carte Cadeau -->` (`bento-giftcard`, avec son `<?php if ($gift_card) : ?> … <?php endif; ?>`) en PREMIER dans le 2e bento.
-2. 2e bento : retirer `<!-- Atelier Image -->` et `<!-- Process Card -->` (déplacés en A). Il reste : Carte cadeau + Conseil + Flash actu. Ce bento « divers » est un état transitoire assumé (la section Avis #4 viendra s'intercaler avant). Si la grille paraît déséquilibrée, ne pas bricoler les spans, on verra sur rendu.
-
-### C. Renuméroter la newsletter
-Dans `<section class="newsletter-kinetic">` : `<span class="section-num">04</span>` → `05`.
-
-### D. CSS
-1. **Remplacer** la règle de #2 `.home-creations .section-header-kinetic { … }` par une version générique qui sert #2 ET #3 (mêmes déclarations) :
-```css
-/* ===== Refonte home #2/#3 — headers de section dans les bentos ===== */
-.hero-bento .section-header-kinetic {
-  padding: 0;
-  max-width: none;
-  margin: 0 0 1.5rem;
-}
-```
-2. **Ajouter** :
-```css
-/* ===== Refonte home #3 — Section L'atelier ===== */
-.home-atelier .bento-storytelling { grid-column: span 7; }
-.home-atelier .bento-atelier { grid-column: span 5; }
-.storytelling-text--seo {
-  margin-top: 0.75rem;
-  font-size: 0.92em;
-  opacity: 0.9;
-}
-.storytelling-text--seo a {
-  color: var(--color-wood);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-@media (hover: hover) {
-  .storytelling-text--seo a:hover { color: var(--color-orange); }
-}
-```
-⚠️ Les liens du paragraphe SEO DOIVENT être stylés explicitement (règles ci-dessus) : le `a:hover` global passe en bleu sinon (piège connu).
-
-**Notes / pièges :**
-- `.bento-card` a `overflow: hidden` et la grille des rows fixes (200px). Si le paragraphe SEO fait clipper le contenu du storytelling en desktop, ajouter `.home-atelier .bento-storytelling { grid-row: span 3; }` (fallback autorisé). Vérifier aussi en mobile.
-- Ne pas toucher au contenu de la carte Conseil ni Flash actu.
-- Les anciens styles `.bento-room-picker` morts (flag de #1) restent hors scope.
-- Vérifier l'équilibre des accolades PHP/CSS avant push.
-
-**Critères de succès :**
-- Section « L'atelier » (04) après « Les créations du moment » : storytelling enrichi à gauche (7 col), photo atelier à droite (5 col), frise process pleine largeur dessous, sans numéro « 03 » résiduel.
-- Le paragraphe SEO s'affiche en entier (pas de clipping), avec 4 liens fonctionnels vers les pages catégories (URLs en `/categorie-produit/…/`), stylés bois/orange (pas de bleu au hover).
-- 1er bento supprimé ; le bento « divers » (Carte cadeau + Conseil + Flash actu) s'affiche entre L'atelier et la newsletter.
-- Newsletter numérotée 05. Ordre final de la page : carousel → réassurance → Ton projet → Collections 02 → Créations 03 → L'atelier 04 → bento divers → Newsletter 05.
-
-### 👉 Action Robin
-Vérifier sur `test.atelier-sapi.fr` : rendu de la section L'atelier (desktop + mobile), lisibilité du paragraphe SEO, les 4 liens catégories, et l'allure du bento divers. Une fois validé → #4 (section « Ils en parlent » : avis Etsy + presse).
-
-</details>
-
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #2 — « Les créations du moment »
-**Résultat (branche `feature/refonte-home`, commit `55f3888`) :**
-- **Data** : `posts_per_page` 4→8 + `break` remplacé par `if (count($featured_products) >= 2) break;` → récupère désormais **2** produits featured (l.217 / l.255).
-- **Section** : nouvelle `<section class="hero-bento home-creations">` (header « 03 — Les créations du moment ») insérée **juste après Collections**, avant le 2e bento. Star (grande) + boucle `$featured_products` (2 cartes `bento-product-featured`, attributs `data-piece-swap*` conservés) + CTA « Toutes les créations ». Spans bento réutilisés, **aucun CSS de carte réécrit**.
-- **Retraits** : Star du 1er bento ; produit featured + CTA du 2e bento. Storytelling + Carte cadeau (1er) et Process + Atelier + Conseil + Flash actu (2e) **intacts**.
-- **CSS** : 1 bloc `.home-creations .section-header-kinetic` (padding:0 / max-width:none / margin) pour aligner le header sur les cartes.
-- **Vérifs OK** : 1 seule occurrence de `bento-hero`/`bento-cta`/`bento-product-featured` (dans la nouvelle section) ; accolades PHP 59/59, CSS 3673/3673.
-- ⚠️ **État transitoire assumé** (cf. énoncé) : doublon temporaire du numéro « 03 » (section + carte Process), 1er bento à 2 cartes, 2e à 4 — sera re-séquencé / rééquilibré en #3.
-
-### 👉 Action Robin
-Regarder `test.atelier-sapi.fr` (desktop + mobile) : valider le regroupement et le layout (Star à gauche, 2 produits à droite, CTA en bandeau ; 2 produits distincts). Une fois validé → #3 (section « L'atelier » : storytelling + frise process + bloc texte SEO).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #2 — Regrouper les portes produit en « Les créations du moment »
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-**Mockup de référence :** `mockups/mockup-15-home-refonte-juin-2026.html` (section « Les créations du moment »).
-**Prérequis :** #1 fait (commit `d939e22`).
-
-**Contexte :** Les portes produit sont aujourd'hui éparpillées : la **Star du moment** est dans le 1er bento, le **produit featured** et le **CTA "Toutes les créations"** sont dans le 2e bento, séparés par la section Collections. On les regroupe dans UNE section claire « Les créations du moment », placée **juste après Collections**. On réutilise les cartes bento existantes (`bento-hero`, `bento-product-featured`, `bento-cta`) dans un `.bento-container` neuf : leurs spans (`8×3`, `4×2`, `12×1`) donnent exactement le layout voulu (Star à gauche, 2 produits empilés à droite, CTA en bandeau). **Zéro CSS de carte à réécrire.**
-
-**À faire :**
-
-### A. Data — récupérer 2 produits featured au lieu d'1
-Dans `front-page.php`, bloc `// Featured products for Bento grid (random product)` (~l.213). Deux changements :
-- `posts_per_page` : passer de `4` à `8` (pour trouver 2 produits avec photo `detail`).
-- Remplacer la ligne `break; // Only need 1` par :
-```php
-        if (count($featured_products) >= 2) break;
-```
-(le `$featured_products[] = [...]` juste au-dessus reste inchangé.)
-
-### B. Créer la section, juste après Collections
-Insérer entre la fin de `<!-- Collections Carousel / Grid -->` (le `</section>` qui ferme `.collections-kinetic`) et le `<!-- Hero Bento Grid (continued) -->` (2e bento) :
-```php
-<!-- Les créations du moment (refonte home #2) — regroupe Star + produits featured + CTA -->
-<section class="hero-bento home-creations">
-  <div class="section-header-kinetic">
-    <span class="section-num">03</span>
-    <h2 class="section-title-kinetic">Les créations du moment</h2>
-  </div>
-  <div class="bento-container">
-
-    <?php if ($star_product_data) : ?>
-    <a href="<?php echo esc_url($star_product_data['url']); ?>" class="bento-card bento-hero">
-      <?php echo wp_get_attachment_image($star_product_data['image_id'], 'woocommerce_single', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $star_product_data['name'] . ', star du moment']); ?>
-      <span class="bento-bestseller-badge">Star du moment</span>
-      <div class="bento-content">
-        <h2 class="bento-title product-name"><?php echo esc_html($star_product_data['name']); ?></h2>
-        <?php if ($star_product_data['category']) : ?>
-          <p class="bento-category"><?php echo esc_html($star_product_data['category']); ?></p>
-        <?php endif; ?>
-      </div>
-    </a>
-    <?php endif; ?>
-
-    <?php foreach ($featured_products as $fp) : ?>
-    <a href="<?php echo esc_url($fp['url']); ?>" class="bento-card bento-product-featured" data-product-id="<?php echo esc_attr($fp['id']); ?>" data-piece-swap data-piece-swap-type="detail" data-piece-swap-size="large">
-      <?php echo wp_get_attachment_image($fp['image_id'], 'large', false, ['class' => 'bento-bg-img', 'loading' => 'lazy', 'alt' => $fp['name'] . ', luminaire artisanal']); ?>
-      <div class="bento-product-featured-info">
-        <h3><?php echo esc_html($fp['name']); ?></h3>
-        <span class="bento-product-featured-price"><?php echo wp_kses_post($fp['price']); ?></span>
-      </div>
-    </a>
-    <?php endforeach; ?>
-
-    <a href="<?php echo home_url('/mes-creations/'); ?>" class="bento-card bento-cta">
-      <h3 class="cta-title">Toutes les créations</h3>
-      <span class="cta-button">
-        <span>Explorer</span>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"/></svg>
-      </span>
-    </a>
-
-  </div>
-</section>
-```
-
-### C. Retirer les cartes déplacées de leurs anciens bentos
-- 1er bento (`<section class="hero-bento">`, le premier) : supprimer le bloc `<!-- Star du moment -->` (`<?php if ($star_product_data) : ?> … <?php endif; ?>` avec `class="bento-card bento-hero"`).
-- 2e bento (`<!-- Hero Bento Grid (continued) -->`) : supprimer le bloc `<!-- Product Card - Random Featured Product -->` (`bento-product-featured`, utilise `$featured_products[0]`) ET le bloc `<!-- CTA Card -->` (`bento-cta`, « Toutes les créations »).
-- NE PAS toucher aux autres cartes : Storytelling + Carte cadeau (1er bento) ; Process + Atelier + Conseil + Flash actu (2e bento).
-
-### D. CSS — un seul bloc (alignement du header avec les cartes)
-Le `.hero-bento` apporte déjà `padding: 3rem` + `max-width: 1600px` + centrage. Mais `.section-header-kinetic` apporte son PROPRE `padding: 0 3rem` + max-width, ce qui le décalerait de 3rem par rapport aux cartes. Neutraliser, scopé à la nouvelle section. Ajouter dans `style.css` :
-```css
-/* ===== Refonte home #2 — Section Les créations du moment ===== */
-.home-creations .section-header-kinetic {
-  padding: 0;
-  max-width: none;
-  margin: 0 0 1.5rem;
-}
-```
-
-**Notes / pièges :**
-- État transitoire assumé : après #2, le 1er bento n'a plus que Storytelling + Carte cadeau, et le 2e que Process + Atelier + Conseil + Flash actu. Storytelling + Process partiront dans #3 (« L'atelier »). On ne rééquilibre pas les bentos maintenant.
-- Numérotation : la section porte « 03 », et la carte Process affiche aussi « 03 » pour l'instant. Doublon temporaire, re-séquencé en #3. Ne pas y toucher ici.
-- Garder les attributs `data-piece-swap*` sur les cartes featured (swap photo par pièce).
-- Aucun tiret cadratin/demi-cadratin. Ne pas ajouter d'ombre aux cartes qui n'en ont pas.
-- Vérifier l'équilibre des accolades PHP/CSS avant push.
-
-**Critères de succès :**
-- Nouvelle section « Les créations du moment » (header 03) juste après Collections, avec Star (grande, à gauche), 2 produits featured (à droite), et le CTA « Toutes les créations » en bandeau.
-- 2 produits featured distincts s'affichent (data récupère bien 2).
-- La Star a disparu du 1er bento ; le produit featured et le CTA ont disparu du 2e bento ; les autres cartes restent.
-- Rendu desktop conforme au mockup, mobile correct (cartes empilées).
-
-### 👉 Action Robin
-Regarder `test.atelier-sapi.fr` (desktop + mobile) : valider le regroupement et le layout de la section. Une fois validé → #3 (section « L'atelier » : storytelling + frise process + bloc texte SEO).
-
-</details>
-
-## ✅ [FAIT 2026-06-04 — sur test] Refonte home #1 — Entrée projet en section dédiée
-**Résultat (branche `feature/refonte-home`, commit `d939e22`) :**
-- `front-page.php` : nouveau `<section class="home-projet-section">` inséré juste après le carousel (`endif` ~l.470) et avant le 1er bento. Markup room-picker repris, eyebrow « Ton projet », titre au **tutoiement** (« cherches-tu »), `isset()` sur `$room_icons`. Attributs `data-room-picker` + `data-room-picker-freetext` **préservés** (câblage JS Conseiller/Mon Projet intact).
-- Bloc `bento-room-picker` retiré du 1er bento → il ne reste que 3 cartes (Star, Storytelling, Carte cadeau). Rééquilibrage du bento **volontairement pas fait** (prévu en tâche suivante, à voir sur rendu).
-- `style.css` : bloc `/* Refonte home #1 */` ajouté après `.advice-room-picker*` (fond warm, bordure dashed, eyebrow, cards centrées, mobile 2 colonnes).
-- **Vérifs OK** : 0 référence `bento-room-picker` dans le markup ; accolades front-page 59/59, CSS 3672/3672 ; `$room_choices`/`$room_icons` définis (l.194/203) avant usage.
-- ⚠️ **Cleanup à prévoir** : les règles CSS `.bento-room-picker` (style.css l.10835+, 11844, 11920) sont maintenant **mortes** (plus aucun markup). Pas supprimées ici pour rester dans le scope ; à nettoyer dans une tâche dédiée.
-
-### 👉 Action Robin
-Regarder `test.atelier-sapi.fr` (desktop + mobile) : valider placement + rendu, et dire si tu préfères ce cadre warm contenu (dashed) ou un bandeau crème pleine largeur edge-to-edge. Une fois validé → on enchaîne #2 (regrouper les portes produit en « Créations du moment »).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Refonte home #1 — Remonter l'entrée projet en section dédiée
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** `feature/refonte-home` (push auto à la fin, jamais master).
-**Mockup de référence :** `mockups/mockup-15-home-refonte-juin-2026.html` (section "Pour quelle pièce ?").
-
-**Contexte :** Aujourd'hui le room-picker "Pour quelle pièce ?" est noyé comme 4e carte du 1er bento (`.bento-room-picker`), donc invisible. C'est l'entrée n°1 du tunnel. On la sort du bento et on la promeut en **section pleine largeur juste après le carousel** (donc après le bandeau réassurance injecté en JS, et avant le 1er bento). On RÉUTILISE le markup room-picker existant et ses styles globaux : ne rien réinventer.
-
-**À faire :**
-
-1. **Retirer** de `front-page.php` le bloc commenté `<!-- Pour quelle pièce ? … -->` correspondant à `<div class="bento-card bento-room-picker" data-room-picker>` (actuellement ~lignes 516-540), à l'intérieur du 1er `<section class="hero-bento"><div class="bento-container">`. NE PAS toucher aux 3 autres cartes du bento (Star, Storytelling, Carte cadeau).
-
-2. **Insérer** juste après la fin de la section carousel (après le `<?php endif; ?>` qui ferme `if ($total_slides > 0)`, ~ligne 470) et AVANT le `<!-- Hero Bento Grid -->` (~ligne 472), cette nouvelle section. Le markup interne est repris à l'identique de la version page Conseils (`page-conseils-eclaires.php` ~ligne 218), donc les variables `$room_choices` / `$room_icons` déjà présentes dans `front-page.php` fonctionnent :
-
-```php
-<!-- Entrée projet — room picker promu en section pleine largeur (refonte home #1) -->
-<section class="home-projet-section">
-  <div class="home-projet" data-room-picker>
-    <div class="room-picker-inner">
-      <span class="home-projet__eyebrow">Ton projet</span>
-      <h3 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h3>
-      <div class="room-picker-cards">
-        <?php foreach ($room_choices as $room) :
-          $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
-        ?>
-          <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
-            <span class="room-card-icon"><?php echo $icon_svg; ?></span>
-            <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-          </a>
-        <?php endforeach; ?>
-      </div>
-      <div class="room-picker-or" aria-hidden="true">
-        <span class="room-picker-or__text">ou</span>
-      </div>
-      <form class="room-picker-freetext" data-room-picker-freetext>
-        <input type="text" class="room-picker-freetext__input" name="freetext"
-               placeholder="Décris ton projet en quelques mots…" maxlength="500"
-               aria-label="Décris ton projet en quelques mots">
-        <button type="submit" class="room-picker-freetext__submit" aria-label="Envoyer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </button>
-      </form>
-    </div>
-  </div>
-</section>
-```
-
-⚠️ Conserver IMPÉRATIVEMENT les attributs `data-room-picker` et `data-room-picker-freetext` (ils câblent le JS Conseiller / Mon Projet). Wording du titre passé au **tutoiement** ("cherches-tu", pas "cherchez-vous").
-
-3. **Ajouter** dans `style.css` ce bloc (à la suite des règles `.advice-room-picker*`, ~ligne 7910). Il est calqué sur `.advice-room-picker` mais nommé `home-projet*` pour découpler la home de la page Conseils. Les cartes sont déjà stylées par les règles globales `.room-card` / `.room-card-icon` / `.room-card-label`, ne pas les redéclarer :
-
-```css
-/* ===== Refonte home #1 — Section entrée projet ===== */
-.home-projet-section {
-  max-width: 1400px;
-  margin: 2.5rem auto;
-  padding: 0 2rem;
-}
-.home-projet {
-  position: relative;
-  background: var(--color-warm, #FBF6EA);
-  border-radius: 16px;
-  padding: 2.75rem 2rem;
-  text-align: center;
-  overflow: hidden;
-}
-.home-projet::before {
-  content: "";
-  position: absolute;
-  inset: 12px;
-  border: 1.5px dashed rgba(147, 125, 104, 0.35);
-  border-radius: 12px;
-  pointer-events: none;
-}
-.home-projet .room-picker-inner { position: relative; z-index: 1; }
-.home-projet__eyebrow {
-  display: block;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-size: 0.82rem;
-  color: var(--color-wood);
-  opacity: 0.85;
-  margin-bottom: 0.5rem;
-}
-.home-projet .room-picker-cards {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  width: 100%;
-}
-@media (max-width: 768px) {
-  .home-projet-section { padding: 0 1rem; }
-  .home-projet { padding: 1.75rem 1.25rem; }
-  .home-projet .room-picker-cards { gap: 0.75rem; }
-  .home-projet .room-card { flex: 0 0 calc(50% - 0.5rem); max-width: none; padding: 1rem 0.75rem; }
-}
-```
-
-**Notes / pièges :**
-- Après retrait, le 1er bento n'a plus que 3 cartes. Le `.bento-container` est en grille 12 colonnes `grid-auto-flow: dense` : les 3 cartes restantes vont se réagencer. Si ça paraît déséquilibré, NE PAS bricoler les spans dans cette tâche, on rééquilibrera le bento dans une tâche suivante une fois vu sur le rendu.
-- Ne pas ajouter d'ombre aux cartes qui n'en avaient pas. Aucun tiret cadratin ni demi-cadratin dans les textes.
-- Vérifier l'équilibre des accolades CSS/PHP avant de pousser (pas de PHP local pour `php -l`).
-
-**Critères de succès :**
-- La section "Pour quelle pièce ?" apparaît en pleine largeur juste sous le bandeau réassurance, avant le 1er bento, fond warm + bordure dashed, 6 pièces + "ou" + champ libre.
-- Cliquer une pièce ou soumettre le champ libre déclenche le même comportement Conseiller/Mon Projet qu'avant (attributs data préservés).
-- Le room-picker a bien DISPARU du 1er bento ; les 3 autres cartes du bento s'affichent toujours.
-- Rendu mobile correct (pièces sur 2 colonnes).
-
-### 👉 Action Robin
-Regarder `test.atelier-sapi.fr` (desktop + mobile) : valider le placement et le rendu, et dire si tu préfères ce cadre warm contenu (dashed) ou un bandeau crème pleine largeur edge-to-edge (ajustable en 1 tâche). Une fois validé, on enchaîne avec #2 (regrouper les portes produit en "Créations du moment").
-
-</details>
-
-## ✅ [VALIDÉ ROBIN 2026-06-04 — sur test] Setup branche refonte home + déploiement test
-**Validation :** run `Deploy to Test Server` #2491 vert (18s) sur `feature/refonte-home` ; home rendue à l'identique sur test.atelier-sapi.fr, aucune régression. Prêt pour la 1re tâche de structure.
-
-**Résultat (branche `feature/refonte-home`, commit `af1dabd`) :**
-- Branche `feature/refonte-home` créée depuis `test-theme-sapi-maison` et poussée sur origin (tracking set).
-- `.github/workflows/deploy-test.yml` : ajout de `feature/refonte-home` à `on.push.branches` (à côté de `test-theme-sapi-maison` et `feature/photos-par-piece`).
-- Push effectué → le workflow `Deploy to Test Server` se déclenche sur cette branche. `front-page.php` **inchangé** : aucune modif de structure à ce stade.
-- ⚠️ `gh` non installé en local : je n'ai pas pu lire le statut du run dans l'onglet Actions. À confirmer côté GitHub (doit être vert).
-
-### 👉 Action Robin
-Vérifier dans l'onglet **Actions** que `Deploy to Test Server` est passé au vert sur `feature/refonte-home`, puis vérifier le rendu de la home sur `test.atelier-sapi.fr` : doit être **identique** à l'actuelle (carousel + bento + reste OK, aucune régression). Une fois confirmé, on enchaîne avec la 1re tâche de structure (injection de la nouvelle ossature dans `front-page.php`, mockup de réf : `mockups/mockup-15-home-refonte-juin-2026.html`).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] Setup branche refonte home + déploiement test
-**Date :** 2026-06-04
-**Priorité :** haute
-**Branche :** créer `feature/refonte-home` **depuis `test-theme-sapi-maison`**. Push auto autorisé (branche feature/test). Jamais de push master.
-
-**Contexte :** On démarre la refonte complète de la page d'accueil (`front-page.php`). On développe sur une branche dédiée, déployée sur `test.atelier-sapi.fr`, sans casser la home actuelle (qui reste intacte sur `test-theme-sapi-maison` et `master`). Rappel : le site de test n'a qu'une version du thème à la fois (déploiement FTP via GitHub Actions), il affichera donc la branche poussée en dernier. C'est assumé.
-
-**À faire :**
-1. Créer la branche `feature/refonte-home` à partir de `test-theme-sapi-maison`.
-2. Dans `.github/workflows/deploy-test.yml`, ajouter `feature/refonte-home` à `on.push.branches` (à côté de `test-theme-sapi-maison` et `feature/photos-par-piece`).
-3. Commit + push `feature/refonte-home` pour déclencher un premier déploiement test.
-4. Vérifier dans l'onglet Actions que le workflow `Deploy to Test Server` s'exécute sans erreur.
-5. NE RIEN modifier d'autre dans `front-page.php` à ce stade. La refonte arrivera dans des tâches suivantes, section par section (mockup de référence : `mockups/mockup-15-home-refonte-juin-2026.html`).
-
-**Critères de succès :**
-- `feature/refonte-home` existe et est poussée sur origin.
-- Un push sur cette branche déclenche bien `deploy-test.yml` (run visible dans Actions, statut vert).
-- `test.atelier-sapi.fr` rend la home actuelle **à l'identique** depuis cette branche : aucune régression visuelle, le carousel + le bento + tout le reste fonctionnent comme avant.
-
-**Critères de succès :**
-- `feature/refonte-home` existe et est poussée sur origin.
-- Un push sur cette branche déclenche bien `deploy-test.yml` (run visible dans Actions, statut vert).
-- `test.atelier-sapi.fr` rend la home actuelle **à l'identique** depuis cette branche : aucune régression visuelle, le carousel + le bento + tout le reste fonctionnent comme avant.
-
-</details>
-
-## ✅ [FAIT 2026-06-03 — sur test] /sur-mesure/ #6 + disclaimer + suppression form mort
-**Résultat (branche `test`, commits `b99c9c8` + `572d69f`) :**
-- **Partie A** — `sapi_handle_surmesure_form` (functions.php ~6525) : upsert Brevo liste #6 `attributes:['SOURCE'=>'conseiller']` **uniquement** (piège 400 évité), `updateEnabled:true`, après validation email, **non bloquant** (error_log `[sapi-brevo-conseiller] …/sur-mesure/…` ; email de notif + retour continuent). Disclaimer opt-in (vouvoiement, classe `.contact-disclaimer`) sous le bouton dans `page-sur-mesure.php`.
-- **Partie B** — supprimés : le bloc inline mort `conseiller-surmesure-wrap` (archive-product.php), le bloc enqueue commenté dans functions.php, et le fichier `assets/sapi-surmesure-card.js`. La card-lien orange `mes-creations-surmesure-card` (→ /sur-mesure/) est **conservée**.
-- **Vérifs OK** : 0 référence restante à `sapi-surmesure-card` / `conseiller-surmesure-wrap` ; accolades équilibrées (functions.php 889/889, archive 34/34) ; body Brevo = `listIds:[6]` + `SOURCE` seul. `php -l` impossible (pas de PHP local).
-
-### 👉 Action Robin
-Tester sur `test.atelier-sapi.fr` : soumission du formulaire `/sur-mesure/` → contact créé dans Brevo #6 (`SOURCE=conseiller`) + email de notif reçu + disclaimer visible ; vérifier que /mes-creations/ affiche toujours la card-lien orange. Puis « go prod » → merge test → master (avec tout le lot en attente).
-
-<details><summary>Énoncé original</summary>
-
-## [TÂCHE] /sur-mesure/ : inscrire à #6 (SOURCE=conseiller) + disclaimer, et supprimer le form inline mort
-**Date :** 2026-06-03
-**Branche :** à confirmer avec Robin avant de commiter. Pas de push master sans accord.
+## [✅ FAIT — 2026-07-16] Charte — pousser la refonte du logo et des polices
+**Date :** 2026-07-16
 **Priorité :** normale
 
-**Contexte :** Découverte de 3 formulaires "sur-mesure". La modale Conseiller (`sapi_megafilter_surmesure`) inscrit déjà à #6 `SOURCE=conseiller` + disclaimer (FAIT, validé). Restent deux choses, décidées avec Robin le 03/06 : (A) inscrire le VRAI entonnoir = la page /sur-mesure/ (qui n'inscrit personne aujourd'hui) ; (B) supprimer un formulaire inline mort.
+### ✅ Résultat Claude Code (2026-07-16)
+- **Vérif avant commit** : `git status` propre — le `.ai` est bien dans `_local/` (gitignoré), rien d'interdit (`_local/`, `.DS_Store`, `.ai`, `charte-en-ligne.zip`) stagé. ✅
+- **Commit** `dea72a2` « Logo régénéré depuis le vectoriel + zone de protection + Montserrat », `git push origin main` → OK.
+- **Déploiement GHA** confirmé (fichier live re-daté ~30 s après le push). Critères testés :
+  - `/` → 200, **identique** à `index.html` poussé ✅
+  - `download/logo/logo-sapi-noir-zone.svg` → 200 (`image/svg+xml`) ✅
+  - `download/logo-sapi.zip` → 200 (356 Ko) ✅
+  - `download/polices-sapi.zip` → 200 (492 Ko) ✅
+  - `download/square-peg.zip` → **404** (renommé, bien supprimé par la synchro FTP) ✅
+  - `_local/` → **404** ✅
+  - anciens PNG (`logo-sapi-noir-1000.png`) → **404** (supprimés), nouveaux PNG 1200 → 200 ✅
+- **🔒 SSL** : l'AutoSSL O2switch est **désormais émis** → `https://charte.atelier-sapi.fr` répond en 200 avec **certificat valide** (le point en attente de la tâche précédente est résolu).
 
-### Partie A — Inscrire les demandes /sur-mesure/ à #6
-Handler `sapi_handle_surmesure_form` (functions.php ~6498), POST classique, champs `fullname` / `email` / `message` / `robin_project`.
-- Après la validation `if (!is_email($email))` (~6525), ajouter un upsert Brevo identique au pattern déjà utilisé (modale / robin_contact) :
-  - `$api_key = defined('BREVO_API_KEY') ? BREVO_API_KEY : '';`
-  - si clé : POST `https://api.brevo.com/v3/contacts`, body `['email'=>$email,'listIds'=>[6],'attributes'=>['SOURCE'=>'conseiller'],'updateEnabled'=>true]`.
-  - IMPORTANT : n'envoyer QUE l'attribut `SOURCE` (pas de nom/message/téléphone → Brevo rejette en 400, contact jamais inscrit ; bug déjà vécu).
-  - `error_log` sur échec, NON bloquant : l'email de notif à Robin et la confirmation/redirection doivent continuer même si Brevo échoue.
-- Disclaimer opt-in sous le bouton d'envoi du formulaire dans `page-sur-mesure.php` (`#sur-mesure-form`), même style/CSS `.contact-disclaimer` que la modale :
-  > En envoyant votre demande, vous acceptez de recevoir occasionnellement des nouvelles de l'Atelier Sâpi. Désinscription possible à tout moment.
+<details><summary>Consigne d'origine (archivée)</summary>
 
-### Partie B — Supprimer le formulaire inline mort
-- Dans `woocommerce/archive-product.php` : supprimer UNIQUEMENT le bloc inline mort `conseiller-surmesure-wrap` / `conseiller-surmesure-card` / `conseiller-surmesure-form` (~ligne 535+, `data-surmesure-wrap hidden`).
-- NE PAS toucher au template `mes-creations-surmesure-card` (~ligne 276) : c'est la card-lien orange vers /sur-mesure/, qui FONCTIONNE et qu'on garde.
-- Supprimer le bloc d'enqueue commenté de `sapi-surmesure-card.js` dans functions.php (~488-497) et le fichier `assets/sapi-surmesure-card.js`.
-- Vérifier qu'aucun autre fichier ne référence `sapi-surmesure-card` après suppression.
+**⚠️ Dépôt séparé, PAS le thème :** `~/Atelier Sapi Claude Cowork/business/docs/charte-graphique/`
+(dépôt `robinSapi/charte-atelier-sapi`). Ne rien toucher dans `theme-atelier-sapi`.
 
-### Critères de succès
-- Une soumission /sur-mesure/ crée un contact #6 `SOURCE=conseiller` (vérifiable côté Brevo) ; l'email de notif part toujours, même si Brevo échoue.
-- Disclaimer visible sous le bouton du formulaire /sur-mesure/.
-- Plus aucune trace du form inline mort ni de son JS ; la card-lien orange /mes-creations/ → /sur-mesure/ reste intacte.
+**Contexte :** Robin a validé. Tout est écrit et vérifié côté fichiers, il ne reste qu'à
+committer et pousser. Le workflow GHA déploie tout seul sur `charte.atelier-sapi.fr`.
+
+**Ce qui change :**
+- Logo entièrement régénéré depuis le master vectoriel (`.ai` converti en SVG).
+  4 déclinaisons (noir, bois, gris, creme) x (SVG nu + SVG avec zone + PNG 1200/600/300).
+- Zone de protection : carré = 2x le diamètre du disque, disque centré, marge D/2.
+  Ratio vérifié à 0,500 sur les 5 images.
+- Montserrat ajoutée au pack (4 TTF : Light, Regular, Bold, Black).
+- Anciens PNG au lettrage évidé supprimés, filtres CSS retirés de la page.
+- Section Logo : les cartes n'ont plus de padding, elles SONT le carré de protection.
+
+**À faire :**
+1. `cd business/docs/charte-graphique/`
+2. `git status` — vérifier qu'il n'y a NI `_local/`, NI `.DS_Store`, NI `.ai`, NI `charte-en-ligne.zip`.
+   (contrôlé côté Cowork : c'est propre, mais revérifier avant de committer)
+3. `git add -A`
+4. Commit : « Logo régénéré depuis le vectoriel + zone de protection + Montserrat »
+5. `git push origin main`
+6. Suivre le run Actions. En cas d'échec, rapporter le log ici sans retenter en boucle.
+
+**Critères de succès :**
+- `https://charte.atelier-sapi.fr` à jour : section Logo avec 6 cartes à l'échelle
+- `download/logo/logo-sapi-noir-zone.svg` → 200
+- `download/logo-sapi.zip` et `download/polices-sapi.zip` → 200
+- `download/square-peg.zip` → **404 attendu** (renommé en polices-sapi.zip)
+- `/_local/` → toujours 404
+
+**Rappel :** `main` de ce dépôt est directement en ligne. Le push publie.
 
 </details>
+
+---
+
+## [✅ FAIT — 2026-07-17] Charte — pousser en prod : photos, survol, carrousel, palette
+
+**Date :** 2026-07-17
+**Priorité :** normale
+
+### ✅ Résultat Claude Code (2026-07-17)
+**⚠️ Déployé en 2 commits — Cowork a enrichi les fichiers PENDANT mon travail** (ajout suppression Print + palette Affinity + README, après mon 1er commit). J'ai donc complété avec un 2e commit pour que le live corresponde à l'état final voulu. Le résultat en ligne est complet et correct.
+- **Commit 1** `14bd66c` « Photos, doctrine de survol, carrousel de densité, dérivées en bande » (48 fichiers : photos, survol, carrousel, dérivées en bande, montserrat/square-peg séparés).
+- **Commit 2** `88eb2be` « Retrait de la rubrique Print + palette Affinity (.clr) » (le delta arrivé après : `index.html` sans Print, `download/palette-sapi.clr`, `README.md`).
+- **Vérif avant chaque commit** : `.DS_Store` (dans `download/fonts/`) et `.ai` (dans `_local/`) bien **ignorés**, absents du staging. Rien d'interdit poussé. ✅
+- **Déploiement GHA** confirmé pour les 2 push (fichier live re-daté à chaque fois). Critères finaux testés (cert SSL valide) :
+  - `/` → 200, **identique** à `index.html` final poussé ✅
+  - `download/square-peg.zip` + `download/montserrat.zip` → **200** ✅
+  - `download/polices-sapi.zip` → **404** (pack combiné retiré par la synchro FTP) ✅
+  - `download/fonts/SquarePeg-Regular.woff2` → **404** ; `…SquarePeg-Regular.ttf` → 200 ✅
+  - `download/palette-sapi.clr` → **200** (1670 o ; non matché par les exclusions `*.zip`, monte bien, pas besoin de toucher `deploy.yml`) ✅
+  - `img/regle-zone.jpg` → 200 ; `img/regle-2-3.jpg` + `img/sapi-art.jpg` → **404** ✅
+  - **Print retiré** : plus qu'**1** occurrence de « print » dans le HTML live = le garde-fou `localStorage` (attendu), aucun onglet Print ✅
+  - `_local/` → **404** ✅
+- **Contrôle assets** : tous les fichiers (img/ + download/) référencés dans le `index.html` live répondent **200** — aucun lien cassé.
+- **⚠️ Rendu visuel non vérifié** (pas de navigateur dans le bac à sable, comme signalé par Cowork) : contrastes/largeurs/carrousel/survol + le garde-fou `sapi-charte-ctx=print` (page pas blanche) à contrôler à l'œil. Structure + tous les assets OK, mais le visuel reste à valider par Robin.
+
+<details><summary>Consigne d'origine (archivée)</summary>
+
+**⚠️ Dépôt séparé, PAS le thème :** `~/Atelier Sapi Claude Cowork/business/docs/charte-graphique/`
+(dépôt `robinSapi/charte-atelier-sapi`, branche `main`). Ne rien toucher dans `theme-atelier-sapi`.
+
+**Contexte :** Robin a validé. Tout est écrit et vérifié côté fichiers, il ne reste qu'à
+committer et pousser. Le workflow GHA déploie seul sur `charte.atelier-sapi.fr`.
+48 fichiers en attente depuis le commit `dea72a2`.
+
+**Ce qui change :**
+- **Survol** : doctrine posée. Bouton = la couleur fonce + l'ombre s'ouvre, aucun mouvement.
+  Carte = elle lévite, la couleur ne bouge pas. Inerte = rien. Boutons en aplat, plus de dégradé.
+- **Couleurs** : une seule pastille par couleur, coupée 66/34. La dérivée de survol est la
+  tranche droite (hex + « SURVOL », copiable au clic, token en `title`). Le bloc « 1 DÉRIVÉE »
+  et les cartes `span 2` sont supprimés → **la grille des couleurs est devenue uniforme**.
+- **Photos** : section refaite. 4 exemples segmentés, 3 overlays côte à côte, carrousel de
+  densité pleine largeur (scroll-snap), lightbox qui conserve la bordure rouge des faux.
+- **Règle de cadrage** : « le luminaire au centre, entier dans la moitié centrale ».
+  Nouvelle image `img/regle-zone.jpg`. `img/regle-2-3.jpg` et `img/sapi-art.jpg` supprimées.
+- **Section Formats refondue** : grille en 3 colonnes explicites (l'`auto-fit` écrasait les cartes),
+  Pinterest réuni en une seule carte pleine largeur avec ses 3 ratios (2:3 référence, carré, long).
+  Sous-titre supprimé : il énonçait encore l'ancienne règle des 2/3 et contredisait la section Photos.
+  Nouvelle règle « Le centrage » + `img/regle-centrage.jpg`.
+- **Les 3 exemples d'overlay repassés en 4:5** (ils étaient en 4:3), régénérés depuis `situation.jpg`.
+- ⚠️ **Règle du nom de produit appliquée aux images** : prénom Montserrat 700 CAPITALES + surnom
+  Square Peg, sur une seule ligne de base, rapport 2,12× (la charte affiche 2,13×). Les visuels
+  violaient la règle que la charte énonce dans sa propre section Polices.
+- **Polices** : woff2 remplacés par des TTF. `polices-sapi.zip` (pack combiné) abandonné au
+  profit de **deux packs séparés** : `square-peg.zip` + `montserrat.zip`.
+- Textes raccourcis à l'essentiel (2129 mots), tirets cadratins retirés partout.
+- **Print supprimé** : Robin abandonne la rubrique. L'onglet, la section 09, l'entrée de menu,
+  les 2 encarts « manque » disséminés dans Logo et Couleurs, le contexte `print` des 14 sections
+  partagées et les 6 règles CSS orphelines (`.gap`, `.gap-t`, `.gap-list`) sont retirés.
+  **Garde-fou ajouté** : le contexte est mémorisé en `localStorage`, et `'print'` dort dans le
+  navigateur de quiconque a cliqué l'onglet. Sans lui la page s'ouvrait **vide**, sans rien en
+  console pour l'expliquer. Il retombe sur `web` si le contexte mémorisé n'existe plus.
+- **Nouvelle carte de téléchargement : la palette Affinity** (`download/palette-sapi.clr`,
+  18 couleurs nommées, là où l'ancienne en avait 17 anonymes dont 2 fantômes).
+  ⚠️ Elle est **générée depuis la constante `GAMMES` d'`index.html`** : ne jamais l'éditer à la
+  main, sinon la charte et le nuancier divergent. Le `.clr` du Drive a été remplacé par le même
+  fichier (ancien archivé dans `_local/`).
+- README remis d'aplomb (il décrivait 12 PNG et des woff2 qui n'existent plus).
+
+**À faire :**
+1. `cd business/docs/charte-graphique/`
+2. `git status` — vérifier qu'il n'y a NI `_local/`, NI `.DS_Store`, NI `.ai`, NI `charte-en-ligne.zip`.
+   (contrôlé côté Cowork : c'est propre, mais revérifier avant de committer)
+3. `git add -A` — inclut 4 suppressions (`polices-sapi.zip`, les 2 woff2, `sapi-art.jpg`)
+4. Commit : « Photos, survol, dérivées en bande, palette Affinity, print retiré »
+5. `git push origin main`
+6. Suivre le run Actions. En cas d'échec, rapporter le log ici sans retenter en boucle.
+
+**Critères de succès :**
+- `https://charte.atelier-sapi.fr` à jour
+- `download/square-peg.zip` et `download/montserrat.zip` → **200**
+- `download/polices-sapi.zip` → **404 attendu** (le pack combiné est abandonné ; le workflow
+  synchronise et doit le retirer du serveur — si il répond encore 200, le signaler)
+- `download/fonts/SquarePeg-Regular.woff2` → **404 attendu**
+- `img/regle-zone.jpg` et `img/regle-centrage.jpg` → 200 ; `img/regle-2-3.jpg` et `img/sapi-art.jpg` → 404
+- `download/palette-sapi.clr` → **200**. Le workflow exclut `*.zip` et ré-inclut `download/*.zip` ;
+  `.clr` n'est matché par aucune exclusion, donc il devrait monter. À vérifier quand même : si 404,
+  ajouter une exception dans `deploy.yml`.
+- **Plus aucun onglet « Print »** dans la barre de contexte : il ne reste que Site web et Réseaux
+  sociaux. Et la page ne doit **pas** être blanche même avec `sapi-charte-ctx=print` en localStorage
+  (c'est le cas de Robin) : tester en console avec
+  `localStorage.setItem('sapi-charte-ctx','print')` puis recharger.
+- `/_local/` → toujours 404
+
+**⚠️ Point non vérifié côté Cowork :** le **rendu**. Pas de navigateur dans le bac à sable
+(playwright ne peut pas installer Chromium sans sudo). Les contrastes, la largeur des textes,
+l'équilibre des accolades et le parse JS sont vérifiés ; **le visuel ne l'est pas**.
+Si quelque chose s'affiche de travers après déploiement, c'est là qu'il faut regarder en premier.
+
+**Rappel :** `main` de ce dépôt est directement en ligne. Le push publie.
+
+---
+
+## [✅ FAIT — 2026-07-17] Charte — pousser la refonte des visuels et de la densité
+
+**Date :** 2026-07-17
+**Priorité :** normale
+
+### ✅ Résultat Claude Code (2026-07-17)
+- **Vérif avant commit** : `.ai` (dans `_local/`) et `.DS_Store` (dans `download/fonts/`) bien **ignorés** ; rien de `_local/` (ni `.bak.html`) stagé. 26 fichiers stagés (conforme), dont les 4 suppressions génériques. ✅
+- **Commit** `5187b4a` « Photos de Robin, compositions réseaux, densité en 8 cartes », `git push origin main` → OK (un seul commit cette fois, pas de modif concurrente de Cowork).
+- **Déploiement GHA** confirmé (fichier live re-daté ~20 s après le push). Critères testés (cert SSL valide) :
+  - `/` → 200, **identique** à l'`index.html` poussé ✅
+  - les **8 photos par modèle** (`packshot-leon`, `packshot-merveilleuse`, `detail-claudine`, `vue-dessous-olivia`, `vue-dessous-gaston`, `situation-sebastien`, `situation-alice`, `situation-charlie`) → **200** ✅
+  - les **8 compositions réseaux** `img/compo-*.jpg` référencées et servies → **200** ✅
+  - `img/regle-centrage.jpg` + `img/regle-zone.jpg` → 200 ✅
+  - anciennes génériques (`packshot.jpg`, `detail.jpg`, `situation.jpg`, `vue-dessous.jpg`) → **404** (retirées par la synchro FTP) ✅
+  - `_local/` → **404** ✅
+- **Section Densité** : `.m-edito` (éditoriale) et `.m-split` (scindée) présentes dans le HTML live → 8 cartes en place ✅
+- **Intégrité liens** : tous les assets référencés dans l'`index.html` live répondent **200** — aucun lien cassé.
+- **Perf** : somme des photos référencées ~3,4 Mo (conforme à l'estimation Cowork ~3,6 Mo). Si la page traîne, l'option « redescendre 1600→1200px » reste en réserve.
+- **⚠️ Rendu visuel non vérifié** (pas de navigateur dans le bac à sable) : hauteurs `.m-edito`/`.m-split` **estimées** → surveiller un éventuel débordement clippé en silence par `overflow:hidden` ; contraste des 3 critères photo sur aplat orange (3,63:1, sous le seuil 4,5 — réserve assumée par Robin). À valider à l'œil par Robin.
+
+<details><summary>Consigne d'origine (archivée)</summary>
+
+**⚠️ Dépôt séparé, PAS le thème :** `~/Atelier Sapi Claude Cowork/business/docs/charte-graphique/`
+(dépôt `robinSapi/charte-atelier-sapi`, branche `main`). Ne rien toucher dans `theme-atelier-sapi`.
+
+**Contexte :** Robin a validé (« c'est parfait, on pousse en prod »). **26 fichiers** en attente
+depuis `88eb2be`. Tout est écrit et contrôlé côté Cowork, il ne reste qu'à committer et pousser.
+
+**Ce qui change :**
+- **8 photos fournies par Robin remplacent les anciennes**, nommées **par modèle** :
+  `packshot-leon`, `packshot-merveilleuse`, `detail-claudine`, `vue-dessous-olivia`,
+  `vue-dessous-gaston`, `situation-sebastien`, `situation-alice`, `situation-charlie`.
+  Les 4 génériques (`packshot.jpg`, `detail.jpg`, `situation.jpg`, `vue-dessous.jpg`) sont supprimées.
+- **Les 4 catégories de visuels passent en carré.**
+- **8 compositions réseaux publiées** ajoutées en galerie dans Formats (`img/compo-*.jpg`).
+  35 Mo compressés à 601 Ko.
+- **Les 5 images fabriquées régénérées** (`regle-zone`, `regle-centrage`, `overlay-noir/blanc/faux`)
+  avec une recette unique : courbe `(1-(1-t)³)²`, rampe pure sans palier, dégradé qui s'arrête au
+  luminaire, nom de produit en une seule couleur.
+- **Carrousel de densité : 5 → 8 cartes.** Deux mises en page nouvelles (`.m-edito` éditorial à
+  vignette, `.m-split` texte/photo 50-50) et deux cas nouveaux (la primaire en aplat sombre,
+  l'orange répété quatre fois). Données produit tirées du **catalogue réel** (Olivia Ø700/750 g/120 €,
+  Claudine Ø650/135 €) — aucun chiffre inventé.
+- **Section Formats refondue** : grille 3 colonnes, Pinterest réuni en une carte pleine largeur avec
+  ses 3 ratios, sous-titre supprimé, règle « Le centrage » ajoutée.
+- **Les 3 critères photo en aplat orange** (choix de Robin, voir la réserve).
+- **Infractions de la charte contre elle-même, corrigées** : 2 overlays pleins cadres qui mangeaient
+  le luminaire dans les mockups, 6 noms de produit ayant perdu leurs deux polices, 1 prix en
+  monospace (3e police interdite).
+- **Le hero était illisible depuis le premier jour.** « ATELIER SÂPI » était en `--wood` sur le fond
+  sombre : **1,36:1**. Le bois est un ton moyen (luminance 0,21), il ne peut porter aucun petit texte
+  sur ce fond — même sans la photo il plafonnerait à 3,13. Passé en crème à 90% → **4,68:1**.
+  La date en bas à droite était à **2,84:1** (opacité 50%) → passée à 85% → **4,75:1**.
+  ⚠️ Conséquence assumée : le hero perd son accent bois.
+
+**À faire :**
+1. `cd business/docs/charte-graphique/`
+2. `git status` — vérifier qu'il n'y a NI `_local/`, NI `.DS_Store`, NI `.ai`.
+   ⚠️ `_local/` contient des `.bak.html` et des PNG de travail : ils doivent rester gitignorés.
+3. `git add -A` — inclut 4 suppressions (les photos génériques)
+4. Commit : « Photos de Robin, compositions réseaux, densité en 8 cartes »
+5. `git push origin main`
+6. Suivre le run Actions. En cas d'échec, rapporter le log ici sans retenter en boucle.
+
+**Critères de succès :**
+- `https://charte.atelier-sapi.fr` à jour
+- `img/packshot-leon.jpg` et `img/compo-achetez-lampadaire.jpg` → **200**
+- `img/packshot.jpg`, `img/detail.jpg`, `img/situation.jpg`, `img/vue-dessous.jpg` → **404 attendu**
+  (le workflow synchronise et doit les retirer du serveur ; s'ils répondent encore 200, le signaler)
+- Section Densité : **8 cartes**, dont une éditoriale et une scindée
+- Section Formats : la galerie des 8 compositions s'affiche sous l'onglet **Réseaux sociaux**
+
+**⚠️ Non vérifié côté Cowork — à regarder en premier si ça casse :**
+- **Le rendu.** Pas de navigateur dans le bac à sable (playwright ne peut pas installer Chromium sans
+  sudo). Contrastes, largeurs de texte, accolades, parse JS et intégrité des liens sont vérifiés ;
+  **le visuel ne l'est pas**. Les hauteurs de `.m-edito` et `.m-split` sont **estimées** (marges de
+  12 à 168px selon les cartes). Si une carte déborde, c'est là — un débordement de 42px est déjà
+  passé inaperçu aujourd'hui parce que `overflow:hidden` clippe en silence.
+- **`img/` pèse 3,6 Mo.** Si la page traîne, redescendre les photos de 1600 à 1200px.
+
+**Réserve assumée par Robin :** les 3 critères photo sont en aplat `#E35B24`. Le corps de texte y est
+à **3,63:1 pour un seuil de 4,5** — aucune couleur de texte ne passe sur cet orange. Le titre (19px
+gras) et le chiffre passent, au seuil « grand texte » de 3,0. Robin a tranché en connaissance de
+cause. Même situation sur tous les boutons blanc-sur-orange des maquettes.
+
+**Rappel :** `main` de ce dépôt est directement en ligne. Le push publie.
+
+</details>
+
+---
+
+## [✅ FAIT — 2026-07-17] Charte — corriger le hero, illisible depuis le premier jour
+
+**Date :** 2026-07-17
+**Priorité :** normale — **2 lignes de CSS, rien d'autre**
+
+### ✅ Résultat Claude Code (2026-07-17)
+- **Diff conforme** : un seul fichier (`index.html`), 2 lignes dans le `<style>`, rien d'autre.
+  - `.hero .eyebrow` : `color:var(--wood)` → `color:var(--creme);opacity:.9` ✅
+  - `.hero .date` : `opacity:.5` → `opacity:.85` ✅
+- **Commit** `c907c5e` « Hero lisible : ourlet et date remontés au-dessus de 4,5:1 », `git push origin main` → OK.
+- **Déploiement GHA** confirmé (fichier live re-daté ~10 s après le push). Les 2 règles corrigées sont **présentes telles quelles dans le HTML live** ; page live == `index.html` poussé ; arbre propre, HEAD=origin/main.
+- **⚠️ Rendu non vérifié à l'œil** (pas de navigateur) : les valeurs de contraste (4,68:1 / 4,75:1) sont celles calculées par Cowork ; à confirmer visuellement par Robin que « ATELIER SÂPI » (crème, plus bois) et la date sont bien lisibles.
+- 📝 Observation hors-scope (non touchée) : `.hero .date` reste en `font-family:ui-monospace…` (une police monospace) — la charte interdit une 3ᵉ police. Pas dans le périmètre de cette tâche ; à signaler si tu veux qu'on l'aligne plus tard.
+
+<details><summary>Consigne d'origine (archivée)</summary>
+
+**⚠️ Dépôt séparé, PAS le thème :** `~/Atelier Sapi Claude Cowork/business/docs/charte-graphique/`
+(dépôt `robinSapi/charte-atelier-sapi`, branche `main`).
+
+**Contexte :** Robin a signalé que « ATELIER SÂPI » était illisible dans l'en-tête. Mesuré : **1,36:1**.
+Un second échec a été trouvé au passage, qu'il n'avait pas signalé : la date en bas à droite, à
+**2,84:1**. Seul `index.html` a changé depuis `5187b4a`, et uniquement dans le `<style>`.
+
+**Ce qui change :**
+- `.hero .eyebrow` : `color:var(--wood)` → `color:var(--creme);opacity:.9` → **1,36 → 4,68:1**
+- `.hero .date` : `opacity:.5` → `opacity:.85` → **2,84 → 4,75:1**
+
+**Pourquoi le bois ne pouvait pas rester :** sa luminance (0,21) est trop proche de celle du hero
+(0,15 — `#323232` recouvert de la photo à 28%). Même en retirant la photo, il plafonnerait à **3,13**
+sur le noir. Ce n'était pas un réglage à ajuster : le bois est un ton moyen, il ne porte aucun petit
+texte sur fond sombre. **Conséquence assumée par Robin : le hero perd son accent bois.**
+
+**À faire :**
+1. `cd business/docs/charte-graphique/`
+2. `git status` — un seul fichier modifié, `index.html`
+3. `git add index.html`
+4. Commit : « Hero lisible : ourlet et date remontés au-dessus de 4,5:1 »
+5. `git push origin main`
+6. Suivre le run Actions.
+
+**Critères de succès :**
+- `https://charte.atelier-sapi.fr` : « ATELIER SÂPI » lisible dans l'en-tête, en crème et non en bois
+- La date en bas à droite du hero est lisible
+
+**Rappel :** `main` de ce dépôt est directement en ligne. Le push publie.
+
+</details>
+
+---
+
+## [TÂCHE] Page /catalogue B2B — Temps 1 (page web seule, sans PDF)
+**Date :** 2026-08-04
+**Priorité :** normale
+**⚠️ Demander un PLAN + état des lieux AVANT de coder.** Ne rien committer sans le go de Robin. Travail sur **branche test** (jamais master), Robin valide sur test avant prod. Demander la branche exacte à utiliser.
+
+**Brief complet :** `business/docs/brief-catalogue-temps1-page.md` (à lire en entier). Le Temps 2 (export PDF) est documenté séparément dans `business/docs/brief-catalogue-temps2-pdf.md` — **hors périmètre ici**, mais le Temps 1 doit poser les fondations qu'il réutilisera.
+
+**Contexte :** catalogue produits sans prix pour prescripteurs B2B (architectes, décorateurs) qui le transmettent à leur client final. ~40 produits, 4 catégories (Suspensions, Appliques, Lampadaires, Posables). Découpé en 2 temps : la page d'abord, le PDF plus tard.
+
+**À faire (résumé, détail dans le brief) :**
+- Template autonome `page-catalogue.php`, **étanchéité** (aucun chemin vers le reste du site) : pas de `get_header/footer/nav`, ne pas se reposer sur `wp_head()` (imprimer à la main les seuls CSS/JS nécessaires), logo image non cliquable, aucune fiche cliquable vers `/produit/`, aucun lien sortant, aucun prix (ni HTML ni JSON), `noindex,nofollow`.
+- Ordre de page : en-tête -> section « Histoire de l'atelier » (ACF) -> section « Deux bois au choix » Peuplier/Okoumé (ACF) -> 4 boutons filtres catégories (affichage client) -> grille produits (carte : galerie + titre + desc courte + bouton « Fiche technique ») -> bloc export PDF **désactivé/non câblé au Temps 1** -> bouton « Nous contacter » (mailto ou form intégré).
+- Modale fiche technique : description complète + tableau caractéristiques à partir des **clés ACF/attributs Woo réels (lire le code, ne rien inventer)** ; établir le mapping caractéristiques (réutilisé au Temps 2) ; fermeture croix/clic extérieur/Échap ; mobile OK.
+- **Fondations pour le Temps 2** : isoler la source de données produits (requête appelable indépendamment du rendu) et le mapping caractéristiques ; créer les champs ACF « Histoire » et « Bois ».
+
+**Critères de succès :** voir la « Recette Temps 1 » à la fin du brief. En particulier : audit HTML remonte zéro `<a href>`/`<link rel>` interne, zéro `og:url`, zéro prix ; filtres catégories OK ; modale OK ; `noindex` vérifié ; mobile OK.
+
+### ✅ RÉPONSE CLAUDE CODE — Temps 1 CODÉ + POUSSÉ SUR TEST (2026-08-04, en attente validation Robin)
+
+**Branche :** `test-theme-sapi-maison`. Code livré, mais **la page n'existe pas encore côté WordPress** — voir le pas-à-pas ci-dessous (action Robin).
+
+**Fichiers créés/modifiés :**
+- `inc/catalogue-data.php` (NEW) — fondation Temps 2 : source de données unique `sapi_catalogue_get_products()` (produits groupés par catégorie, **zéro prix**, images en IDs d'attachment) + mapping caractéristiques `sapi_catalogue_specs_schema()` / `sapi_catalogue_get_product_specs()` (aligné sur `single-product.php` + `acf-champs-fiche-technique.csv`, aucune clé inventée) + `sapi_catalogue_categories()` + groupe ACF `group_catalogue_b2b` (Histoire / Bois / accroche).
+- `page-catalogue.php` (NEW) — template autonome « Catalogue B2B » (pas de get_header/footer/wp_head/wp_footer ; `<head>` manuel + `noindex,nofollow` ; logo image morte ; en-tête → Histoire → Bois → 4 filtres → grille cartes → bloc PDF **masqué** → FAB contact mailto `contact@atelier-sapi.fr` ; modale fiche technique).
+- `assets/catalogue.css` (NEW) — feuille autonome (tokens recopiés, Square Peg local, Montserrat→fallback système, responsive).
+- `assets/catalogue.js` (NEW) — galerie (nav + dots + swipe), filtres client-side (`.is-filtered-out`), modale (ouverture par clonage du `<template>` de la carte, fermeture croix/clic extérieur/Échap, piège de focus, lock scroll).
+- `functions.php` — 1 ligne : `require_once .../inc/catalogue-data.php` (front + admin).
+
+**Étanchéité — audit STATIQUE passé** (le HTML rendu reste à auditer une fois la page publiée) :
+- 0 `get_header/get_footer/wp_head/wp_footer/wp_nav_menu` appelés.
+- Unique `<a href>` = le mailto contact (autorisé par le brief). 0 `<link rel>`, 0 `og:`, 0 JSON-LD dans le template.
+- 0 prix / `get_price` / permalink dans template + data + JS.
+- `<meta name="robots" content="noindex, nofollow">` présent.
+- **Durcissement** : descriptions produit passées par `sapi_catalogue_safe_html()` → `strip_shortcodes` + `wp_kses` sans `<a>` (empêche un lien interne éditorial de fuiter dans la modale).
+- Équilibrage accolades/parenthèses/crochets OK sur les 2 fichiers PHP (pas de binaire PHP local pour lint, comme d'habitude).
+
+**✅ AUDIT DU HTML RENDU — page publiée `/catalogue` (fetch live 2026-08-04, commit `2bb3d57`) :**
+- `<a href>` interne : **0** (uniquement Google Fonts externe + mailto contact).
+- Prix (€, woocommerce-Price, data-price, "price") : **0**.
+- Fuites wp_head (canonical, og:, JSON-LD, rel REST/RSS/oEmbed/shortlink, wp-json) : **0** → `<head>` manuel étanche confirmé.
+- `<meta robots noindex,nofollow>` présent. Bloc PDF `hidden`. 27 produits, tableaux specs présents.
+- **Formatter câblé** (commit `2bb3d57`) : titres carte+modale en `.product-name` + `product-name-formatter.js` chargé ; Montserrat via Google Fonts (comme le site). Le rendu prénom/surnom est JS (invisible au curl) → à confirmer à l'œil.
+
+**✅ VALIDÉ PAR ROBIN SUR TEST (2026-08-04)** — page publiée + testée en navigateur : rendu, titres prénom/surnom, filtres, modale, galeries. Page live : `test.atelier-sapi.fr/catalogue`.
+
+**Retouches cosmétiques post-validation (commit `8487112`) :**
+- Image de carte : remplit tout le carré (fix spécificité `.cat-gallery__slide .cat-gallery__img` vs la règle globale `img{height:auto}`).
+- Clic n'importe où sur la carte → ouvre la fiche (flèches/dots de galerie exclus). Curseur pointer sur la carte.
+- Modale desktop refaite en **colonne verticale** : photo paysage 3/2 en haut (grande, pleine largeur), titre + desc + specs dessous, scroll d'un bloc. Dialog 820px ; photo 4/3 sur mobile.
+
+**Commits (branche test) :** `eefb25a` (page + fondation) → `2bb3d57` (formatter + Montserrat) → `0a6341d` (audit) → `8487112` (cosmétique).
+
+---
+
+### 📨 RETOUR À COWORK — Temps 1 catalogue B2B : TERMINÉ + VALIDÉ SUR TEST
+
+**Statut :** ✅ livré, validé par Robin sur `test.atelier-sapi.fr/catalogue`. **Pas encore en prod.**
+
+**Ce qui est en place :** page `/catalogue` étanche (0 lien interne, 0 prix, 0 fuite wp_head, `noindex` — audité sur le HTML live), 27 produits en 4 catégories, sections Histoire/Bois éditables en ACF, filtres, modale fiche technique, formatter des noms, bloc PDF **masqué** (Temps 2).
+
+**Fondations posées pour le Temps 2 (PDF)** — à réutiliser tel quel, ne pas redévelopper :
+- Source de données unique **sans prix** : `sapi_catalogue_get_products()` (dans `inc/catalogue-data.php`).
+- Mapping caractéristiques : `sapi_catalogue_specs_schema()` / `sapi_catalogue_get_product_specs()`.
+- Champs ACF Histoire/Bois (groupe `group_catalogue_b2b`) — même source pour le PDF.
+
+**Actions côté Robin / Cowork avant d'aller plus loin :**
+1. **Remplir le contenu ACF** de la page Catalogue (bloc « Catalogue B2B — contenus » : Histoire, intro Bois, textes/images Peuplier & Okoumé). Sans ça = valeurs par défaut.
+2. **Go prod** quand Robin le décide → merge `test-theme-sapi-maison` → `master` (uniquement sur son ordre), puis Robin lance le workflow GitHub Actions.
+3. **Décider du Temps 2 (export PDF)** : quand Cowork/Robin veut l'enchaîner, ouvrir la tâche à partir de `business/docs/brief-catalogue-temps2-pdf.md` — les fondations ci-dessus sont prêtes.
+
+**Points à trancher restés ouverts (mineurs, si Cowork veut affiner) :** bloc PDF actuellement masqué (le rendre visible-désactivé possible au Temps 2) ; adresse contact = `contact@atelier-sapi.fr`.
+
+**Écarts assumés (à confirmer) :**
+1. **Titres produit** affichés bruts (pas passés dans `product-name-formatter.js`) — choix d'étanchéité/simplicité pour cette page B2B autonome. Si tu veux le rendu prénom/surnom, je câble le formatter (self-contained) au tour suivant.
+2. **Montserrat** non self-hosté dans le thème → fallback police système sur cette page autonome (Square Peg, lui, est local). Si tu veux Montserrat garanti, je l'ajoute en @font-face local.
+
+**👉 ACTION ROBIN — créer la page dans WordPress :**
+1. WP admin → **Pages → Ajouter** : titre « Catalogue », **permalien `/catalogue`**.
+2. Panneau **Attributs de page → Modèle → « Catalogue B2B »**, puis **Publier**.
+3. La page publiée fait apparaître le bloc ACF **« Catalogue B2B — contenus »** : remplir Accroche, Histoire (titre/texte/image), Bois (intro + textes/images Peuplier & Okoumé). Vide = valeurs par défaut.
+4. Ouvrir `test.atelier-sapi.fr/catalogue` et valider : filtres, galeries, bouton « Fiche technique » (modale : description + tableau caractéristiques), fermeture croix/clic/Échap, mobile.
+5. Retour : ce qui va / ne va pas → j'ajuste. (Le bloc PDF est volontairement masqué : Temps 2.)
+
+---
+
+## [TÂCHE] Catalogue B2B — Temps 2 : export PDF
+**Date :** 2026-08-04
+**Priorité :** normale
+**⚠️ Demander un PLAN + état des lieux AVANT de coder.** Ne rien committer sans le go de Robin. Même branche que le Temps 1 : **`test-theme-sapi-maison`** (jamais master). Robin valide sur test. **Mise en prod groupée** : Temps 1 + Temps 2 seront mergés ensemble vers master quand Robin dira go (ne pas merger avant).
+
+**Brief complet :** `business/docs/brief-catalogue-temps2-pdf.md` (à lire en entier).
+
+**Réutiliser les fondations du Temps 1 (ne PAS redévelopper)** :
+- Source de données sans prix : `sapi_catalogue_get_products()` (`inc/catalogue-data.php`).
+- Mapping caractéristiques : `sapi_catalogue_specs_schema()` / `sapi_catalogue_get_product_specs()`.
+- Champs ACF Histoire/Bois (groupe `group_catalogue_b2b`) → mêmes contenus dans le PDF.
+
+**À faire (résumé, détail dans le brief) :**
+- **mPDF** via Composer dans le thème, police(s) de marque enregistrées (`fontdata`). CSS PDF **distincte** (mPDF ne gère qu'un sous-ensemble CSS).
+- **Route REST** (ex. `/wp-json/sapi/v1/catalogue-pdf`) recevant les catégories cochées ; rejoue la même requête produits que la page. **Un seul PDF combiné** : page de garde → page Histoire (ACF) → page Bois Peuplier/Okoumé (ACF) → une section par catégorie cochée (une page/produit) → page contact en texte non cliquable.
+- **Étanchéité PDF** : aucun prix, aucun lien, aucune URL cliquable. Mention « Document non contractuel, ne constitue pas une offre de prix ».
+- Gabarit fiche : titre + SKU, visuel principal, 2-3 vignettes, description intégrale (débordement propre sur 2e page, pas de troncature), tableau caractéristiques (mapping Temps 1), pied = réf + n° de page. Champs vides = tiret, pas masqués.
+- **Perf/cache** : images `large` (1024px) principal / `medium` vignettes, JPEG ~80, cible < 25 Mo. Cache fichier dans `wp-content/uploads/catalogues/` (dossier non indexable), clé = hash catégories + timestamp dernière modif produit ; invalidation sur `save_post`, `updated_post_meta` (ACF), remplacement image, modif description. **Pré-générer** « toutes catégories » + 4 mono-catégorie (hook/cron) ; combinaisons rares à la demande avec loader explicite. Vérifier `max_execution_time` / `memory_limit` sur o2switch mutualisé.
+- **Câbler le bloc export** en bas de `/catalogue` (actuellement masqué) : cases 4 catégories + bouton « Télécharger en PDF » → endpoint. Choix **indépendant** du filtre d'affichage du haut (libellé clair).
+
+**Critères de succès :** voir la « Recette Temps 2 » à la fin du brief. En particulier : PDF combiné = exactement les catégories cochées ; pages Histoire/Bois présentes ; 0 prix, 0 lien/URL cliquable ; mention non contractuel ; poids complet mesuré < 25 Mo ; pré-génération OK ; invalidation cache testée ; dossier catalogues non indexable.
+
+### ✅ RÉPONSE CLAUDE CODE — Temps 2 PDF CODÉ + RECETTE TECHNIQUE OK SUR TEST (2026-08-04)
+
+**Décisions Robin (validées) :** mPDF installé via **étape Composer en CI** (vendor/ gitignoré) ; limites serveur **détectées** ; bloc export **affiché+câblé** ; **polices de marque** TTF (charte).
+
+**Infra & diagnostic serveur (test, o2switch) :** PHP 8.3, **mémoire 512 Mo**, **max_execution 600 s**, GD dispo, tempDir inscriptible. mPDF 8.3.1 OK.
+
+**Mesures réelles :** PDF **toutes catégories = 3,9 Mo, 2,06 s** (pic 58 Mo) — largement < 25 Mo. Mono-catégorie (appliques) = 0,78 Mo.
+
+**Recette (Recette Temps 2 du brief) :**
+- [x] Endpoint `GET /wp-json/sapi/v1/catalogue-pdf?cats=…` → 200 `application/pdf`, `%PDF-1.4`, pièce jointe.
+- [x] PDF combiné = catégories cochées (clé de cache par sélection).
+- [x] Pages Histoire + Bois présentes (lisent l'ACF Temps 1).
+- [x] **0 prix** : données Temps 1 sans prix + audit flux PDF décompressés (0 « euro/EUR/prix ») + audit page Temps 1 (mêmes descriptions, 0 €).
+- [x] **0 lien/URL cliquable** : **0 annotation `/URI`** dans le PDF ; contact en texte brut.
+- [x] Mention « Document non contractuel, ne constitue pas une offre de prix » (pied + page contact).
+- [x] Poids complet **3,9 Mo < 25 Mo**.
+- [x] Pré-génération (cron single event) : toutes + 4 mono-catégorie.
+- [x] Invalidation : `save_post_product`, add/edit/delete attachment, meta produit + ACF Histoire/Bois → bump stamp + purge + pré-gén différée.
+- [x] Dossier `uploads/catalogues/` **non accessible en direct** (vrai fichier caché → 404 ; upload normal → 200) **+ noms non devinables** (`wp_hash`). `mpdf-tmp` → 404.
+- [x] Bloc export **indépendant** du filtre d'affichage (cases dédiées, libellé clair).
+
+**Fichiers :** `composer.json`, `.gitignore` (+vendor/), `.github/workflows/deploy-test.yml`+`deploy-prod.yml` (étape composer + exclude scopé), `inc/catalogue-pdf.php` (infra+générateur+cache+endpoint+pregen), `assets/pdf-fonts/*.ttf`, `assets/pdf-logo.png`, `page-catalogue.php` (bloc câblé), `assets/catalogue.js`+`.css` (bouton). SKU ajouté à `inc/catalogue-data.php`.
+Commits : `51058bc` (infra) → `1efeab9` (polices) → `c02c6c8` (générateur) → `4a1f7fd` (cache/endpoint/pregen/bouton) → `a0a1b56` (durcissement cache).
+
+**✅ VALIDÉ PAR ROBIN SUR TEST (2026-08-05)** — après itérations de mise en page.
+**Ajustements post-recette (validés) :**
+- Fiche produit remaniée « Option A » : grande photo paysage en haut + vignettes + description + caractéristiques en 2 colonnes équilibrées, **1 produit/page** (31 pages toutes catégories).
+- Tailles disponibles + essences lues dans les variations (pa_taille / pa_materiau) → **dans le tableau caractéristiques** (lignes Dimensions/Bois). Pastilles retirées (mPDF ne les rend pas proprement).
+- Nom produit prénom/surnom en NOIR ; **surnom Square Peg 34pt EN STYLE INLINE**. ⚠️ **PIÈGE mPDF** : les sélecteurs descendants (`.prod-name .pr { font-size }`) **ne sont pas appliqués** → toute taille de police sur span imbriqué doit être **inline**, sinon retombe au défaut (~10pt). Symptôme : « la taille ne change pas ».
+- Mention pied revue : « Document non contractuel remis à titre de présentation » (plus « offre de prix »).
+- Photos alignées à gauche, coins droits (mPDF n'arrondit ni les `<img>`, ni proprement via background dans les tableaux → abandonné).
+- Animation de chargement au téléchargement (fetch→blob + spinner).
+- **Busting cache par version** : constante `SAPI_CATALOGUE_PDF_VERSION` (=14) dans la clé de cache → à incrémenter à chaque évolution de mise en page.
+
+**✅ NETTOYAGE FAIT** : routes temporaires `catalogue-pdf-selftest` / `catalogue-pdf-preview` retirées. Ne reste que l'endpoint public `catalogue-pdf`.
+
+### 📨 RETOUR À COWORK — Catalogue B2B (Temps 1 + 2) : EN PROD ✅ (2026-08-05)
+
+**Statut : LIVE et validé par Robin sur `atelier-sapi.fr`.**
+
+**Ce qui est en ligne :**
+- **Page `/catalogue`** (prescripteurs B2B — architectes/décorateurs) : catalogue produits **sans prix, sans lien, `noindex`**, à transmettre au client final sans court-circuiter le prescripteur. Sections Histoire + Deux bois (Peuplier/Okoumé) éditables en ACF, filtres par catégorie, fiche technique en modale.
+- **Export PDF** : bouton « Télécharger en PDF » (choix des catégories) → un PDF A4 de marque, 1 produit/page, sans prix ni lien, mention « document non contractuel ».
+- **Audit prod OK** : page 200 / `noindex` / 0 lien interne / 0 prix ; endpoint PDF 200 (`application/pdf`).
+
+**À noter côté Cowork / Robin :**
+1. Le **contenu ACF** (Histoire de l'atelier, textes/images des deux bois) est à remplir/soigner en prod si ce n'est pas déjà fait (sinon valeurs par défaut). C'est éditable sans code, depuis la page Catalogue.
+2. La page est **volontairement non indexable** (pas dans Google, pas de lien depuis le site) — c'est le but. Le lien `atelier-sapi.fr/catalogue` se **partage à la main** aux prescripteurs.
+3. **Déploiement sélectif** : seul le catalogue est parti en prod. **Tout le reste du travail sur test reste sur test** (immersion /mes-creations, état B, room-picker, admin « Règles de filtrage » Tâche 5, emails WooCommerce, mode vacances…) — leur mise en prod est une décision séparée, à planifier quand Robin voudra.
+4. Idée business (si utile) : Cowork peut préparer un petit **message-type** pour envoyer le catalogue aux prescripteurs, et référencer le lien dans les docs commerciales.
+
+---
+
+**✅ POUSSÉ EN PROD (master) le 2026-08-05 — commit `113a1ef`.** Déploiement **sélectif** : cherry-pick propre en UN commit par-dessus master (16 fichiers = 100% catalogue), **PAS** un merge de test (qui aurait envoyé immersion / état B / Tâche 5 / emails / mode vacances, non validés prod). master ne contient qu'un commit de plus que l'avant-catalogue. **Reste à Robin :** (1) lancer le workflow GitHub Actions « Deploy to Production » (manuel, régénère vendor via Composer) ; (2) créer la page `/catalogue` en prod (template + ACF) ; (3) vérifier `atelier-sapi.fr/catalogue` + bouton PDF.
+
+<details><summary>Ancien « RESTE avant prod » (archivé)</summary>
+
+**GO PROD (Temps 1 + Temps 2 groupés)** — sur ordre explicite de Robin uniquement :
+1. Merge `test-theme-sapi-maison` → `master` + push.
+2. Robin lance le workflow GitHub Actions prod (qui régénère `vendor/` via l'étape Composer).
+3. Robin crée/complète la page `/catalogue` en prod (template + ACF) si pas déjà répliqué.
+**Diagnostic serveur test o2switch (utile pour la prod)** : PHP 8.3, mémoire 512 Mo, max_execution 600 s, GD ok — génération synchrone viable. Vérifier que la prod a les mêmes ordres de grandeur.
+
+</details>
+
+---
+
+## [TÂCHE] Catalogue B2B — Corrections post-prod (fonts, cache, robustesse PDF)
+**Date :** 2026-08-05
+**Priorité :** normale
+**⚠️ Demander un PLAN + état des lieux AVANT de coder.** Ne rien committer sans le go de Robin. Développer sur **`test-theme-sapi-maison`**, valider sur test, puis **cherry-pick sélectif vers master** (même pattern que le déploiement initial du catalogue, commit `113a1ef`) — pas de merge de test. ⚠️ Le catalogue vit désormais sur deux branches (couture cherry-pick), rester scopé aux fichiers du catalogue.
+
+**Contexte :** le catalogue B2B (Temps 1 + 2) est en prod et validé. Trois corrections de qualité identifiées en revue. Le reste (pré-génération, noindex, distribution) est assumé par Robin, hors périmètre.
+
+### Point 2 — Self-héberger les polices (retirer Google Fonts externe)
+**Problème :** la page `/catalogue` charge Montserrat depuis Google Fonts (`<link>` externe) → requête sortante qui écorne l'étanchéité + friction RGPD connue en France (IP visiteur envoyée à Google).
+**À faire :** self-héberger Montserrat (les graisses réellement utilisées) en `@font-face` local dans `assets/catalogue.css`, supprimer le `<link>` Google Fonts du `<head>` de `page-catalogue.php`. Square Peg est déjà local, s'aligner sur le même schéma. Fichiers de police dans le thème (ex. `assets/fonts/`).
+**Succès :** re-audit du HTML live = **0 `<link>`/requête externe** (plus aucun appel Google) ; rendu Montserrat identique à l'œil ; les TTF du PDF (`assets/pdf-fonts/`) restent cohérents avec les graisses de la page.
+
+### Point 3 — Busting de cache PDF automatique (fin du compteur manuel)
+**Problème :** `SAPI_CATALOGUE_PDF_VERSION = 14` s'incrémente **à la main** à chaque évolution de mise en page. Oubli = vieux PDF servi silencieusement, bug difficile à diagnostiquer.
+**À faire :** dériver la version de la clé de cache d'un **hash (ou filemtime) des fichiers qui déterminent le rendu PDF** (`inc/catalogue-pdf.php` + la CSS/template PDF + éventuellement la CSS des polices). La clé de cache devient : hash catégories + timestamp dernière modif produit + hash template PDF. Supprimer la dépendance au compteur manuel (ou le garder en override d'urgence seulement).
+**Succès :** modifier le template PDF (sans toucher aucune constante) → le prochain téléchargement régénère automatiquement ; deux générations sans changement de code = cache réutilisé (pas de régénération inutile).
+
+### Point 4 — Durcir la robustesse du gabarit PDF (pièges mPDF)
+**Problème :** mPDF ignore les sélecteurs descendants (piège documenté : la taille du surnom Square Peg doit être en style inline sinon retour à ~10pt). Chaque futur ajustement du gabarit risque de rouvrir ce type de régression silencieuse.
+**À faire :** (a) centraliser/commenter les styles fragiles du gabarit produit (tailles de police des noms, etc.) dans un helper unique en inline, avec un commentaire d'avertissement, pour ne pas les redécouvrir à chaque édition ; (b) ajouter un **self-check de non-régression** léger (endpoint admin-only OU commande, pas de route publique) qui régénère un PDF échantillon et **assert les invariants machine-vérifiables** : `%PDF`, 0 annotation `/URI`, 0 occurrence de prix (€/EUR), nombre de pages attendu, présence des pages Histoire + Bois. Retirer la route après si besoin, ou la garder gated admin.
+**Succès :** le self-check passe ; les invariants d'étanchéité (0 `/URI`, 0 prix) sont vérifiables à la demande sans refaire l'audit à la main ; les réglages de police du gabarit sont regroupés et commentés.
+
+**Rappel transverse :** ces corrections ne doivent rien changer au rendu validé par Robin (mise en page « Option A », 1 produit/page, mention « document non contractuel remis à titre de présentation »). Re-mesurer le poids du PDF toutes catégories après coup (doit rester < 25 Mo, était à 3,9 Mo).
+
+---
+
+## [TÂCHE] Blinder les appels WooCommerce du thème (anti-fatal quand WC est absent/inactif)
+**Date :** 2026-08-05
+**Priorité :** haute
+**Branche :** `test-theme-sapi-maison` d'abord, valider sur test, puis cherry-pick sélectif vers master (pas de merge de test). Ne rien committer sans le go de Robin. Demander un PLAN + état des lieux AVANT de coder.
+
+**Contexte :** le 5 août 2026, une mise à jour du plugin **Broken Link Checker** a provoqué une erreur fatale qui a désactivé WooCommerce dans la foulée. Résultat : le thème a planté tout le site (front + admin, écran blanc) car `functions.php` appelle des fonctions WooCommerce **sans vérifier que WC est chargé**. L'erreur exacte remontée par WordPress :
+`Uncaught Error: Call to undefined function wc_get_page_id() in .../theme-sapi-maison/functions.php` (dans le callback `admin_init` de migration checkout, `wc_get_page_id('checkout')` — ~ligne 1500 sur master).
+Le site n'a été rétabli que par une restauration UpdraftPlus. Objectif : que la seule indisponibilité de WooCommerce ne puisse **plus jamais** faire tomber le thème.
+
+**À faire :**
+
+1. **Corriger le déclencheur exact.** Dans le callback `add_action('admin_init', function () { $page_id = wc_get_page_id('checkout'); ... })`, ajouter en première ligne un garde : `if (!function_exists('wc_get_page_id')) return;`.
+
+2. **Auditer et blinder les autres appels WooCommerce non gardés** exécutés au chargement de `functions.php` ou sur des hooks toujours joués (`after_setup_theme`, `init`, `admin_init`, `wp_enqueue_scripts`, `widgets_init`, etc.). Cibler les appels nus à `wc_*()`, `WC()->...`, `is_cart()`, `is_checkout()`, `wc_get_page_id()`, etc. qui ne sont pas déjà protégés par `class_exists('WooCommerce')` / `function_exists(...)`. Certains le sont déjà (ex. l 532, 672, 774) — les laisser ; il s'agit de couvrir ceux qui ne le sont pas. Pattern de garde à réutiliser : `if (!class_exists('WooCommerce')) return;` en tête de callback, ou `function_exists()` autour de l'appel isolé.
+
+3. **Ne pas modifier le comportement** quand WooCommerce EST actif (cas nominal) : les gardes ne doivent s'activer que si WC est absent. Zéro changement fonctionnel visible en prod.
+
+**Critères de succès :**
+- Test de résilience : WooCommerce désactivé → le site (front + `/wp-admin`) reste accessible, plus d'écran blanc, plus d'`undefined function` dans `debug.log` provenant du thème. Le site tourne en mode dégradé (sans les blocs boutique) mais **ne plante pas**.
+- WooCommerce réactivé → comportement identique à aujourd'hui (panier, checkout, compteur, etc. inchangés).
+- Console 0 erreur ; aucun impact sur la home ni le catalogue.
+
+**🧪 TEST DE RÉSILIENCE (Robin, 2026-08-06) :** WC désactivé → **/wp-admin accessible ✅** (objectif principal atteint, plus de blocage back-office). **Front (home) reste cassé** : identifié = `front-page.php` (~12 appels non gardés `wc_get_product`/`wc_price` lignes 38/56/58/113/118/120/165/170/172/240/275/277, blocs produits de la home). `header.php`/`footer.php` déjà gardés. **Décision Robin : ON LAISSE — périmètre clôturé à functions.php, front-page.php assumé.** Si un jour on veut la home résiliente : encadrer ces blocs d'un `if (class_exists('WooCommerce'))` (petit follow-up, 1 fichier).
+
+---
+
+## [TÂCHE] Catalogue — page prix publics `/catalogue-prix` + export PDF tarif pro (admin)
+**Date :** 2026-08-24
+**Priorité :** normale
+**Branche :** `test-theme-sapi-maison`, valider sur test, puis **cherry-pick sélectif vers master** (même pattern que `113a1ef`, pas de merge de test).
+**⚠️ Demander un PLAN + un état des lieux AVANT de coder.** Rien ne part sans le go de Robin.
+**Brief complet côté Cowork :** `business/docs/brief-catalogue-pro-tarife.md` (à lire, il contient les arbitrages et le texte par défaut des mentions légales).
+
+**Contexte :** le catalogue B2B `/catalogue` est en prod, sans aucun prix, et sert aux prescripteurs qui montrent la gamme à leur client final. Robin a besoin de deux choses en plus : une version de cette page **avec les prix publics TTC**, et un **tarif professionnel remisé** à envoyer aux revendeurs (Muse, Ankorstore, prospects salons).
+
+**Décision d'architecture — le point à ne pas rater :** le tarif professionnel n'existe **jamais sur le web**. Aucune page, aucun endpoint public, aucun lien secret ne contient de prix remisé. Le taux est saisi par Robin dans l'admin au moment de générer un PDF, et ne vit que le temps de cette génération. Conséquence directe : Robin peut sortir un PDF à -12% pour un client historique et à -30% pour un prospect, sans que le site ait à savoir qui est qui.
+
+Trois objets, trois niveaux :
+
+| Objet | Contenu | Accès |
+|---|---|---|
+| `/catalogue` (existant) | zéro prix | public, **strictement inchangé** |
+| `/catalogue-prix` (nouveau) | PVP TTC par variation | public, `noindex` |
+| PDF tarif pro (nouveau) | prix HT remisé + PVP TTC | admin seul |
+
+**Contraintes fermes :**
+- `inc/catalogue-data.php` porte une garantie documentée « aucune donnée de prix n'est jamais produite par cette couche ». **Ne pas la casser.** Les prix vivent dans un fichier séparé qui enrichit la couche existante.
+- `/catalogue` ne doit pas bouger d'un octet dans son rendu.
+- Le catalogue vit sur deux branches (couture cherry-pick) : rester scopé aux fichiers du catalogue.
+- Prix WooCommerce = **PVP TTC**, TVA 20% (confirmé par Robin).
+
+---
+
+### Lot 1 — Couche de données prix (`inc/catalogue-data-pro.php`, nouveau fichier)
+
+- `sapi_catalogue_round_ht($price)` — arrondi à **l'euro inférieur** (74,17 → 74). Un seul endroit.
+- `sapi_catalogue_ht_from_ttc($ttc, $rate)` — `floor($ttc / 1.20 * (1 - $rate))`. Le taux est **toujours un argument**, jamais une constante : c'est ce qui rend l'export à taux variable possible.
+- `sapi_catalogue_product_pricing($product)` — tableau de prix par variation : croise `pa_taille` × essence (`pa_materiau` / `pa_bois` / `pa_essence`) ; retourne pour chaque combinaison le libellé, le PVP TTC et le SKU de variation ; produit simple = une ligne. **Ne calcule aucun prix HT** : la conversion se fait au rendu du PDF, avec le taux du moment. Réutiliser `sapi_catalogue_product_sizes()` et `sapi_catalogue_product_essences()` qui existent déjà.
+- `sapi_catalogue_normalize_product_priced($product)` — appelle `sapi_catalogue_normalize_product()` puis **ajoute** la clé `pricing`. Aucune duplication de la logique specs / galerie / descriptions.
+- `sapi_catalogue_get_products()` gagne un argument optionnel `$include_ids` restreignant le résultat à une liste d'IDs produit, groupement et ordre conservés. **Modification additive** : sans l'argument, comportement strictement identique.
+
+⚠️ Pas de paramètre `$with_prices = false` sur la fonction publique. Une fonction séparée, appelée explicitement. Un défaut finit toujours par se retourner contre soi.
+
+### Lot 2 — Page `/catalogue-prix`
+
+- Champ ACF `catalogue_affiche_prix` (true/false) sur le template `page-catalogue.php`, lu **une seule fois** en tête dans `$show_prices`. `/catalogue` garde le flag à false.
+- Robin créera une seconde page WordPress, même template, flag à true, slug `catalogue-prix`.
+- Rendu quand le flag est actif :
+  - carte produit : « À partir de XX € TTC » sous la description courte
+  - modale fiche technique : tableau complet des variations (Variation / Prix TTC)
+  - section mentions légales en début de page, sous l'accroche (nouveau champ ACF `catalogue_mentions_legales`, textarea)
+- `noindex, nofollow` déjà en place dans le template. Vérifier aussi l'exclusion du sitemap Yoast : la page reprend les descriptions des fiches produit, risque de cannibalisation.
+- CSS : classes `cat-price-*` dans `assets/catalogue.css`, portées par `body.has-prices`. Pas de nouveau fichier.
+
+### Lot 3 — Export PDF tarif pro
+
+**Page admin** `Produits > Catalogue PRO`, capacité `manage_woocommerce` :
+
+| Champ | Type | Défaut |
+|---|---|---|
+| Taux de remise (%) | nombre | 30 |
+| Produits à inclure | liste à cocher groupée par catégorie | tous cochés |
+| Établi pour | texte libre | vide |
+| Date d'export | date | aujourd'hui |
+| Valable jusqu'au | date | 31/12 de l'année en cours |
+| Mentions légales | textarea | texte par défaut (voir le brief Cowork) |
+
+- **Sélecteur produits** : ~40 lignes, case + nom + SKU, un « tout / rien » sur chaque en-tête de catégorie, compteur « 12 produits sélectionnés », export refusé à zéro produit. L'ordre du PDF reste celui du site (catégorie puis `menu_order`), pas l'ordre de cochage.
+- ⚠️ **Piège o2switch déjà rencontré en Tâche 5** : des cases multiples en `name="...[]"` sont fusionnées par le WAF, une seule valeur survit. Utiliser un **nom unique par case** (`produits[<id>]=1`), sélection = clés cochées.
+- **Persistance** : chaque export enregistre les valeurs en option WP et les repropose au suivant, **sauf `Établi pour`** qui repart toujours vide (ne jamais envoyer à Ankorstore un tarif au nom de Muse).
+- **Garde-fou** : au-delà de 35% de remise, confirmation explicite avant génération.
+- **Journal des exports** en option WP (date, taux, client, nombre de produits), 20 dernières entrées affichées sous le formulaire.
+
+**Génération** (`inc/catalogue-pdf-pro.php`), en réutilisant `sapi_catalogue_pdf_new_mpdf()` et la CSS existante :
+
+- Page de garde : « Tarif professionnel », « Établi pour X » (bloc masqué si le champ est vide), date d'export, date de validité. **Le taux n'apparaît nulle part** : le revendeur voit ses prix, pas la remise qu'on lui consent par rapport à un autre.
+- Page mentions légales juste après, rendue depuis le champ libre (`wpautop` + `wp_kses` sur un jeu de balises sûr).
+- Par produit : tableau de prix pleine largeur sous les vignettes, avant les caractéristiques. Colonnes **Variation / Prix pro HT / PVP conseillé TTC**.
+- Filigrane discret « Tarif professionnel — confidentiel » sur les pages produit.
+- Bump `SAPI_CATALOGUE_PDF_VERSION` (14 → 15). ⚠️ Si le Point 3 de la tâche « Corrections post-prod » (busting automatique par hash) est déjà fait, le bump manuel n'a plus lieu d'être, et le hash doit couvrir `catalogue-pdf-pro.php`.
+
+**Cache** — le PDF pro ne passe **pas** par le cache public :
+- clé propre `wp_hash(ids triés + stamp + version + taux + client + dates + mentions)`. Le texte des mentions **doit** entrer dans la clé, sinon une correction resservirait l'ancien fichier.
+- même dossier protégé `uploads/catalogues/`, préfixe `pro-`
+- purge automatique des `pro-*.pdf` de plus de 30 jours : ils portent des noms de clients
+- pas de pré-génération : chaque sélection est quasi unique, le cache ne sert qu'au ré-export identique après correction d'une coquille
+
+**Route** — **pas de route REST publique**. Un `admin_post_sapi_catalogue_pro_pdf` avec vérification de nonce et de capacité. La route publique existante `/sapi/v1/catalogue-pdf` ne change pas et reste sans prix.
+
+**Temps de génération** : le diagnostic du Temps 2 (PHP 8.3, 512 Mo, `max_execution_time` 600 s, GD ok) conclut à une génération synchrone viable. Rester en synchrone. Relever les mêmes valeurs sur la prod avant le cherry-pick.
+
+---
+
+**Critères de succès :**
+1. `curl` sur `/catalogue` → aucune occurrence de `€` ni de prix, **y compris dans les `<template>` de fiche technique**. Rendu identique à aujourd'hui.
+2. `curl` sur `/catalogue-prix` → PVP TTC présents, **aucun prix HT, aucun taux**.
+3. `/wp-json/sapi/v1/catalogue-pdf` → PDF toujours sans prix, inchangé.
+4. `admin_post` pro appelé non connecté → refus.
+5. Deux exports au même périmètre mais à taux différents → deux fichiers distincts, prix corrects dans les deux.
+6. Un export à 8 produits ne contient que ces 8 produits, dans l'ordre du site, catégories vides absentes.
+7. Modifier les mentions légales et ré-exporter à périmètre identique → le nouveau texte apparaît (cache bien invalidé).
+8. Contrôle **au rendu du PDF, pas au XML** : rasteriser une page produit et lire les prix à l'œil (règle acquise sur le logo de la charte).
+9. Cas limite d'arrondi vérifié : PVP se terminant par 9 €, taux à décimale.
+10. `/catalogue-prix` absent du sitemap, `noindex` effectif.
+
+---
+
+### 📐 ADDENDUM (2026-08-24) — Gabarit PDF : le tableau de prix fait déborder la fiche sur une 2ᵉ page
+
+**Constat :** avec la section prix ajoutée, chaque fiche produit déborde d'un peu sur une seconde page. Le bloc photo actuel (héro 167 × 100 mm + rangée de 3 vignettes 50 × 33 mm) consomme à lui seul ~137 mm des 265 mm utiles. Décisions de Robin ci-dessous.
+
+#### A. Bande de 3 photos à hauteur fixe — **PDF PRO UNIQUEMENT**
+
+Remplacer héro + vignettes par **une seule bande horizontale de 3 photos de taille identique**, pleine largeur de la carte, hauteur fixe.
+
+Ordre imposé :
+1. **La photo produit = l'image mise en avant WooCommerce** (`get_post_thumbnail_id()`). ⚠️ Ce n'est **pas** la première image de `gallery_ids` : la galerie du catalogue vient de `sapi_get_product_photo_ids_with_fallback()` et commence par une ambiance. Il faut donc aller chercher la featured image **explicitement**, et la dédoublonner de la suite si elle figure aussi dans la galerie.
+2. La 1ʳᵉ photo d'ambiance
+3. La 2ᵉ photo d'ambiance
+
+**Repli** si moins de deux ambiances disponibles : compléter avec une **photo de détail**. Si le compte n'y est toujours pas, laisser l'emplacement vide plutôt que de répéter une image.
+
+**Hauteur de bande : 65 mm** (voir le calcul de budget en D). Emplacements d'environ 55 × 65 mm, légèrement portrait, ce qui convient à des luminaires qui sont des objets verticaux.
+
+⚠️ **Recadrage obligatoire.** `sapi_catalogue_pdf_img_tag()` ajuste en « contain » : à hauteur fixe, une portrait sort étroite et une paysage large, et la bande part en dents de scie. Recadrer les 3 images **au même ratio** dans `sapi_catalogue_pdf_image()`, qui repasse déjà par `wp_get_image_editor` (ajouter un `crop`, pas seulement un `resize`). Sans ça, ce n'est pas une bande.
+
+#### B. Marges réduites — **LES DEUX PDF**
+
+- Marges de page : `margin_top` / `margin_bottom` de 16 → **12 mm**, `margin_left` / `margin_right` de 15 → **10 mm**.
+- Padding de `.prod-card` : `4.5mm 6mm` → **`3mm 4mm`**.
+
+⚠️ Le pied de page vit dans la marge basse. Vérifier `margin_footer` après réduction : à 12 mm de marge basse avec un footer en 7,5 pt, ça passe, mais si le footer se fait rogner ou chevaucher le contenu, remonter `margin_bottom` à 14 plutôt que de bricoler le footer.
+
+Gain : ~8 mm en hauteur, ~3 mm de padding, et la largeur utile passe de 180 à 190 mm.
+
+#### C. Catégorie alignée en haut à droite, sur la ligne du nom — **LES DEUX PDF**
+
+Aujourd'hui `.cat-tag` est un `div` au-dessus du nom (~4 mm perdus), et `prod-head` porte le nom à gauche + **`Réf. SKU` à droite**. La cellule de droite est donc déjà occupée.
+
+⚠️ **Conflit à trancher, ne pas empiler les deux.** Le SKU figure **déjà dans le pied de page** de chaque fiche produit (`SetHTMLFooter`, `'Réf. ' . $p['sku']`). Donc : **retirer le `Réf.` de l'en-tête** et donner la cellule de droite à la catégorie. Le SKU reste lisible en pied de page, l'information n'est pas perdue.
+
+Résultat : une seule ligne d'en-tête, nom à gauche (Montserrat + Square Peg, styles inline conservés), catégorie à droite dans le style `.cat-tag` actuel (8,5 pt bold, capitales, `#E35B24`), alignée en bas comme le nom.
+
+#### D. Budget vertical après les trois changements
+
+| Poste | Avant | Après (PDF pro) |
+|---|---|---|
+| Bloc photo | 137 mm | 65 mm |
+| Marges page (haut + bas) | 32 mm | 24 mm |
+| Padding carte | 9 mm | 6 mm |
+| Ligne catégorie | ~4 mm | 0 (fusionnée) |
+
+Environ **87 mm récupérés** sur la fiche pro, pour un tableau de prix qui en demande 25 au plus. La marge est confortable, c'est délibéré : elle absorbe les descriptions longues.
+
+Sur le **PDF public**, le gain est d'environ 15 mm (marges + padding + ligne catégorie), sans changement de photos.
+
+### ✅ ADDENDUM TRAITÉ (2026-08-24) — commits `a8d78d0` + `869e2cb`
+
+**A, B, C faits.** Le gabarit de carte produit est extrait en fonction partagée `sapi_catalogue_pdf_product_card_html()` : les deux générateurs ne divergent plus que par le bloc photo et le tableau de prix. `sapi_catalogue_pdf_image()` gagne un argument `$crop` optionnel (recadrage centré via `wp_get_image_editor->resize(w, h, true)`, entrant dans le nom du fichier de cache image) ; sans lui la bande partait en dents de scie. Bande à 57 × 65 mm (l'addendum disait « environ 55 » — 57 remplit mieux la largeur utile de la carte). Ordre : `get_post_thumbnail_id()` lu **explicitement** puis dédoublonné, 2 ambiances, repli sur les détails, emplacement laissé vide sinon.
+
+**Correction en cours de route sur le pied de page.** L'addendum avertissait du risque. Mesure sur le PDF réellement généré : la ligne de pied se pose à (`margin_footer` − 4,3 mm) du bord de feuille. Avec `margin_footer` à 7, elle tombait à **2,7 mm** — sous la zone non imprimable de la plupart des imprimantes. Correctif : garder les 9 mm par défaut (pied à 4,7 mm, exactement là où Robin l'avait validé) et descendre `margin_bottom` à **14** plutôt que 12. On perd 2 mm des 8 visés, sur une fiche qui en récupère ~87.
+
+**Vérifié par machine sur test** (PDF public, catégorie **lampadaires** = le cas le plus dense) :
+- **11 pages** = garde + Histoire + Deux bois + **7 lampadaires** + contact → **exactement une page par fiche, aucun débordement**.
+- Marge gauche mesurée dans le flux : **15,9 mm avant → 10,9 mm après**. Le resserrement a bien pris.
+- Pied de page : 2,7 mm en v16 → **4,7 mm en v17**, identique à l'ancien gabarit.
+- 0 lien `/URI`, 0 occurrence de `€`/`EUR`/`prix`/`TTC`/`HT`. Le PDF public reste sans prix.
+
+`SAPI_CATALOGUE_PDF_VERSION` : 15 → 16 → **17**.
+
+**✅ TOUT VALIDÉ PAR ROBIN au rendu (2026-08-24) :**
+- Bande de 3 photos : régularité conforme, et photo produit en position 1 = bien l'image mise en avant, pas une ambiance.
+- **Toutes les fiches du tarif pro tiennent sur une page**, avec de la marge en plus. L'objectif de l'addendum est atteint.
+- **PDF public re-validé** malgré son changement d'apparence (marges resserrées, en-tête sur une ligne, SKU retiré du haut et conservé en pied).
+
+### 🎨 Retouches design du PDF pro (2026-08-24) — commit `703a1d5`, v18
+
+Deux incohérences relevées par Robin sur la fiche du tarif pro :
+1. **Titre du tableau de prix désaccordé** des titres de section de la fiche technique : `letter-spacing` 1px au lieu de .5px, `padding-bottom` 1mm au lieu de `0.4mm 0`. Déclarations désormais recopiées à l'identique depuis `.spec-block .sec`. ⚠️ **Recopiées et non héritées** : mPDF gère mal les sélecteurs descendants, on ne peut pas réutiliser la classe `.sec` dans `.pro-prices`. Un commentaire d'avertissement dans les deux feuilles rappelle que toute retouche de l'une doit être répercutée sur l'autre.
+2. **Description déplacée AVANT le tableau de prix** — on présente l'objet, puis on le chiffre. L'argument du gabarit partagé devient `after_description` (au lieu de `after_photos`). Le filet en tête du tableau est remplacé par une marge haute de 3,5 mm : une respiration, pas une coupure.
+
+Ordre final de la carte : en-tête → photos → description → prix → caractéristiques.
+
+**Vérifié :** le PDF public n'est pas affecté (il passe une chaîne vide à `after_description`). Régénéré en v18, ses 33 flux de contenu décompressés ont la **même empreinte SHA-256** qu'en v17 — seules les métadonnées `CreationDate`/`ModDate` diffèrent. 11 pages, 0 lien, 0 prix.
+
+### ✅ RÉSOLU — Bande photo du PDF pro refaite (commits `5635c03` + `f70c707`, v20 puis v21)
+
+**Composition, d'après le schéma de Robin :** 3 grands carrés (photo produit = image mise en avant, puis 2 ambiances) + 1 colonne de 2 petits carrés (détail en haut, accessoire en bas). Toutes carrées, même hauteur, la bande occupe toute la largeur utile.
+
+**Géométrie déduite, rien en dur** : `3S + 3g + s = W` avec `2s + g = S`, soit `S = (2W − 5g)/7`. À 181 mm utiles (A4 − marges − padding de carte) et 3 mm d'écart : grands carrés **49,57 mm**, petits **23,29 mm**, bande haute de 49,57 mm. Rapport grand/petit **2,13**, contre 2,12 sur le schéma de Robin (ses 52 mm supposaient les 190 mm de la page, sans le padding de la carte).
+
+**Correctif de fond de l'étirement :** `sapi_catalogue_pdf_image()` retrouve sa forme d'origine (ne recadre plus, préserve le ratio). Le recadrage vit dans `sapi_catalogue_pdf_square_image()`, qui **n'utilise pas** `resize($w, $h, true)` — on découpe soi-même le plus grand carré disponible avec `crop()`, donc la sortie est carrée **par construction**, et les dimensions sont **relues** sur le fichier produit au lieu d'être affirmées. Cible plafonnée au côté disponible : jamais de suragrandissement.
+
+**Point focal branché :** Robin a l'extension **Media Focus Point** (wpcompany v2.0.5), confirmée sur le serveur de test. Adaptateur `sapi_catalogue_focal_point_from_mfp()` accroché au filtre `sapi_catalogue_focal_point`, passant par `MFP_Background($id, false)` — l'API publique documentée depuis la v1.3 — et non par sa méta, qui casserait à la première mise à jour. Appel entouré d'un tampon de sortie : un `echo` de l'extension corromprait le flux binaire du PDF. Sans extension ou sans point focal posé, retour à 50/50 et recadrage centré.
+
+**Règle des emplacements vides :** chaque emplacement affiche une photo de **son type** ou reste blanc, sans repli d'un type sur un autre (consigne Robin pour l'accessoire, appliquée à tous). À rediscuter si trop de colonnes de droite sortent vides.
+
+**Vérifié :** PDF public inchangé (même empreinte de contenu en v19, v20 et v21 — la bande ne concerne que le PDF pro), pages publiques 200.
+
+<details><summary>Diagnostic d'origine (archivé)</summary>
+
+**Cause racine :** `WP_Image_Editor::resize($w, $h, true)` **n'agrandit jamais**. WordPress (`image_resize_dimensions()`, branche crop) renvoie `(min(cible_w, source_w), min(cible_h, source_h))` — pas la cible. Le recadrage part du format `large` (plafonné à 1024 px) et vise 570×650 : dès qu'une source fait moins de 650 px de haut, la sortie n'a pas le ratio demandé. `sapi_catalogue_pdf_image()` **affirme** ensuite les dimensions demandées (`$w = $crop['w']`) au lieu de lire celles obtenues, et le HTML force `width:57mm; height:65mm` → l'image est étirée pour remplir la case.
+
+**Mesuré sur les 205 images de galerie du catalogue :** ratios réels de **0,56 à 2,13** ; **20 images sur 205** ne peuvent pas atteindre le ratio cible ; pire cas source 1024×481 → sortie 570×481 → **étirement de +35 % en hauteur**.
+
+**Acquis, quelle que soit la mise en page retenue :** lire les dimensions **réelles** du fichier produit (`getimagesize` sur la sortie) et ne jamais imposer largeur ET hauteur sur une image dont le ratio n'est pas garanti. C'est cette double faute qui déforme, pas le choix de composition.
+
+**Exigences Robin :** aucune déformation (rédhibitoire) ; rognage toléré mais ratio d'origine préféré ; **la première photo doit être carrée**. Trois compositions lui ont été proposées — il a répondu par un schéma, mis en œuvre ci-dessus.
+
+</details>
+
+### 📐 ADDENDUM 2 (2026-08-24) — Bande photo du PDF pro : disposition « 3 grands + rangée de 5 »
+
+**Mesuré sur le PDF pro que tu as livré** (`tarifs-pro-atelier-sapi-test-4`, 31 pages, rasterisé) :
+- Les fiches produit s'arrêtent entre **220,0 et 226,2 mm**. Avec `margin_bottom` à 14, il reste donc **56,8 mm de blanc** sous la fiche la plus dense. Il y a de la place pour une bande nettement plus haute.
+- **L'emplacement « accessoire » est vide sur toutes les pages contrôlées.** La bande n'affiche que 4 images sur 5 : 3 grands carrés + 1 petit en haut à droite, et un blanc en bas à droite. La règle « chaque emplacement affiche une photo de son type ou reste blanc » produit ce trou en pratique, pas seulement en théorie. **Elle est remplacée ci-dessous.**
+
+#### A. Nouvelle géométrie — décision Robin
+
+Bande à **deux rangées**, plus de colonne latérale :
+- **Rangée haute : 3 grands carrés.** `S = (181 − 2×3)/3` = **58,33 mm**
+- **Rangée basse : 5 petits carrés.** `s = (181 − 4×3)/5` = **33,80 mm**
+- Écart de 3 mm partout, **hauteur de bande = 95,13 mm**
+
+Les grands passent donc de 49,6 à 58,3 mm : les photos principales grossissent **et** on gagne des emplacements (8 au lieu de 5).
+
+⚠️ **Marge de sécurité réduite.** Le supplément est de 46,5 mm pour 56,8 mm disponibles : il ne reste que **~10 mm** sur la fiche la plus dense. **Vérifier le nombre de pages sur les 27 produits**, pas seulement sur un lampadaire. Si une fiche déborde, réduire la rangée basse plutôt que les grands.
+
+#### B. Ordre de remplissage et types
+
+Les types ne sont plus des réservations, ce sont des **préférences avec repli sur l'ambiance**. Une case ne reste jamais vide parce que la photo de son type manque.
+
+| Position | Type préféré | Repli |
+|---|---|---|
+| 1 (grand) | photo produit = `get_post_thumbnail_id()` | ambiance |
+| 2, 3 (grands) | ambiance | détail |
+| 4, 5, 6 (petits) | ambiance | détail |
+| 7 (petit) | **détail** | ambiance |
+| 8 (petit, dernier) | **accessoire** | ambiance |
+
+Détail et accessoire restent **groupés en fin de rangée**, dans cet ordre. Dédoublonnage global : une même image n'apparaît jamais deux fois dans la bande.
+
+#### C. Moins de 8 photos — rangée alignée à gauche (décision Robin)
+
+Les petits carrés **gardent leurs 33,80 mm** et la rangée se remplit **de la gauche vers la droite**, laissant le blanc à droite. Pas de recentrage, pas d'agrandissement (agrandir ferait monter la bande à 104 mm, au-dessus du budget).
+
+Conséquences à coder explicitement :
+- « L'accessoire est en dernier » signifie **dernière case affichée**, pas case n°8. À 6 photos, la rangée basse compte 3 cases : ambiance, détail, accessoire.
+- **Zéro petit disponible → la rangée basse disparaît** et la bande retombe à 58,33 mm. On ne laisse pas une rangée vide.
+- Moins de 3 photos au total : les grands s'alignent aussi à gauche, même règle, sans redimensionnement.
+
+#### D. Photo produit — la faire exister visuellement
+
+Sur le rendu, la case 1 est un détourage sur blanc posé sur le fond crème de la carte (`#fffdfb`), sans bordure : **elle se lit comme un vide, pas comme une photo**. Ajouter un filet clair (le `#ece2d3` de la carte convient) autour de **cette case uniquement**, ou un fond très légèrement grisé. Les autres cases n'en ont pas besoin, leurs photos portent leur propre cadre.
+
+#### E. Vérification
+
+- **Compter les pages sur les 27 produits.** Une seule fiche à 2 pages invalide la disposition.
+- Contrôle **au rendu rasterisé** : aucune case vide sur un produit qui a 8 photos ou plus, blanc uniquement en fin de rangée basse, et aucune image répétée dans une même bande.
+- Vérifier qu'un produit sans photo de détail ni d'accessoire affiche bien 8 ambiances et **aucun trou**.
+- Acquis à ne pas perdre : ratio préservé, recadrage carré par `crop()` avec dimensions **relues** sur le fichier produit, point focal via `MFP_Background()`.
+- Le **PDF public ne change pas** : la bande ne concerne que le PDF pro. Contrôler que son empreinte de contenu reste identique, comme aux versions précédentes.
+- Bump de `SAPI_CATALOGUE_PDF_VERSION`.
+
+---
+
+**🛑 PAS DE CHERRY-PICK VERS `master` POUR L'INSTANT — décision Robin.** D'autres modifications sont à venir sur le catalogue. Tout reste sur `test-theme-sapi-maison`. Au moment du passage en prod, ne pas oublier : la page `/catalogue-prix` est du contenu en base, **à recréer à la main** sur atelier-sapi.fr, avec son exclusion du sitemap Yoast.
+
+---
+
+#### E. Vérification
+
+- **Cas le plus dense à tester en priorité : un lampadaire.** C'est la catégorie qui porte le plus de lignes de caractéristiques (`hauteur_totale`, `hauteur_ampoule`, `interrupteur` en plus du tronc commun), avec la description la plus longue disponible. Si celui-là tient sur une page, les autres tiennent.
+- **Contrôle au rendu rasterisé, pas au XML** : compter les pages, et vérifier à l'œil que la bande de 3 photos est bien régulière (mêmes largeurs, pas de dents de scie).
+- ⚠️ **Le PDF public change d'apparence** (marges + en-tête). Il est en prod et validé : le faire re-valider par Robin au rendu avant le cherry-pick vers master.
+- Bump de `SAPI_CATALOGUE_PDF_VERSION` obligatoire, le gabarit des deux PDF change.
+
+---
+
+### 🚧 AVANCEMENT — Lots 1+2 faits sur `test-theme-sapi-maison` (2026-08-24)
+
+Robin a donné le go pour **les lots 1+2 seulement** : il veut voir la page avant que je parte sur l'admin. **Lot 3 (admin + PDF pro) en attente de sa validation visuelle.**
+
+**Fait :**
+- `inc/catalogue-data-pro.php` (NEW) — arrondis, `sapi_catalogue_ht_from_ttc($ttc, $rate)` (taux en argument), `sapi_catalogue_product_pricing()`, `sapi_catalogue_normalize_product_priced()`, `sapi_catalogue_get_products_priced()`, `sapi_catalogue_format_price()`, groupe ACF `group_catalogue_prix`.
+- `inc/catalogue-data.php` — SEULE modification : argument optionnel `$include_ids` (additif). La garantie « zéro prix » de la couche est intacte.
+- `page-catalogue.php` — `$show_prices` lu une fois, « À partir de X € TTC » sur la carte, tableau Variation/Prix TTC dans la fiche technique, bloc mentions légales, bloc PDF masqué quand le flag est actif.
+- `assets/catalogue.css` — classes `cat-price-*` portées par `body.has-prices`.
+- `inc/catalogue-pdf.php` — correctif `sapi_catalogue_page_id()` (voir ci-dessous).
+
+**Deux pièges traités, tous deux signalés par Robin :**
+1. **`sapi_catalogue_page_id()` serait tombé dès la création de `/catalogue-prix`.** `get_posts()` sans `orderby` retombe sur date DESC → la page la plus récente aurait gagné, et le PDF public aurait lu les ACF Histoire/Bois de la page prix. Corrigé par `meta_query` avec branche **`NOT EXISTS`** (indispensable : la page `/catalogue` a été créée avant l'existence du champ, elle n'a aucune ligne de meta, un `!=` seul ne matche pas une meta absente) + `orderby ID ASC`.
+2. **`floor()` nu sur `ttc / 1.20 * (1 - taux)` perd un euro.** Corrigé en `floor(round($x, 6))`. Vérifié par balayage (PVP 20→600 € pas 0,10 × taux 0→50% pas 0,1 pt, ~2,9 M de cas, référence en rationnels exacts) : **82 divergences avec `floor()` nu, 0 avec le correctif.** Jeu de test du critère n°9, au taux par défaut de 30% : PVP 108 → 63, 204 → 119, 216 → 126, 396 → 231, 408 → 238, 420 → 245, 432 → 252.
+
+**Décisions prises avec Robin :**
+- Bloc « Télécharger en PDF » **masqué** sur `/catalogue-prix` (l'endpoint public produit un PDF sans prix, incohérent). Un PDF prix public reste possible plus tard : même gabarit que le tarif pro, colonne HT retirée.
+- Champ ACF `catalogue_mentions_legales` laissé **vide par défaut**. Le texte du brief est celui du **PDF pro** (HT, MOQ, confidentialité) et ne doit pas être recyclé sur une page TTC grand public — Robin le remplira.
+- PVP de référence = **prix régulier** (repli sur le prix actif) : une promo temporaire ne doit pas devenir la base d'un tarif revendeur.
+- **Essences exposées = Peuplier et Okoumé uniquement** (décision Robin). La base contient une 3ᵉ essence, « Peuplier teinté noir » (+50 € sur Vincent l'incandescent), que `/catalogue` n'a jamais affichée : `sapi_catalogue_product_essences()` codait en dur deux libellés et ignorait le reste en silence. On garde ce périmètre. La table est extraite dans `sapi_catalogue_essence_labels()` (source unique) et la couche prix s'y aligne — sans ce filtre, `/catalogue-prix` aurait affiché un prix sur un bois que la fiche technique juste en dessous ne mentionne pas.
+
+**Constaté sur test** (JSON des variations des fiches produit) : les prix **varient fortement selon l'essence** — Vincent l'incandescent, 18x33cm : Peuplier 85 € / Okoumé 105 €. Le tableau croisé taille × essence est donc nécessaire, pas de simplification possible. Aucune promo en cours (prix régulier = prix actif partout). Détail cosmétique sans gravité : les libellés de `pa_taille` sont irréguliers (« 50 cm », « 70cm », « 90 cm ») — à uniformiser dans les attributs WooCommerce si Robin le souhaite, ça n'a aucun impact sur le code.
+
+**✅ LOTS 1+2 VALIDÉS PAR ROBIN sur test (2026-08-24).** Page `/catalogue-prix` créée par Robin sur test.atelier-sapi.fr, 27 produits, 27 tableaux de prix, `noindex` effectif, bloc PDF absent, `has-prices` actif. `/catalogue` re-audité après coup : **0 occurrence de `€`**, ligne « Bois » inchangée — la non-régression tient.
+
+**Itération visuelle demandée et livrée** : le tableau des prix est passé de la liste « une ligne par combinaison » à un **tableau croisé** (essences en lignes, dimensions en colonnes). Ex. Vincent l'incandescent : Peuplier 85/110/115 €, Okoumé 105/135/135 € pour 18x33 / 25x40 / 32x33 cm. Sur les 27 produits : 0 case vide, toutes les combinaisons existent en base. Trois choix intégrés : lignes ordonnées par la table du catalogue (Peuplier puis Okoumé) et non par ordre de création des variations ; combinaison absente = « — » (jamais un prix déduit par symétrie) ; défilement horizontal confiné au tableau, la page ne part jamais en travers sur mobile.
+
+**Commits sur `test-theme-sapi-maison`** : `cb5c884` (lots 1+2), `d8c5295` (filtre essences), `0ba0ca9` (tableau croisé).
+
+---
+
+### 🚧 LOT 3 livré sur `test-theme-sapi-maison` (2026-08-24) — commit `111b126`
+
+`inc/catalogue-pdf-pro.php` (génération, cache, route) + `inc/catalogue-pro-admin.php` (formulaire). `SAPI_CATALOGUE_PDF_VERSION` 14 → 15.
+
+**Conforme au brief :** page de garde sans jamais le taux, page mentions, une page par produit avec tableau Variation / Prix pro HT / PVP conseillé TTC, filigrane « Tarif professionnel — confidentiel » sur les pages produit seulement. Sélecteur produit à nom unique par case (`produits[<id>]`, piège WAF o2switch de la Tâche 5), « tout / rien » par catégorie, compteur, export refusé à zéro produit, persistance sauf « Établi pour », garde-fou > 35%, journal des 20 derniers exports. Cache à clé propre incluant le hash des mentions, préfixe `pro-`, purge à 30 jours, pas de pré-génération. Route `admin_post` gardée par capacité + nonce, **aucune route REST ajoutée**.
+
+**Vérifié sur test après déploiement :**
+- `/catalogue` 200, **0 occurrence de `€`** ; `/catalogue-prix` 200. Aucun fatal.
+- `admin_post` pro **non connecté → refusé** (404, aucun PDF servi). Page admin non connectée → redirection vers `wp-login`.
+- Endpoint public `/wp-json/sapi/v1/catalogue-pdf` : 200 `application/pdf`, régénéré après le bump de version, audit des flux décompressés = **16 pages, 0 lien `/URI`, 0 occurrence de `€`/`EUR`/`prix`/`TTC`/`HT`**. Le PDF public reste strictement sans prix.
+
+**⏳ Reste à faire par Robin (nécessite une session admin, je ne peux pas la simuler) :** lancer un export depuis `Produits > Catalogue PRO` et contrôler **au rendu du PDF, pas au XML** (règle acquise sur le logo de la charte). Valeurs attendues pour Vincent l'incandescent au taux par défaut de 30% — 18x33cm : Peuplier 49 € HT / 85 € TTC, Okoumé 61 € HT / 105 € TTC ; 25x40cm : 64 / 110 et 78 / 135 ; 32x33cm : 67 / 115 et 78 / 135. Vérifier aussi : deux exports à taux différents donnent deux fichiers distincts, un export à 8 produits ne contient que ces 8 produits dans l'ordre du site, et une correction des mentions suivie d'un ré-export au même périmètre fait bien apparaître le nouveau texte (invalidation du cache).
+
+**Itération Robin (commit `1b7df05`)** : le PDF pro reprend désormais les **pages d'intro du PDF public** (Histoire de l'atelier, Deux bois au choix) et la page mentions porte le titre **« Tarif professionnel »**, mis en page comme elles. Les blocs Histoire/Bois ont été **extraits en helpers partagés** (`sapi_catalogue_pdf_intro_fields()` / `_histoire_html()` / `_bois_html()`) plutôt que recopiés — un seul gabarit, une seule source ACF, lue sur la page sans prix. Vérifié : les 20 fragments de balisage sont identiques et dans le même ordre qu'avant extraction ; le PDF public reste servi à l'octet près. Ordre du document : garde → Histoire → Deux bois → Tarif professionnel → produits.
+
+⚠️ Le titre « Tarifs professionnels » en tête du texte par défaut des mentions a été retiré (doublon avec le titre de page). Si Robin a déjà lancé un export avant cette itération, sa version enregistrée contient encore cette ligne : à supprimer à la main dans le champ.
+
+**Questions toujours ouvertes pour Robin :** (a) cherry-pick vers `master` maintenant ou à la fin ? (b) rappel — la page `/catalogue-prix` devra être **recréée à la main en prod** (contenu en base, pas en code), ainsi que son exclusion du sitemap Yoast. (c) le PDF pro n'a pas de page contact finale (le brief ne la prévoyait pas) — à confirmer.
+
+---
+
+## 📨 RETOUR À COWORK — Catalogue prix + Tarifs professionnels : LIVRÉ SUR TEST ✅ (2026-08-24)
+
+**Statut : terminé et validé par Robin sur `test.atelier-sapi.fr`. VOLONTAIREMENT PAS EN PROD** — Robin a d'autres modifications du catalogue à demander, le passage sur `master` attendra qu'elles soient faites.
+
+### Ce qui existe maintenant
+
+Trois objets, trois niveaux de confidentialité, exactement comme le brief le prévoyait :
+
+| Objet | Contenu | Qui y a accès |
+|---|---|---|
+| `/catalogue` | zéro prix | public — **strictement inchangé**, audité après chaque modification |
+| `/catalogue-prix` | prix publics TTC par variation | public, `noindex`, lien à transmettre à la main |
+| PDF « Tarifs professionnels » | prix revendeur HT remisés + PVP conseillés | Robin seul, depuis l'admin |
+
+**Le point d'architecture à retenir, y compris côté commercial : le tarif remisé n'existe nulle part sur le web.** Aucune page, aucun lien secret, aucune adresse à protéger. Le taux de remise est saisi par Robin au moment de générer le PDF et disparaît ensuite. Conséquence directe : un tarif à ‑12 % pour un revendeur historique et un autre à ‑30 % pour un prospect de salon, sans que l'un puisse jamais deviner l'existence de l'autre, et sans que le site ait à savoir qui est qui.
+
+### Comment Robin s'en sert
+
+`wp-admin` → **Produits → Catalogue PRO**. Il règle le taux, coche les produits à inclure, saisit éventuellement « Établi pour [nom du revendeur] », et le PDF se télécharge.
+
+Détails utiles à connaître pour l'accompagner :
+- **« Établi pour » repart toujours vide** à chaque ouverture. C'est délibéré : on n'envoie jamais à Ankorstore un tarif encore au nom de Muse. Tout le reste (taux, sélection de produits, dates, mentions) est mémorisé d'un export à l'autre.
+- **Au-delà de 35 % de remise**, une confirmation est demandée avant génération.
+- **Un journal des 20 derniers exports** (date, client, taux, nombre de produits, auteur) s'affiche sous le formulaire. C'est la réponse le jour où un revendeur affirme qu'on lui avait promis autre chose.
+- Le taux **n'apparaît nulle part** dans le document produit.
+
+### ⚠️ Ce qui reste à faire, et qui n'est pas du code
+
+1. **Compléter les mentions légales.** Le texte du brief est pré-rempli dans l'admin, mais cinq crochets `[à compléter]` attendent : minimum de commande, frais de port, délai de fabrication, conditions de règlement, capital social. Tant qu'ils sont là, ils partiront tels quels chez le revendeur. C'est à remplir **une seule fois**, la valeur est ensuite conservée.
+2. **Vérifier la cohérence des PVP avant le premier envoi.** Le tarif pro affiche le prix public conseillé à côté du prix d'achat. Si le prix du site et celui d'Etsy divergent aujourd'hui sur un modèle, le PDF expose l'écart au revendeur. Le brief le signalait déjà — ça n'a pas été vérifié.
+3. **Le jour du passage en prod** : la page `/catalogue-prix` est du **contenu en base, pas du code**. Elle devra être recréée à la main sur `atelier-sapi.fr` (template « Catalogue B2B », slug `catalogue-prix`, bouton « Afficher les prix publics » activé), avec son **exclusion du sitemap Yoast** — sinon elle cannibalise les fiches produit, dont elle reprend les descriptions.
+
+### Constats de terrain, potentiellement utiles côté business
+
+- **Les prix varient fortement selon l'essence** : sur Vincent l'incandescent, 85 € en peuplier contre 105 € en okoumé pour la même taille, jusqu'à 80 € d'écart sur certaines lignes. Le tableau des prix croise donc taille × essence.
+- **Une troisième essence existe en base, « Peuplier teinté noir » (+50 €), que `/catalogue` n'a jamais affichée.** Décision de Robin : on garde ce périmètre à deux bois. À reconsidérer si elle devient commercialement significative — c'est un choix business, plus un oubli technique.
+- **Aucune promotion en cours** sur le catalogue au moment du développement. Le tarif se base sur le prix régulier, pas sur le prix actif : une promo de saison ne contaminera jamais un tarif annuel envoyé à un revendeur.
+
+### Idée pour Cowork
+
+La mécanique est prête, il manque le commercial. Cowork peut préparer un **message-type d'envoi du tarif à un revendeur** (Muse, Ankorstore, prospects salons), et un second pour la page `/catalogue-prix` à destination des décorateurs qui veulent les prix publics. Le lien de la page se partage à la main, elle n'est ni indexée ni liée depuis le site.
+
+
+---
+
+### ✅ ADDENDUM 2 TRAITÉ (2026-08-24) — commit `5f69e89`, v22
+
+Géométrie conforme au calcul de l'addendum : grands **58,33 mm** `(W−2g)/3`, petits **33,80 mm** `(W−4g)/5`, bande **95,13 mm**, les deux rangées faisant exactement 181 mm. Supplément **+45,56 mm** pour 56,8 mm disponibles.
+
+Ordre de remplissage vérifié par simulation sur 7 cas : à 8 photos les deux dernières cases sont détail puis accessoire ; **à 6 photos la rangée basse donne bien ambiance / détail / accessoire** (l'exemple de l'addendum) ; sans détail ni accessoire, 8 ambiances et aucun trou ; à 3 photos la rangée basse disparaît ; dédoublonnage effectif.
+
+Filet `#ece2d3` sur la seule photo produit, épaisseur retranchée de l'image pour que la case garde son côté exact.
+
+**⏳ Vérification du nombre de pages : impossible de mon côté**, la génération du tarif pro demande une session admin. Projection à partir de la mesure de Robin (fiche la plus dense du PDF pro à 226,2 mm) : **271,8 mm attendus pour une limite à 283 mm**, soit ~11 mm de marge. Mesuré sur le PDF public, l'écart entre la fiche la plus dense et la 4ᵉ n'est que de 5,5 mm : les fiches sont très homogènes, si la plus dense passe les autres passent. **Fiches à contrôler en priorité : LÉON (la plus dense), puis DALIDA, VINCENT et MYRIAM.**
+
+---
+
+### 🔴 À CORRIGER — deux constats faits en auditant le PDF (2026-08-24)
+
+**1. Du balisage HTML s'affiche en toutes lettres dans « Poids » — EN PRODUCTION.**
+Cinq fiches du catalogue prescripteurs affichent littéralement `<p>35 Kilos le matin<br /> 22 le soir</p>` dans la ligne Poids : **Olivia La gardiena (×2), Charlie Le pissenlit, Claudine La turbine, Vincent L'incandescent**. Vérifié sur `atelier-sapi.fr/catalogue` **et** sur test. C'est visible sur la page, dans le PDF public et dans le tarif pro.
+Deux problèmes distincts : (a) le contenu du champ ACF `poids` est une valeur de test, à corriger côté Robin ; (b) `sapi_catalogue_get_product_specs()` ramène la valeur brute et le rendu l'échappe, donc toute mise en forme saisie dans un champ de caractéristique ressortira en balises visibles. Correctif proposé : `wp_strip_all_tags()` sur les valeurs de specs. **Non fait, en attente du go de Robin** (ça touche `/catalogue`, qui est gelé).
+
+**2. ⚠️ Mes audits « 0 occurrence de € » sur les PDF ne prouvaient rien.**
+mPDF sous-ensemble ses polices : les flux de contenu ne contiennent que des index de glyphes, aucun texte en clair. Chercher la chaîne `€` dans un flux décompressé ne pouvait donc jamais rien trouver, quel que soit le contenu réel du document. Restaient valables : le contrôle des annotations `/URI`, le comptage de pages, et les comparaisons d'empreintes entre versions.
+**Corrigé :** un extracteur passant par les CMap `/ToUnicode` embarquées a été écrit (`scratchpad/pdftext.py`). Sur le PDF public complet : 33 423 caractères extraits, « Culot » 27 fois et « Peuplier » 28 fois — soit bien les 27 fiches, l'extraction fonctionne — et **0 occurrence de `€`, `Prix`, `TTC`, `HT`**. L'étanchéité du PDF public est donc désormais **réellement** vérifiée, et non plus supposée. À réutiliser pour tout audit futur.
+
+
+---
+
+### ✅ PDF PUBLIC — bande photo « 2 grandes + 4 moyennes » (2026-08-24, commit `b7cab95`, v23)
+
+Demande de Robin après constat que les fiches publiques descendaient au pire à 259,6 mm, laissant 64 à 68 mm de blanc — presque un quart de page.
+
+**Contrainte structurante rappelée par Robin :** la taille des carrés n'est pas libre, elle est imposée par la largeur. Pour occuper de la hauteur, on met **moins d'images par rangée**, jamais des images plus grandes.
+
+| Profil | Rangée haute | Rangée basse | Bande |
+|---|---|---|---|
+| `pro` | 3 × 58,33 mm | 5 × 33,80 mm | 95,13 mm |
+| `public` | 2 × **87,87 mm** | 4 × **42,20 mm** | **133,53 mm** |
+
+Largeurs utiles et écarts **mesurés par Robin sur le rendu** (179,2 mm et 3,46 mm côté public), pas déduits. ⚠️ Le profil pro garde 181/3, valeurs sous lesquelles sa bande a été validée à l'œil : **l'écart de 1,8 mm entre les deux mesures reste à trancher**, il n'a pas été touché.
+
+**Les deux PDF divergent volontairement** — les publics ne sont pas les mêmes, ne pas chercher à les unifier. Le moteur, le recadrage carré au point focal, le dédoublonnage et les règles de repli restent partagés ; seuls le nombre de cases par rangée et l'ordre de remplissage changent, via un profil.
+
+**Ordre public :** 2 ambiances en grand, puis packshot, ambiance, détail, accessoire. La fiche s'ouvre sur des mises en situation et non sur un détourage — c'est un document qui doit séduire. Le filet clair suit désormais le **packshot où qu'il atterrisse** (case 1 en pro, case 3 en public), et non plus la première case.
+
+**Correctif trouvé en simulant :** les réserves de fin sont servies sur leur type **strict**, sans repli, et repliées seulement une fois les cases de tête pourvues. Sinon un produit sans accessoire voyait le repli lui prendre la **première** ambiance, reléguée en dernière petite case au lieu d'ouvrir la fiche en grand. Vérifié sur 8 cas, profils pro et public, sans régression du pro.
+
+**Mesuré sur test après déploiement :** 11 pages sur les lampadaires, soit **une fiche par page, aucun débordement**. Bas du contenu 262,2 → **259,1 mm**, 23,9 mm de dégagement sous le plancher de 283. Poids du catalogue complet 3,91 → **6,21 Mo** (+59 %, six images carrées au lieu de quatre en « contain ») — **très loin du plafond de 25 Mo**. Étanchéité revérifiée avec l'extracteur `/ToUnicode` : 33 423 caractères, 0 occurrence de `€`, `Prix`, `TTC`, `HT`.
+
+L'ancien gabarit « grande photo + 3 vignettes » et ses règles CSS ont été retirés — plus rien ne les appelait, git les conserve.
+
+**⏳ Reste : la seconde revalidation du PDF public au rendu par Robin**, qu'il assume.
+
+
+---
+
+### ✅ Deux photos de détail dans les deux PDF (2026-08-24, commit `a3f57f2`, v24)
+
+Demande de Robin, avec repli sur ambiance. Le nombre **total** de cases étant imposé par la géométrie, la 2ᵉ case de détail prend la place d'une ambiance dans chaque profil :
+
+| Profil | Composition |
+|---|---|
+| `pro` | packshot + **4** ambiances + **2 détails** + 1 accessoire (était 5 ambiances + 1 détail) |
+| `public` | 2 ambiances en grand + packshot + **2 détails** + 1 accessoire (était 2 ambiances + packshot + 1 ambiance + 1 détail) |
+
+**Correctif trouvé en simulant :** le repli d'une réserve restée vide se pose **à sa place** dans la séquence, plus en fin. Sinon un produit avec une seule photo de détail voyait l'ambiance de repli passer **après** l'accessoire, alors que celui-ci doit rester la dernière case affichée (règle de l'addendum 2 : détail et accessoire groupés en fin, dans cet ordre). Vérifié sur 7 cas × 2 profils : avec 2 détails, avec 1 seul, sans aucun, sans détail ni accessoire — l'accessoire termine toujours la séquence quand il existe.
+
+**Vérifié sur test :** 11 pages sur les lampadaires (une fiche par page), 0 lien `/URI`, et étanchéité confirmée à l'extracteur `/ToUnicode` — 0 `€`, 0 `Prix`, 0 `TTC`, 0 `HT`, « Culot » 7 fois pour 7 lampadaires.
+
+**⏳ En attente de Robin :** (1) revalidation au rendu des DEUX PDF — le pro n'a pas encore été vu dans sa version « 3 grands + 5 petits », contrôler LÉON en priorité ; (2) l'écart de 1,8 mm entre les deux largeurs utiles (179,2 mesuré vs 181 en constante côté pro) ; (3) le champ « Poids » qui affiche du balisage en prod ; (4) le cherry-pick vers `master`.
+
+
+---
+
+## 🚀 CHERRY-PICK PROD FAIT (2026-08-24) — `master` = commit `a92516c`
+
+**⚠️ Robin avait dit « main » : `origin/main` est ABANDONNÉE** — 2 commits, restés au premier import, 2707 commits derrière. La branche de prod est bien **`master`**, conformément au CLAUDE.md. C'est elle qui a reçu le cherry-pick.
+
+**Un seul commit par-dessus `master`**, même pattern que `113a1ef` — surtout **pas** un merge de `test-theme-sapi-maison`, qui aurait embarqué immersion, room-picker, Tâche 5, emails WooCommerce et front-page, non validés pour la prod.
+
+**8 fichiers, 1952 insertions.** Les 7 fichiers catalogue sont repris **à l'octet près** depuis test (vérifié par diff). `functions.php` ne cède que **13 lignes de `require`, purement additives** (0 suppression) — ses 806 lignes d'écart avec test appartiennent à d'autres chantiers. Vérifié avant push : aucun fichier hors catalogue dans le diff, 0 commit perdu.
+
+**⏳ Ce qui reste à faire par Robin, dans l'ordre :**
+1. **Lancer le workflow GitHub Actions « Deploy to Production »** — il est en `workflow_dispatch` uniquement, le push sur `master` ne déploie donc RIEN tout seul. L'étape Composer y régénère `vendor/` (mPDF), qui est gitignoré.
+2. **Créer la page `/catalogue-prix` en prod** : c'est du contenu en base, pas du code. Template « Catalogue B2B », slug `catalogue-prix`, champ « Afficher les prix publics » activé. Puis l'exclure du sitemap Yoast.
+3. **Compléter les mentions légales** dans `Produits > Catalogue PRO` — les cinq crochets `[à compléter]` partiraient tels quels chez un revendeur.
+4. **Vérifier `atelier-sapi.fr/catalogue`** : rendu inchangé, et le PDF public qui, lui, change d'apparence.
+
+**Restent ouverts, sans urgence :** l'écart de 1,8 mm entre les deux largeurs utiles (179,2 mesuré vs 181 en constante côté pro) ; et le champ « Poids » de 5 fiches qui affiche `<p>35 Kilos le matin</p>` en toutes lettres — le contenu est à corriger côté Robin, et un `wp_strip_all_tags()` sur les valeurs de specs reste à décider.
+
+
+---
+
+### ✅ POIDS — retiré de la fiche technique, porté par la matrice de prix (2026-08-25, commit `8acd8c8`, v25)
+
+**Le point de départ était un faux diagnostic de ma part.** J'avais dit à Robin d'aller corriger le champ « Poids » dans l'admin produit. **Il n'existe pas** : le champ ACF `poids` a été retiré des groupes de champs, mais la valeur est restée en base. `get_field('poids')` la lit toujours alors que plus aucun écran ne permet de l'éditer — visible en façade, introuvable en coulisses.
+
+**Et le problème était bien plus large que les 5 blagues.** Audit de la ligne « Poids » sur les 36 fiches en prod : **28 affichaient « — »**, 5 la blague, 3 un poids correct. Cause : le repli interrogeait `$product->get_weight()` sur le produit **parent**, qui n'a jamais de poids sur un variable. Le code cherchait au seul endroit où l'information ne se trouve pas — alors qu'elle est parfaitement renseignée sur les variations (Olivia : 12/12, de 315 g à 2,01 kg).
+
+**Décision Robin :** le catalogue sans prix n'affiche plus de poids **du tout** ; le poids ne réapparaît que là où il y a des prix.
+
+1. **Ligne « Poids » supprimée** des quatre surfaces. `sapi_catalogue_product_weight()` supprimée, plus aucun appelant. La meta orpheline n'est plus jamais lue par la couche catalogue.
+2. **Le poids vient des variations** et rejoint le prix : prix et poids varient sur **exactement les mêmes axes** (taille × essence), la matrice de prix est donc son domicile naturel — aucun tableau supplémentaire, aucune fourchette approximative, précision totale.
+   - `/catalogue-prix` : sous le prix dans chaque case, en second rang typographique.
+   - PDF pro : une 4ᵉ colonne « Poids ». Pour un revendeur, le poids conditionne le port.
+3. `sapi_catalogue_format_weight()` : grammes sous le kilo, kilos au-delà.
+
+**Vérifié sur test :** `/catalogue` → 0 ligne Poids, 0 « Kilos le matin », 0 poids affiché. `/catalogue-prix` → 141 poids dans les matrices. Vincent : `Peuplier 60 € / 290 g · 80 € / 480 g · 105 € / 800 g · 145 € / 1,20 kg`.
+
+**⚠️ DEUX SUITES À TRAITER**
+
+**(a) La blague reste sur les pages produit publiques.** `woocommerce/single-product.php:777` lit la même meta orpheline pour sa propre fiche technique (ligne 829). Vérifié en prod : `atelier-sapi.fr/mes-creations/olivia-la-gardiena` et `claudine-la-turbine` affichent toujours `<p>35 Kilos le matin</p>`, balises comprises. **Hors périmètre catalogue, pas corrigé.** Même correctif possible (lire les variations), mais c'est un fichier du site marchand, à décider séparément.
+
+**(b) ✅ SECOND CHERRY-PICK FAIT — `master` = `b930f09` (2026-08-25).** 6 fichiers catalogue repris à l'identique de test, `functions.php` non concerné (ses require du catalogue y étaient déjà et n'ont pas bougé). Vérifié avant push : aucun fichier hors catalogue, 0 commit perdu, plus aucune lecture de `get_field('poids')` ni de `sapi_catalogue_product_weight()` dans la couche catalogue.
+
+`master` porte donc maintenant DEUX commits catalogue : `a92516c` (page prix + tarifs pro) puis `b930f09` (poids). **Le workflow « Deploy to Production » est toujours à lancer à la main par Robin** — le push ne déploie rien.
+
+
+---
+
+## ✅ EN PRODUCTION ET AUDITÉ (2026-08-25) — `master` = `b930f09`
+
+Robin a lancé le déploiement, créé la page `/catalogue-prix` en prod et exclu les deux pages du sitemap Yoast. Audit complet de `atelier-sapi.fr` :
+
+| Contrôle | Résultat |
+|---|---|
+| `/catalogue` | 200 · 0 `€` · 0 ligne Poids · 0 « Kilos le matin » |
+| `/catalogue-prix` | 200 · `has-prices` · 36 fiches · 173 poids dans les matrices · `noindex` · sans bloc PDF |
+| PDF public (lampadaires) | 200 `application/pdf` · 2,1 Mo **généré en 2,1 s** — `vendor/`/mPDF bien régénéré par le workflow |
+| Étanchéité du PDF (extracteur `/ToUnicode`) | 12 pages · 0 lien `/URI` · **0 `€`, 0 `Prix`, 0 `TTC`, 0 `HT`** · « Culot » 8 fois pour 8 fiches |
+| `admin_post` tarif pro, non connecté | refusé |
+| Sitemap Yoast | **15 pages, plus aucune entrée catalogue** (étaient 17) |
+
+### ⏳ Ce qui reste ouvert
+
+1. **Mentions légales du tarif pro** — les cinq crochets `[à compléter]` (minimum de commande, port, délai, règlement, capital social) partiraient tels quels chez un revendeur. Contenu, côté Robin.
+2. **La blague « 35 Kilos le matin » subsiste sur les pages produit publiques.** `woocommerce/single-product.php:777` lit la même meta ACF orpheline (affichée l.829). Vérifié en prod sur `olivia-la-gardiena` et `claudine-la-turbine`. Hors périmètre catalogue — décision Robin : même correctif (lire les variations) ou plus tard.
+3. **Exclusion Yoast ancrée dans le code** — proposée, non faite. Un filtre `wpseo_exclude_from_sitemap_by_post_ids` excluant toute page portant le template `page-catalogue.php`. Le réglage manuel actuel vit en base : il sera à refaire si une page est recréée, ce qui vient précisément d'arriver pour `/catalogue-prix`. Demanderait un 3ᵉ cherry-pick, court.
+4. **Écart de 1,8 mm** entre les deux largeurs utiles (179,2 mm mesuré par Robin vs 181 en constante côté profil pro). Non tranché.
+5. **Cohérence des PVP site / Etsy** à vérifier avant le premier envoi d'un tarif : le PDF pro affiche le PVP conseillé à côté du prix d'achat, un écart serait exposé au revendeur.
+
+
+---
+
+## ✅ RECETTE PRODUCTION VALIDÉE PAR ROBIN (2026-08-25) — chantier clos
+
+Les cinq contrôles humains sont passés sur `atelier-sapi.fr` : tarif pro généré depuis la prod, page prix sur mobile, bouton PDF du catalogue, fiches techniques du catalogue prescripteurs, et poids dynamique d'une fiche produit.
+
+**En production :** `/catalogue` (inchangée, sans prix), `/catalogue-prix` (PVP TTC + poids en matrice croisée, `noindex`, hors sitemap), PDF public refondu, et `Produits > Catalogue PRO` pour les tarifs professionnels. `master` = `b930f09`.
+
+### Ce qui reste, hors code
+
+1. **Les cinq crochets `[à compléter]`** des mentions légales du tarif pro (minimum de commande, port, délai, règlement, capital social) — à remplir avant le premier envoi à un revendeur. Robin s'en charge.
+2. **Cohérence des PVP site / Etsy** à vérifier avant ce même premier envoi. Robin s'en charge.
+
+### Défaut connu, laissé volontairement (décision Robin)
+
+La meta ACF `poids` reste en base sur 5 produits (Olivia ×2, Charlie, Claudine, Vincent) et continue d'être écrite **dans le code source** de leur fiche produit, puis remplacée par « Faites votre choix » dès le chargement — invisible à l'écran, visible seulement au source ou pour un robot sans JavaScript. La couche catalogue, elle, ne la lit plus nulle part.
+
+⚠️ **Ne pas supprimer cette meta sans corriger le code d'abord.** [single-product.php:829](woocommerce/single-product.php) n'ajoute la ligne « Poids » que si le serveur a trouvé une valeur : c'est cette meta parasite qui fait exister la ligne sur ces 5 produits, et donc qui permet au JavaScript d'y écrire le poids de la variation. La supprimer ferait disparaître la ligne — et le poids dynamique avec. Le correctif propre (rendre la ligne inconditionnelle sur les produits à variations, avec « Faites votre choix » en valeur initiale) a été proposé et **refusé pour l'instant**. Il ferait au passage fonctionner le poids dynamique sur les 36 produits au lieu de 8.
+
+### Non tranché, sans conséquence
+
+Écart de 1,8 mm entre les deux largeurs utiles de la bande photo (179,2 mm mesuré par Robin vs 181 en constante côté profil pro). Robin : « on s'en moque ».
+
+
+---
+
+## 📨 RETOUR À COWORK — Catalogue prix + Tarifs professionnels : EN PROD ✅ (2026-08-25)
+
+> Ce retour **remplace** celui du 24/08 (« livré sur test, volontairement pas en prod »). Tout est désormais en ligne sur `atelier-sapi.fr`, déployé et recetté par Robin.
+
+### Ce que Robin peut faire dès maintenant
+
+**Envoyer le lien `/catalogue-prix`** à un décorateur ou un architecte qui réclame les prix publics. La page reprend le catalogue avec les PVP TTC en tableau croisé essences × dimensions, et le poids de chaque déclinaison. Elle est `noindex` et retirée du sitemap : elle ne se trouve pas sur Google, le lien se transmet à la main.
+
+**Générer un tarif professionnel** depuis `Produits > Catalogue PRO` : il choisit un taux de remise, coche les produits, saisit éventuellement le nom du revendeur, et récupère un PDF de marque avec prix pro HT, PVP conseillé et poids.
+
+**Le point d'architecture à retenir côté commercial :** le tarif remisé n'existe nulle part sur le web. Le taux est saisi au moment de l'export et disparaît ensuite. Muse peut donc recevoir un -12 % et un prospect de salon un -30 % sans qu'aucun des deux ne puisse deviner l'autre, et sans que le site ait à savoir qui est qui.
+
+### ⚠️ Deux choses à finir AVANT le premier envoi à un revendeur
+
+1. **Les cinq crochets `[à compléter]`** des mentions légales, dans l'admin : minimum de commande, frais de port, délai de fabrication, conditions de règlement, capital social. Tant qu'ils sont là, ils partent tels quels dans le PDF. À remplir **une seule fois**, la valeur est ensuite conservée d'un export à l'autre.
+2. **La cohérence des PVP entre le site et Etsy.** Le tarif pro affiche le prix public conseillé juste à côté du prix d'achat : si les deux divergent sur un modèle, le revendeur voit l'écart. Jamais vérifié.
+
+Robin a dit prendre ces deux points en charge. **Cowork peut utilement le relancer dessus** — ce sont les seuls vrais bloquants commerciaux.
+
+### Ce que Cowork peut préparer
+
+La mécanique est prête, il manque le commercial : un **message-type d'envoi du tarif** à un revendeur (Muse, Ankorstore, prospects salons), et un second pour transmettre `/catalogue-prix` à un prescripteur qui veut les prix publics. Le journal des 20 derniers exports (date, client, taux, nombre de produits) est consultable sous le formulaire d'export — utile pour savoir qui a reçu quoi.
+
+### Constats utiles au business
+
+- **Les prix varient fortement selon l'essence** : jusqu'à 80 € d'écart sur une même taille (Vincent l'incandescent, 85 € en peuplier contre 105 € en okoumé). D'où le tableau croisé plutôt qu'une simple liste.
+- **Une 3ᵉ essence existe en base, « Peuplier teinté noir » (+50 €)**, que le catalogue n'a jamais affichée. Périmètre volontairement maintenu à deux bois — **c'est un choix commercial à reconsidérer si elle se vend**, pas un oubli technique.
+- **Le poids de chaque déclinaison est désormais exposé** dans la matrice de prix et dans le tarif pro. Pour un revendeur, c'est ce qui conditionne le port.
+- **Aucune promotion en cours** au moment du développement. Le tarif se base sur le prix régulier : une promo de saison ne contaminera jamais un tarif annuel déjà envoyé.
+
+### Défaut connu, laissé volontairement
+
+Sur 5 fiches produit (Olivia ×2, Charlie, Claudine, Vincent), une ancienne valeur de test — « 35 Kilos le matin, 22 le soir » — subsiste en base et apparaît dans le **code source** de la page, avant d'être remplacée à l'affichage. Invisible à l'écran pour un visiteur. Robin a choisi de ne pas y toucher.
+
+⚠️ **Si le sujet revient : ne pas supprimer cette donnée sans faire corriger le code d'abord.** C'est elle qui fait exister la ligne « Poids » sur ces 5 fiches ; la supprimer seule ferait disparaître le poids dynamique au lieu de le réparer. Le détail technique est consigné plus haut dans ce fichier.
+

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mise en production — pas à pas</title>
+<style>
+  :root{
+    --bois:#937D68; --orange:#E35B24; --encre:#2B2118;
+    --fond:#FAF7F2; --carte:#FFFFFF; --trait:#E6DED3; --doux:#8A7F73;
+    --ok:#3F7D58; --ko:#B4402B; --alerte:#B8860B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fond);color:var(--encre);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:820px;margin:0 auto;padding:24px 18px 170px}
+  header{padding:18px 0 4px}
+  h1{margin:0 0 6px;font-size:24px;letter-spacing:-.01em}
+  .sub{color:var(--doux);font-size:14px;margin:0}
+
+  .bar{position:sticky;top:0;z-index:20;background:rgba(250,247,242,.95);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--trait);
+    margin:14px -18px 0;padding:10px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .prog{flex:1 1 160px;height:8px;background:var(--trait);border-radius:99px;overflow:hidden;min-width:110px}
+  .prog i{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+  .count{font-size:13px;color:var(--doux);white-space:nowrap}
+  .count b{color:var(--encre)}
+
+  .avant{background:#FBEFEC;border:1px solid #E8C4BB;border-radius:12px;padding:14px 16px;margin:18px 0 4px}
+  .avant h2{margin:0 0 7px;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:#8C3A26}
+  .avant p{margin:6px 0;font-size:14px}
+
+  .et{background:var(--carte);border:1px solid var(--trait);border-radius:12px;
+    padding:16px 17px;margin:16px 0;position:relative}
+  .et.fait{border-color:#BFD9CB;box-shadow:inset 4px 0 0 var(--ok);opacity:.72}
+  .et.fait .titre{text-decoration:line-through;text-decoration-color:var(--doux)}
+  .tete{display:flex;gap:11px;align-items:flex-start}
+  .num{flex:0 0 30px;height:30px;border-radius:50%;background:var(--bois);color:#fff;
+    font:700 14px/30px inherit;text-align:center}
+  .et.fait .num{background:var(--ok)}
+  .titre{margin:0;font-size:17px;font-weight:700;line-height:1.3;padding-top:3px}
+  .duree{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--bois);background:#F1EBE2;padding:3px 8px;border-radius:20px;margin-left:auto;
+    white-space:nowrap;align-self:center}
+  .corps{margin-top:11px;padding-left:41px}
+  .corps p{margin:8px 0}
+  .corps ol,.corps ul{margin:8px 0;padding-left:20px}
+  .corps li{margin:5px 0}
+
+  .att{background:#FDF6E3;border-left:3px solid var(--alerte);padding:9px 12px;
+    border-radius:0 8px 8px 0;margin:11px 0;font-size:13.5px}
+  .att b{color:#7A5B0B}
+  .stop{background:#FBEFEC;border-left:3px solid var(--ko);padding:9px 12px;
+    border-radius:0 8px 8px 0;margin:11px 0;font-size:13.5px}
+  .stop b{color:#8C3A26}
+  .voir{background:#FCFAF7;border:1px dashed var(--trait);padding:10px 12px;border-radius:9px;margin:11px 0}
+  .voir b{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--orange);margin-bottom:3px}
+
+  code{background:#F1EBE2;padding:2px 6px;border-radius:4px;font-size:12.5px;word-break:break-word}
+  pre{background:#F1EBE2;padding:10px 12px;border-radius:8px;overflow-x:auto;
+    font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;margin:9px 0}
+  kbd{background:#EFE7DC;border:1px solid var(--trait);border-bottom-width:2px;
+    padding:1px 6px;border-radius:5px;font:600 12.5px/1 inherit}
+
+  .coche{display:flex;align-items:center;gap:9px;margin-top:13px;margin-left:41px;
+    padding:9px 13px;border:1px solid var(--trait);border-radius:9px;background:#FCFAF7;
+    cursor:pointer;user-select:none;font-size:13.5px;font-weight:600;width:fit-content}
+  .coche input{width:17px;height:17px;accent-color:var(--ok);cursor:pointer}
+
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(250,247,242,.96);
+    backdrop-filter:blur(10px);border-top:1px solid var(--trait);padding:11px 18px;
+    padding-bottom:calc(11px + env(safe-area-inset-bottom));display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+  button{font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:9px;
+    border:1px solid var(--trait);background:#fff;color:var(--encre);cursor:pointer}
+  button.g{background:transparent;color:var(--doux)}
+
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--fond:#1A1512;--carte:#231C17;--trait:#3A2F27;--encre:#F0E9E0;--doux:#A2958A}
+    :root:not([data-theme="light"]) button,
+    :root:not([data-theme="light"]) .coche{background:#2A221C;color:var(--encre)}
+    :root:not([data-theme="light"]) .bar{background:rgba(26,21,18,.95)}
+    :root:not([data-theme="light"]) .foot{background:rgba(26,21,18,.96)}
+    :root:not([data-theme="light"]) code,
+    :root:not([data-theme="light"]) pre,
+    :root:not([data-theme="light"]) kbd{background:#2E251E}
+    :root:not([data-theme="light"]) .voir{background:#1E1813}
+    :root:not([data-theme="light"]) .duree{background:#2E251E}
+    :root:not([data-theme="light"]) .att{background:#2A2016}
+    :root:not([data-theme="light"]) .att b{color:#D8B36A}
+    :root:not([data-theme="light"]) .avant,
+    :root:not([data-theme="light"]) .stop{background:#2E1B16;border-color:#5A2E22}
+    :root:not([data-theme="light"]) .avant h2,
+    :root:not([data-theme="light"]) .stop b{color:#E8A08A}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Mise en production</h1>
+    <p class="sub">Deux mois et demi de travail, 262 commits, 113 fichiers. Coche au fur et à mesure — la page se souvient si tu la fermes.</p>
+  </header>
+
+  <div class="bar">
+    <div class="prog"><i id="pi"></i></div>
+    <div class="count" id="pc">0 / 9</div>
+  </div>
+
+  <div class="avant">
+    <h2>Deux choses à savoir avant de commencer</h2>
+    <p><strong>Fusionner ne met rien en ligne.</strong> Le déploiement en production est manuel, tu le déclenches toi-même à l'étape 4. Tu peux donc fusionner tranquillement, rien ne part tant que tu ne l'as pas demandé.</p>
+    <p><strong>Si quelque chose casse, tu as une sortie.</strong> UpdraftPlus a tes sauvegardes, et on peut revenir au thème précédent. Ne panique pas, appelle-moi.</p>
+  </div>
+
+  <div id="liste"></div>
+</div>
+
+<div class="foot">
+  <button class="g" id="bClear">Décocher tout</button>
+</div>
+
+<script>
+const E = [
+{
+ n:1, t:"Sauvegarder avant tout", d:"5 min",
+ corps:
+  '<p>On ne touche pas à un site en production sans filet.</p>'
+ +'<ol><li>WP-admin → <b>UpdraftPlus</b> → onglet <b>Sauvegarde/Restauration</b>.</li>'
+ +'<li>Clique <b>Sauvegarder maintenant</b>.</li>'
+ +'<li>Coche bien <b>base de données</b> ET <b>fichiers</b>.</li>'
+ +'<li>Attends la fin (la ligne apparaît dans « Sauvegardes existantes »).</li></ol>'
+ +'<div class="att"><b>Pourquoi la base aussi :</b> ce déploiement ajoute une colonne à une table. '
+ +'Si ça tourne mal, il faut pouvoir revenir sur les deux, pas seulement sur les fichiers.</div>'
+},
+{
+ n:2, t:"Fusionner test dans master", d:"10 min",
+ corps:
+  '<p>Dans <b>GitHub Desktop</b>, sur le dépôt du site :</p>'
+ +'<ol><li>En haut, <b>Current Branch</b> → choisis <b>master</b>.</li>'
+ +'<li>Menu <b>Branch</b> → <b>Merge into current branch…</b></li>'
+ +'<li>Sélectionne <b>test-theme-sapi-maison</b> → <b>Create a merge commit</b>.</li></ol>'
+ +'<div class="stop"><b>Il va y avoir un conflit, c\'est prévu.</b> Un seul, dans <code>functions.php</code>. '
+ +'Les deux branches ont supprimé du code mort dans la même zone, et git ne sait pas choisir tout seul.</div>'
+ +'<p><b>Comment le résoudre :</b> GitHub Desktop affiche « 1 conflicted file ». '
+ +'À côté de <code>functions.php</code>, ouvre le petit menu et choisis '
+ +'<b>« Use the branch being merged » / « Utiliser test-theme-sapi-maison »</b>. '
+ +'C\'est la version de test qu\'on garde — Claude Code a vérifié que le bloc concerné n\'est appelé par personne, ni d\'un côté ni de l\'autre.</p>'
+ +'<p>Puis <b>Continue merge</b>, et <b>Push origin</b>.</p>'
+ +'<div class="att"><b>Si tu vois plus d\'un fichier en conflit :</b> arrête-toi et dis-le-moi. '
+ +'L\'audit n\'en prévoit qu\'un seul, un deuxième voudrait dire que quelque chose a changé depuis.</div>'
+},
+{
+ n:3, t:"Vérifier que le push est bien passé", d:"1 min",
+ corps:
+  '<p>Sur GitHub, dans le dépôt, vérifie que la branche <b>master</b> affiche bien ton commit de fusion tout en haut, daté de maintenant.</p>'
+ +'<div class="voir"><b>Ce que tu dois voir</b>Le message de fusion, à la seconde près, sur master. '
+ +'Si tu ne le vois pas, le push n\'est pas parti : reviens sur GitHub Desktop et clique <b>Push origin</b>.</div>'
+},
+{
+ n:4, t:"Lancer le déploiement", d:"3 à 5 min",
+ corps:
+  '<p>Le déploiement en production ne part <b>pas</b> tout seul. Tu le déclenches :</p>'
+ +'<ol><li>Sur GitHub, onglet <b>Actions</b>.</li>'
+ +'<li>Dans la colonne de gauche, <b>Deploy to Production</b>.</li>'
+ +'<li>Bouton <b>Run workflow</b> → branche <b>master</b> → <b>Run workflow</b>.</li>'
+ +'<li>Attends que la pastille passe au vert. Compte 3 à 5 minutes.</li></ol>'
+ +'<div class="stop"><b>Si la pastille passe au rouge</b>, n\'y retouche pas et envoie-moi le journal. '
+ +'Le site continue de tourner sur l\'ancienne version, rien n\'est cassé.</div>'
+},
+{
+ n:5, t:"Vider les caches", d:"3 min",
+ corps:
+  '<p>Le HTML des pages a changé, mais tes visiteurs recevraient encore l\'ancien.</p>'
+ +'<ol><li>WP-admin → <b>WP Super Cache</b> → <b>Supprimer le cache</b>.</li>'
+ +'<li>WP-admin → <b>Autoptimize</b> → <b>Vider le cache</b> (bouton en haut, ou dans la barre d\'admin).</li></ol>'
+ +'<div class="att"><b>Dans cet ordre.</b> Autoptimize regénère les fichiers JS et CSS combinés ; '
+ +'WP Super Cache garde les pages qui les référencent. Vider les pages d\'abord évite de reconstruire du vieux.</div>'
+},
+{
+ n:6, t:"LE test qui compte : une session s\'enregistre-t-elle ?", d:"5 min",
+ corps:
+  '<p>C\'est le seul point qui peut casser <b>sans se voir</b>. Ce déploiement ajoute une colonne à ta table de sessions. Si l\'ajout a échoué, plus rien ne s\'enregistre, en silence.</p>'
+ +'<ol><li>Note l\'heure.</li>'
+ +'<li>Fenêtre de <b>navigation privée</b> → <code>atelier-sapi.fr/mes-creations/</code></li>'
+ +'<li>Clique une pièce, puis « Décrire mon projet en détail », et réponds jusqu\'au bout.</li>'
+ +'<li>WP-admin → <b>Robin Conseiller</b>. Recharge la page.</li></ol>'
+ +'<div class="voir"><b>Ce que tu dois voir</b>Une ligne toute neuve, en haut, à l\'heure que tu viens de noter, avec ta pièce.</div>'
+ +'<div class="stop"><b>Si la ligne n\'apparaît pas : STOP.</b> Ne continue pas, préviens-moi. '
+ +'Ton site fonctionne normalement pour tes clients — c\'est seulement la mesure qui est aveugle, et je sais quoi regarder.</div>'
+},
+{
+ n:7, t:"Le tour du propriétaire", d:"10 min",
+ corps:
+  '<p>Toujours en navigation privée, dans cet ordre :</p>'
+ +'<ul><li><b>Accueil</b> — le sélecteur de pièce s\'affiche, les images chargent.</li>'
+ +'<li><b>Mes créations</b> — le sélecteur en hero, puis clique une pièce : la sélection s\'affiche avec la phrase de Robin qui s\'écrit.</li>'
+ +'<li><b>Une fiche produit</b> — la pastille « Comment choisir ? » ouvre la modale, et « Appliquer » sélectionne bien la variation.</li>'
+ +'<li><b>Ajoute un produit au panier</b> et va jusqu\'à la page de commande (sans payer).</li>'
+ +'<li><b>Page Contact</b> — envoie-toi un message et vérifie que tu le reçois.</li>'
+ +'<li>Retourne sur l\'<b>accueil</b> : le rappel <b>« Tu cherchais pour ton salon »</b> doit être là.</li></ul>'
+ +'<div class="att"><b>Le point le plus sensible :</b> en production, un plugin modifie l\'ordre de chargement des scripts, '
+ +'ce qui n\'arrive pas sur le site de test. Si un comportement diffère de ce qu\'on a recetté, c\'est très probablement là — '
+ +'décris-moi ce que tu vois, je saurai où chercher.</div>'
+},
+{
+ n:8, t:"Effacer les documents de travail restés en ligne", d:"10 min",
+ corps:
+  '<p>Le nouveau réglage empêche de les <b>envoyer</b>, mais il ne supprime pas ceux qui sont déjà sur le serveur. À faire une seule fois.</p>'
+ +'<p>WP-admin → <b>Gestionnaire de fichiers WP</b>, va dans <code>wp-content/themes/theme-sapi-maison/</code> et supprime :</p>'
+ +'<p><b>Les trois dossiers :</b></p>'
+ +'<pre>memory/     mockups/     .claude/</pre>'
+ +'<p><b>Les fichiers à la racine du thème :</b></p>'
+ +'<pre>CLAUDE.md · CUSTOMIZATIONS.md · DEPLOYMENT.md · README.md · RELEASE.md\n'
+ +'acf-champs-fiche-technique.csv · acf-conseils-fields.csv\n'
+ +'guide-luminaire-arborescence.csv · guide-luminaire-v2-regles.txt\n'
+ +'croisements-conseils.html · identite-visuelle-robin.html\n'
+ +'test-bordure-interieure.html · newsletter-*.html (les 7)</pre>'
+ +'<p><b>Dans <code>assets/</code> — uniquement ces cinq :</b></p>'
+ +'<pre>guide-filtrage-impact.html · guide-filtrage-simulateur.html\n'
+ +'guide-flowchart.html · seo-maillage.html · workflow-schema.html</pre>'
+ +'<div class="stop"><b>Ne touche à AUCUN autre fichier de <code>assets/</code>.</b> '
+ +'Les <code>guide-prompt-*.txt</code> en particulier sont lus par le site pour construire les réponses de Robin. '
+ +'Les supprimer lui ferait perdre sa voix et ses règles, sans message d\'erreur.</div>'
+ +'<p>Pour vérifier : ouvre <code>atelier-sapi.fr/wp-content/themes/theme-sapi-maison/memory/MEMORY.md</code>. '
+ +'Tu dois obtenir une page d\'erreur, pas du texte.</p>'
+},
+{
+ n:9, t:"Surveiller les jours suivants", d:"2 min par jour",
+ corps:
+  '<p>Rien à faire, juste à regarder.</p>'
+ +'<ul><li><b>WP-admin → Robin Conseiller</b> : les sessions continuent d\'arriver, jour après jour.</li>'
+ +'<li>Le graphique <b>Provenance</b> se remplit enfin : Accueil, Conseils éclairés, Mes créations, Fiche produit.</li>'
+ +'<li>Le bloc <b>Pièces hors catalogue demandées</b> te dira ce qu\'on te demande et que tu ne fais pas.</li></ul>'
+ +'<div class="att"><b>Ne t\'inquiète pas si ces chiffres baissent :</b> ton taux de « quiz complet » va mécaniquement '
+ +'descendre. On compte maintenant des visiteurs qu\'on ne comptait pas — le dénominateur grossit, pas le comportement qui change.</div>'
+}
+];
+
+const liste = document.getElementById('liste');
+E.forEach(function(x){
+  const d = document.createElement('section');
+  d.className = 'et'; d.dataset.n = x.n;
+  d.innerHTML =
+    '<div class="tete"><div class="num">'+x.n+'</div>'
+    + '<h2 class="titre">'+x.t+'</h2><span class="duree">'+x.d+'</span></div>'
+    + '<div class="corps">'+x.corps+'</div>'
+    + '<label class="coche"><input type="checkbox" data-e="'+x.n+'"> Étape terminée</label>';
+  liste.appendChild(d);
+});
+
+const KEY='sapi-mise-en-prod-28-08';
+let saved={}; try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+document.querySelectorAll('input[data-e]').forEach(function(i){
+  if(saved[i.dataset.e]) i.checked=true;
+});
+
+function etat(){
+  let n=0;
+  document.querySelectorAll('input[data-e]').forEach(function(i){
+    const c=i.closest('.et');
+    if(i.checked){n++;c.classList.add('fait')}else{c.classList.remove('fait')}
+  });
+  document.getElementById('pi').style.width=(n/E.length*100)+'%';
+  document.getElementById('pc').innerHTML='<b>'+n+'</b> / '+E.length;
+}
+function sauve(){
+  const o={};
+  document.querySelectorAll('input[data-e]').forEach(function(i){if(i.checked)o[i.dataset.e]=1});
+  try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}
+}
+etat();
+document.addEventListener('change',function(e){
+  if(e.target.matches('input[data-e]')){etat();sauve()}
+});
+document.getElementById('bClear').onclick=function(){
+  if(!confirm('Décocher toutes les étapes ?'))return;
+  document.querySelectorAll('input[data-e]').forEach(function(i){i.checked=false});
+  try{localStorage.removeItem(KEY)}catch(e){}
+  etat();
+};
+</script>
+</body>
+</html>

@@ -24,12 +24,15 @@
   var config = window.SAPI_PHOTO_SWAP || {};
   if (!config.ajaxUrl || !config.nonce) return;
 
-  // Mapping style → essence (mirror sapi-product-preselect.js).
+  /* La table vit dans `sapi-project.js`, source unique — c'est le seul fichier
+     chargé partout où ce script tourne (sélection, catégories, accueil), là où
+     `sapi-product-preselect.js` n'existe pas.
+     ⚠️ Pas de repli sur une table locale : deux tables qui divergent sans que
+     rien ne plante, c'est le défaut qu'on vient de supprimer. */
   function deriveEssence(answers) {
-    if (!answers || !answers.style) return '';
-    if (answers.style === 'moderne') return 'peuplier';
-    if (answers.style === 'ancien')  return 'okoume';
-    return '';
+    return (window.sapiProject && window.sapiProject.styleToEssence)
+      ? window.sapiProject.styleToEssence(answers)
+      : '';
   }
 
   function fetchWithTimeout(url, timeout) {
@@ -211,9 +214,25 @@
     }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
+  /* ⚠️ « complete », PAS « loading ». Ce fichier doit démarrer APRÈS
+     `sapi-project.js`, parce que elle échange les photos d'après la pièce du projet, au chargement — or
+     ce projet n'est complet qu'une fois l'adresse ingérée par `sapi-project`,
+     ce qui arrive à `DOMContentLoaded`.
+     Le test naïf `readyState === 'loading'` ne le garantit pas : **en
+     production, Autoptimize ajoute `defer` à tous les scripts**, et dans un
+     script différé `readyState` vaut déjà « interactive ». On tombait donc
+     dans le `else` et `init()` partait trop tôt.
+     Avec le test sur « complete », on attend `DOMContentLoaded` dans tous les
+     cas sauf si la page est DÉJÀ entièrement chargée — donc en production on
+     démarre à `DOMContentLoaded`, pas immédiatement. C'est bien l'effet
+     recherché : ne pas confondre « le test dit complete » et « on s'exécute
+     tout de suite ».
+     ⚠️ Le site de test n'a PAS Autoptimize : cette classe de bug ne peut pas
+     être montrée en recette. Ne pas « simplifier » ce test parce qu'il a l'air
+     de marcher sur test. Explication complète dans sapi-project.js. */
+  if (document.readyState === 'complete') {
     init();
+  } else {
+    document.addEventListener('DOMContentLoaded', init);
   }
 })();

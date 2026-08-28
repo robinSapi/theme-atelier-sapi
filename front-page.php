@@ -196,16 +196,9 @@ if ($gc_query->have_posts()) {
 // Room picker now opens Mon Projet banner instead of guide-luminaire page
 $creations_url = home_url('/mes-creations/');
 
-// Room choices for mini-questionnaire "Pour quelle pièce ?"
-$room_choices = [
-  ['label' => 'Salon',   'slug' => 'salon',    'icon' => 'sofa'],
-  ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => 'dining'],
-  ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => 'bed'],
-  ['label' => 'Chambre enfant', 'slug' => 'chambre-enfant', 'icon' => 'teddy'],
-  ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => 'monitor'],
-  ['label' => 'Entrée',  'slug' => 'entree',   'icon' => 'door'],
-  ['label' => 'Escalier','slug' => 'escalier', 'icon' => 'stairs'],
-];
+// Room choices for mini-questionnaire "Pour quelle pièce ?" — source unique
+// partagée avec l'état A de /mes-creations/ (cf. sapi_room_choices()).
+$room_choices = function_exists('sapi_room_choices') ? sapi_room_choices() : [];
 
 $room_icons = [
   'sofa'    => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/><rect x="2" y="11" width="20" height="7" rx="2"/><path d="M5 18v2m14-2v2"/></svg>',
@@ -548,7 +541,7 @@ foreach ($carousel_products as $product) {
 
 <!-- Entrée projet — room picker (bande crème) -->
 <section class="home-projet-section">
-  <div class="home-projet" data-room-picker>
+  <div class="home-projet" data-room-picker data-room-picker-from="home">
     <div class="room-picker-inner">
       <div class="conseiller-sig conseiller-sig--v1">
         <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
@@ -557,12 +550,18 @@ foreach ($carousel_products as $product) {
           <span class="conseiller-sig__hook">Mon regard d'artisan sur ton projet</span>
         </span>
       </div>
-      <h2 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h2>
+      <h2 class="room-picker-title">Pour quelle pièce cherches-tu un luminaire ?</h2>
       <div class="room-picker-cards">
         <?php foreach ($room_choices as $room) :
           $icon_svg = isset($room_icons[$room['icon']]) ? $room_icons[$room['icon']] : '';
         ?>
-          <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
+          <?php /* `from=home` : c'est la SEULE façon de savoir qu'un visiteur
+                   est passé par le sélecteur de pièce de l'accueil. La modale
+                   du Conseiller n'est pas chargée sur cette page, aucune session n'y
+                   naît donc — elle naît à l'arrivée sur /mes-creations/, où ce
+                   paramètre est lu puis oublié. Sans lui, ces visiteurs se confondent
+                   avec ceux qui arrivent directement par Google. */ ?>
+          <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'] . '&from=home')); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
             <span class="room-card-icon"><?php echo $icon_svg; ?></span>
             <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
           </a>

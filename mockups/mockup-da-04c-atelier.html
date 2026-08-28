@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA Home · 04c L'atelier — Immersion par la lumière (raffinée)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-wood:#8B7355;--color-wood-dark:#4A3F35;--color-wood-mid:#6B5A4A;
+  --color-warm:#FBF6EA;--color-orange:#E35B24;--color-ink:#3a322b;
+  --shadow-card:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+  --shadow-hover:0 4px 14px rgba(147,125,104,.16),0 12px 44px rgba(147,125,104,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:#efe9dc;color:var(--color-ink);line-height:1.55}
+.devnote{background:var(--color-wood-dark);color:var(--color-warm);padding:14px 28px;font-size:13px}
+.devnote strong{color:#fff}.devnote em{color:#e9c9a8;font-style:normal}
+.devnote .hl{color:#fff;background:var(--color-orange);padding:2px 8px;border-radius:50px;font-weight:600}
+.wrap{max-width:1400px;margin:0 auto;padding:48px 24px 90px}
+.variant-head{margin:8px 0 18px}
+.variant-head .tag{display:inline-block;background:var(--color-orange);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:50px}
+.variant-head h2{font-family:'Square Peg',cursive;font-size:42px;color:var(--color-wood-dark);font-weight:400;margin-top:8px;line-height:1}
+.variant-head p{max-width:920px;color:var(--color-wood-mid);font-size:14.5px;margin-top:6px}
+.note{font-size:13px;color:var(--color-wood-mid);background:#fff;border-left:3px solid var(--color-wood);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:18px;max-width:1040px}
+.note strong{color:var(--color-wood-dark)}
+
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.cta{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:15px;border-radius:50px;padding:14px 30px;text-decoration:none;transition:.22s}
+.cta .arr{transition:transform .25s}
+.cta:hover .arr{transform:translateX(4px)}
+.cta-wood{background:var(--color-wood);color:#fff}.cta-wood:hover{background:var(--color-wood-dark)}
+
+/* =========================================================
+   IMMERSION PAR LA LUMIÈRE — raffinée (04c)
+   - Fond immersif qui CHANGE au survol des étapes (crossfade JS)
+   - Colonne texte sombre franche, toujours lisible
+   - Liens catégories = inline DANS le paragraphe (maillage SEO)
+   - SEULES pills = les 5 étapes du process (ruban bas)
+   ========================================================= */
+.lumiere{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);min-height:620px;display:flex;align-items:stretch}
+
+/* pile de couches de fond : une par étape + défaut. opacité crossfade */
+.lumiere .bgstack{position:absolute;inset:0;z-index:0}
+.lumiere .bg{position:absolute;inset:0;background-position:center;background-size:cover;opacity:0;transition:opacity .6s ease}
+.lumiere .bg.is-on{opacity:1}
+
+/* dégradé FRANC : colonne quasi opaque à gauche, photo nette à droite */
+.lumiere .veil{position:absolute;inset:0;z-index:1;background:linear-gradient(95deg,rgba(40,33,27,.95) 0%,rgba(40,33,27,.92) 32%,rgba(40,33,27,.6) 52%,rgba(40,33,27,.14) 74%,rgba(40,33,27,0) 100%)}
+/* glow chaud bas pour asseoir le ruban d'étapes */
+.lumiere .veil-bottom{position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(40,33,27,.7) 0%,rgba(40,33,27,.18) 26%,transparent 46%)}
+
+.lumiere .col{position:relative;z-index:2;width:52%;padding:60px 56px 150px;display:flex;flex-direction:column;justify-content:center;color:#fff}
+.lumiere .eyebrow{color:#f0b07e}
+.lumiere h3{font-family:'Square Peg',cursive;font-size:66px;font-weight:400;line-height:.92;color:#fff;margin:8px 0 18px}
+.lumiere p{font-size:16px;color:#ece3d6;max-width:460px;margin-bottom:26px}
+
+/* liens catégories INLINE dans le paragraphe (maillage SEO, pas de pills) */
+.lumiere p a.cat{color:#fff;text-decoration:none;border-bottom:1px solid rgba(240,176,126,.6);padding-bottom:1px;transition:.2s;white-space:nowrap}
+.lumiere p a.cat:hover{color:#f0b07e;border-bottom-color:var(--color-orange)}
+
+/* ruban des 5 étapes — SEULES pills de la section */
+.lumiere .process-strip{position:absolute;z-index:3;right:30px;bottom:30px;max-width:64%;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px}
+.lumiere .ps{display:flex;align-items:center;gap:10px;background:rgba(40,33,27,.55);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:8px 18px 8px 8px;cursor:pointer;transition:.25s;user-select:none}
+.lumiere .ps:hover{background:rgba(227,91,36,.92);border-color:var(--color-orange);transform:translateY(-2px)}
+.lumiere .ps .n{width:28px;height:28px;border-radius:50%;background:var(--color-orange);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:.25s}
+.lumiere .ps:hover .n{background:#fff;color:var(--color-orange)}
+.lumiere .ps .t{color:#f3ead9;font-size:13px;font-weight:600;letter-spacing:.02em;transition:.25s}
+.lumiere .ps:hover .t{color:#fff}
+
+/* petit hint au-dessus du ruban */
+.lumiere .strip-hint{position:absolute;z-index:3;left:56px;bottom:78px;color:#cdbfae;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;font-weight:600;opacity:.85;display:flex;align-items:center;gap:7px}
+.lumiere .strip-hint .dot{width:6px;height:6px;border-radius:50%;background:var(--color-orange);display:inline-block}
+
+@media(max-width:900px){
+  .lumiere{min-height:auto;flex-direction:column}
+  .lumiere .col{width:100%;padding:48px 30px 30px}
+  .lumiere h3{font-size:54px}
+  .lumiere .strip-hint{position:static;margin:8px 0 12px}
+  .lumiere .process-strip{position:static;padding:0 30px 40px;left:auto;right:auto;bottom:auto}
+}
+</style>
+</head>
+<body>
+<div class="devnote">
+  <strong>DA HOME · Section 04 — L'atelier · 04c « Immersion par la lumière » (raffinée)</strong>
+  &nbsp;·&nbsp;
+  <em>Base validée = variante C de 04b, avec 2 ajustements Robin&nbsp;: (1) liens catégories redevenus des <strong>liens texte inline dans le paragraphe</strong> (les seules pills = les 5 étapes du process)&nbsp;; (2) <span class="hl">survole les étapes pour voir le fond changer</span> (crossfade vers la photo de l'étape, retour au défaut hors survol).
+  &nbsp;Photos provisoires (vraies images du site test) — « 01 Dessin » utilise un portrait Robin en attendant une vraie photo de croquis.</em>
+</div>
+
+<div class="wrap">
+
+  <div class="variant-head">
+    <span class="tag">04c · version aboutie</span>
+    <h2>Immersion par la lumière</h2>
+    <p>Le geste central&nbsp;: au repos, un beau luminaire allumé en plein cadre. Quand on survole une étape, la grande image de fond se fond vers la photo de cette étape (dessin, découpe laser, finitions, assemblage, expédition). La colonne texte reste sombre et 100&nbsp;% lisible quelle que soit la photo derrière.</p>
+  </div>
+
+  <section class="lumiere" id="atelier">
+    <!-- pile de fonds : défaut + 1 par étape. Crossfade géré en JS -->
+    <div class="bgstack">
+      <div class="bg is-on" data-key="default" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/A7404411-1536x905.jpg')"></div>
+      <div class="bg" data-key="1" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg')"></div>
+      <div class="bg" data-key="2" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_7638.jpg')"></div>
+      <div class="bg" data-key="3" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/03/P_SLM_XL_det5.jpg')"></div>
+      <div class="bg" data-key="4" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/DLD_P_R.jpg')"></div>
+      <div class="bg" data-key="5" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5851-1024x757.jpg')"></div>
+    </div>
+    <div class="veil"></div>
+    <div class="veil-bottom"></div>
+
+    <div class="col">
+      <div class="eyebrow">L'atelier · Lyon</div>
+      <h3>Des sculptures lumineuses</h3>
+      <p>Je ne vends pas des lampes, je façonne des objets qui s'allument. Chaque
+        <a class="cat" href="#">suspension</a>,
+        <a class="cat" href="#">applique</a>,
+        <a class="cat" href="#">lampe à poser</a> ou
+        <a class="cat" href="#">lampadaire</a>
+        est dessiné, découpé au laser puis assemblé pièce par pièce dans mon atelier, à 15&nbsp;min de Lyon. La lumière que tu vois ici, je l'ai réglée à la main avant de te l'envoyer.</p>
+      <a class="cta cta-wood" href="#">Découvrir l'artisan <span class="arr">→</span></a>
+    </div>
+
+    <!-- SEULES pills de la section : les 5 étapes (bas-droite) -->
+    <div class="process-strip">
+      <div class="ps" data-bg="1"><span class="n">01</span><span class="t">Dessin</span></div>
+      <div class="ps" data-bg="2"><span class="n">02</span><span class="t">Découpe laser</span></div>
+      <div class="ps" data-bg="3"><span class="n">03</span><span class="t">Finitions</span></div>
+      <div class="ps" data-bg="4"><span class="n">04</span><span class="t">Assemblage</span></div>
+      <div class="ps" data-bg="5"><span class="n">05</span><span class="t">Expédition</span></div>
+    </div>
+  </section>
+
+  <div class="note"><strong>Comment marche l'effet&nbsp;:</strong> 6 couches d'image sont empilées dans la section (le fond par défaut + une par étape). Au survol d'une pill, on allume la couche correspondante (opacité 0→1 en 0,6&nbsp;s, crossfade). À la sortie du survol, on revient au fond par défaut. Le double dégradé (latéral + bas) garantit que le texte et le ruban d'étapes restent lisibles quelle que soit la photo affichée.</div>
+
+  <div class="note"><strong>Variante de disposition possible (non implémentée ici)&nbsp;:</strong> les 5 étapes pourraient passer en <strong>colonne latérale verticale</strong> côté droit (liste numérotée plutôt que ruban bas). Même effet de crossfade au survol, mais lecture « sommaire de fabrication » plus posée et davantage d'espace pour les libellés longs (« Découpe laser », « Expédition »). À tester si Robin veut un côté plus éditorial. Le ruban bas reste mon choix par défaut&nbsp;: plus immersif, l'image respire en haut.</div>
+
+</div>
+
+<script>
+(function(){
+  var section = document.getElementById('atelier');
+  if(!section) return;
+  var layers = {};
+  section.querySelectorAll('.bg').forEach(function(el){ layers[el.dataset.key] = el; });
+  var def = layers['default'];
+
+  function show(key){
+    Object.keys(layers).forEach(function(k){ layers[k].classList.remove('is-on'); });
+    (layers[key] || def).classList.add('is-on');
+  }
+
+  section.querySelectorAll('.ps').forEach(function(pill){
+    pill.addEventListener('mouseenter', function(){ show(pill.dataset.bg); });
+    // accessibilité clavier : focus aussi
+    pill.setAttribute('tabindex','0');
+    pill.addEventListener('focus', function(){ show(pill.dataset.bg); });
+  });
+
+  // sortie du ruban entier -> retour au fond par défaut
+  var strip = section.querySelector('.process-strip');
+  strip.addEventListener('mouseleave', function(){ show('default'); });
+  strip.addEventListener('focusout', function(e){
+    if(!strip.contains(e.relatedTarget)) show('default');
+  });
+})();
+</script>
+</body>
+</html>

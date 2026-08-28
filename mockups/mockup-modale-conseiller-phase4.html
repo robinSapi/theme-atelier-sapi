@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modale Conseiller harmonisée — Phase 4 (version finale)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#8B7355; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --cream:#FBF6EA; --warm:#FBF6EA; --ink:#3a322b; --border:#e7ded2;
+    --robin:url('https://atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice.jpg');
+    --shadow-card:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+    --shadow-card-h:0 4px 14px rgba(147,125,104,.16),0 12px 44px rgba(147,125,104,.22);
+    --grain:repeating-linear-gradient(92deg,rgba(139,115,85,.05) 0,rgba(139,115,85,.05) 1px,transparent 1px,transparent 7px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Montserrat',sans-serif;color:var(--ink);background:#2b211a}
+  .devnote{background:var(--wood-dark);color:#f0e7d8;font-size:13px;line-height:1.6;padding:16px 28px}
+  .devnote b{color:#fff}
+  .wrap{max-width:1280px;margin:0 auto;padding:28px 24px 80px}
+  h3.sec{color:#f4ebdd;font-size:14px;letter-spacing:.1em;text-transform:uppercase;margin:10px 0 6px;font-weight:700}
+  p.note{color:#c9bba8;font-size:12.5px;margin-bottom:22px;max-width:920px;line-height:1.55}
+  p.note b{color:#ffd9c2}
+
+  /* ---------- carte modale : cadre C (grain bois seul) ---------- */
+  .stage{background:rgba(30,22,14,.82);border-radius:18px;padding:26px;display:flex;justify-content:center}
+  .modal{width:100%;max-width:560px;background:var(--warm);background-image:var(--grain);border-radius:16px;position:relative;padding:26px 26px 24px;box-shadow:0 24px 64px rgba(0,0,0,.25)}
+  .close{position:absolute;top:14px;right:16px;width:26px;height:26px;border:none;background:none;color:var(--wood-mid);font-size:20px;cursor:pointer;line-height:1}
+
+  /* ---------- signature pill V1 (sur TOUS les écrans) ---------- */
+  .sig{display:inline-flex;align-items:center;gap:12px;background:var(--wood-dark);border-radius:60px;padding:6px 22px 6px 6px;margin-bottom:18px}
+  .sig .av{width:34px;height:34px;border-radius:50%;background-image:var(--robin);background-size:cover;background-position:center 22%;flex-shrink:0}
+  .sig .hook{font-family:'Square Peg';color:#fff;font-size:24px;line-height:1}
+
+  /* ---------- contenus ---------- */
+  .h2{font-weight:700;font-size:1.45rem;color:var(--wood-dark);text-transform:uppercase;letter-spacing:.01em;margin-bottom:18px;line-height:1.2}
+  .choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .choices.col4{grid-template-columns:repeat(2,1fr)}
+  .choice{background:#fff;border:1px solid rgba(147,125,104,.18);border-radius:12px;padding:14px 10px;text-align:center;box-shadow:var(--shadow-card);cursor:pointer;transition:.18s}
+  .choice:hover{border-color:var(--orange);transform:translateY(-2px);box-shadow:var(--shadow-card-h)}
+  .choice .ic{width:34px;height:34px;border-radius:8px;background:var(--cream);margin:0 auto 9px;display:flex;align-items:center;justify-content:center;transition:.18s}
+  .choice:hover .ic{background:#fbe4d8}
+  .choice .lb{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink);line-height:1.25}
+
+  .sep{display:flex;align-items:center;gap:12px;margin:18px 0}
+  .sep::before,.sep::after{content:'';flex:1;height:1px;background:rgba(139,115,85,.25)}
+  .sep span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--wood-mid)}
+  .free{display:flex;align-items:center;gap:8px}
+  .free input{flex:1;border:1px solid rgba(147,125,104,.22);border-radius:50px;padding:11px 18px;font-family:inherit;font-size:13.5px;background:#fff;color:var(--ink)}
+  .free .go{width:38px;height:38px;border-radius:50%;background:var(--orange);border:none;color:#fff;font-size:16px;cursor:pointer;flex-shrink:0}
+  .reassure{font-size:12px;color:var(--wood-mid);font-style:italic;text-align:center;margin-top:14px}
+
+  .progress{height:4px;border-radius:2px;background:rgba(139,115,85,.15);margin-top:20px;overflow:hidden}
+  .progress i{display:block;height:100%;width:55%;background:var(--orange);border-radius:2px}
+  .footlink{display:block;text-align:center;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--wood-mid);text-decoration:underline;margin-top:16px;cursor:pointer}
+
+  .intro{font-size:14px;color:var(--ink);margin-bottom:14px;line-height:1.5}
+  .reccard{background:#fff;border:1px solid rgba(147,125,104,.18);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-card);margin-bottom:14px}
+  .reccard .row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+  .reccard .row+.row{border-top:1px solid #f0e8da}
+  .reccard .k{color:var(--wood-mid);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:11.5px}
+  .reccard .v{color:var(--ink);font-weight:700}
+  .conseil{font-size:12.5px;color:var(--wood-mid);font-style:italic;line-height:1.5;margin-bottom:16px}
+  .btn{display:block;width:100%;text-align:center;border:none;border-radius:50px;padding:13px;font-family:inherit;font-weight:700;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;margin-bottom:10px}
+  .btn.pri{background:var(--orange);color:#fff}
+  .btn.sec{background:#fff;color:var(--wood-dark);border:1px solid rgba(147,125,104,.25)}
+
+  .field{margin-bottom:12px}
+  .field input,.field textarea{width:100%;border:1px solid rgba(147,125,104,.22);border-radius:14px;padding:12px 16px;font-family:inherit;font-size:13.5px;background:#fff;color:var(--ink);resize:none}
+  .field input{border-radius:50px}
+  .consent{font-size:11px;color:var(--wood-mid);line-height:1.5;margin-top:6px}
+  .subline{font-size:12px;color:var(--wood-mid);text-align:center;margin-top:4px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .chip{background:#fff;border:1px solid rgba(147,125,104,.22);border-radius:50px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--wood-dark);cursor:pointer}
+  .chip b{color:var(--orange)}
+
+  .chatmsg{max-width:80%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.45;margin-bottom:8px}
+  .chatmsg.r{background:var(--wood-dark);color:#f3ebdd;border-bottom-left-radius:4px}
+  .chatmsg.u{background:#fff;border:1px solid var(--border);margin-left:auto;border-bottom-right-radius:4px}
+
+  .mini h{display:block;font-weight:700;font-size:13px;color:#f4ebdd;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="devnote">
+<b>PHASE 4 — Modale Conseiller, version finale.</b> Décisions Robin : <b>cadre C</b> (grain bois en filigrane seul, sans pointillé ni ourlet) · <b>pill photo V1 sur tous les écrans</b>, avec une accroche Square Peg contextuelle à la place des anciens badges texte. Tutoiement corrigé partout (S1, récap, contact). Aucun hook JS / data-* touché.
+</div>
+
+<div class="wrap">
+  <h3 class="sec">La modale harmonisée — les 6 états</h3>
+  <p class="note">Chaque écran porte la pill V1 (photo de Robin + accroche manuscrite contextuelle). Accroches retenues : S0 <b>« Mon regard d'artisan sur ton projet »</b> · questions <b>« On affine ton projet »</b> · chat <b>« Discutons de ton projet »</b> · reco produit <b>« Mon conseil pour toi »</b> · récap <b>« On récapitule ? »</b> · contact <b>« Échangeons ensemble »</b>. Dis-moi si tu veux retoucher l'une d'elles.</p>
+
+  <div class="grid2">
+
+    <!-- S0 -->
+    <div><div class="mini"><h>S0 — choix de la pièce</h></div>
+    <div class="stage"><div class="modal">
+      <button class="close">×</button>
+      <span class="sig"><span class="av"></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+      <div class="h2">Pour quelle pièce&nbsp;?</div>
+      <div class="choices">
+        <div class="choice"><div class="ic"></div><div class="lb">Cuisine</div></div>
+        <div class="choice"><div class="ic"></div><div class="lb">Bureau / Atelier</div></div>
+        <div class="choice"><div class="ic"></div><div class="lb">Salon / Salle à manger</div></div>
+        <div class="choice"><div class="ic"></div><div class="lb">Chambre</div></div>
+        <div class="choice"><div class="ic"></div><div class="lb">Chambre enfant</div></div>
+        <div class="choice"><div class="ic"></div><div class="lb">Entrée / Couloir</div></div>
+      </div>
+      <div class="sep"><span>ou</span></div>
+      <div class="free"><input placeholder="Décris ton projet en quelques mots…"><button class="go">↗</button></div>
+      <div class="reassure">Robin t'aide à choisir, sans engagement</div>
+    </div></div></div>
+
+    <!-- S1 -->
+    <div><div class="mini"><h>S1 — questions (taille / style)</h></div>
+    <div class="stage"><div class="modal">
+      <button class="close">×</button>
+      <span class="sig"><span class="av"></span><span class="hook">On affine ton projet</span></span>
+      <div class="h2">Quelle taille fait <span style="color:var(--orange)">ton</span> salon&nbsp;?</div>
+      <div class="choices col4">
+        <div class="choice"><div class="ic"></div><div class="lb">Petit</div></div>
+        <div class="choice"><div class="ic"></div><div class="lb">Standard</div></div>
+        <div class="choice"><div class="ic"></div><div class="lb">Grand</div></div>
+        <div class="choice"><div class="ic"></div><div class="lb">Je ne sais pas</div></div>
+      </div>
+      <div class="progress"><i></i></div>
+      <span class="footlink">← Étape précédente</span>
+    </div></div></div>
+
+    <!-- S2 CHAT -->
+    <div><div class="mini"><h>S2 — chat libre avec Robin</h></div>
+    <div class="stage"><div class="modal">
+      <button class="close">×</button>
+      <span class="sig"><span class="av"></span><span class="hook">Discutons de ton projet</span></span>
+      <div style="margin:6px 0 14px">
+        <div class="chatmsg r">Dis-moi tout&nbsp;: c'est pour quelle ambiance&nbsp;?</div>
+        <div class="chatmsg u">Un salon assez sombre, murs en pierre</div>
+        <div class="chatmsg r">Top, je pense à une essence claire pour réchauffer la lumière…</div>
+      </div>
+      <div class="free"><input placeholder="Ta réponse…"><button class="go">↗</button></div>
+      <button class="btn pri" style="margin-top:12px">Voir ma sélection</button>
+    </div></div></div>
+
+    <!-- S-PRODUCT-RECAP -->
+    <div><div class="mini"><h>S-product-recap — reco produit</h></div>
+    <div class="stage"><div class="modal">
+      <button class="close">×</button>
+      <span class="sig"><span class="av"></span><span class="hook">Mon conseil pour toi</span></span>
+      <div class="intro">Pour <span style="color:var(--orange)">ton</span> salon, Robin te recommande&nbsp;:</div>
+      <div class="reccard">
+        <div class="row"><span class="k">Essence</span><span class="v">Peuplier</span></div>
+        <div class="row"><span class="k">Taille</span><span class="v">70 cm</span></div>
+      </div>
+      <div class="conseil">Le peuplier clair réchauffe ton intérieur moderne, et 70 cm tient l'échelle de la pièce sans l'écraser.</div>
+      <button class="btn pri">✓ Appliquer cette sélection</button>
+      <button class="btn sec">Modifier mon projet</button>
+      <span class="footlink">Contacter Robin</span>
+    </div></div></div>
+
+    <!-- S3 -->
+    <div><div class="mini"><h>S3 — récap « Ton projet » (hors fiche)</h></div>
+    <div class="stage"><div class="modal">
+      <button class="close">×</button>
+      <span class="sig"><span class="av"></span><span class="hook">On récapitule&nbsp;?</span></span>
+      <div class="h2">Voici ton projet</div>
+      <div class="chips">
+        <span class="chip">Pièce&nbsp;: <b>Salon</b></span>
+        <span class="chip">Taille&nbsp;: <b>Standard</b></span>
+        <span class="chip">Style&nbsp;: <b>Moderne</b></span>
+      </div>
+      <button class="btn pri">→ Voir la sélection</button>
+      <button class="btn sec">☺ Préciser avec Robin</button>
+      <span class="footlink">↻ Recommencer</span>
+    </div></div></div>
+
+    <!-- S-CONTACT -->
+    <div><div class="mini"><h>S-contact — échanger avec Robin</h></div>
+    <div class="stage"><div class="modal">
+      <button class="close">×</button>
+      <span class="sig"><span class="av"></span><span class="hook">Échangeons ensemble</span></span>
+      <div class="field"><input placeholder="Ton email"></div>
+      <div class="field"><textarea rows="3" placeholder="Décris ton projet…"></textarea></div>
+      <button class="btn pri">Envoyer ma demande →</button>
+      <div class="subline">Réponse de Robin sous 48h · Aucun engagement</div>
+      <div class="consent">En envoyant <span style="color:var(--orange)">ta</span> demande, <span style="color:var(--orange)">tu</span> acceptes de recevoir une réponse de l'Atelier Sâpi par email.</div>
+    </div></div></div>
+
+  </div>
+</div>
+</body>
+</html>

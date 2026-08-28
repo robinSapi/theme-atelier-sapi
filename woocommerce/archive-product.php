@@ -102,136 +102,282 @@ if ($piece_slugs && function_exists('get_field') && function_exists('wc_get_page
 $hero_photos_attr = !empty($hero_photos_by_piece)
   ? wp_json_encode($hero_photos_by_piece, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
   : '';
+
+// ── Refonte /mes-creations/ — état B « immersion » (arrivée depuis le
+// room-picker via ?piece=). Tout est gated sur une pièce valide : sans
+// ?piece= valide, $imm_piece reste vide et rien ci-dessous n'est rendu
+// (état A 100 % inchangé). Le CSS (body.mescreations-immersion) masque le
+// hero croquis + la zone cards conseiller et révèle ce hero immersif.
+$imm_piece = function_exists('sapi_mescreations_immersion_piece') ? sapi_mescreations_immersion_piece() : '';
+if ($imm_piece) {
+  // Photo plein écran : 1re photo hero_<slug> si dispo, sinon repli générique
+  // (décision Robin #5). Repli = une ambiance neutre connue en prod.
+  $imm_photo_url = !empty($hero_photos_by_piece[$imm_piece][0]) ? $hero_photos_by_piece[$imm_piece][0] : '';
+  $imm_generic_fallback = '2025/04/Alban-Le-virevoltant-Salon-Paysage.jpg';
+
+  /* ⚠️ SÉLECTION ET DÉCOR VIENNENT DU MÊME CALCUL — sapi_immersion_build_context().
+     Avant, ce bloc calculait la sélection ici et le décor trois lignes plus
+     haut, chacun de son côté : ils pouvaient se contredire, et ils l'ont fait
+     (conseil « appliques pour ton couloir » sous un titre « ton entrée » avec
+     des suspensions dans le carrousel). L'endpoint du moment 2 appelle
+     EXACTEMENT la même fonction : les deux chemins ne peuvent plus diverger.
+
+     ⚠️ L'URL EST LUE EN ENTIER, plus seulement `?piece=`. Le moteur se règle
+     d'abord sur la sortie électrique : le critère le plus déterminant était
+     précisément celui que l'adresse ne savait pas exprimer, et une sélection
+     n'était donc ni partageable ni rechargeable.
+     La pièce reste la CONDITION d'activation de l'immersion — le décor
+     (photo, possessif, conseil figé) n'existe que par elle. Les six autres
+     clés n'ajoutent que de la précision à la sélection. */
+  $imm_answers = function_exists('sapi_mescreations_immersion_answers')
+    ? sapi_mescreations_immersion_answers()
+    : ['piece' => $imm_piece];
+  $imm_answers['piece'] = $imm_piece; // la pièce validée fait foi
+  $imm_ctx     = sapi_immersion_build_context($imm_answers);
+
+  $imm_products   = $imm_ctx['products'];
+  $imm_possessive = $imm_ctx['possessive'];
+  $imm_title      = $imm_ctx['title'];
+  // Phrase de conseil FIGÉE par pièce (jamais l'IA live — décision Robin / brief).
+  $imm_phrase     = $imm_ctx['phrase'];
 ?>
+<!-- Track de scroll-pinning : le hero (sticky) reste épinglé pendant que le
+     scroll pilote la révélation (flou photo + remontée texte + apparition des
+     cards), réversible. La hauteur du track = durée de l'animation. -->
+<div class="mescreations-immersion-track" data-immersion-track>
+<section class="mescreations-immersion" data-immersion data-immersion-piece="<?php echo esc_attr($imm_piece); ?>" aria-label="<?php echo esc_attr($imm_title); ?>">
+  <div class="mescreations-immersion__bg">
+    <?php if ($imm_photo_url) : ?>
+      <img class="mescreations-immersion__bg-img" src="<?php echo esc_url($imm_photo_url); ?>" alt="" loading="eager" fetchpriority="high">
+    <?php else : ?>
+      <?php echo sapi_image($imm_generic_fallback, 'full', ['alt' => '', 'class' => 'mescreations-immersion__bg-img', 'loading' => 'eager']); ?>
+    <?php endif; ?>
+  </div>
+  <div class="mescreations-immersion__scrim" aria-hidden="true"></div>
+
+  <!-- Bandeau réassurance : on réutilise le MÊME mécanisme que la home — le
+       bandeau global .robin-bandeau est déplacé en JS juste après ce hero et
+       reçoit .home-repositioned-bar (sticky sous le header au scroll). Rien
+       n'est rendu ici. -->
+
+  <!-- ══════════════════════════════════════════════════════════════════════
+       COUCHE DE CONTENU — modèle à zones (proposition Robin, 25/08/2026)
+       Enveloppe les TROIS zones (texte / sélection / indice) pour qu'elles se
+       PARTAGENT une hauteur, au lieu d'être punaisées chacune à une distance
+       du bas mesurée à la main. Deux zones qui se partagent une hauteur ne
+       peuvent pas se chevaucher ; trois blocs punaisés, si — c'est l'origine
+       de tous les chevauchements de la recette mobile.
+
+       Le modèle est actif SUR TOUS LES ÉCRANS depuis le 25/08 (il a d'abord
+       été livré en mobile, puis étendu au desktop le même jour). Le bloc
+       `@media (max-width: 768px)` de style.css ne porte plus que les
+       différences du mobile — la zone texte y sort de l'écran au scroll,
+       alors qu'en desktop elle reste dans le flux.
+       ══════════════════════════════════════════════════════════════════════ -->
+  <div class="mescreations-immersion__layer">
+
+  <!-- Bloc texte (pill + phrase IA + question) : centré, remonte au scroll. -->
+  <div class="mescreations-immersion__inner">
+    <!-- Pill Robin V1 (composant partagé, déjà stylé) -->
+    <div class="conseiller-sig conseiller-sig--v1 mescreations-immersion__sig" data-immersion-sig>
+      <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+      <span class="conseiller-sig__text">
+        <span class="conseiller-sig__who"><?php esc_html_e('Le conseil de Robin', 'theme-sapi-maison'); ?></span>
+        <?php /* [data-imm-hook] : réécrit par le moment 2 quand le décor change. */ ?>
+        <span class="conseiller-sig__hook" data-imm-hook><?php echo esc_html(sprintf(__('Mon conseil pour %s', 'theme-sapi-maison'), $imm_possessive)); ?></span>
+      </span>
+    </div>
+
+    <!-- Phrase de conseil (machine à écrire au load, ne se réécrit jamais).
+         Le texte complet est dans data-immersion-phrase-text ; le JS l'écrit. -->
+    <p class="mescreations-immersion__phrase" data-immersion-phrase data-immersion-phrase-text="<?php echo esc_attr($imm_phrase); ?>">
+      <span class="mescreations-immersion__phrase-content"></span>
+    </p>
+
+    <!-- Bouton PRINCIPAL de l'écran d'accueil : descend jusqu'à la sélection.
+         Il remplace l'ancien indice « Découvre ta sélection », qui était un
+         petit texte gris en bas d'écran et que Robin trouvait trop discret.
+         Fond blanc plein : c'est l'action principale, elle doit primer sur le
+         bouton translucide (qui a migré au-dessus du carrousel). -->
+    <button type="button" class="mescreations-immersion__reveal-btn" data-immersion-reveal-btn hidden>
+      <?php esc_html_e('Découvrir ma sélection', 'theme-sapi-maison'); ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+  </div>
+
+  <!-- Sélection : apparaît au scroll (flou photo), pièce-level rendue CÔTÉ
+       SERVEUR + carte sur-mesure. Positionnée dans la partie basse du hero. -->
+  <div class="mescreations-immersion__selection" data-immersion-selection>
+    <div class="mescreations-immersion__selection-head">
+      <?php /* [data-imm-title] : réécrit par le moment 2 — il dit la catégorie
+               dès qu'elle est certaine (« ma sélection d'appliques pour… »). */ ?>
+      <span class="mescreations-immersion__selection-title" data-imm-title><?php echo esc_html($imm_title); ?></span>
+    </div>
+
+    <div class="mescreations-immersion__slider-wrap">
+      <button type="button" class="mes-creations-selection__nav-arrow mescreations-immersion__arrow" data-immersion-prev aria-label="<?php esc_attr_e('Précédent', 'theme-sapi-maison'); ?>" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="mescreations-immersion__slider" data-immersion-slider>
+      <?php
+      // Card = sapi_immersion_render_product_card() (même rendu que l'endpoint
+      // AJAX du « moment 2 » → une seule source pour le markup des cards).
+      foreach ($imm_products as $imm_prod) {
+        sapi_immersion_render_product_card($imm_prod, $imm_piece);
+      }
+      ?>
+
+      <!-- Carte sur-mesure en fin de slider -->
+      <a class="mescreations-immersion__pcard mescreations-immersion__pcard--sur" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
+        <span class="mescreations-immersion__sur-eyebrow"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></span>
+        <span class="mescreations-immersion__sur-title"><?php esc_html_e('Créons ensemble', 'theme-sapi-maison'); ?></span>
+        <?php /* ⚠️ Formulation POSITIVE, décidée par Robin. L'ancienne version
+                 (« Rien ne colle parfaitement ? Robin dessine ton luminaire. »)
+                 présentait le sur-mesure comme un lot de consolation, à lire
+                 juste après quatre modèles qu'on vient de recommander : elle
+                 disqualifiait la sélection en même temps qu'elle proposait
+                 autre chose. Ici c'est une option de plus, pas un repli.
+                 ⚠️ Espace INSÉCABLE avant le « ! » : une espace ordinaire est
+                 un point de césure, le « ! » tomberait seul en bout de ligne
+                 (même piège que le « ? » du room-picker). */ ?>
+        <span class="mescreations-immersion__sur-sub"><?php esc_html_e('Pour ce projet, un luminaire sur-mesure est aussi une bonne idée !', 'theme-sapi-maison'); ?></span>
+        <span class="mescreations-immersion__sur-cta">
+          <?php esc_html_e('En parler à Robin', 'theme-sapi-maison'); ?>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="14" height="14"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+      </div><!-- /.mescreations-immersion__slider -->
+      <button type="button" class="mes-creations-selection__nav-arrow mescreations-immersion__arrow" data-immersion-next aria-label="<?php esc_attr_e('Suivant', 'theme-sapi-maison'); ?>" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div><!-- /.mescreations-immersion__slider-wrap -->
+
+    <!-- Dots du carrousel : générés en JS (le nombre de cards varie selon la
+         pièce, et change au « moment 2 » quand la sélection est remplacée).
+         Rendus ici plutôt qu'en PHP pour n'avoir qu'UNE source de vérité. -->
+    <div class="mescreations-immersion__dots" data-immersion-dots aria-hidden="true"></div>
+
+    <!-- Ouvre la modale Conseiller (questionnaire complet → sélection plus
+         fine). Placé SOUS le carrousel : on ne propose d'affiner qu'après
+         avoir montré, et le carrousel remonte d'autant.
+         ⚠️ Il vivait sous la phrase de Robin. En le déplaçant dans la zone
+         sélection, Robin a refermé un défaut connu : depuis que le bloc texte
+         sort de l'écran en mobile, l'entrée du questionnaire disparaissait en
+         écran B — un chemin de vente perdu au moment précis où le visiteur
+         juge la sélection. -->
+    <?php /* `data-modal-state` retiré : lu par personne. Le clic passe par
+             l'écouteur de sapi-mescreations-immersion.js, qui code l'état en dur. */ ?>
+    <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal">
+      <?php esc_html_e('Décrire mon projet en détail pour un luminaire plus adapté', 'theme-sapi-maison'); ?>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint aria-hidden="true">
+    <!-- Indice 1 : la FLÈCHE SEULE (décision Robin). Le texte « Découvre ta
+         sélection » a migré dans le bouton blanc du bloc de Robin ; le garder
+         ici ferait doublon. Il reste la suggestion du geste de scroll, pour
+         qui ne lit pas les boutons. Le libellé accessible est porté par
+         aria-label, puisqu'il n'y a plus de texte visible. -->
+    <span class="mescreations-immersion__hint mescreations-immersion__hint--reveal mescreations-immersion__hint--arrow-only" role="button" tabindex="0" aria-label="<?php esc_attr_e('Découvrir ma sélection', 'theme-sapi-maison'); ?>">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </span>
+    <!-- Indice 2 : apparaît une fois la sélection révélée (pause) → catalogue. -->
+    <span class="mescreations-immersion__hint mescreations-immersion__hint--catalogue">
+      <span class="mescreations-immersion__hint-label"><?php esc_html_e('Voir le catalogue complet', 'theme-sapi-maison'); ?></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </span>
+  </div><!-- /.mescreations-immersion__scrollhint -->
+
+  </div><!-- /.mescreations-immersion__layer -->
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     REPÈRE DE FIN DE RÉVÉLATION — élément de 1px, invisible, sans effet sur
+     la mise en page. Il matérialise EN CSS l'endroit exact où la révélation
+     doit être terminée (`top: 100vh`, cf. style.css).
+
+     Pourquoi il existe : jusqu'ici le JS mesurait cette distance avec
+     `window.innerHeight`, qui SUIT la barre d'adresse iOS, alors que le
+     `100vh` du CSS l'IGNORE — 86px d'écart sur un iPhone 14. Sans conséquence
+     tant que l'écart tombe dans le plateau, mais dès qu'on ancrera le scroll
+     sur ce point, l'écart deviendrait la position d'arrêt elle-même : la page
+     se calerait sur une révélation à ~90 %, texte encore un peu visible.
+
+     En lisant sa position, le JS et le CSS ne peuvent plus être en désaccord
+     sur « où finit la révélation » : c'est le même endroit par construction,
+     sur tous les écrans et dans les deux états de la barre d'adresse.
+     C'est aussi la future cible du 2ᵉ point d'ancrage — la scène épinglée,
+     elle, ne doit JAMAIS en être une (un sticky est perpétuellement « déjà
+     aligné » pour le moteur d'ancrage : blocage ou tremblement selon le
+     navigateur).
+     ════════════════════════════════════════════════════════════════════════ -->
+<div class="mescreations-immersion__mark" data-immersion-mark aria-hidden="true"></div>
+</div><!-- /.mescreations-immersion-track -->
+<?php } // end état B immersion ?>
+
+<?php if ($imm_piece) : // ── ÉTAT B : hero artisan (h1, caché en CSS sous l'immersion). Zone cards conseiller retirée (Tâche 7, plus de sapi-cards-conseiller.js). ── ?>
+
 <section class="shop-hero-artisan">
   <div class="shop-hero-artisan-inner">
     <h1><?php esc_html_e('Mes créations', 'theme-sapi-maison'); ?></h1>
   </div>
 </section>
 
-<!-- ── F2a Phase 2 — Cards Conseiller V3 (sans projet / avec projet) ── -->
+
+<?php else : // ── ÉTAT A (sans ?piece=) : le room-picker EST le hero (Tâche 4). ── ?>
+
 <?php
-// Icône SVG crayon (badge "Conseil de Robin" / "Mon projet") + CTA.
-$conseiller_pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
-
-// Round 4 — Room picker dans la card Conseil (même contenu que la homepage).
 require_once get_template_directory() . '/inc/guide-data.php';
-$conseil_room_choices = [
-  ['label' => 'Salon',   'slug' => 'salon',    'icon' => 'sofa'],
-  ['label' => 'Cuisine', 'slug' => 'cuisine',  'icon' => 'dining'],
-  ['label' => 'Chambre', 'slug' => 'chambre',  'icon' => 'bed'],
-  ['label' => 'Chambre enfant', 'slug' => 'chambre-enfant', 'icon' => 'teddy'],
-  ['label' => 'Bureau',  'slug' => 'bureau',   'icon' => 'monitor'],
-  ['label' => 'Entrée',  'slug' => 'entree',   'icon' => 'door'],
-  ['label' => 'Escalier','slug' => 'escalier', 'icon' => 'stairs'],
-];
-$conseil_room_icons = sapi_guide_get_icons();
+$picker_icons = sapi_guide_get_icons();
 ?>
-<!-- Refonte /mes-creations/ — Section "Ma sélection" : card englobante qui
-     contient badge + phrase IA + slot grille (peuplé par sapi-cards-conseiller.js
-     via clone des produits matchés depuis la grille basse "Toutes mes créations").
-     Sans projet : card "Conseil de Robin" simple avec CTA → modale V3. -->
-<section class="conseiller-cards-zone mes-creations-selection" data-conseiller-zone data-mes-creations-selection aria-label="<?php esc_attr_e('Ma sélection', 'theme-sapi-maison'); ?>">
-
-  <!-- Card "Conseil de Robin" — visible sans projet. Contient le room
-       picker complet : titre + 6 pièces clicables + séparateur "ou" +
-       champ texte libre (identique à la home et au pré-refonte). -->
-  <div class="conseiller-card conseiller-card--conseil" data-conseiller-card="conseil" data-room-picker hidden>
-    <div class="conseiller-card__inner">
-      <span class="conseiller-badge conseiller-badge--default">
-        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-        <?php esc_html_e('Conseil de Robin', 'theme-sapi-maison'); ?>
+<section class="mescreations-picker-hero" data-mes-creations-picker data-room-picker-from="mes_creations" aria-label="<?php esc_attr_e('Choisir une pièce', 'theme-sapi-maison'); ?>">
+  <div class="mescreations-picker-hero__inner room-picker-inner">
+    <div class="conseiller-sig conseiller-sig--v1">
+      <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+      <span class="conseiller-sig__text">
+        <span class="conseiller-sig__who"><?php esc_html_e('Le conseil de Robin', 'theme-sapi-maison'); ?></span>
+        <span class="conseiller-sig__hook"><?php esc_html_e('Mon regard d\'artisan sur ton projet', 'theme-sapi-maison'); ?></span>
       </span>
-      <h2 class="room-picker-title"><?php esc_html_e('Pour quelle pièce cherchez-vous un luminaire ?', 'theme-sapi-maison'); ?></h2>
-      <div class="room-picker-cards">
-        <?php foreach ($conseil_room_choices as $room) :
-          $icon_svg = isset($conseil_room_icons[$room['icon']]) ? $conseil_room_icons[$room['icon']] : '';
-        ?>
-          <button type="button" class="room-card" data-piece="<?php echo esc_attr($room['slug']); ?>" data-piece-label="<?php echo esc_attr($room['label']); ?>">
-            <span class="room-card-icon"><?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
-            <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
-          </button>
-        <?php endforeach; ?>
-      </div>
-      <div class="room-picker-or" aria-hidden="true">
-        <span class="room-picker-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
-      </div>
-      <form class="room-picker-freetext" data-room-picker-freetext>
-        <input type="text" class="room-picker-freetext__input" name="freetext"
-               placeholder="<?php esc_attr_e('Décris ton projet en quelques mots…', 'theme-sapi-maison'); ?>"
-               maxlength="500"
-               aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
-        <button type="submit" class="room-picker-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-        </button>
-      </form>
     </div>
-  </div>
-
-  <!-- Card "Mon projet" englobante — visible avec projet. Contient :
-       - badge "Mon projet · N luminaires" (N dynamique via JS)
-       - phrase IA italique + signature Square Peg
-       - lien "Préciser ou modifier mon projet" → modale V3 en édition (S3)
-       - slot grille rempli par JS (clones des cards matching + card sur-mesure) -->
-  <section class="conseiller-card conseiller-card--mon-projet mes-creations-selection__card" data-conseiller-card="mon-projet"<?php if ($hero_photos_attr) : ?> data-piece-photos="<?php echo esc_attr($hero_photos_attr); ?>"<?php endif; ?> hidden>
-    <!-- Bandeau photo de la pièce du projet (pleine largeur, sans titre).
-         Affiché par sapi-cards-conseiller.js seulement si la pièce a une
-         photo dédiée (data-piece-photos). -->
-    <div class="conseiller-card__photo" data-mon-projet-photo hidden></div>
-    <div class="conseiller-card__inner">
-      <span class="conseiller-badge conseiller-badge--default" data-mon-projet-badge>
-        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-        <span data-mon-projet-badge-text><?php esc_html_e('Ton projet', 'theme-sapi-maison'); ?></span>
-      </span>
-      <p class="conseiller-mon-projet__text" data-mon-projet-phrase>
-        <span class="conseiller-mon-projet__text-content" data-mon-projet-phrase-content></span>
-      </p>
-      <!-- Chip-question : prochaine question non répondue avec ses pills
-           cliquables (héritage F2a-sexies). Visible quand le projet est
-           incomplet, le clic sur une pill enregistre la réponse + ouvre
-           la modale sur la question suivante. -->
-      <div class="conseiller-mon-projet__inline-question" data-inline-question hidden></div>
-      <a class="conseiller-link mes-creations-selection__edit" href="#" data-action="open-modal" data-modal-state="s3" data-mon-projet-edit>
-        <span><?php esc_html_e('Préciser ou modifier mon projet', 'theme-sapi-maison'); ?></span>
-        <?php echo $conseiller_pencil_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?>
-      </a>
-      <!-- Slot grille : rempli par sapi-cards-conseiller.js avec les clones
-           des cards .product-card-cinetique qui matchent sapiProject + la
-           card sur-mesure (clonée depuis le <template> ci-dessous) en
-           dernière cellule. -->
-      <div class="mes-creations-selection__grid" data-mes-creations-selection-grid aria-live="polite"></div>
-
-      <!-- Navigation slider : flèches + dots. Peuplé par JS selon le nombre
-           de pages (= total cards / cards visibles par viewport). Masqué
-           si tout tient sur une page. -->
-      <div class="mes-creations-selection__nav" data-mes-creations-selection-nav hidden></div>
-
-      <!-- Template card sur-mesure — variante D "Invitation chaleureuse" (mockup-16).
-           Card pleine couleur orange + dashed décoratif blanc inversé du
-           pattern Conseiller V3. Cloné par populateSelectionGrid() comme
-           dernière cellule du slot. Pas rendu dans le DOM tant que le JS
-           ne le clone pas. -->
-      <template data-mes-creations-surmesure-template>
-        <a href="<?php echo esc_url(home_url('/sur-mesure/')); ?>" class="mes-creations-surmesure-card" data-mes-creations-surmesure-cta>
-          <div class="mes-creations-surmesure-card__eyebrow"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></div>
-          <div class="mes-creations-surmesure-card__title"><?php esc_html_e('Créons ensemble', 'theme-sapi-maison'); ?></div>
-          <p class="mes-creations-surmesure-card__sub"><?php esc_html_e('Pour ton projet, la solution idéale est peut-être un luminaire dessiné sur mesure. Robin peut te conseiller.', 'theme-sapi-maison'); ?></p>
-          <span class="mes-creations-surmesure-card__cta">
-            <?php esc_html_e('En parler à Robin', 'theme-sapi-maison'); ?>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
-          </span>
+    <h1 class="room-picker-title"><?php esc_html_e('Pour quelle pièce cherches-tu un luminaire ?', 'theme-sapi-maison'); ?></h1>
+    <p class="room-picker-sub"><?php esc_html_e('Choisis une pièce : je te montre la sélection que je conseille, pensée pour cet espace.', 'theme-sapi-maison'); ?></p>
+    <div class="room-picker-cards">
+      <?php foreach (sapi_room_choices() as $room) :
+        $icon_svg = isset($picker_icons[$room['icon']]) ? $picker_icons[$room['icon']] : '';
+      ?>
+        <?php /* `from=mes_creations` : c'est le troisième sélecteur de pièce du
+                 site, et probablement le plus utilisé — il occupe le haut de la
+                 page vers laquelle mènent les deux autres. Sans ce marqueur, un
+                 clic ici ne laissait aucune trace tant que la modale n'était pas
+                 ouverte, ce qui est rare. La provenance enregistrée reste
+                 « Mes créations » : cette colonne dit sur quelle PAGE la
+                 personne a commencé, pas par quel geste. */ ?>
+        <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'] . '&from=mes_creations')); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
+          <span class="room-card-icon"><?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+          <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
         </a>
-      </template>
+      <?php endforeach; ?>
     </div>
-  </section>
+    <div class="room-picker-or" aria-hidden="true">
+      <span class="room-picker-or__text"><?php esc_html_e('ou', 'theme-sapi-maison'); ?></span>
+    </div>
+    <!-- Texte libre : formulaire GET natif → /mes-creations/?freetext=… ; la
+         modale s'auto-ouvre en chat sur ce param (sapi-modal-conseiller.js init).
+         Aucun JS requis ici. -->
+    <form class="room-picker-freetext" method="get" role="search" action="<?php echo esc_url(home_url('/mes-creations/')); ?>">
+      <input type="text" class="room-picker-freetext__input" name="freetext"
+             placeholder="<?php esc_attr_e('Décris ton projet en quelques mots…', 'theme-sapi-maison'); ?>"
+             maxlength="500"
+             aria-label="<?php esc_attr_e('Décris ton projet en quelques mots', 'theme-sapi-maison'); ?>">
+      <button type="submit" class="room-picker-freetext__submit" aria-label="<?php esc_attr_e('Envoyer', 'theme-sapi-maison'); ?>">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </form>
+  </div>
 </section>
 
-<!-- Séparateur visuel entre "Ma sélection" et "Toutes mes créations" :
-     filet fin court centré (Option B). -->
-<div class="mes-creations-section-divider" aria-hidden="true"></div>
+<?php endif; // fin état A / état B ?>
 
 <!-- Section "Toutes mes créations" — catalogue complet (1 seule grille DOM,
      source of truth pour les matches qui sont clonés dans la card "Ma sélection"
@@ -467,41 +613,13 @@ $conseil_room_icons = sapi_guide_get_icons();
       <?php endwhile; ?>
     </div>
 
-    <!-- Grosse card récap "Pourquoi choisir Sâpi" — visible uniquement avec filtres actifs (shop.js) -->
-    <div class="why-sapi-recap" style="display: none;">
-      <div class="why-sapi-recap-inner">
-        <h2>Pourquoi choisir l'Atelier Sâpi ?</h2>
-        <div class="why-sapi-recap-grid">
-          <div class="why-sapi-recap-item">
-            <div class="product-text-card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
-            <h3>100% artisanal français</h3>
-            <p>Chaque luminaire est conçu, découpé et assemblé à la main dans l'atelier lyonnais de Robin.</p>
-          </div>
-          <div class="why-sapi-recap-item">
-            <div class="product-text-card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-            <h3>Pièces uniques & originales</h3>
-            <p>Chaque modèle est une création originale signée Robin. Votre intérieur sera unique, comme vous.</p>
-          </div>
-          <div class="why-sapi-recap-item">
-            <div class="product-text-card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-            <h3>Bois PEFC & éco-responsable</h3>
-            <p>Les bois proviennent de forêts gérées durablement (PEFC). Beauté et responsabilité vont de pair.</p>
-          </div>
-          <div class="why-sapi-recap-item">
-            <div class="product-text-card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-            <h3>Service client réactif</h3>
-            <p>Robin est là pour vous accompagner personnellement, du choix à l'installation.</p>
-          </div>
-        </div>
-        <div class="why-sapi-recap-highlight">
-          <div class="product-text-card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-          <div>
-            <h3>Fabriqué avec amour à Lyon</h3>
-            <p>Vous recevez bien plus qu'un objet : vous recevez une histoire, un bout de l'atelier de Robin, une pièce qui porte son attention aux détails.</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <?php /* L'encart « Pourquoi choisir l'Atelier Sâpi ? » a été retiré le
+         28/08. Il ne s'affichait qu'« avec filtres actifs », état déterminé
+         par `window.sapiMegaFilter` — objet supprimé avec le filtrage
+         navigateur. La condition était donc toujours fausse et cet encart n'a
+         jamais été vu par personne. Si tu veux ce contenu sur la page, il faut
+         le remettre SANS condition : ce n'est plus un correctif, c'est une
+         décision d'affichage. */ ?>
 
     <!-- Empty-state "aucun produit" pour le filtrage JS côté client.
          Cas extrême après l'élargissement progressif : aucun produit catalogue

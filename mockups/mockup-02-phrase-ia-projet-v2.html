@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #2 v2 — Phrase IA + lien Modifier (avec projet, esthétique Conseiller)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+
+  /* Hero réactif (état avec projet) */
+  .hero {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 100px 20px 60px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'Square Peg', cursive;
+    font-size: clamp(56px, 10vw, 100px);
+    font-weight: normal;
+    line-height: 1;
+  }
+  .hero p {
+    margin-top: 14px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     Card "Mon projet" — esthétique Conseiller
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .conseiller-bento {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .conseiller-bento__card {
+    position: relative;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 50px 40px 48px;
+    text-align: center;
+  }
+  .conseiller-bento__card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .conseiller-bento__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 22px;
+  }
+  .conseiller-bento__badge svg { width: 11px; height: 11px; }
+
+  .conseiller-bento__text {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--color-wood-dark);
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 auto 18px;
+  }
+  .conseiller-bento__sig {
+    display: inline;
+    margin-left: 8px;
+    font-family: 'Square Peg', cursive;
+    font-style: normal;
+    font-size: 24px;
+    color: var(--color-wood);
+    line-height: 1;
+  }
+
+  .conseiller-bento__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-wood);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    margin-top: 6px;
+  }
+  .conseiller-bento__link:hover { color: var(--color-orange); }
+
+  /* Stub grille */
+  .grid-stub {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 28px;
+  }
+  .grid-stub__card {
+    aspect-ratio: 1/1.2;
+    background: linear-gradient(135deg, var(--color-warm) 0%, #E5DED3 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    opacity: 0.5;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .mockup-footer {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 32px 20px;
+    text-align: center;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+
+  @media (max-width: 768px) {
+    .hero { padding: 80px 20px 40px; }
+    .conseiller-bento { padding: 0 14px; margin: 28px auto; }
+    .conseiller-bento__card { padding: 36px 22px 36px; }
+    .conseiller-bento__card::before { inset: 8px; }
+    .conseiller-bento__text { font-size: 16px; }
+    .grid-stub { grid-template-columns: 1fr; gap: 18px; padding: 0 14px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1>Pour ton salon</h1>
+  <p>Ma sélection pour cette pièce</p>
+</section>
+
+
+<div class="conseiller-bento">
+  <div class="conseiller-bento__card">
+    <span class="conseiller-bento__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+
+    <p class="conseiller-bento__text">
+      "Pour un salon spacieux et moderne, j'ai sélectionné des suspensions à ampoule entourée — la lumière diffuse y est plus douce, idéale pour les soirées canapé."
+      <span class="conseiller-bento__sig">— Robin</span>
+    </p>
+
+    <a href="#" class="conseiller-bento__link">Préciser ou modifier mon projet ✎</a>
+  </div>
+</div>
+
+
+<div class="grid-stub">
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+  <div class="grid-stub__card">photo produit</div>
+</div>
+
+
+<div class="mockup-footer">
+  <strong>Mockup #2 v2 — Phrase IA + lien Modifier (avec projet)</strong> · esthétique Conseiller universelle<br>
+  Badge "Mon projet" · phrase IA italique · signature Square Peg · lien Modifier discret
+</div>
+
+</body>
+</html>

@@ -91,28 +91,13 @@ function sapi_guide_get_steps() {
       'visibility' => ['sortie' => ['plafond'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree']],
       'choices'    => [
         ['label' => 'Standard',    'dim' => '< 2,50 m',  'slug' => 'standard',    'icon' => 'ceiling-low'],
-        ['label' => 'Confortable', 'dim' => '2,50–3 m',  'slug' => 'confortable', 'icon' => 'ceiling-mid'],
+        ['label' => 'Confortable', 'dim' => '2,50-3 m',  'slug' => 'confortable', 'icon' => 'ceiling-mid'],
         ['label' => 'Haute',       'dim' => '> 3 m',     'slug' => 'haute',       'icon' => 'ceiling-high'],
       ],
     ],
-    [
-      'id'         => 'table',
-      'question'   => 'Au-dessus d\'une table ou d\'un îlot ?',
-      'visibility' => ['hauteur' => ['standard'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant']],
-      'dynamic_question' => [
-        'piece' => [
-          'cuisine' => 'Au-dessus de ta table ou d\'un îlot ?',
-          'bureau'  => 'Au-dessus de ton bureau ?',
-          'salon'   => 'Au-dessus de ta table ?',
-          'chambre' => 'Au-dessus de ton lit ?',
-          'chambre-enfant' => 'Au-dessus du lit ?',
-        ],
-      ],
-      'choices'    => [
-        ['label' => 'Oui', 'slug' => 'oui', 'icon' => 'table-yes'],
-        ['label' => 'Non', 'slug' => 'non', 'icon' => 'table-no'],
-      ],
-    ],
+    // Tâche 2 — question « table » SUPPRIMÉE du parcours (aucun effet sur la
+    // sélection ; la colonne analytics table_reponse est conservée mais n'est
+    // plus alimentée).
     [
       'id'         => 'style',
       'question'   => 'Quel style pour ton intérieur ?',

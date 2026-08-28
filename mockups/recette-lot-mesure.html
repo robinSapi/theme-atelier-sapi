@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recette — lot mesure</title>
+<style>
+  :root{
+    --bois:#937D68; --orange:#E35B24; --encre:#2B2118; --brule:#241610;
+    --fond:#FAF7F2; --carte:#FFFFFF; --trait:#E6DED3; --doux:#8A7F73;
+    --ok:#3F7D58; --ko:#B4402B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fond);color:var(--encre);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 18px 160px}
+  header{padding:20px 0 6px}
+  h1{margin:0 0 6px;font-size:23px;letter-spacing:-.01em}
+  .sub{color:var(--doux);font-size:14px;margin:0}
+
+  .bar{position:sticky;top:0;z-index:20;background:rgba(250,247,242,.94);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--trait);
+    margin:14px -18px 0;padding:10px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .prog{flex:1 1 160px;height:7px;background:var(--trait);border-radius:99px;overflow:hidden;min-width:110px}
+  .prog i{display:block;height:100%;width:0;background:var(--bois);transition:width .3s}
+  .count{font-size:13px;color:var(--doux);white-space:nowrap}
+  .count b{color:var(--encre)}
+
+  .avant{background:#F7F0E6;border:1px solid #E4D3B5;border-radius:12px;padding:14px 16px;margin:18px 0 4px}
+  .avant h2{margin:0 0 7px;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:#8A6A2F}
+  .avant ol{margin:0;padding-left:19px}
+  .avant li{margin:5px 0}
+
+  .q{background:var(--carte);border:1px solid var(--trait);border-radius:12px;
+    padding:16px 17px;margin:14px 0}
+  .q.is-ok{border-color:#BFD9CB;box-shadow:inset 3px 0 0 var(--ok)}
+  .q.is-ko{border-color:#E8C4BB;box-shadow:inset 3px 0 0 var(--ko)}
+  .q h3{margin:0 0 3px;font-size:16.5px;line-height:1.35}
+  .q .n{color:var(--bois);font-weight:700;margin-right:7px}
+  .why{margin:2px 0 10px;font-size:13.5px;color:var(--doux);font-style:italic}
+
+  .steps{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:s}
+  .steps li{counter-increment:s;position:relative;padding-left:30px;margin:7px 0}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:1px;
+    width:20px;height:20px;border-radius:50%;background:var(--bois);color:#fff;
+    font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+  .look{margin:12px 0 0;padding:11px 13px;background:#FCFAF7;border:1px dashed var(--trait);border-radius:9px}
+  .look b{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--orange);margin-bottom:3px;font-weight:700}
+
+  .choix{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .choix label{flex:1 1 130px;text-align:center;padding:9px 10px;border:1px solid var(--trait);
+    border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;background:#FCFAF7;user-select:none}
+  .choix input{position:absolute;opacity:0;pointer-events:none}
+  .choix label:has(input:checked){background:var(--bois);border-color:var(--bois);color:#fff}
+  .choix label.ko:has(input:checked){background:var(--ko);border-color:var(--ko)}
+
+  textarea{width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--trait);
+    border-radius:9px;background:#FCFAF7;font:16px/1.5 inherit;resize:vertical;min-height:46px;color:inherit}
+  textarea:focus{outline:2px solid var(--bois);outline-offset:-1px;background:#fff}
+  textarea::placeholder{color:#B3A899}
+
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(250,247,242,.96);
+    backdrop-filter:blur(10px);border-top:1px solid var(--trait);padding:11px 18px;
+    padding-bottom:calc(11px + env(safe-area-inset-bottom));display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+  button{font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:9px;
+    border:1px solid var(--trait);background:#fff;color:var(--encre);cursor:pointer}
+  button.p{background:var(--orange);border-color:var(--orange);color:#fff}
+  button.g{background:transparent;color:var(--doux)}
+  .out{max-width:860px;margin:0 auto;padding:0 18px}
+  #zone{display:none;margin:16px 0 0}#zone.on{display:block}
+  #txt{width:100%;min-height:280px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+  .note{font-size:12.5px;color:var(--doux);margin:7px 0 0}
+  code{background:#F1EBE2;padding:1px 5px;border-radius:4px;font-size:12.5px;word-break:break-all}
+  kbd{background:#EFE7DC;border:1px solid var(--trait);border-bottom-width:2px;
+    padding:1px 6px;border-radius:5px;font:600 12.5px/1 inherit}
+
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--fond:#1A1512;--carte:#231C17;--trait:#3A2F27;--encre:#F0E9E0;--doux:#A2958A}
+    :root:not([data-theme="light"]) textarea{background:#1E1813}
+    :root:not([data-theme="light"]) .choix label{background:#2A221C}
+    :root:not([data-theme="light"]) button{background:#2A221C;color:var(--encre)}
+    :root:not([data-theme="light"]) .bar{background:rgba(26,21,18,.94)}
+    :root:not([data-theme="light"]) .foot{background:rgba(26,21,18,.96)}
+    :root:not([data-theme="light"]) code{background:#2E251E}
+    :root:not([data-theme="light"]) kbd{background:#2E251E}
+    :root:not([data-theme="light"]) .look{background:#1E1813}
+    :root:not([data-theme="light"]) .avant{background:#2A2016;border-color:#4A3A22}
+    :root:not([data-theme="light"]) .avant h2{color:#D8B36A}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Recette — lot mesure</h1>
+    <p class="sub">Ce lot répare ce que le tableau de bord compte. Un test qui passe « à peu près » ne suffit pas : on cherche des chiffres justes, pas une page qui s'affiche.</p>
+  </header>
+
+  <div class="bar">
+    <div class="prog"><i id="pi"></i></div>
+    <div class="count" id="pc">0 / 7</div>
+  </div>
+
+  <div class="avant">
+    <h2>Avant de commencer</h2>
+    <ol>
+      <li>Tu dois avoir <strong>poussé la branche sur le site test</strong> et attendu que le déploiement soit passé.</li>
+      <li>Ouvre <strong>une fenêtre de navigation privée</strong> pour chaque test qui commence par « nouvelle fenêtre privée ». Sans ça, ton projet mémorisé de la fois d'avant fausse le résultat : le site croira que tu as déjà répondu.</li>
+      <li>Garde <strong>un deuxième onglet ouvert</strong> sur <code>WP-admin → Robin Conseiller</code>. Tu y reviendras à chaque test. Pense à recharger la page à chaque fois, elle ne se met pas à jour toute seule.</li>
+      <li>Les sessions arrivent <strong>en haut de la liste</strong>, la plus récente en premier. La colonne <em>Date</em> te confirme que c'est bien la tienne.</li>
+    </ol>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<div class="foot">
+  <button class="p" id="bExport">Copier pour Claude</button>
+  <button id="bFile">Télécharger .md</button>
+  <button class="g" id="bClear">Tout effacer</button>
+</div>
+<div class="out"><div id="zone"><textarea id="txt" readonly></textarea>
+<p class="note">Colle ça dans la conversation. Seuls les tests où tu as répondu sont exportés.</p></div></div>
+
+<script>
+const T = [
+{
+ n:"1", t:"Le conseil de Robin est enregistré",
+ why:"C'est le cœur du lot. Ce texte s'écrit lettre par lettre sur ta page et il n'a jamais été enregistré une seule fois.",
+ steps:[
+  "Nouvelle fenêtre privée. Va sur <code>test.atelier-sapi.fr/mes-creations/</code>",
+  "Ouvre la modale du Conseiller (le bouton qui lance le questionnaire).",
+  "Réponds exactement ceci : pièce <b>Cuisine</b> · taille <b>Standard</b> · sortie <b>Au plafond</b> · hauteur <b>Standard</b> · éclairage <b>Ce sera la principale source</b> · style <b>Ancien, pierre, bois, tons chauds</b>.",
+  "Va jusqu'au bout, jusqu'à ce que la modale se referme toute seule et que la sélection s'affiche.",
+  "<b>Attends que la phrase de Robin finisse de s'écrire</b>, puis lis-la en entier. Si besoin, prends une capture : tu vas devoir la comparer.",
+  "Passe sur l'onglet admin, recharge la page, clique sur ta session (la première de la liste)."
+ ],
+ look:"Dans le détail, un encart <b>« Phrase IA finale (advice_text) »</b>. Il doit contenir <b>exactement la même phrase</b> que celle lue sur le site. Avant ce lot, cet encart n'apparaissait jamais.",
+ ph:"Si l'encart est absent, dis-le. Si le texte est là mais différent de celui affiché, colle-moi les deux."
+},
+{
+ n:"2", t:"Le conseil est enregistré aussi quand on vient d'une fiche produit",
+ why:"Ce chemin-là ne sauvegardait rien du tout : ni le conseil, ni tes réponses. La page part vers /mes-creations/ sans jamais refermer la modale.",
+ steps:[
+  "Nouvelle fenêtre privée. Va sur <b>n'importe quelle fiche produit</b> du site test.",
+  "Ouvre le Conseiller depuis la <b>pastille</b> de la fiche produit (pas depuis le menu).",
+  "Réponds : pièce <b>Chambre</b> · taille <b>Grand</b> · sortie <b>Au mur</b> · hauteur <b>Confortable</b> · éclairage <b>J'ai d'autres sources lumineuses</b> · style <b>Moderne, neuf, tons clairs</b>.",
+  "Va jusqu'au bout. Le site doit te <b>renvoyer sur /mes-creations/</b>.",
+  "Attends que la phrase finisse de s'écrire, lis-la.",
+  "Onglet admin, recharge, ouvre la première session."
+ ],
+ look:"Trois choses ensemble, dans la même session : la colonne <b>Pièce</b> affiche <b>Chambre</b>, le <b>Récap projet</b> liste bien tes six réponses, et l'encart <b>advice_text</b> contient la phrase. Il en manquait les trois avant ce lot.",
+ ph:"Précise laquelle des trois manque, si l'une manque."
+},
+{
+ n:"3", t:"La sortie du chat n'oublie plus la pièce",
+ why:"Trouvé pendant la relecture. Le visiteur qui revient, discute et repart arrivait dans le tableau sans pièce : invisible dans « Top pièces » et dans le filtre Pièce.",
+ steps:[
+  "Cette fois <b>PAS</b> de navigation privée : on veut justement que le site se souvienne de toi. Utilise ta fenêtre normale, après avoir déjà fait un parcours.",
+  "Va sur <code>test.atelier-sapi.fr/mes-creations/</code> et ouvre le Conseiller.",
+  "Prends la porte qui mène à la <b>conversation avec Robin</b> (le chat), pas le questionnaire.",
+  "Écris-lui une phrase, par exemple <i>« C'est pour au-dessus de ma table de cuisine »</i>, et attends sa réponse.",
+  "Sors par le bouton <b>« Voir la sélection »</b> proposé dans la conversation. Surtout pas par la croix.",
+  "Onglet admin, recharge, regarde la première ligne."
+ ],
+ look:"La colonne <b>Pièce</b> de cette session doit être <b>remplie</b>, pas vide. C'est le seul point de ce test.",
+ ph:"Si le bouton « Voir la sélection » n'apparaît pas dans ta conversation, dis-le-moi : ça veut dire autre chose."
+},
+{
+ n:"4", t:"L'encart fantôme a disparu du détail",
+ why:"« Catalogue présenté » attendait une donnée que le site n'a jamais produite. On retire un encart qui ne s'est affiché aucune fois, pas une fonctionnalité.",
+ steps:[
+  "Onglet admin, page Robin Conseiller.",
+  "Ouvre <b>trois sessions différentes</b> : une d'aujourd'hui, une d'il y a plusieurs jours, et une qui porte une demande de contact si tu en as une.",
+  "Fais défiler chaque détail de haut en bas."
+ ],
+ look:"Aucune section <b>« Catalogue présenté »</b> nulle part. Et le reste du détail doit s'enchaîner normalement : <em>Récap projet</em>, la conversation s'il y en a une, puis <em>Technique</em>. Pas de trou blanc, pas de titre qui flotte tout seul, pas de bloc décalé.",
+ ph:"S'il reste un espace vide bizarre entre deux sections, décris où."
+},
+{
+ n:"5", t:"Les filtres de période comptent toujours juste",
+ why:"J'ai touché à ces requêtes puis j'ai fait marche arrière. Je veux être sûr qu'elles sont revenues exactement à leur état d'origine.",
+ steps:[
+  "Onglet admin. En haut, bascule sur <b>7 jours</b> et note le nombre affiché à côté du titre.",
+  "Bascule sur <b>30 jours</b> : le nombre doit être <b>supérieur ou égal</b> à celui de 7 jours.",
+  "Bascule sur <b>Tout</b> : supérieur ou égal aux deux précédents.",
+  "Reviens sur <b>30 jours</b> et ajoute en plus un filtre <b>Pièce = Salon</b>.",
+  "Regarde le petit pourcentage de tendance affiché à côté du total."
+ ],
+ look:"Les trois nombres qui grandissent dans le bon sens, et le <b>pourcentage de tendance qui reste affiché</b> quand tu combines période + pièce. S'il disparaît ou s'il affiche quelque chose d'absurde comme −100 % alors que tu vois des sessions, c'est un problème.",
+ ph:"Note-moi les trois nombres (7j / 30j / tout) et le pourcentage."
+},
+{
+ n:"6", t:"Aucun bandeau d'alerte sur les horloges",
+ why:"Nouveau. Il prévient si la base de données et WordPress ne sont plus à la même heure. Chez toi il ne devrait rien dire.",
+ steps:[
+  "Onglet admin, page Robin Conseiller, tout en haut, juste sous le titre et le bouton d'export."
+ ],
+ look:"<b>Rien.</b> Aucun encart orange. S'il apparaît, ce n'est pas un bug de ma part : ça veut dire que les deux horloges divergent vraiment, et le message te dit quoi vérifier. Dans ce cas, recopie-le-moi tel quel.",
+ ph:"Si le bandeau apparaît, colle son texte ici."
+},
+{
+ n:"7", t:"Rien n'a cassé ailleurs",
+ why:"J'ai retiré du code d'écriture et des règles de style. C'est le genre de retrait qui casse un voisin sans prévenir.",
+ steps:[
+  "Sur le site test, refais un parcours court dans le Conseiller depuis <code>/mes-creations/</code> et vérifie que la sélection s'affiche normalement.",
+  "Ouvre <b>une fiche produit</b>, ouvre la pastille, et vérifie que la pré-sélection de taille et d'essence se fait toujours.",
+  "Dans l'admin, clique le bouton <b>Exporter CSV</b> et ouvre le fichier.",
+  "Dans le CSV, vérifie sur deux ou trois lignes que chaque valeur est bien sous le bon titre de colonne : la date sous <em>Date</em>, la pièce sous <em>Pièce</em>."
+ ],
+ look:"Le parcours et la pré-sélection inchangés, et surtout <b>aucune colonne décalée</b> dans le CSV. Un décalage produit un fichier qui a l'air correct et qui ment.",
+ ph:"Si quelque chose bouge par rapport à avant, même un détail visuel, note-le."
+}
+];
+
+const list = document.getElementById('list');
+const KEY = 'sapi-recette-lot-mesure';
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){}
+
+T.forEach(function(x){
+  const d = document.createElement('div');
+  d.className = 'q'; d.dataset.n = x.n;
+  d.innerHTML =
+    '<h3><span class="n">'+x.n+'</span>'+x.t+'</h3>'+
+    '<p class="why">'+x.why+'</p>'+
+    '<ol class="steps">'+x.steps.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ol>'+
+    '<div class="look"><b>Ce que tu dois voir</b>'+x.look+'</div>'+
+    '<div class="choix">'+
+      '<label><input type="radio" name="r'+x.n+'" value="ok">C\'est bon</label>'+
+      '<label class="ko"><input type="radio" name="r'+x.n+'" value="ko">Ça ne va pas</label>'+
+      '<label class="ko"><input type="radio" name="r'+x.n+'" value="?">Je ne comprends pas le test</label>'+
+    '</div>'+
+    '<textarea data-c="'+x.n+'" placeholder="'+x.ph.replace(/"/g,'&quot;')+'"></textarea>';
+  list.appendChild(d);
+});
+
+function etat(){
+  let n = 0;
+  T.forEach(function(x){
+    const c = document.querySelector('input[name="r'+x.n+'"]:checked');
+    const card = document.querySelector('.q[data-n="'+x.n+'"]');
+    card.classList.remove('is-ok','is-ko');
+    if (c) { n++; card.classList.add(c.value === 'ok' ? 'is-ok' : 'is-ko'); }
+  });
+  document.getElementById('pi').style.width = (n / T.length * 100) + '%';
+  document.getElementById('pc').innerHTML = '<b>'+n+'</b> / '+T.length;
+}
+
+function sauve(){
+  const o = {};
+  document.querySelectorAll('input[type=radio]:checked').forEach(function(i){ o[i.name] = i.value; });
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){ if (t.value.trim()) o['c'+t.dataset.c] = t.value; });
+  try { localStorage.setItem(KEY, JSON.stringify(o)); } catch(e){}
+}
+
+Object.keys(saved).forEach(function(k){
+  if (k.charAt(0) === 'c') {
+    const t = document.querySelector('textarea[data-c="'+k.slice(1)+'"]');
+    if (t) t.value = saved[k];
+  } else {
+    const i = document.querySelector('input[name="'+k+'"][value="'+saved[k]+'"]');
+    if (i) i.checked = true;
+  }
+});
+etat();
+
+document.addEventListener('change', function(){ etat(); sauve(); });
+document.addEventListener('input', function(e){ if (e.target.tagName === 'TEXTAREA') sauve(); });
+
+function texte(){
+  let s = '# Recette — lot mesure\n\n';
+  let vide = true;
+  T.forEach(function(x){
+    const c = document.querySelector('input[name="r'+x.n+'"]:checked');
+    const t = document.querySelector('textarea[data-c="'+x.n+'"]');
+    const com = t && t.value.trim();
+    if (!c && !com) return;
+    vide = false;
+    const lib = c ? ({ok:'OK', ko:'NE VA PAS', '?':'TEST PAS COMPRIS'})[c.value] : 'sans réponse';
+    s += '## ' + x.n + '. ' + x.t + ' — **' + lib + '**\n';
+    if (com) s += com + '\n';
+    s += '\n';
+  });
+  return vide ? '(rien de rempli)' : s;
+}
+
+document.getElementById('bExport').onclick = function(){
+  const z = document.getElementById('zone'), t = document.getElementById('txt');
+  t.value = texte(); z.classList.add('on');
+  try {
+    navigator.clipboard.writeText(t.value);
+    this.textContent = 'Copié ✓';
+    setTimeout(function(){ document.getElementById('bExport').textContent = 'Copier pour Claude'; }, 1800);
+  } catch(e) {
+    t.select();
+  }
+  z.scrollIntoView({behavior:'smooth', block:'nearest'});
+};
+
+document.getElementById('bFile').onclick = function(){
+  const b = new Blob([texte()], {type:'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'recette-lot-mesure.md';
+  a.click();
+};
+
+document.getElementById('bClear').onclick = function(){
+  if (!confirm('Effacer toutes tes réponses ?')) return;
+  document.querySelectorAll('input[type=radio]').forEach(function(i){ i.checked = false; });
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){ t.value = ''; });
+  try { localStorage.removeItem(KEY); } catch(e){}
+  etat();
+};
+</script>
+</body>
+</html>

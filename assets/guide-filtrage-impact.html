@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robin Conseiller — L'impact de chaque question sur le filtrage (V4, juin 2026)</title>
+<style>
+  :root{
+    --bg:#faf8f5; --card:#ffffff; --ink:#2b2b2b; --muted:#6b7280; --line:#e7e1d8;
+    --accent:#e35b24; --wood:#937d68;
+    --cat:#2f6f9f; --format:#7b5ea7; --ampoule:#c98a1b; --taille:#3f8f5f; --essence:#937d68;
+    --nav:#6b7280; --surmesure:#e35b24;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1040px;margin:0 auto;padding:32px 20px 80px}
+  header.top{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:8px}
+  header.top h1{font-size:28px;margin:0 0 6px;letter-spacing:-.01em}
+  header.top .sub{color:var(--muted);font-size:15px}
+  .updated{display:inline-block;background:#eef6ef;color:#2f7a45;border:1px solid #cfe6d4;
+    border-radius:999px;padding:2px 12px;font-size:13px;font-weight:600;margin-top:10px}
+  h2.section{font-size:21px;margin:42px 0 14px;padding-top:8px;border-top:1px solid var(--line)}
+  h2.section .n{color:var(--accent);font-weight:800;margin-right:8px}
+  p.lead{color:#444;margin:0 0 16px}
+
+  /* pipeline */
+  .pipe{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:16px 0 6px}
+  .pipe .box{flex:1 1 150px;background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:14px;text-align:center;min-width:140px}
+  .pipe .box b{display:block;font-size:15px;margin-bottom:4px}
+  .pipe .box span{font-size:13px;color:var(--muted)}
+  .pipe .arrow{align-self:center;color:var(--accent);font-size:22px;font-weight:700}
+  .note-strong{background:#fff4ef;border:1px solid #f3c9b6;border-left:4px solid var(--accent);
+    border-radius:10px;padding:14px 16px;margin:16px 0}
+  .note-strong b{color:var(--accent)}
+
+  /* entry points */
+  .entries{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+  .entries .e{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .entries .e h4{margin:0 0 6px;font-size:15px}
+  .entries .e p{margin:0;font-size:13px;color:var(--muted)}
+  .tag-ia{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:1px 7px;margin-top:8px}
+  .tag-haiku{background:#eef2ff;color:#4338ca}
+  .tag-sonnet{background:#fef3c7;color:#92600a}
+
+  /* lever legend */
+  .levers{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+  .lever{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);
+    border-radius:999px;padding:5px 13px 5px 9px;font-size:13.5px;font-weight:600}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .d-cat{background:var(--cat)} .d-format{background:var(--format)} .d-ampoule{background:var(--ampoule)}
+  .d-taille{background:var(--taille)} .d-essence{background:var(--essence)} .d-nav{background:var(--nav)}
+  .d-surmesure{background:var(--surmesure)}
+
+  /* question cards */
+  .q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0;margin:16px 0;
+    overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .q .head{padding:16px 18px;border-bottom:1px solid var(--line);background:#fcfbf9}
+  .q .head .qn{font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
+  .q .head h3{margin:3px 0 6px;font-size:19px}
+  .q .head .when{font-size:13px;color:var(--muted)}
+  .q .head .when b{color:#444}
+  .q .body{padding:8px 18px 16px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+  .chip{font-size:12px;font-weight:700;border-radius:7px;padding:3px 9px;color:#fff}
+  .c-cat{background:var(--cat)} .c-format{background:var(--format)} .c-ampoule{background:var(--ampoule)}
+  .c-taille{background:var(--taille)} .c-essence{background:var(--essence)} .c-nav{background:var(--nav)}
+  .c-surmesure{background:var(--surmesure)}
+  table.ans{width:100%;border-collapse:collapse;margin-top:10px;font-size:14.5px}
+  table.ans th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);
+    padding:6px 10px;border-bottom:2px solid var(--line)}
+  table.ans td{padding:9px 10px;border-bottom:1px solid #f0ece5;vertical-align:top}
+  table.ans tr:last-child td{border-bottom:none}
+  table.ans td.opt{font-weight:700;white-space:nowrap;width:170px}
+  .mini{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .nofilter{background:#fff4ef;border:1px solid #f3c9b6;border-radius:8px;padding:10px 12px;font-size:13.5px}
+
+  /* matrix */
+  .matrix-wrap{overflow-x:auto;margin:14px 0}
+  table.matrix{width:100%;border-collapse:collapse;font-size:13.5px;min-width:720px}
+  table.matrix th,table.matrix td{border:1px solid var(--line);padding:8px 9px;text-align:center}
+  table.matrix th{background:#fcfbf9;font-size:12px}
+  table.matrix th.q,table.matrix td.q{text-align:left;font-weight:700;white-space:nowrap;background:#fcfbf9}
+  table.matrix td .y{font-weight:800}
+  table.matrix td small{display:block;color:var(--muted);font-size:11px;font-weight:400}
+
+  /* pitfalls */
+  .pit{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);
+    border-radius:10px;padding:14px 16px;margin:12px 0}
+  .pit h4{margin:0 0 5px;font-size:15.5px}
+  .pit p{margin:0;font-size:14px;color:#444}
+  .pit.warn{border-left-color:#c98a1b}
+  .pit.dead{border-left-color:#9aa0a6}
+  footer{margin-top:50px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+  code{background:#f1ede7;border-radius:5px;padding:1px 6px;font-size:13px}
+  @media(max-width:680px){.entries{grid-template-columns:1fr}.q .head h3{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Robin Conseiller : l'impact de chaque question</h1>
+    <div class="sub">Comment chaque réponse du visiteur agit concrètement sur la sélection de luminaires.</div>
+    <span class="updated">Mis à jour le 11 juin 2026 (conforme au code actuel)</span>
+  </header>
+
+  <!-- ============ 1. LE MOTEUR EN BREF ============ -->
+  <h2 class="section"><span class="n">1.</span>Le moteur en bref</h2>
+  <p class="lead">Le visiteur répond à des questions, ces réponses deviennent des <b>filtres</b> appliqués au catalogue,
+  on obtient une liste de produits, le code en choisit 4, et seulement à la fin l'IA rédige le texte.</p>
+
+  <div class="pipe">
+    <div class="box"><b>1. Questions</b><span>Le visiteur répond (quiz, modale ou texte libre)</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>2. Filtres PHP</b><span>Catégorie, format, ampoule, taille, essence</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>3. Liste produits</b><span>Les modèles qui passent les filtres</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>4. Choix des 4</b><span><code>pick_four</code> : le code choisit</span></div>
+    <div class="arrow">→</div>
+    <div class="box"><b>5. L'IA rédige</b><span>Le texte de conseil, pas la sélection</span></div>
+  </div>
+
+  <div class="note-strong">
+    <b>Le point clé à retenir :</b> au premier tour, c'est le <b>code (PHP) qui choisit les 4 produits affichés</b>, pas l'IA.
+    L'ordre est fixe : 1) la meilleure vente, 2) le dernier modèle ajouté, 3) la 2e meilleure vente, 4) un modèle au hasard parmi le reste.
+    L'IA ne fait qu'écrire le texte d'accompagnement. Elle ne choisit des produits que dans deux cas : la conversation de raffinement (« refine »)
+    et le champ de texte libre de la page Mes créations. Donc pour améliorer la pertinence des suggestions, le levier est dans les filtres
+    et dans <code>pick_four</code>, pas dans les consignes données à l'IA.
+  </div>
+
+  <p class="lead" style="margin-top:18px">Trois portes d'entrée, le même moteur de filtrage derrière :</p>
+  <div class="entries">
+    <div class="e"><h4>Quiz (historique)</h4><p>Le questionnaire classique pas à pas qui mène à une page de résultats.</p><span class="tag-ia tag-sonnet">Sonnet rédige</span></div>
+    <div class="e"><h4>Modale Conseiller</h4><p>La fenêtre conversationnelle, conseil donné à chaque étape.</p><span class="tag-ia tag-sonnet">Sonnet rédige</span></div>
+    <div class="e"><h4>Texte libre (Mes créations)</h4><p>Le visiteur décrit son projet en quelques mots, l'IA en déduit les filtres.</p><span class="tag-ia tag-haiku">Haiku extrait</span> <span class="tag-ia tag-sonnet">Sonnet discute</span></div>
+  </div>
+  <p class="mini">Les trois traduisent les réponses dans les mêmes « slugs » (cuisine, plafond, moderne…) et passent par les mêmes fonctions de filtrage.
+  Le reste de ce document décrit ces filtres communs.</p>
+
+  <!-- ============ 2. LES LEVIERS ============ -->
+  <h2 class="section"><span class="n">2.</span>Les 5 leviers de filtrage (+ 2 effets de navigation)</h2>
+  <p class="lead">Chaque question agit sur un ou plusieurs de ces leviers. C'est la grille de lecture du document.</p>
+  <div class="levers">
+    <span class="lever"><span class="dot d-cat"></span>Catégorie de luminaire</span>
+    <span class="lever"><span class="dot d-format"></span>Format (vertical / horizontal / boule)</span>
+    <span class="lever"><span class="dot d-ampoule"></span>Type d'ampoule</span>
+    <span class="lever"><span class="dot d-taille"></span>Taille de la variation</span>
+    <span class="lever"><span class="dot d-essence"></span>Essence du bois</span>
+    <span class="lever"><span class="dot d-nav"></span>Étape suivante affichée</span>
+    <span class="lever"><span class="dot d-surmesure"></span>Carte sur-mesure</span>
+  </div>
+
+  <!-- ============ 3. L'IMPACT DE CHAQUE QUESTION ============ -->
+  <h2 class="section"><span class="n">3.</span>L'impact de chaque question</h2>
+  <p class="lead">Une fiche par question. Les pastilles colorées indiquent les leviers que la question actionne.</p>
+
+  <!-- PIECE -->
+  <div class="q">
+    <div class="head">
+      <div class="qn">Question 1</div>
+      <h3>Pour quelle pièce ?</h3>
+      <div class="when"><b>Toujours posée</b>, en premier.</div>
+      <div class="chips">
+        <span class="chip c-ampoule">Type d'ampoule</span>
+        <span class="chip c-cat">Catégorie (cuisine)</span>
+        <span class="chip c-format">Format (escalier)</span>
+        <span class="chip c-nav">Étape suivante</span>
+        <span class="chip c-surmesure">Sur-mesure (escalier)</span>
+      </div>
+    </div>
+    <div class="body">
+      <p class="mini" style="margin-bottom:0">Surprise utile : la pièce ne choisit <b>pas</b> le type de luminaire (c'est la question « Où installer ? » qui le fait).
+      La pièce sert surtout à régler le <b>type d'ampoule</b>.</p>
+      <table class="ans">
+        <tr><th>Réponse</th><th>Effet sur le filtrage</th></tr>
+        <tr><td class="opt">Cuisine</td><td>Ampoule dégagée ou semi-dégagée. <b>Jamais de lampe à poser</b> (retirée des catégories). En grande pièce, ce filtre ne s'applique plus : tous les types d'ampoule sont acceptés.</td></tr>
+        <tr><td class="opt">Bureau / Atelier</td><td>Ampoule dégagée ou semi-dégagée. En grande pièce, ce filtre ne s'applique plus : tous les types d'ampoule sont acceptés.</td></tr>
+        <tr><td class="opt">Salon / Salle à manger</td><td>Ampoule entourée ou semi-dégagée.</td></tr>
+        <tr><td class="opt">Chambre</td><td>Ampoule entourée ou semi-dégagée.</td></tr>
+        <tr><td class="opt">Chambre enfant</td><td>Traitée comme une chambre (entourée ou semi-dégagée).</td></tr>
+        <tr><td class="opt">Entrée / Couloir</td><td>Ampoule entourée ou semi-dégagée (aligné sur salon/chambre depuis peu). Autorise le format vertical si la hauteur est confortable ou haute.</td></tr>
+        <tr><td class="opt">Cage d'escalier</td><td>Aucun filtre ampoule. Bascule vers « Quel type d'escalier ? » au lieu de la taille classique. Autorise le format vertical, exclut l'horizontal. Déclenche le parcours sur-mesure dans la modale.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAILLE -->
+  <div class="q">
+    <div class="head">
+      <div class="qn">Question 2</div>
+      <h3>Quelle taille fait ta pièce ?</h3>
+      <div class="when">Posée pour <b>toutes les pièces sauf l'escalier</b> (qui a sa propre question).</div>
+      <div class="chips">
+        <span class="chip c-taille">Taille de variation</span>
+        <span class="chip c-format">Format</span>
+        <span class="chip c-nav">Étape suivante</span>
+        <span class="chip c-surmesure">Sur-mesure (grande)</span>
+      </div>
+    </div>
+    <div class="body">
+      <table class="ans">
+        <tr><th>Réponse</th><th>Effet sur le filtrage</th></tr>
+        <tr><td class="opt">Petit</td><td>Pré-sélectionne la <b>plus petite taille</b> disponible du produit. Combinée à une hauteur confortable ou haute, autorise le format vertical. Saute la question « Ce sera l'éclairage principal ? » (réservée aux grandes pièces) et va directement à « Où installer ? ».</td></tr>
+        <tr><td class="opt">Standard (moyenne)</td><td>Pré-sélectionne la <b>2e taille</b> du produit (la 1re s'il n'en a qu'une). Saute la question « Ce sera l'éclairage principal ? » (réservée aux grandes pièces).</td></tr>
+        <tr><td class="opt">Grand</td><td>Pré-sélectionne la <b>3e taille</b>. <b>Exclut les suspensions qui ont 2 tailles ou moins</b> (filtre relâché si plus rien ne reste). Ouvre l'étape Éclairage. Déclenche la carte sur-mesure.</td></tr>
+        <tr><td class="opt">Je ne sais pas</td><td>Aucun filtre de taille : tous les produits passent, quelle que soit leur taille.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAILLE ESCALIER -->
+  <div class="q">
+    <div class="head">
+      <div class="qn">Question 2 bis</div>
+      <h3>Quel type d'escalier ?</h3>
+      <div class="when">Posée <b>uniquement pour la cage d'escalier</b>, à la place de la question de taille.</div>
+      <div class="chips">
+        <span class="chip c-taille">Taille de variation</span>
+      </div>
+    </div>
+    <div class="body">
+      <table class="ans">
+        <tr><th>Réponse</th><th>Effet sur le filtrage</th></tr>
+        <tr><td class="opt">Escalier standard</td><td>Traité comme une <b>petite</b> pièce (suspensions compactes).</td></tr>
+        <tr><td class="opt">Grand escalier ouvert</td><td>Traité comme une <b>grande</b> pièce (grandes suspensions verticales).</td></tr>
+      </table>
+      <p class="mini">La réponse est convertie en taille, puis suit la même logique que la question de taille classique.</p>
+    </div>
+  </div>
+
+  <!-- ECLAIRAGE -->
+  <div class="q">
+    <div class="head">
+      <div class="qn">Question 3</div>
+      <h3>Ce sera l'éclairage principal ?</h3>
+      <div class="when">Posée <b>seulement si la pièce est grande</b>.</div>
+      <div class="chips">
+        <span class="chip c-cat">Catégorie (remplace le choix par sortie)</span>
+      </div>
+    </div>
+    <div class="body">
+      <table class="ans">
+        <tr><th>Réponse</th><th>Effet sur le filtrage</th></tr>
+        <tr><td class="opt">Source principale</td><td>Filtrage normal : la catégorie est décidée par la question « Où installer ? ».</td></tr>
+        <tr><td class="opt">J'ai d'autres sources<br>(secondaire)</td><td>Bascule sur un <b>pool réduit</b> (lampadaires + lampes à poser + appliques), puis affiné par la sortie : plafond → suspensions en complément ; mur → appliques ; prise 230V ou inconnue → lampadaires + lampes + appliques. En cuisine, la lampe à poser est retirée. L'IA présente ces luminaires comme des compléments.</td></tr>
+      </table>
+      <p class="mini">Note : l'ancienne option « multi-ampoules / grappe » n'est plus proposée dans le questionnaire (voir section Pièges).</p>
+    </div>
+  </div>
+
+  <!-- SORTIE -->
+  <div class="q">
+    <div class="head">
+      <div class="qn">Question 4 — la plus structurante</div>
+      <h3>Où vas-tu installer ton luminaire ?</h3>
+      <div class="when">Posée <b>dès qu'une pièce est connue</b> (visible même si la taille n'a pas été demandée, pour gérer le texte libre).</div>
+      <div class="chips">
+        <span class="chip c-cat">Catégorie de luminaire</span>
+        <span class="chip c-nav">Étape suivante</span>
+      </div>
+    </div>
+    <div class="body">
+      <p class="mini" style="margin-bottom:0"><b>C'est cette question qui décide du type de luminaire affiché</b>, pas la pièce.</p>
+      <table class="ans">
+        <tr><th>Réponse</th><th>Catégories retenues</th></tr>
+        <tr><td class="opt">Au plafond</td><td><b>Suspensions.</b> Ouvre ensuite l'étape Hauteur.</td></tr>
+        <tr><td class="opt">Au mur</td><td><b>Appliques.</b> Saute Hauteur et Table.</td></tr>
+        <tr><td class="opt">Sur prise 230V</td><td><b>Lampadaires + Lampes à poser + Appliques</b> (le kit prise permet d'installer une applique sans sortie murale).</td></tr>
+        <tr><td class="opt">Je ne sais pas</td><td><b>Suspensions + Lampadaires + Lampes à poser + Appliques</b> (les appliques ont été ajoutées récemment à ce cas).</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- HAUTEUR -->
+  <div class="q">
+    <div class="head">
+      <div class="qn">Question 5</div>
+      <h3>Quelle hauteur sous plafond ?</h3>
+      <div class="when">Posée <b>seulement si la sortie est au plafond</b> (et hors escalier).</div>
+      <div class="chips">
+        <span class="chip c-format">Format</span>
+        <span class="chip c-nav">Étape suivante</span>
+        <span class="chip c-surmesure">Sur-mesure</span>
+      </div>
+    </div>
+    <div class="body">
+      <table class="ans">
+        <tr><th>Réponse</th><th>Effet sur le filtrage</th></tr>
+        <tr><td class="opt">Standard (< 2,50 m)</td><td>Ouvre l'étape « Au-dessus d'une table ? ». Le format vertical reste exclu par défaut.</td></tr>
+        <tr><td class="opt">Confortable (2,50 à 3 m)</td><td>Saute l'étape Table. Autorise le format vertical si la pièce est une entrée ou une petite pièce. Déclenche la carte sur-mesure.</td></tr>
+        <tr><td class="opt">Haute (> 3 m)</td><td><b>Autorise le format vertical dans tous les cas</b> (toutes pièces, toutes tailles). En petite pièce, exclut aussi le format horizontal. Saute l'étape Table. Déclenche la carte sur-mesure.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="q">
+    <div class="head">
+      <div class="qn">Question 6</div>
+      <h3>Au-dessus d'une table ou d'un îlot ?</h3>
+      <div class="when">Posée si la hauteur est standard (hors entrée et escalier).</div>
+      <div class="chips">
+        <span class="chip c-nav" style="background:#9aa0a6">Aucun filtre aujourd'hui</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="nofilter">
+        <b>Attention :</b> dans le code actuel, cette réponse <b>ne change pas la sélection de produits</b>.
+        Elle n'est utilisée que dans le texte de contexte envoyé à l'IA pendant une conversation de raffinement.
+        En plafond + hauteur standard, le format vertical est de toute façon déjà exclu, que la réponse soit « oui » ou « non ».
+        C'est donc une question devenue cosmétique : à revoir, soit pour lui redonner un effet, soit pour la retirer.
+      </div>
+    </div>
+  </div>
+
+  <!-- STYLE -->
+  <div class="q">
+    <div class="head">
+      <div class="qn">Question 7</div>
+      <h3>Quel style pour ton intérieur ?</h3>
+      <div class="when"><b>Toujours posée</b>, en dernier.</div>
+      <div class="chips">
+        <span class="chip c-essence">Essence du bois</span>
+      </div>
+    </div>
+    <div class="body">
+      <table class="ans">
+        <tr><th>Réponse</th><th>Effet sur le filtrage</th></tr>
+        <tr><td class="opt">Moderne, tons clairs</td><td>Pré-sélectionne la variation <b>Peuplier</b> (bois clair).</td></tr>
+        <tr><td class="opt">Ancien, tons chauds</td><td>Pré-sélectionne la variation <b>Okoumé</b> (bois chaud).</td></tr>
+        <tr><td class="opt">Pas de préférence</td><td>Aucun filtre d'essence : la variation par défaut du produit est utilisée.</td></tr>
+      </table>
+      <p class="mini">Le style choisit l'essence affichée, pas le produit lui-même.</p>
+    </div>
+  </div>
+
+  <!-- ============ 4. MATRICE ============ -->
+  <h2 class="section"><span class="n">4.</span>Tableau récapitulatif : question × levier</h2>
+  <p class="lead">Vue d'ensemble en un coup d'œil. Un point plein signifie que la question agit sur ce levier.</p>
+  <div class="matrix-wrap">
+    <table class="matrix">
+      <tr>
+        <th class="q">Question</th>
+        <th>Catégorie</th><th>Format</th><th>Ampoule</th><th>Taille</th><th>Essence</th><th>Étape suivante</th><th>Sur-mesure</th>
+      </tr>
+      <tr>
+        <td class="q">Pièce</td>
+        <td><span class="y" style="color:var(--cat)">●</span><small>cuisine seult</small></td>
+        <td><span class="y" style="color:var(--format)">●</span><small>escalier</small></td>
+        <td><span class="y" style="color:var(--ampoule)">●</span></td>
+        <td></td><td></td>
+        <td><span class="y" style="color:var(--nav)">●</span></td>
+        <td><span class="y" style="color:var(--surmesure)">●</span><small>escalier</small></td>
+      </tr>
+      <tr>
+        <td class="q">Taille</td>
+        <td></td>
+        <td><span class="y" style="color:var(--format)">●</span><small>petite+haut</small></td>
+        <td><small>annule en grande</small></td>
+        <td><span class="y" style="color:var(--taille)">●</span></td>
+        <td></td>
+        <td><span class="y" style="color:var(--nav)">●</span></td>
+        <td><span class="y" style="color:var(--surmesure)">●</span><small>grande</small></td>
+      </tr>
+      <tr>
+        <td class="q">Type d'escalier</td>
+        <td></td><td></td><td></td>
+        <td><span class="y" style="color:var(--taille)">●</span><small>par mapping</small></td>
+        <td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="q">Éclairage</td>
+        <td><span class="y" style="color:var(--cat)">●</span><small>override</small></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="q">Où installer ?</td>
+        <td><span class="y" style="color:var(--cat)">●●●</span></td>
+        <td></td><td></td><td></td><td></td>
+        <td><span class="y" style="color:var(--nav)">●</span></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td class="q">Hauteur</td>
+        <td></td>
+        <td><span class="y" style="color:var(--format)">●</span></td>
+        <td></td><td></td><td></td>
+        <td><span class="y" style="color:var(--nav)">●</span></td>
+        <td><span class="y" style="color:var(--surmesure)">●</span></td>
+      </tr>
+      <tr>
+        <td class="q">Au-dessus d'une table</td>
+        <td colspan="7" style="color:var(--muted);text-align:left;font-style:italic">Aucun effet sur la sélection (texte IA uniquement)</td>
+      </tr>
+      <tr>
+        <td class="q">Style</td>
+        <td></td><td></td><td></td><td></td>
+        <td><span class="y" style="color:var(--essence)">●</span></td>
+        <td></td><td></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- ============ 5. PIEGES ============ -->
+  <h2 class="section"><span class="n">5.</span>Pièges et points à surveiller</h2>
+
+  <div class="pit warn">
+    <h4>La question « table » ne filtre rien, et la boule non plus</h4>
+    <p>La réponse « table » ne sert qu'à colorer le texte de l'IA en raffinement : la sélection est identique que le visiteur réponde oui ou non. Le format boule, lui, n'est jamais filtré non plus, une boule passe dans tous les cas. Décision prise (juin 2026) : on garde la boule toujours autorisée, donc cette question reste sans effet sur la sélection pour l'instant.</p>
+  </div>
+
+  <div class="pit dead">
+    <h4>L'option « multi-ampoules / grappe » est du code orphelin</h4>
+    <p>Le questionnaire ne propose plus que « principale » et « secondaire » pour l'éclairage. Mais le code qui gère la grappe (carte sur-mesure dédiée, sélection d'un modèle par format) existe toujours et n'est plus atteignable. À nettoyer, ou à rebrancher si l'on veut réintroduire ce parcours.</p>
+  </div>
+
+  <div class="pit">
+    <h4>La carte sur-mesure se déclenche différemment selon la porte d'entrée</h4>
+    <p>Quiz : grande pièce, ou hauteur confortable / haute (ou grappe). Modale Conseiller : cage d'escalier, ou grande pièce combinée à une hauteur confortable / haute. Une grande pièce seule déclenche la carte dans le quiz mais pas dans la modale. À harmoniser si l'on veut un comportement unique.</p>
+  </div>
+
+  <div class="pit">
+    <h4>Le filet de sécurité quand aucun produit ne passe</h4>
+    <p>Si les filtres ne renvoient rien, ils sont relâchés en cascade : on enlève d'abord le filtre d'ampoule, puis le filtre de format, puis le filtre de taille. Chaque relâchement ajoute une note d'avertissement transmise à l'IA pour qu'elle signale honnêtement le compromis au visiteur.</p>
+  </div>
+
+  <footer>
+    Document de référence interne, Atelier Sâpi. Décrit le filtrage commun aux trois portes d'entrée du Conseiller, conforme au code de juin 2026.
+    Remplace l'ancien « guide-flowchart.html » (daté de mars), qui décrivait un parcours et des règles désormais modifiés.
+  </footer>
+
+</div>
+</body>
+</html>

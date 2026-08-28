@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Identite visuelle — Robin Conseiller (choix retenus)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+  :root {
+    --color-cream: #FEFDFB;
+    --color-warm: #FBF6EA;
+    --color-wood: #937D68;
+    --color-wood-rgb: 147, 125, 104;
+    --color-orange: #E35B24;
+    --color-orange-hover: #C94D1E;
+    --color-dark: #323232;
+    --font-display: 'Square Peg', Georgia, serif;
+    --font-body: 'Montserrat', sans-serif;
+    --gradient-cta: linear-gradient(180deg, #E35B24 0%, #D14F1C 100%);
+
+    /* ─── Nouveau : identite Robin ─── */
+    --robin-bg: var(--color-warm);
+    --robin-border: 2px dashed rgba(var(--color-wood-rgb), 0.3);
+    --robin-radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--color-cream);
+    color: var(--color-dark);
+    line-height: 1.6;
+  }
+
+  .page-title {
+    text-align: center;
+    padding: 3rem 1rem 0.5rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  .page-subtitle {
+    text-align: center;
+    color: var(--color-wood);
+    font-size: 0.95rem;
+    margin-bottom: 3rem;
+  }
+
+  section {
+    max-width: 900px;
+    margin: 0 auto 4rem;
+    padding: 0 1.5rem;
+  }
+  section h2 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-wood);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(var(--color-wood-rgb), 0.2);
+  }
+  .variant-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(var(--color-wood-rgb), 0.6);
+    margin: 2.5rem 0 0.75rem;
+  }
+  .variant-label:first-of-type { margin-top: 0; }
+
+  hr.section-divider {
+    max-width: 900px;
+    margin: 4rem auto;
+    border: none;
+    border-top: 1px solid rgba(var(--color-wood-rgb), 0.15);
+  }
+
+  /* ═══════════════════════════════════════════
+     MARQUEUR IDENTITAIRE : fond creme + bordure pointillee
+  ═══════════════════════════════════════════ */
+  .robin-zone {
+    background: var(--robin-bg);
+    border: var(--robin-border);
+    border-radius: var(--robin-radius);
+  }
+
+  /* ═══════════════════════════════════════════
+     CARD CONSEIL — Style A + bordure pointillee
+  ═══════════════════════════════════════════ */
+  .card-robin {
+    background: var(--robin-bg);
+    border: var(--robin-border);
+    border-radius: var(--robin-radius);
+    padding: 2rem;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    cursor: pointer;
+  }
+  .card-robin:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--color-wood-rgb), 0.1);
+    border-color: var(--color-wood);
+  }
+  .card-robin__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    background: var(--color-wood);
+    color: #fff;
+    border-radius: 50px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .card-robin__text {
+    position: relative;
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--color-dark);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
+    z-index: 1;
+  }
+  .card-robin__text::before {
+    content: '\00AB\00A0';
+    color: var(--color-orange);
+    opacity: 0.4;
+  }
+  .card-robin__text::after {
+    content: '\00A0\00BB';
+    color: var(--color-orange);
+    opacity: 0.4;
+  }
+  .card-robin__signature {
+    display: block;
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--color-orange);
+  }
+
+  /* ═══════════════════════════════════════════
+     BANDEAU — Style A + bordure pointillee
+  ═══════════════════════════════════════════ */
+  .bandeau {
+    background: var(--robin-bg);
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .bandeau:hover { background: #f5edda; }
+  .bandeau__left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .bandeau__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    background: var(--color-wood);
+    color: #fff;
+    border-radius: 50px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .bandeau__summary {
+    font-size: 0.85rem;
+    color: var(--color-dark);
+  }
+  .bandeau__arrow {
+    color: var(--color-wood);
+    font-size: 1.2rem;
+    transition: transform 0.2s;
+  }
+
+  /* ═══════════════════════════════════════════
+     BOUTONS SUGGESTIONS — Outline orange + icones
+  ═══════════════════════════════════════════ */
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  .suggestion {
+    padding: 0.55rem 1.15rem;
+    border: 1.5px solid rgba(227, 91, 36, 0.3);
+    border-radius: 50px;
+    background: transparent;
+    color: var(--color-dark);
+    font-size: 0.85rem;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .suggestion:hover {
+    background: rgba(227, 91, 36, 0.06);
+    border-color: var(--color-orange);
+  }
+  .suggestion.is-selected {
+    background: var(--color-orange);
+    color: #fff;
+    border-color: var(--color-orange);
+  }
+  .suggestion__icon {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  /* ═══════════════════════════════════════════
+     INVITATIONS CONTEXTUELLES — Inline pill + bordure pointillee
+  ═══════════════════════════════════════════ */
+  .invite {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--robin-bg);
+    border: var(--robin-border);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, color 0.2s;
+    font-size: 0.82rem;
+    color: var(--color-wood);
+  }
+  .invite:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--color-wood-rgb), 0.1);
+    border-color: var(--color-wood);
+    color: var(--color-dark);
+  }
+  .invite__icon {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  /* ═══════════════════════════════════════════
+     DISCLAIMER IA — Chaleureux
+  ═══════════════════════════════════════════ */
+  .disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem;
+    background: rgba(var(--color-wood-rgb), 0.05);
+    border-radius: 12px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--color-wood);
+  }
+  .disclaimer__icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .disclaimer a {
+    color: var(--color-orange);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .disclaimer a:hover { text-decoration: underline; }
+
+  /* ═══════════════════════════════════════════
+     CTA
+  ═══════════════════════════════════════════ */
+  .cta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-orange);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: gap 0.2s;
+  }
+  .cta-link:hover { gap: 0.6rem; }
+
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.5rem;
+    background: var(--gradient-cta);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(227, 91, 36, 0.2);
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .cta-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(227, 91, 36, 0.3);
+  }
+
+  /* ═══════════════════════════════════════════
+     MODALE — Fil de fiches conseil (scroll vertical)
+  ═══════════════════════════════════════════ */
+  .modal {
+    background: var(--color-cream);
+    border-radius: 20px;
+    border: var(--robin-border);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    max-width: 520px;
+    margin: 0 auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+  }
+
+  /* Header — fixe en haut */
+  .modal__header {
+    padding: 1rem 1.5rem;
+    background: var(--robin-bg);
+    border-bottom: 1px solid rgba(var(--color-wood-rgb), 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .modal__header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .modal__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-wood);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+  }
+  .modal__name { font-weight: 600; font-size: 0.9rem; }
+  .modal__role { font-size: 0.7rem; color: var(--color-wood); }
+  .modal__close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(var(--color-wood-rgb), 0.08);
+    color: var(--color-dark);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Corps scrollable — scroll snap */
+  .modal__body {
+    flex: 1;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Fiche conseil — chaque fiche = 1 card dans 1 ecran */
+  .fiche {
+    min-height: 100%;
+    scroll-snap-align: start;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+  }
+  .fiche__card {
+    background: var(--robin-bg);
+    border: var(--robin-border);
+    border-radius: var(--robin-radius);
+    padding: 1.75rem;
+    width: 100%;
+  }
+
+  .fiche__conseil-wrap {
+    position: relative;
+  }
+  .fiche__conseil {
+    position: relative;
+    font-size: 0.93rem;
+    line-height: 1.75;
+    color: var(--color-dark);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
+    z-index: 1;
+  }
+  .fiche__conseil::before {
+    content: '\00AB\00A0';
+    color: var(--color-orange);
+    opacity: 0.4;
+  }
+  .fiche__conseil::after {
+    content: '\00A0\00BB';
+    color: var(--color-orange);
+    opacity: 0.4;
+  }
+  .fiche__conseil strong {
+    color: var(--color-wood);
+    font-weight: 600;
+  }
+  .fiche__signature {
+    display: block;
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--color-orange);
+    margin-bottom: 1.25rem;
+  }
+
+  .fiche__link {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  .fiche__link a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.3rem;
+    border: 1.5px solid var(--color-orange);
+    border-radius: 50px;
+    color: var(--color-orange);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .fiche__link a:hover {
+    background: rgba(227, 91, 36, 0.06);
+  }
+
+  .fiche__question {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-wood);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.6rem;
+  }
+
+  /* Input dans chaque card */
+  .fiche__input-wrapper {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(var(--color-wood-rgb), 0.1);
+  }
+  .modal__input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(var(--color-wood-rgb), 0.06);
+    border-radius: 50px;
+    padding: 0.6rem 0.75rem 0.6rem 1.25rem;
+  }
+  .modal__input input {
+    flex: 1;
+    border: none;
+    background: none;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--color-dark);
+    outline: none;
+  }
+  .modal__input input::placeholder { color: rgba(var(--color-wood-rgb), 0.5); }
+  .modal__send {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--gradient-cta);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* ═══════════════════════════════════════════
+     MODALE B — Une seule card visible a la fois
+  ═══════════════════════════════════════════ */
+  .modal-b {
+    background: var(--color-cream);
+    border-radius: 20px;
+    border: var(--robin-border);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    max-width: 520px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  .modal-b__header {
+    padding: 1rem 1.5rem;
+    background: var(--robin-bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-b__header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .modal-b__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: none;
+    color: var(--color-wood);
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.3rem 0;
+    transition: color 0.2s;
+  }
+  .modal-b__back:hover { color: var(--color-dark); }
+  .modal-b__step-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-dark);
+  }
+  .modal-b__close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(var(--color-wood-rgb), 0.08);
+    color: var(--color-dark);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-b__body {
+    padding: 1.75rem 1.5rem;
+  }
+
+  /* ═══════════════════════════════════════════
+     MOBILE FRAME
+  ═══════════════════════════════════════════ */
+  .mobile-frame {
+    width: 375px;
+    margin: 0 auto;
+    border: 3px solid #222;
+    border-radius: 36px;
+    overflow: hidden;
+    background: var(--color-cream);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .mobile-frame__notch {
+    height: 30px;
+    background: #222;
+    border-radius: 0 0 20px 20px;
+    margin: 0 auto;
+    width: 150px;
+  }
+
+  /* ═══════════════════════════════════════════
+     RECAP
+  ═══════════════════════════════════════════ */
+  .recap {
+    background: var(--robin-bg);
+    border: var(--robin-border);
+    border-radius: var(--robin-radius);
+    padding: 2rem;
+  }
+  .recap h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--color-dark);
+  }
+  .recap ul {
+    list-style: none;
+    padding: 0;
+  }
+  .recap li {
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--color-dark);
+    padding: 0.3rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  .recap li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.65rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-orange);
+    opacity: 0.5;
+  }
+  .recap li strong { color: var(--color-wood); }
+
+  /* ═══════════════════════════════════════════
+     PAGE ACCUEIL CARD
+  ═══════════════════════════════════════════ */
+  .home-card {
+    background: var(--robin-bg);
+    border: var(--robin-border);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .home-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(var(--color-wood-rgb), 0.1);
+    border-color: var(--color-wood);
+  }
+  .home-card__title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-dark);
+    margin-bottom: 0.5rem;
+  }
+  .home-card__desc {
+    font-size: 0.9rem;
+    color: var(--color-wood);
+    margin-bottom: 1.5rem;
+  }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">Robin Conseiller — Choix retenus</h1>
+<p class="page-subtitle">Fond creme + bordure pointillee = espace Robin</p>
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Identite visuelle Robin</h2>
+
+  <div class="recap">
+    <h3>Le marqueur : partout ou Robin parle</h3>
+    <ul>
+      <li><strong>Fond creme</strong> (#FBF6EA) + <strong>bordure pointillee bois</strong></li>
+      <li>Le visiteur apprend vite : cette couleur + ce cadre = Robin vous parle</li>
+      <li>S'applique aux cards, au bandeau, aux invitations, aux bulles de la modale</li>
+    </ul>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Card Conseil</h2>
+
+  <div class="card-robin">
+    <div class="card-robin__badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>
+      Conseil de Robin
+    </div>
+    <p class="card-robin__text">La cuisine, c'est un espace ou la lumiere de travail compte beaucoup. Une ampoule bien degagee, une suspension positionnee juste au-dessus de l'ilot — ca change tout au quotidien.</p>
+    <span class="card-robin__signature">— Robin</span>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Bandeau sous header</h2>
+
+  <p class="variant-label">Sans projet en cours</p>
+  <div class="bandeau">
+    <div class="bandeau__left">
+      <span class="bandeau__badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>
+        Mon projet
+      </span>
+      <span class="bandeau__summary" style="color: var(--color-wood);">Robin peut vous conseiller</span>
+    </div>
+    <span class="bandeau__arrow">&rsaquo;</span>
+  </div>
+
+  <p class="variant-label">Avec projet en cours</p>
+  <div class="bandeau">
+    <div class="bandeau__left">
+      <span class="bandeau__badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>
+        Mon projet
+      </span>
+      <span class="bandeau__summary">Cuisine &middot; Suspension &middot; Moderne</span>
+    </div>
+    <span class="bandeau__arrow">&rsaquo;</span>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Boutons de suggestion</h2>
+
+  <p class="variant-label">Pieces (avec icones)</p>
+  <div class="suggestions">
+    <button class="suggestion"><span class="suggestion__icon">&#x1F373;</span> Cuisine</button>
+    <button class="suggestion"><span class="suggestion__icon">&#x1F6CB;</span> Salon</button>
+    <button class="suggestion is-selected"><span class="suggestion__icon">&#x1F6CF;</span> Chambre</button>
+    <button class="suggestion"><span class="suggestion__icon">&#x1F4BB;</span> Bureau</button>
+    <button class="suggestion"><span class="suggestion__icon">&#x1F6AA;</span> Entree</button>
+    <button class="suggestion"><span class="suggestion__icon">&#x1FA9C;</span> Escalier</button>
+  </div>
+
+  <p class="variant-label">Choix techniques (sans icones)</p>
+  <div class="suggestions">
+    <button class="suggestion">Sortie plafond</button>
+    <button class="suggestion is-selected">Prise murale</button>
+    <button class="suggestion">Je ne sais pas</button>
+  </div>
+
+  <p class="variant-label">Styles (avec icones)</p>
+  <div class="suggestions">
+    <button class="suggestion"><span class="suggestion__icon">&#x25CF;</span> Moderne &middot; Peuplier</button>
+    <button class="suggestion"><span class="suggestion__icon">&#x25CF;</span> Classique &middot; Okoume</button>
+    <button class="suggestion"><span class="suggestion__icon">&#x25CF;</span> Neutre</button>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Invitations contextuelles</h2>
+
+  <p class="variant-label">Sur une page categorie</p>
+  <div style="margin-bottom: 0.75rem;">
+    <div class="invite"><span class="invite__icon">&#x1F4A1;</span> Besoin d'un conseil pour choisir ?</div>
+  </div>
+
+  <p class="variant-label">Sur une fiche produit</p>
+  <div style="margin-bottom: 0.75rem;">
+    <div class="invite"><span class="invite__icon">&#x2728;</span> Une question sur cette piece ?</div>
+  </div>
+
+  <p class="variant-label">Sur la page nos creations</p>
+  <div style="margin-bottom: 0.75rem;">
+    <div class="invite"><span class="invite__icon">&#x1F50D;</span> Vous cherchez quelque chose en particulier ?</div>
+  </div>
+
+  <p class="variant-label">Apres les filtres</p>
+  <div style="margin-bottom: 0.75rem;">
+    <div class="invite"><span class="invite__icon">&#x1F914;</span> Pas sur de votre choix ? Robin peut vous aider</div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Card page d'accueil</h2>
+
+  <div class="home-card">
+    <div class="card-robin__badge" style="margin-bottom: 1.25rem;">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>
+      Conseil de Robin
+    </div>
+    <div class="home-card__title">Dans quelle piece imaginez-vous votre luminaire ?</div>
+    <div class="home-card__desc">Robin vous guide vers la creation ideale pour votre interieur</div>
+    <div class="suggestions" style="justify-content: center;">
+      <button class="suggestion"><span class="suggestion__icon">&#x1F373;</span> Cuisine</button>
+      <button class="suggestion"><span class="suggestion__icon">&#x1F6CB;</span> Salon</button>
+      <button class="suggestion"><span class="suggestion__icon">&#x1F6CF;</span> Chambre</button>
+      <button class="suggestion"><span class="suggestion__icon">&#x1F4BB;</span> Bureau</button>
+      <button class="suggestion"><span class="suggestion__icon">&#x1F6AA;</span> Entree</button>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Disclaimer IA</h2>
+
+  <div class="disclaimer">
+    <span class="disclaimer__icon">&#x1F6E0;</span>
+    <div>J'ai passe des heures a transmettre mes connaissances a cet outil pour qu'il puisse vous conseiller quand je suis a l'atelier. Si vous voulez me parler directement, <a href="#">contactez-moi</a>.</div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Modale — fil de fiches conseil (scroll vertical)</h2>
+  <p class="variant-label">Exemple : parcours cuisine complet (4 fiches empilees)</p>
+
+  <div class="modal">
+    <div class="modal__header">
+      <div class="modal__header-left">
+        <div class="modal__avatar">R</div>
+        <div>
+          <div class="modal__name">Robin</div>
+          <div class="modal__role">Votre conseiller luminaire</div>
+        </div>
+      </div>
+      <button class="modal__close">&times;</button>
+    </div>
+
+    <div class="modal__body">
+
+      <!-- FICHE 1 — Accueil -->
+      <div class="fiche">
+        <div class="fiche__card">
+          <div class="disclaimer" style="margin-bottom: 1.5rem; font-size: 0.72rem; padding: 0.75rem 1rem;">
+            <span class="disclaimer__icon" style="font-size: 0.85rem;">&#x1F6E0;</span>
+            <div>J'ai passe des heures a transmettre mes connaissances a cet outil pour qu'il puisse vous conseiller quand je suis a l'atelier. <a href="#">Me parler directement</a></div>
+          </div>
+
+          <p class="fiche__conseil">
+Bienvenue ! Chaque luminaire que je cree est une piece unique, faconnee a la main dans mon atelier. Pour vous orienter au mieux, dites-moi : <strong>dans quelle piece imaginez-vous votre futur luminaire ?</strong>
+          </p>
+
+          <div class="fiche__question">Votre piece</div>
+          <div class="suggestions">
+            <button class="suggestion"><span class="suggestion__icon">&#x1F373;</span> Cuisine</button>
+            <button class="suggestion"><span class="suggestion__icon">&#x1F6CB;</span> Salon</button>
+            <button class="suggestion"><span class="suggestion__icon">&#x1F6CF;</span> Chambre</button>
+            <button class="suggestion"><span class="suggestion__icon">&#x1F4BB;</span> Bureau</button>
+            <button class="suggestion"><span class="suggestion__icon">&#x1F6AA;</span> Entree</button>
+            <button class="suggestion"><span class="suggestion__icon">&#x1FA9C;</span> Escalier</button>
+          </div>
+
+          <div class="fiche__input-wrapper">
+            <div class="modal__input">
+              <input type="text" placeholder="Ecrire a Robin...">
+              <button class="modal__send">&uarr;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FICHE 2 — Conseil cuisine -->
+      <div class="fiche">
+        <div class="fiche__card">
+          <p class="fiche__conseil">
+La cuisine, c'est un espace ou <strong>la lumiere de travail compte enormement</strong>. Je recommande toujours une ampoule bien degagee : ca eclaire efficacement le plan de travail, l'ilot ou la table a manger, sans zone d'ombre.
+            <br><br>
+            Mes suspensions en bois s'integrent particulierement bien dans cet espace — le bois apporte de la chaleur sans alourdir.
+          </p>
+
+          <a href="#" class="fiche__link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-orange)" stroke-width="2"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>
+            Voir les suspensions pour la cuisine
+            <span class="fiche__link-arrow">&rarr;</span>
+          </a>
+
+          <div class="fiche__question">Quel type de sortie electrique avez-vous ?</div>
+          <div class="suggestions">
+            <button class="suggestion">Sortie plafond</button>
+            <button class="suggestion">Prise murale 230V</button>
+            <button class="suggestion">Je ne sais pas</button>
+          </div>
+
+          <div class="fiche__input-wrapper">
+            <div class="modal__input">
+              <input type="text" placeholder="Ecrire a Robin...">
+              <button class="modal__send">&uarr;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FICHE 3 — Conseil sortie plafond -->
+      <div class="fiche">
+        <div class="fiche__card">
+          <p class="fiche__conseil">
+Parfait, avec une <strong>sortie au plafond</strong> vous avez le plus de possibilites. La question importante maintenant : <strong>la hauteur sous plafond</strong>. Une suspension trop basse gene le passage, trop haute elle perd en impact.
+            <br><br>
+            En general, je conseille que le bas du luminaire soit a environ 70-80 cm au-dessus d'un ilot ou d'une table, et au moins 2m10 du sol dans une zone de passage.
+          </p>
+
+          <a href="#" class="fiche__link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-orange)" stroke-width="2"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>
+            Voir toutes les suspensions
+            <span class="fiche__link-arrow">&rarr;</span>
+          </a>
+
+          <div class="fiche__question">Votre plafond est plutot...</div>
+          <div class="suggestions">
+            <button class="suggestion">Standard (~2m50)</button>
+            <button class="suggestion">Haut (&gt; 2m80)</button>
+            <button class="suggestion">Mansarde / pente</button>
+          </div>
+
+          <div class="fiche__input-wrapper">
+            <div class="modal__input">
+              <input type="text" placeholder="Ecrire a Robin...">
+              <button class="modal__send">&uarr;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FICHE 4 — Recommandation finale -->
+      <div class="fiche">
+        <div class="fiche__card">
+          <p class="fiche__conseil">
+Pour votre cuisine avec sortie plafond a hauteur standard, je vous orienterais vers <strong>Olivia</strong> ou <strong>Emma</strong>. Ce sont deux suspensions avec ampoule bien degagee, ideales au-dessus d'un ilot.
+            <br><br>
+            Olivia a un format plus horizontal, parfait pour eclairer une grande surface. Emma est plus compacte, adaptee a un espace cible. Les deux existent en Peuplier (ton clair, esprit moderne) et en Okoume (ton chaud, esprit classique).
+            <br><br>
+            Si vous hesitez entre les deux, ou si vous avez des contraintes particulieres, n'hesitez pas a me contacter directement — je pourrai vous guider plus finement.
+          </p>
+
+          <a href="#" class="fiche__link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-orange)" stroke-width="2"><path d="M9 18h6M12 2v1M18 12a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/></svg>
+            Voir ma selection personnalisee
+            <span class="fiche__link-arrow">&rarr;</span>
+          </a>
+
+          <div class="fiche__question">Envie d'aller plus loin ?</div>
+          <div class="suggestions">
+            <button class="suggestion"><span class="suggestion__icon">&#x1F4AC;</span> Contacter Robin</button>
+            <button class="suggestion"><span class="suggestion__icon">&#x2728;</span> Projet sur mesure</button>
+            <button class="suggestion"><span class="suggestion__icon">&#x1F504;</span> Recommencer</button>
+          </div>
+
+          <div class="fiche__input-wrapper">
+            <div class="modal__input">
+              <input type="text" placeholder="Ecrire a Robin...">
+              <button class="modal__send">&uarr;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Modale B — Une seule card visible (diaporama)</h2>
+
+  <p class="variant-label">Fiche 1 : accueil (pas de bouton retour)</p>
+  <div class="modal-b">
+    <div class="modal-b__header">
+      <div class="modal-b__header-left">
+        <div class="modal__avatar">R</div>
+        <div>
+          <div class="modal__name">Robin</div>
+          <div class="modal__role">Votre conseiller luminaire</div>
+        </div>
+      </div>
+      <button class="modal-b__close">&times;</button>
+    </div>
+    <div class="modal-b__body">
+        <div class="disclaimer" style="margin-bottom: 1.5rem; font-size: 0.72rem; padding: 0.75rem 1rem;">
+          <span class="disclaimer__icon" style="font-size: 0.85rem;">&#x1F6E0;</span>
+          <div>J'ai passe des heures a transmettre mes connaissances a cet outil pour qu'il puisse vous conseiller quand je suis a l'atelier. <a href="#">Me parler directement</a></div>
+        </div>
+
+        <div class="fiche__conseil-wrap">
+          <p class="fiche__conseil">
+Bienvenue ! Chaque luminaire que je cree est une piece unique, faconnee a la main dans mon atelier. Pour vous orienter au mieux, dites-moi : dans quelle piece imaginez-vous votre futur luminaire ?
+          </p>
+          <span class="fiche__signature">— Robin</span>
+        </div>
+
+        <div class="fiche__question">Votre piece</div>
+        <div class="suggestions">
+          <button class="suggestion"><span class="suggestion__icon">&#x1F373;</span> Cuisine</button>
+          <button class="suggestion"><span class="suggestion__icon">&#x1F6CB;</span> Salon</button>
+          <button class="suggestion"><span class="suggestion__icon">&#x1F6CF;</span> Chambre</button>
+          <button class="suggestion"><span class="suggestion__icon">&#x1F4BB;</span> Bureau</button>
+          <button class="suggestion"><span class="suggestion__icon">&#x1F6AA;</span> Entree</button>
+          <button class="suggestion"><span class="suggestion__icon">&#x1FA9C;</span> Escalier</button>
+        </div>
+
+        <div class="fiche__input-wrapper">
+          <div class="modal__input">
+            <input type="text" placeholder="Ecrire a Robin...">
+            <button class="modal__send">&uarr;</button>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <p class="variant-label">Fiche 2 : apres "Cuisine"</p>
+  <div class="modal-b">
+    <div class="modal-b__header">
+      <div class="modal-b__header-left">
+        <button class="modal-b__back">&larr; Retour</button>
+      </div>
+      <div class="modal-b__step-title">Votre cuisine</div>
+      <button class="modal-b__close">&times;</button>
+    </div>
+    <div class="modal-b__body">
+        <div class="fiche__conseil-wrap">
+          <p class="fiche__conseil">
+La cuisine, c'est un espace ou <strong>la lumiere de travail compte enormement</strong>. Je recommande toujours une ampoule bien degagee : ca eclaire efficacement le plan de travail, l'ilot ou la table a manger, sans zone d'ombre.
+            <br><br>
+            Mes suspensions en bois s'integrent particulierement bien dans cet espace — le bois apporte de la chaleur sans alourdir.
+          </p>
+          <span class="fiche__signature">— Robin</span>
+        </div>
+
+        <div class="fiche__link"><a href="#">Voir les suspensions pour la cuisine &rarr;</a></div>
+
+        <div class="fiche__question">Quel type de sortie electrique avez-vous ?</div>
+        <div class="suggestions">
+          <button class="suggestion">Sortie plafond</button>
+          <button class="suggestion">Prise murale 230V</button>
+          <button class="suggestion">Je ne sais pas</button>
+        </div>
+
+        <div class="fiche__input-wrapper">
+          <div class="modal__input">
+            <input type="text" placeholder="Ecrire a Robin...">
+            <button class="modal__send">&uarr;</button>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <p class="variant-label">Fiche 3 : apres "Sortie plafond"</p>
+  <div class="modal-b">
+    <div class="modal-b__header">
+      <div class="modal-b__header-left">
+        <button class="modal-b__back">&larr; Retour</button>
+      </div>
+      <div class="modal-b__step-title">Sortie electrique</div>
+      <button class="modal-b__close">&times;</button>
+    </div>
+    <div class="modal-b__body">
+        <div class="fiche__conseil-wrap">
+          <p class="fiche__conseil">
+Parfait, avec une <strong>sortie au plafond</strong> vous avez le plus de possibilites. La question importante maintenant : <strong>la hauteur sous plafond</strong>. Une suspension trop basse gene le passage, trop haute elle perd en impact.
+            <br><br>
+            En general, je conseille que le bas du luminaire soit a environ 70-80 cm au-dessus d'un ilot ou d'une table, et au moins 2m10 du sol dans une zone de passage.
+          </p>
+          <span class="fiche__signature">— Robin</span>
+        </div>
+
+        <div class="fiche__link"><a href="#">Voir toutes les suspensions &rarr;</a></div>
+
+        <div class="fiche__question">Votre plafond est plutot...</div>
+        <div class="suggestions">
+          <button class="suggestion">Standard (~2m50)</button>
+          <button class="suggestion">Haut (&gt; 2m80)</button>
+          <button class="suggestion">Mansarde / pente</button>
+        </div>
+
+        <div class="fiche__input-wrapper">
+          <div class="modal__input">
+            <input type="text" placeholder="Ecrire a Robin...">
+            <button class="modal__send">&uarr;</button>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <p class="variant-label">Fiche 4 : recommandation finale</p>
+  <div class="modal-b">
+    <div class="modal-b__header">
+      <div class="modal-b__header-left">
+        <button class="modal-b__back">&larr; Retour</button>
+      </div>
+      <div class="modal-b__step-title">Ma recommandation</div>
+      <button class="modal-b__close">&times;</button>
+    </div>
+    <div class="modal-b__body">
+        <div class="fiche__conseil-wrap">
+          <p class="fiche__conseil">
+Pour votre cuisine avec sortie plafond a hauteur standard, je vous orienterais vers <strong>Olivia</strong> ou <strong>Emma</strong>. Ce sont deux suspensions avec ampoule bien degagee, ideales au-dessus d'un ilot.
+            <br><br>
+            Olivia a un format plus horizontal, parfait pour eclairer une grande surface. Emma est plus compacte, adaptee a un espace cible. Les deux existent en Peuplier (ton clair, esprit moderne) et en Okoume (ton chaud, esprit classique).
+            <br><br>
+            Si vous hesitez entre les deux, ou si vous avez des contraintes particulieres, n'hesitez pas a me contacter directement — je pourrai vous guider plus finement.
+          </p>
+          <span class="fiche__signature">— Robin</span>
+        </div>
+
+        <div class="fiche__link"><a href="#">Voir ma selection personnalisee &rarr;</a></div>
+
+        <div class="fiche__question">Envie d'aller plus loin ?</div>
+        <div class="suggestions">
+          <button class="suggestion"><span class="suggestion__icon">&#x1F4AC;</span> Contacter Robin</button>
+          <button class="suggestion"><span class="suggestion__icon">&#x2728;</span> Projet sur mesure</button>
+          <button class="suggestion"><span class="suggestion__icon">&#x1F504;</span> Recommencer</button>
+        </div>
+
+        <div class="fiche__input-wrapper">
+          <div class="modal__input">
+            <input type="text" placeholder="Ecrire a Robin...">
+            <button class="modal__send">&uarr;</button>
+          </div>
+        </div>
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ═══════════════════════════════════════════ -->
+<section>
+  <h2>Vue mobile</h2>
+
+  <div class="mobile-frame">
+    <div class="mobile-frame__notch"></div>
+    <div>
+
+      <!-- Header fictif -->
+      <div style="background: var(--color-dark); color: #fff; padding: 0.75rem 1rem; font-size: 0.8rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+        <span>Atelier Sapi</span>
+        <span style="font-size: 1.2rem;">&#9776;</span>
+      </div>
+
+      <!-- Bandeau Robin -->
+      <div class="bandeau" style="border-radius: 0; border-left: none; border-right: none;">
+        <div class="bandeau__left">
+          <span class="bandeau__badge" style="font-size: 0.6rem; padding: 0.15rem 0.5rem;">
+            Mon projet
+          </span>
+          <span class="bandeau__summary" style="font-size: 0.78rem;">Cuisine &middot; Suspension</span>
+        </div>
+        <span class="bandeau__arrow">&rsaquo;</span>
+      </div>
+
+      <!-- Contenu page -->
+      <div style="padding: 1.25rem;">
+        <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-wood); margin-bottom: 0.5rem;">Nos creations</div>
+        <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Suspensions</div>
+
+        <!-- Invite contextuelle -->
+        <div class="invite" style="margin-bottom: 1.25rem; font-size: 0.78rem;">
+          <span class="invite__icon">&#x1F4A1;</span> Besoin d'un conseil pour choisir ?
+        </div>
+
+        <!-- Grille produits fictive -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <div style="aspect-ratio: 1; background: var(--color-warm); border-radius: 12px;"></div>
+          <div style="aspect-ratio: 1; background: var(--color-warm); border-radius: 12px;"></div>
+          <div style="aspect-ratio: 1; background: var(--color-warm); border-radius: 12px;"></div>
+          <div style="aspect-ratio: 1; background: var(--color-warm); border-radius: 12px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div style="height: 4rem;"></div>
+
+</body>
+</html>

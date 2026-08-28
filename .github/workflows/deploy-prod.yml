@@ -42,11 +42,33 @@ jobs:
           port: 21
           server-dir: /wp-content/themes/theme-sapi-maison/
           local-dir: ./
+          # ⚠️ EXCLUSIONS ÉLARGIES LE 28/08. Le thème embarque des documents de
+          # travail — journal de coordination, maquettes, notes, exports CSV —
+          # et le dossier du thème est servi tel quel par le serveur web : sans
+          # ces lignes, n'importe qui peut lire
+          # atelier-sapi.fr/wp-content/themes/theme-sapi-maison/memory/*.md.
+          #
+          # ⚠️ NE PAS AJOUTER `assets/*.txt`. Le workflow de test l'a, et c'est
+          # un piège : `assets/guide-prompt-{ton,savoir,regles,exemples}.txt`
+          # sont LUS À L'EXÉCUTION par sapi_megafilter_load_v2_prompts(). Les
+          # exclure ne casse rien tant qu'ils sont déjà sur le serveur (le
+          # déploiement FTP ne supprime pas ce qu'il ignore), mais sur une
+          # installation neuve le Conseiller perdrait sa voix et ses règles
+          # métier — en silence, `@file_get_contents` retombant sur ''.
+          # `assets/*.html` en revanche n'est que de la documentation.
           exclude: |
             **/.git*
             **/.git*/**
-            **/README.md
             **/.DS_Store
             **/node_modules/**
             **/.vscode/**
             **/.idea/**
+            .claude/**
+            memory/**
+            mockups/**
+            *.md
+            *.csv
+            *.txt
+            *.html
+            assets/*.html
+            .ftp-deploy-sync-state.json

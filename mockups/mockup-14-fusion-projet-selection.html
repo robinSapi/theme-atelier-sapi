@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #14 — Fusion card "Mon projet" + grille sélection (3 variantes)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-warm-2: #EDE6D8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+  a { color: inherit; text-decoration: none; }
+
+  /* ============================================ MARQUEUR VARIANTE */
+  .variant-marker {
+    background: var(--color-wood-dark);
+    color: #fff;
+    text-align: center;
+    padding: 18px 20px;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .variant-marker strong {
+    color: #E35B24;
+    font-family: 'Square Peg', cursive;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 26px;
+    font-weight: normal;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .variant-marker__desc {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    opacity: 0.7;
+    letter-spacing: 0.08em;
+    font-weight: 400;
+  }
+
+  /* ============================================ HERO */
+  .hero {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 80px 20px 48px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'Square Peg', cursive;
+    font-size: clamp(50px, 9vw, 90px);
+    font-weight: normal;
+    line-height: 1;
+  }
+  .hero p {
+    margin-top: 14px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  /* ============================================ GRILLE PRODUITS commune */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 22px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(74, 63, 53, 0.12);
+  }
+  .card__photo {
+    aspect-ratio: 1/1.1;
+    background: linear-gradient(135deg, var(--color-warm) 0%, var(--color-warm-2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.7;
+  }
+  .card__body {
+    padding: 14px 12px 18px;
+    text-align: center;
+  }
+  .card__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+    margin-bottom: 3px;
+  }
+  .card__price {
+    font-size: 12px;
+    color: var(--color-wood);
+  }
+
+  /* ============================================ COMMUNS Conseiller */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+  }
+  .badge svg { width: 11px; height: 11px; }
+
+  .conseiller-text {
+    font-size: 17px;
+    font-style: italic;
+    color: var(--color-wood-dark);
+    line-height: 1.6;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .conseiller-sig {
+    display: inline;
+    margin-left: 8px;
+    font-family: 'Square Peg', cursive;
+    font-style: normal;
+    font-size: 24px;
+    color: var(--color-wood);
+    line-height: 1;
+  }
+  .conseiller-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-wood);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .conseiller-link:hover { color: var(--color-orange); }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     VARIANTE A — CARD ENGLOBANTE (grille DANS le bloc crème + dashed)
+  ════════════════════════════════════════════════════════════════ */
+  .variantA-wrap {
+    max-width: 1400px;
+    margin: 40px auto 0;
+    padding: 0 20px;
+  }
+  .variantA-card {
+    position: relative;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 50px 40px 44px;
+  }
+  .variantA-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+  .variantA-card > * { position: relative; z-index: 1; }
+  .variantA-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .variantA-header .badge {
+    margin-bottom: 22px;
+  }
+  .variantA-header .conseiller-link {
+    margin-top: 14px;
+  }
+  .variantA-grid {
+    padding: 0 16px;
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     VARIANTE B — BANDEAU PLEINE LARGEUR fond crème
+  ════════════════════════════════════════════════════════════════ */
+  .variantB-band {
+    background: var(--color-warm);
+    padding: 56px 0 60px;
+    position: relative;
+  }
+  .variantB-band::before {
+    content: '';
+    position: absolute;
+    inset: 20px 20px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.30);
+    border-radius: 16px;
+    pointer-events: none;
+  }
+  .variantB-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+    position: relative;
+    z-index: 1;
+  }
+  .variantB-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .variantB-header .badge {
+    margin-bottom: 22px;
+  }
+  .variantB-header .conseiller-link {
+    margin-top: 14px;
+  }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     VARIANTE C — CARD COMPACTE + GRILLE COLLÉE (transition douce)
+     La card sert d'en-tête, la grille suit immédiatement avec un
+     petit titre intégré "Ma sélection · 5 luminaires"
+  ════════════════════════════════════════════════════════════════ */
+  .variantC-wrap {
+    max-width: 1400px;
+    margin: 40px auto 0;
+    padding: 0 20px;
+  }
+  .variantC-card {
+    position: relative;
+    background: var(--color-warm);
+    border-radius: 16px 16px 0 0;
+    padding: 44px 40px 28px;
+    text-align: center;
+  }
+  .variantC-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px 12px 0 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    pointer-events: none;
+  }
+  .variantC-card > * { position: relative; z-index: 1; }
+  .variantC-card .badge { margin-bottom: 18px; }
+  .variantC-card .conseiller-link { margin-top: 14px; }
+  .variantC-tab {
+    background: var(--color-warm);
+    border-radius: 0 0 16px 16px;
+    padding: 6px 40px 36px;
+    position: relative;
+  }
+  .variantC-tab::before {
+    content: '';
+    position: absolute;
+    inset: 0 12px 12px 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    pointer-events: none;
+  }
+  .variantC-tab > * { position: relative; z-index: 1; }
+  .variantC-subhead {
+    text-align: center;
+    margin-bottom: 26px;
+    padding-top: 18px;
+    border-top: 1px dashed rgba(139, 115, 85, 0.30);
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+  .variantC-subhead__eyebrow {
+    display: block;
+    font-family: 'Square Peg', cursive;
+    font-size: 28px;
+    color: var(--color-wood);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .variantC-subhead__title {
+    font-size: 14px;
+    color: var(--color-wood-mid);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .variantC-grid { padding: 0 16px; }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     SECTION CATALOGUE COMPLET (commune)
+  ════════════════════════════════════════════════════════════════ */
+  .section-divider {
+    max-width: 1400px;
+    margin: 70px auto 0;
+    padding: 0 20px;
+    text-align: center;
+    position: relative;
+  }
+  .section-divider::before,
+  .section-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 60px);
+    height: 1px;
+    background: var(--color-line);
+  }
+  .section-divider::before { left: 20px; }
+  .section-divider::after { right: 20px; }
+  .section-divider__dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-wood);
+    opacity: 0.4;
+    margin: 0 5px;
+    vertical-align: middle;
+  }
+
+  .section-catalogue {
+    max-width: 1400px;
+    margin: 44px auto 0;
+    padding: 0 20px 70px;
+  }
+  .section-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .section-header h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: clamp(20px, 2.6vw, 26px);
+    letter-spacing: 0.04em;
+    color: var(--color-wood-dark);
+  }
+  .section-header__sub {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--color-wood);
+  }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 50px;
+    font-size: 13px;
+    color: var(--color-wood-dark);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .pill:hover { border-color: var(--color-wood); }
+  .pill--active {
+    background: var(--color-wood-dark);
+    color: #fff;
+    border-color: var(--color-wood-dark);
+  }
+  .pill__count {
+    margin-left: 6px;
+    opacity: 0.6;
+    font-size: 11px;
+  }
+
+
+  /* ════════════════════════════════════════════════════════════════
+     SÉPARATEUR INTER-VARIANTES (mockup uniquement)
+  ════════════════════════════════════════════════════════════════ */
+  .mockup-sep {
+    height: 60px;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        var(--color-wood-dark) 0,
+        var(--color-wood-dark) 12px,
+        #3a3128 12px,
+        #3a3128 24px
+      );
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     RESPONSIVE
+  ════════════════════════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+    .hero { padding: 60px 20px 30px; }
+    .variantA-wrap, .variantC-wrap { padding: 0 14px; margin-top: 24px; }
+    .variantA-card, .variantC-card { padding: 32px 18px 28px; }
+    .variantA-card::before, .variantC-card::before { inset: 8px; }
+    .variantA-grid, .variantC-grid { padding: 0 4px; }
+    .variantB-band { padding: 36px 0 40px; }
+    .variantB-band::before { inset: 12px 12px; }
+    .variantB-inner { padding: 0 18px; }
+    .variantC-card { border-radius: 14px 14px 0 0; }
+    .variantC-card::before { inset: 8px 8px 0 8px; border-radius: 10px 10px 0 0; }
+    .variantC-tab { padding: 6px 18px 24px; border-radius: 0 0 14px 14px; }
+    .variantC-tab::before { inset: 0 8px 8px 8px; border-radius: 0 0 10px 10px; }
+    .variantC-subhead { margin-left: 6px; margin-right: 6px; }
+    .conseiller-text { font-size: 15px; }
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .card__photo { aspect-ratio: 1/1.05; }
+    .section-divider { margin-top: 48px; }
+    .section-catalogue { padding: 0 14px 50px; margin-top: 32px; }
+    .pills {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      justify-content: flex-start;
+      padding: 0 14px 4px;
+      margin: 0 -14px 26px;
+      scrollbar-width: none;
+    }
+    .pills::-webkit-scrollbar { display: none; }
+    .pill { font-size: 12px; padding: 8px 14px; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VARIANTE A — CARD ENGLOBANTE
+     La grille produits est À L'INTÉRIEUR du bloc crème + dashed.
+     Tout le "projet" est dans un seul rectangle visuel.
+     ═══════════════════════════════════════════════════════════════ -->
+
+<div class="variant-marker">
+  <strong>Variante A</strong> Card englobante — grille DANS le bloc crème + dashed
+  <span class="variant-marker__desc">Un seul rectangle visuel contient : badge, phrase IA, lien Modifier, et toutes les cards produits</span>
+</div>
+
+<section class="hero">
+  <h1>Pour ton salon</h1>
+  <p>Ma sélection pour cette pièce</p>
+</section>
+
+<div class="variantA-wrap">
+  <div class="variantA-card">
+    <div class="variantA-header">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        Mon projet · 5 luminaires
+      </span>
+      <p class="conseiller-text">
+        "Pour un salon spacieux et moderne, j'ai sélectionné des suspensions à ampoule entourée — la lumière diffuse y est plus douce, idéale pour les soirées canapé."
+        <span class="conseiller-sig">— Robin</span>
+      </p>
+      <div><a href="#" class="conseiller-link">Préciser ou modifier mon projet ✎</a></div>
+    </div>
+
+    <div class="grid variantA-grid">
+      <a href="#" class="card"><div class="card__photo">Olivia · suspension</div><div class="card__body"><div class="card__name">Olivia</div><div class="card__price">À partir de 195 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Gaston · suspension</div><div class="card__body"><div class="card__name">Gaston</div><div class="card__price">À partir de 220 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Timothée · suspension</div><div class="card__body"><div class="card__name">Timothée</div><div class="card__price">À partir de 175 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Myriam · suspension</div><div class="card__body"><div class="card__name">Myriam</div><div class="card__price">À partir de 240 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Joséphine · lampadaire</div><div class="card__body"><div class="card__name">Joséphine</div><div class="card__price">À partir de 285 €</div></div></a>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider">
+  <span class="section-divider__dot"></span>
+  <span class="section-divider__dot"></span>
+  <span class="section-divider__dot"></span>
+</div>
+
+<section class="section-catalogue">
+  <header class="section-header">
+    <h2>Toutes mes créations</h2>
+    <p class="section-header__sub">Le catalogue complet</p>
+  </header>
+  <div class="pills">
+    <button class="pill pill--active">Tous <span class="pill__count">24</span></button>
+    <button class="pill">Suspensions <span class="pill__count">11</span></button>
+    <button class="pill">Lampadaires <span class="pill__count">4</span></button>
+    <button class="pill">Lampes à poser <span class="pill__count">6</span></button>
+    <button class="pill">Appliques <span class="pill__count">3</span></button>
+  </div>
+  <div class="grid">
+    <a href="#" class="card"><div class="card__photo">Olivia</div><div class="card__body"><div class="card__name">Olivia</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Gaston</div><div class="card__body"><div class="card__name">Gaston</div><div class="card__price">À partir de 220 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Timothée</div><div class="card__body"><div class="card__name">Timothée</div><div class="card__price">À partir de 175 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Myriam</div><div class="card__body"><div class="card__name">Myriam</div><div class="card__price">À partir de 240 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Joséphine</div><div class="card__body"><div class="card__name">Joséphine</div><div class="card__price">À partir de 285 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Dalida</div><div class="card__body"><div class="card__name">Dalida</div><div class="card__price">À partir de 145 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">La Merveilleuse</div><div class="card__body"><div class="card__name">La Merveilleuse</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Léon</div><div class="card__body"><div class="card__name">Léon</div><div class="card__price">À partir de 95 €</div></div></a>
+  </div>
+</section>
+
+
+<div class="mockup-sep"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VARIANTE B — BANDEAU PLEINE LARGEUR fond crème
+     Pas de card avec border-radius : tout le bloc projet prend
+     toute la largeur de l'écran. Sensation "scène dédiée au projet".
+     ═══════════════════════════════════════════════════════════════ -->
+
+<div class="variant-marker">
+  <strong>Variante B</strong> Bandeau pleine largeur — fond crème sur toute la largeur
+  <span class="variant-marker__desc">Pas de border-radius : le bloc projet occupe toute la largeur de l'écran, dashed décoratif à l'intérieur</span>
+</div>
+
+<section class="hero">
+  <h1>Pour ton salon</h1>
+  <p>Ma sélection pour cette pièce</p>
+</section>
+
+<div class="variantB-band">
+  <div class="variantB-inner">
+    <div class="variantB-header">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        Mon projet · 5 luminaires
+      </span>
+      <p class="conseiller-text" style="margin-top: 22px;">
+        "Pour un salon spacieux et moderne, j'ai sélectionné des suspensions à ampoule entourée — la lumière diffuse y est plus douce, idéale pour les soirées canapé."
+        <span class="conseiller-sig">— Robin</span>
+      </p>
+      <div style="margin-top: 14px;"><a href="#" class="conseiller-link">Préciser ou modifier mon projet ✎</a></div>
+    </div>
+
+    <div class="grid">
+      <a href="#" class="card"><div class="card__photo">Olivia · suspension</div><div class="card__body"><div class="card__name">Olivia</div><div class="card__price">À partir de 195 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Gaston · suspension</div><div class="card__body"><div class="card__name">Gaston</div><div class="card__price">À partir de 220 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Timothée · suspension</div><div class="card__body"><div class="card__name">Timothée</div><div class="card__price">À partir de 175 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Myriam · suspension</div><div class="card__body"><div class="card__name">Myriam</div><div class="card__price">À partir de 240 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Joséphine · lampadaire</div><div class="card__body"><div class="card__name">Joséphine</div><div class="card__price">À partir de 285 €</div></div></a>
+    </div>
+  </div>
+</div>
+
+<section class="section-catalogue" style="margin-top: 60px;">
+  <header class="section-header">
+    <h2>Toutes mes créations</h2>
+    <p class="section-header__sub">Le catalogue complet</p>
+  </header>
+  <div class="pills">
+    <button class="pill pill--active">Tous <span class="pill__count">24</span></button>
+    <button class="pill">Suspensions <span class="pill__count">11</span></button>
+    <button class="pill">Lampadaires <span class="pill__count">4</span></button>
+    <button class="pill">Lampes à poser <span class="pill__count">6</span></button>
+    <button class="pill">Appliques <span class="pill__count">3</span></button>
+  </div>
+  <div class="grid">
+    <a href="#" class="card"><div class="card__photo">Olivia</div><div class="card__body"><div class="card__name">Olivia</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Gaston</div><div class="card__body"><div class="card__name">Gaston</div><div class="card__price">À partir de 220 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Timothée</div><div class="card__body"><div class="card__name">Timothée</div><div class="card__price">À partir de 175 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Myriam</div><div class="card__body"><div class="card__name">Myriam</div><div class="card__price">À partir de 240 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Joséphine</div><div class="card__body"><div class="card__name">Joséphine</div><div class="card__price">À partir de 285 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Dalida</div><div class="card__body"><div class="card__name">Dalida</div><div class="card__price">À partir de 145 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">La Merveilleuse</div><div class="card__body"><div class="card__name">La Merveilleuse</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Léon</div><div class="card__body"><div class="card__name">Léon</div><div class="card__price">À partir de 95 €</div></div></a>
+  </div>
+</section>
+
+
+<div class="mockup-sep"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     VARIANTE C — CARD + ONGLET COLLÉS (deux zones distinctes mais visuellement attachées)
+     La card "Mon projet" reste reconnaissable en haut, mais elle
+     se prolonge en bas par un onglet attaché qui contient la grille.
+     Le tout forme un seul container crème.
+     ═══════════════════════════════════════════════════════════════ -->
+
+<div class="variant-marker">
+  <strong>Variante C</strong> Card + onglet collés — deux zones séparées par une fine ligne dashed
+  <span class="variant-marker__desc">La card "Mon projet" garde son identité en haut, la grille est attachée en bas dans le même container crème</span>
+</div>
+
+<section class="hero">
+  <h1>Pour ton salon</h1>
+  <p>Ma sélection pour cette pièce</p>
+</section>
+
+<div class="variantC-wrap">
+  <div class="variantC-card">
+    <span class="badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+        <path d="m15 5 4 4"/>
+      </svg>
+      Mon projet
+    </span>
+    <p class="conseiller-text" style="margin-top: 18px;">
+      "Pour un salon spacieux et moderne, j'ai sélectionné des suspensions à ampoule entourée — la lumière diffuse y est plus douce, idéale pour les soirées canapé."
+      <span class="conseiller-sig">— Robin</span>
+    </p>
+    <div><a href="#" class="conseiller-link">Préciser ou modifier mon projet ✎</a></div>
+  </div>
+
+  <div class="variantC-tab">
+    <header class="variantC-subhead">
+      <span class="variantC-subhead__eyebrow">Ma sélection</span>
+      <span class="variantC-subhead__title">5 luminaires adaptés</span>
+    </header>
+
+    <div class="grid variantC-grid">
+      <a href="#" class="card"><div class="card__photo">Olivia · suspension</div><div class="card__body"><div class="card__name">Olivia</div><div class="card__price">À partir de 195 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Gaston · suspension</div><div class="card__body"><div class="card__name">Gaston</div><div class="card__price">À partir de 220 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Timothée · suspension</div><div class="card__body"><div class="card__name">Timothée</div><div class="card__price">À partir de 175 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Myriam · suspension</div><div class="card__body"><div class="card__name">Myriam</div><div class="card__price">À partir de 240 €</div></div></a>
+      <a href="#" class="card"><div class="card__photo">Joséphine · lampadaire</div><div class="card__body"><div class="card__name">Joséphine</div><div class="card__price">À partir de 285 €</div></div></a>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider">
+  <span class="section-divider__dot"></span>
+  <span class="section-divider__dot"></span>
+  <span class="section-divider__dot"></span>
+</div>
+
+<section class="section-catalogue">
+  <header class="section-header">
+    <h2>Toutes mes créations</h2>
+    <p class="section-header__sub">Le catalogue complet</p>
+  </header>
+  <div class="pills">
+    <button class="pill pill--active">Tous <span class="pill__count">24</span></button>
+    <button class="pill">Suspensions <span class="pill__count">11</span></button>
+    <button class="pill">Lampadaires <span class="pill__count">4</span></button>
+    <button class="pill">Lampes à poser <span class="pill__count">6</span></button>
+    <button class="pill">Appliques <span class="pill__count">3</span></button>
+  </div>
+  <div class="grid">
+    <a href="#" class="card"><div class="card__photo">Olivia</div><div class="card__body"><div class="card__name">Olivia</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Gaston</div><div class="card__body"><div class="card__name">Gaston</div><div class="card__price">À partir de 220 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Timothée</div><div class="card__body"><div class="card__name">Timothée</div><div class="card__price">À partir de 175 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Myriam</div><div class="card__body"><div class="card__name">Myriam</div><div class="card__price">À partir de 240 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Joséphine</div><div class="card__body"><div class="card__name">Joséphine</div><div class="card__price">À partir de 285 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Dalida</div><div class="card__body"><div class="card__name">Dalida</div><div class="card__price">À partir de 145 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">La Merveilleuse</div><div class="card__body"><div class="card__name">La Merveilleuse</div><div class="card__price">À partir de 195 €</div></div></a>
+    <a href="#" class="card"><div class="card__photo">Léon</div><div class="card__body"><div class="card__name">Léon</div><div class="card__price">À partir de 95 €</div></div></a>
+  </div>
+</section>
+
+
+</body>
+</html>

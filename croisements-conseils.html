@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbre des conseils — Robin V2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Montserrat', sans-serif; background: #FEFDFB; color: #323232; padding: 2rem; }
+
+  h1 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .subtitle { color: #937D68; font-size: 0.82rem; margin-bottom: 2rem; }
+
+  .tree { padding-left: 0; }
+  .tree ul { padding-left: 1.5rem; border-left: 2px solid #eee; margin-left: 0.5rem; }
+  .tree li { list-style: none; padding: 0.3rem 0; position: relative; }
+
+  /* Node styles */
+  .node { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.75rem; border-radius: 8px; font-size: 0.8rem; cursor: default; }
+
+  /* Question node */
+  .node--question {
+    background: #937D68;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Answer node */
+  .node--answer {
+    background: rgba(227, 91, 36, 0.08);
+    border: 1.5px solid rgba(227, 91, 36, 0.3);
+    color: #323232;
+    font-weight: 500;
+  }
+
+  /* Conseil node (the generated text) */
+  .node--conseil {
+    background: #FBF6EA;
+    border: 2px dashed rgba(147, 125, 104, 0.3);
+    color: #323232;
+    font-style: italic;
+    font-size: 0.75rem;
+    max-width: 500px;
+    line-height: 1.4;
+  }
+  .node--conseil::before {
+    content: '\00AB\00A0';
+    color: #E35B24;
+    opacity: 0.5;
+    font-style: normal;
+  }
+  .node--conseil::after {
+    content: '\00A0\00BB';
+    color: #E35B24;
+    opacity: 0.5;
+    font-style: normal;
+  }
+
+  /* Count badge */
+  .count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #E35B24;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    padding: 0 5px;
+    margin-left: 0.3rem;
+  }
+
+  /* Collapsed indicator */
+  .branch-label {
+    font-size: 0.7rem;
+    color: #937D68;
+    font-style: italic;
+    margin-left: 0.3rem;
+  }
+
+  /* Section */
+  .section { margin-bottom: 3rem; }
+  .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid #f5f0e6; }
+
+  /* Summary */
+  .summary {
+    background: #FBF6EA;
+    border: 2px dashed rgba(147,125,104,0.3);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-top: 2rem;
+    max-width: 600px;
+  }
+  .summary h2 { font-size: 0.95rem; margin-bottom: 0.75rem; }
+  .summary-row { display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: 0.82rem; border-bottom: 1px solid rgba(147,125,104,0.1); }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-total { font-weight: 700; color: #E35B24; font-size: 0.95rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 2px solid rgba(147,125,104,0.2); }
+
+  .note { font-size: 0.75rem; color: #937D68; margin-top: 1rem; line-height: 1.5; }
+
+  details { margin: 0.2rem 0; }
+  details summary { cursor: pointer; list-style: none; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary .expand-icon::after { content: ' +'; font-weight: 700; color: #937D68; }
+  details[open] summary .expand-icon::after { content: ' −'; }
+</style>
+</head>
+<body>
+
+<h1>Arbre des conseils Robin — Chaque feuille = 1 texte a ecrire</h1>
+<p class="subtitle">Cliquer pour deplier/replier les branches</p>
+
+<div class="section">
+<div class="tree">
+<ul style="border:none; padding:0;">
+
+<!-- ══════════════ PIECE ══════════════ -->
+<li>
+  <span class="node node--question">Question : Piece</span>
+  <span class="count">6</span>
+  <ul>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Cuisine</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li><span class="node node--conseil">La cuisine, c'est un espace ou la lumiere de travail compte enormement...</span></li>
+        </ul>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Bureau / Atelier</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li><span class="node node--conseil">Le bureau a besoin d'un eclairage fonctionnel mais pas froid...</span></li>
+        </ul>
+      </details>
+    </li>
+    <li><span class="node node--answer">Salon</span> <span class="branch-label">→ 1 texte</span></li>
+    <li><span class="node node--answer">Chambre</span> <span class="branch-label">→ 1 texte</span></li>
+    <li><span class="node node--answer">Entree</span> <span class="branch-label">→ 1 texte</span></li>
+    <li><span class="node node--answer">Escalier</span> <span class="branch-label">→ 1 texte</span></li>
+  </ul>
+</li>
+
+<!-- ══════════════ TAILLE (croisée avec pièce) ══════════════ -->
+<li style="margin-top: 1.5rem;">
+  <span class="node node--question">Question : Taille &times; Piece</span>
+  <span class="count">15</span>
+  <ul>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Petite (&lt; 10 m&sup2;)</span> <span class="branch-label">&times; 5 pieces</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Cuisine</span> <span class="node node--conseil">Dans une petite cuisine, il faut rester compact au-dessus du plan de travail...</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Bureau</span> <span class="node node--conseil">Un petit bureau demande un luminaire qui ne gene pas l'espace de travail...</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Salon</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Chambre</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Entree</span> <span class="branch-label">→ 1 texte</span></li>
+        </ul>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Moyenne (10-20 m&sup2;)</span> <span class="branch-label">&times; 5 pieces</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Cuisine</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Bureau</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Salon</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Chambre</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Entree</span> <span class="branch-label">→ 1 texte</span></li>
+        </ul>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Grande (&gt; 20 m&sup2;)</span> <span class="branch-label">&times; 5 pieces</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Cuisine</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Bureau</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Salon</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Chambre</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Entree</span> <span class="branch-label">→ 1 texte</span></li>
+        </ul>
+      </details>
+    </li>
+  </ul>
+</li>
+
+<!-- ══════════════ TAILLE ESCALIER ══════════════ -->
+<li style="margin-top: 1.5rem;">
+  <span class="node node--question">Question : Taille Escalier</span>
+  <span class="count">2</span>
+  <ul>
+    <li><span class="node node--answer">Standard</span> <span class="branch-label">→ 1 texte</span></li>
+    <li><span class="node node--answer">Grand ouvert</span> <span class="branch-label">→ 1 texte</span></li>
+  </ul>
+</li>
+
+<!-- ══════════════ ECLAIRAGE (croisé avec pièce) ══════════════ -->
+<li style="margin-top: 1.5rem;">
+  <span class="node node--question">Question : Eclairage &times; Piece</span>
+  <span class="count">20</span>
+  <span class="branch-label">(uniquement si taille = grande)</span>
+  <ul>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Eclairage principal</span> <span class="branch-label">&times; 5 pieces</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Cuisine</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Bureau</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Salon</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Chambre</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Entree</span> <span class="branch-label">→ 1 texte</span></li>
+        </ul>
+      </details>
+    </li>
+    <li><span class="node node--answer">Completer existant</span> <span class="branch-label">&times; 5 pieces → 5 textes</span></li>
+    <li><span class="node node--answer">Multi-ampoules / grappe</span> <span class="branch-label">&times; 5 pieces → 5 textes</span></li>
+    <li><span class="node node--answer">Je verrai plus tard</span> <span class="branch-label">&times; 5 pieces → 5 textes</span></li>
+  </ul>
+</li>
+
+<!-- ══════════════ SORTIE ══════════════ -->
+<li style="margin-top: 1.5rem;">
+  <span class="node node--question">Question : Sortie</span>
+  <span class="count">41</span>
+  <ul>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Au plafond</span> <span class="branch-label">&times; piece &times; taille = 17 textes</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li>
+            <details>
+              <summary><span class="branch-label">Piece = Cuisine</span><span class="expand-icon"></span></summary>
+              <ul>
+                <li><span class="node node--answer" style="font-size:0.7rem;">Petite</span> <span class="node node--conseil">Avec une sortie plafond dans votre petite cuisine...</span></li>
+                <li><span class="node node--answer" style="font-size:0.7rem;">Moyenne</span> <span class="branch-label">→ 1 texte</span></li>
+                <li><span class="node node--answer" style="font-size:0.7rem;">Grande</span> <span class="branch-label">→ 1 texte</span></li>
+              </ul>
+            </details>
+          </li>
+          <li><span class="branch-label">Piece = Bureau</span> <span class="branch-label">&times; 3 tailles → 3 textes</span></li>
+          <li><span class="branch-label">Piece = Salon</span> <span class="branch-label">&times; 3 tailles → 3 textes</span></li>
+          <li><span class="branch-label">Piece = Chambre</span> <span class="branch-label">&times; 3 tailles → 3 textes</span></li>
+          <li><span class="branch-label">Piece = Entree</span> <span class="branch-label">&times; 3 tailles → 3 textes</span></li>
+          <li><span class="branch-label">Piece = Escalier</span> <span class="branch-label">&times; 2 types → 2 textes</span></li>
+          <li><span class="branch-label" style="color: #E35B24; font-weight: 600;">Sous-total "Au plafond" : 17 textes</span></li>
+        </ul>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Au mur</span> <span class="branch-label">&times; piece seule = 6 textes</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Cuisine</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Bureau</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Salon</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Chambre</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Entree</span> <span class="branch-label">→ 1 texte</span></li>
+          <li><span class="node node--answer" style="font-size:0.7rem;">Escalier</span> <span class="branch-label">→ 1 texte</span></li>
+        </ul>
+      </details>
+    </li>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Prise 230V</span> <span class="branch-label">&times; piece &times; taille = 17 textes</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li><span class="branch-label">Meme croisement que "Au plafond" → 17 textes</span></li>
+        </ul>
+      </details>
+    </li>
+    <li><span class="node node--answer">Je ne sais pas</span> <span class="branch-label">→ 1 seul texte generique</span></li>
+    <li><span class="branch-label" style="color: #E35B24; font-weight: 700; font-size: 0.85rem;">Total Sortie : 17 + 6 + 17 + 1 = 41 textes</span></li>
+  </ul>
+</li>
+
+<!-- ══════════════ HAUTEUR (croisé avec pièce × taille, si sortie = plafond) ══════════════ -->
+<li style="margin-top: 1.5rem;">
+  <span class="node node--question">Question : Hauteur &times; Piece &times; Taille</span>
+  <span class="count">51</span>
+  <span class="branch-label">(uniquement si sortie = plafond)</span>
+  <ul>
+    <li>
+      <details>
+        <summary><span class="node node--answer">Standard (&lt; 2,50 m)</span> <span class="branch-label">&times; 17</span><span class="expand-icon"></span></summary>
+        <ul>
+          <li><span class="branch-label">Cuisine &times; 3 tailles → 3 textes</span></li>
+          <li><span class="branch-label">Bureau &times; 3 tailles → 3 textes</span></li>
+          <li><span class="branch-label">Salon &times; 3 tailles → 3 textes</span></li>
+          <li><span class="branch-label">Chambre &times; 3 tailles → 3 textes</span></li>
+          <li><span class="branch-label">Entree &times; 3 tailles → 3 textes</span></li>
+          <li><span class="branch-label">Escalier &times; 2 types → 2 textes</span></li>
+        </ul>
+      </details>
+    </li>
+    <li><span class="node node--answer">Confortable (2,50-3 m)</span> <span class="branch-label">&times; 17 → 17 textes</span></li>
+    <li><span class="node node--answer">Haute (&gt; 3 m)</span> <span class="branch-label">&times; 17 → 17 textes</span></li>
+    <li><span class="branch-label" style="color: #E35B24; font-weight: 700; font-size: 0.85rem;">Total Hauteur : 3 &times; 17 = 51 textes</span></li>
+  </ul>
+</li>
+
+<!-- ══════════════ TABLE (croisé avec pièce) ══════════════ -->
+<li style="margin-top: 1.5rem;">
+  <span class="node node--question">Question : Table &times; Piece</span>
+  <span class="count">8</span>
+  <span class="branch-label">(4 pieces &times; oui/non)</span>
+  <ul>
+    <li><span class="node node--answer">Oui</span> <span class="branch-label">&times; cuisine, bureau, salon, chambre → 4 textes</span></li>
+    <li><span class="node node--answer">Non</span> <span class="branch-label">&times; cuisine, bureau, salon, chambre → 4 textes</span></li>
+  </ul>
+</li>
+
+<!-- ══════════════ STYLE ══════════════ -->
+<li style="margin-top: 1.5rem;">
+  <span class="node node--question">Question : Style</span>
+  <span class="count">3</span>
+  <ul>
+    <li><span class="node node--answer">Moderne / Peuplier</span> <span class="branch-label">→ 1 texte</span></li>
+    <li><span class="node node--answer">Ancien / Okoume</span> <span class="branch-label">→ 1 texte</span></li>
+    <li><span class="node node--answer">Pas de preference</span> <span class="branch-label">→ 1 texte</span></li>
+  </ul>
+</li>
+
+</ul>
+</div>
+</div>
+
+<!-- ══════════════ RECAP ══════════════ -->
+<div class="summary">
+  <h2>Total des textes a ecrire</h2>
+  <div class="summary-row"><span>Apres Piece</span><span>6</span></div>
+  <div class="summary-row"><span>Apres Taille (&times; piece)</span><span>15</span></div>
+  <div class="summary-row"><span>Apres Taille Escalier</span><span>2</span></div>
+  <div class="summary-row"><span>Apres Eclairage (&times; piece)</span><span>20</span></div>
+  <div class="summary-row"><span>Apres Sortie (plafond: p&times;t, mur: p, prise: p&times;t, nsp: 1)</span><span>41</span></div>
+  <div class="summary-row"><span>Apres Hauteur (&times; piece &times; taille)</span><span>51</span></div>
+  <div class="summary-row"><span>Apres Table (&times; piece)</span><span>8</span></div>
+  <div class="summary-row"><span>Apres Style</span><span>3</span></div>
+  <div class="summary-row summary-total"><span>TOTAL</span><span>146 textes</span></div>
+
+  <p class="note">
+    Ces 146 textes sont pre-generes une seule fois par l'IA et stockes dans un fichier JSON.
+    Aucun appel API en temps reel pour les etapes du questionnaire.
+    L'IA en temps reel est reservee au texte libre et a la recommandation finale.
+  </p>
+</div>
+
+</body>
+</html>

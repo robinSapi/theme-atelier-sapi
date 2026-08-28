@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recette — lot dette</title>
+<style>
+  :root{
+    --bois:#937D68; --orange:#E35B24; --encre:#2B2118;
+    --fond:#FAF7F2; --carte:#FFFFFF; --trait:#E6DED3; --doux:#8A7F73;
+    --ok:#3F7D58; --ko:#B4402B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fond);color:var(--encre);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:880px;margin:0 auto;padding:24px 18px 160px}
+  header{padding:20px 0 6px}
+  h1{margin:0 0 6px;font-size:23px;letter-spacing:-.01em}
+  .sub{color:var(--doux);font-size:14px;margin:0}
+
+  .bar{position:sticky;top:0;z-index:20;background:rgba(250,247,242,.94);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--trait);
+    margin:14px -18px 0;padding:10px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .prog{flex:1 1 160px;height:7px;background:var(--trait);border-radius:99px;overflow:hidden;min-width:110px}
+  .prog i{display:block;height:100%;width:0;background:var(--bois);transition:width .3s}
+  .count{font-size:13px;color:var(--doux);white-space:nowrap}
+  .count b{color:var(--encre)}
+
+  .avant{background:#F7F0E6;border:1px solid #E4D3B5;border-radius:12px;padding:14px 16px;margin:18px 0 4px}
+  .avant h2{margin:0 0 7px;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:#8A6A2F}
+  .avant ol{margin:0;padding-left:19px}
+  .avant li{margin:6px 0}
+
+  .q{background:var(--carte);border:1px solid var(--trait);border-radius:12px;
+    padding:16px 17px;margin:14px 0}
+  .q.is-ok{border-color:#BFD9CB;box-shadow:inset 3px 0 0 var(--ok)}
+  .q.is-ko{border-color:#E8C4BB;box-shadow:inset 3px 0 0 var(--ko)}
+  .q h3{margin:0 0 3px;font-size:16.5px;line-height:1.35}
+  .q .n{color:var(--bois);font-weight:700;margin-right:7px}
+  .why{margin:2px 0 10px;font-size:13.5px;color:var(--doux);font-style:italic}
+  .crit{background:#FBEFEC;border:1px solid #E8C4BB;border-radius:8px;
+    padding:8px 11px;margin:9px 0 0;font-size:13px;color:#8C3A26}
+  .crit b{color:#8C3A26}
+
+  .steps{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:s}
+  .steps li{counter-increment:s;position:relative;padding-left:30px;margin:7px 0}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:1px;
+    width:20px;height:20px;border-radius:50%;background:var(--bois);color:#fff;
+    font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+  .look{margin:12px 0 0;padding:11px 13px;background:#FCFAF7;border:1px dashed var(--trait);border-radius:9px}
+  .look b{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--orange);margin-bottom:3px;font-weight:700}
+
+  .choix{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .choix label{flex:1 1 130px;text-align:center;padding:9px 10px;border:1px solid var(--trait);
+    border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;background:#FCFAF7;user-select:none}
+  .choix input{position:absolute;opacity:0;pointer-events:none}
+  .choix label:has(input:checked){background:var(--bois);border-color:var(--bois);color:#fff}
+  .choix label.ko:has(input:checked){background:var(--ko);border-color:var(--ko)}
+
+  textarea{width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--trait);
+    border-radius:9px;background:#FCFAF7;font:16px/1.5 inherit;resize:vertical;min-height:46px;color:inherit}
+  textarea:focus{outline:2px solid var(--bois);outline-offset:-1px;background:#fff}
+  textarea::placeholder{color:#B3A899}
+
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(250,247,242,.96);
+    backdrop-filter:blur(10px);border-top:1px solid var(--trait);padding:11px 18px;
+    padding-bottom:calc(11px + env(safe-area-inset-bottom));display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+  button{font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:9px;
+    border:1px solid var(--trait);background:#fff;color:var(--encre);cursor:pointer}
+  button.p{background:var(--orange);border-color:var(--orange);color:#fff}
+  button.g{background:transparent;color:var(--doux)}
+  .out{max-width:880px;margin:0 auto;padding:0 18px}
+  #zone{display:none;margin:16px 0 0}#zone.on{display:block}
+  #txt{width:100%;min-height:280px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+  .note{font-size:12.5px;color:var(--doux);margin:7px 0 0}
+  code{background:#F1EBE2;padding:1px 5px;border-radius:4px;font-size:12.5px;word-break:break-word}
+  pre{background:#F1EBE2;padding:9px 11px;border-radius:7px;overflow-x:auto;
+    font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;margin:8px 0 0}
+  kbd{background:#EFE7DC;border:1px solid var(--trait);border-bottom-width:2px;
+    padding:1px 6px;border-radius:5px;font:600 12.5px/1 inherit}
+
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--fond:#1A1512;--carte:#231C17;--trait:#3A2F27;--encre:#F0E9E0;--doux:#A2958A}
+    :root:not([data-theme="light"]) textarea{background:#1E1813}
+    :root:not([data-theme="light"]) .choix label{background:#2A221C}
+    :root:not([data-theme="light"]) button{background:#2A221C;color:var(--encre)}
+    :root:not([data-theme="light"]) .bar{background:rgba(26,21,18,.94)}
+    :root:not([data-theme="light"]) .foot{background:rgba(26,21,18,.96)}
+    :root:not([data-theme="light"]) code,
+    :root:not([data-theme="light"]) pre,
+    :root:not([data-theme="light"]) kbd{background:#2E251E}
+    :root:not([data-theme="light"]) .look{background:#1E1813}
+    :root:not([data-theme="light"]) .avant{background:#2A2016;border-color:#4A3A22}
+    :root:not([data-theme="light"]) .avant h2{color:#D8B36A}
+    :root:not([data-theme="light"]) .crit{background:#2E1B16;border-color:#5A2E22;color:#E8A08A}
+    :root:not([data-theme="light"]) .crit b{color:#E8A08A}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Recette — lot dette</h1>
+    <p class="sub">12 chantiers, 640 lignes supprimées, une colonne ajoutée en base. Commence par le test 0, puis le 1 : si l'un des deux échoue, arrête-toi et dis-le-moi.</p>
+  </header>
+
+  <div class="bar">
+    <div class="prog"><i id="pi"></i></div>
+    <div class="count" id="pc">0 / 12</div>
+  </div>
+
+  <div class="avant">
+    <h2>Avant de commencer</h2>
+    <ol>
+      <li>Pousse la branche sur le site test et <strong>attends la fin du déploiement</strong>.</li>
+      <li><strong>Fais le test 0 avant tout le reste</strong> — il te fait reposer un réglage que je ne peux pas changer à ta place, et dont dépend le test 8.</li>
+      <li>Ouvre <strong>WP-admin → Robin Conseiller</strong> dans un second onglet. Recharge-le à chaque fois, il ne se met pas à jour tout seul.</li>
+      <li>Sauf mention contraire, chaque test commence par <strong>une nouvelle fenêtre de navigation privée</strong>.</li>
+    </ol>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<div class="foot">
+  <button class="p" id="bExport">Copier pour Claude</button>
+  <button id="bFile">Télécharger .md</button>
+  <button class="g" id="bClear">Tout effacer</button>
+</div>
+<div class="out"><div id="zone"><textarea id="txt" readonly></textarea>
+<p class="note">Colle ça dans la conversation. Seuls les tests où tu as répondu sont exportés.</p></div></div>
+
+<script>
+const T = [
+{
+ n:"0", t:"Le menu des réglages offre bien la taille moyenne",
+ crit:"À faire <b>en premier</b>, et à valider avant de passer au reste : le test 8 en dépend directement.",
+ why:"Le menu n'offrait que Petite et Grande, alors que le questionnaire propose trois tailles. J'avais changé la valeur par défaut sans vérifier que tu pouvais la choisir — tu me l'as montré en capture.",
+ steps:[
+  "WP-admin → <b>réglages du Conseiller</b>.",
+  "Descends jusqu'à la carte <b>« Cage d'escalier → taille »</b>.",
+  "Ouvre le menu de la ligne <b>Escalier standard</b>.",
+  "Choisis <b>« Moyenne (le &laquo;&nbsp;Standard&nbsp;&raquo; du questionnaire) »</b>, puis <b>enregistre</b>.",
+  "Recharge la page des réglages."
+ ],
+ look:"Le menu doit proposer <b>trois</b> choix : Petite, Moyenne, Grande. Et après enregistrement et rechargement, la ligne « Escalier standard » doit toujours afficher <b>Moyenne</b> — pas être retombée sur Petite. « Escalier ouvert » reste sur <b>Grande</b>.",
+ ph:"Si Moyenne n'apparaît pas, ou si le réglage ne tient pas après enregistrement, dis-le : n'enchaîne pas sur le test 8."
+},
+{
+ n:"1", t:"Les sessions sont toujours enregistrées",
+ crit:"Le test le plus important du lot. J'ai ajouté une colonne en base. Si la migration a échoué, <b>plus aucune session ne s'enregistre</b>, sans le moindre message d'erreur. Si ce test échoue, arrête tout et préviens-moi.",
+ why:"Une migration qui rate en silence est exactement le genre de panne qu'on découvre trois semaines plus tard, quand les chiffres sont perdus.",
+ steps:[
+  "Note l'heure qu'il est.",
+  "Nouvelle fenêtre privée → <code>test.atelier-sapi.fr/mes-creations/</code>",
+  "Clique une pièce dans le sélecteur, puis <b>« Décrire mon projet en détail »</b>, et réponds jusqu'au bout.",
+  "Onglet admin, <b>recharge</b> la page Robin Conseiller."
+ ],
+ look:"Une nouvelle ligne, tout en haut, à l'heure que tu viens de noter. Si elle n'y est pas, la migration a échoué : dis-le-moi immédiatement, ne continue pas les autres tests.",
+ ph:"Si la ligne n'apparaît pas, précise-le clairement."
+},
+{
+ n:"2", t:"Rien n'a cassé après la suppression de 640 lignes",
+ crit:"J'ai supprimé un bloc entier de 583 lignes, une fonction, un encart de la page boutique et 21 règles de style. Je veux savoir si quelque chose s'est déplacé à l'écran.",
+ why:"Un retrait de code mort ne devrait rien changer. C'est justement pour ça qu'il faut vérifier.",
+ steps:[
+  "Ouvre <code>test.atelier-sapi.fr/mes-creations/</code> et fais défiler <b>toute la page</b>, jusqu'en bas.",
+  "Ouvre <b>une fiche produit</b> et fais défiler jusqu'en bas également.",
+  "Ouvre le Conseiller depuis la fiche produit, réponds aux 3 questions, applique la sélection.",
+  "Regarde la page d'accueil et la page <b>Conseils éclairés</b>, de haut en bas."
+ ],
+ look:"Aucun trou blanc, aucun bloc décalé, aucune section qui aurait disparu. Les cartes de réassurance (bois français, fait main…) doivent toujours être là sur la page Mes créations.<br><br><b>Et surtout : la modale doit être utilisable.</b> C'est le défaut que tu as trouvé le 28/08 — elle s'ouvrait derrière ses propres écrans masqués, devenus des voiles sombres. Tu devais voir la modale sans pouvoir cliquer dedans. Vérifie que tu peux bien cliquer les réponses, la croix, et faire défiler à l'intérieur.",
+ ph:"Si quelque chose a bougé, même un espacement, décris où."
+},
+{
+ n:"3", t:"L'accueil et Conseils éclairés sont enfin comptés",
+ why:"Jusqu'ici, quelqu'un venu du sélecteur de pièce de l'accueil était indistinguable de quelqu'un arrivé par Google.",
+ steps:[
+  "Nouvelle fenêtre privée → <b>page d'accueil</b> du site test.",
+  "Descends jusqu'au bloc « Pour quelle pièce cherches-tu un luminaire ? » et <b>clique une pièce</b> (pas le champ texte).",
+  "Sur <code>/mes-creations/</code>, ouvre le Conseiller via « Décrire mon projet en détail » et réponds jusqu'au bout.",
+  "Onglet admin, recharge, regarde la colonne <b>Provenance</b> de la première ligne.",
+  "Recommence en partant cette fois de la page <b>Conseils éclairés</b>."
+ ],
+ look:"La première session doit dire <b>Accueil</b>, la seconde <b>Conseils éclairés</b>. Avant ce lot, les deux disaient « Mes créations ». Vérifie aussi que le filtre déroulant en haut propose bien ces deux entrées.",
+ ph:"Note ce qu'affiche la colonne Provenance dans chacun des deux cas."
+},
+{
+ n:"4", t:"Les pièces hors catalogue sont mémorisées",
+ why:"C'est une information que tes visiteurs te donnent gratuitement et que le site jetait. Si la salle de bain revient trente fois, ça vaut peut-être une gamme.",
+ steps:[
+  "Nouvelle fenêtre privée → <code>/mes-creations/</code>, ouvre le Conseiller.",
+  "Prends la porte de la <b>conversation avec Robin</b> (le chat), pas le questionnaire.",
+  "Écris exactement : <i>« C'est pour ma salle de bain »</i>",
+  "Robin doit te répondre qu'il préfère répondre lui-même, et te proposer un formulaire.",
+  "Ferme, va dans l'admin, recharge, et regarde le bloc <b>« Pièces hors catalogue demandées »</b> (colonne de droite, sous les styles)."
+ ],
+ look:"<b>Salle de bain</b> doit apparaître dans ce classement, avec le chiffre 1 à droite. Recommence avec « c'est pour mon garage » : les deux doivent s'y trouver.",
+ ph:"Si le bloc reste vide ou affiche autre chose, dis-le."
+},
+{
+ n:"5", t:"Une pièce couverte ne doit PAS y atterrir",
+ crit:"C'est le contre-test du précédent, et il compte autant. Si un salon se retrouve dans « hors catalogue », le classement devient un mensonge.",
+ why:"Le site rapproche « couloir » de « entrée ». Un mot rapproché n'est pas un mot hors périmètre.",
+ steps:[
+  "Nouvelle fenêtre privée → <code>/mes-creations/</code>, Conseiller, porte de la conversation.",
+  "Écris : <i>« C'est pour mon couloir »</i>, puis laisse Robin répondre.",
+  "Ferme, admin, recharge, regarde le bloc « Pièces hors catalogue demandées »."
+ ],
+ look:"<b>« Couloir » ne doit PAS y apparaître.</b> Ni « salon », ni « entrée », ni aucune pièce que tu couvres. Le bloc doit être resté exactement comme au test précédent.",
+ ph:"Si un mot de trop est apparu, recopie-le."
+},
+{
+ n:"6", t:"Le projet mémorisé expire au bout de 10 jours",
+ why:"Sans ça, quelqu'un qui revient trois semaines plus tard reçoit une recommandation calibrée sur un besoin qu'il n'a plus.",
+ steps:[
+  "En fenêtre <b>normale</b> (pas privée), fais un parcours complet sur <code>/mes-creations/</code>.",
+  "Recharge la page : ta sélection doit être toujours là. C'est le comportement normal, on vérifie qu'il n'a pas cassé.",
+  "Pour simuler 10 jours, ouvre la console du navigateur (<kbd>F12</kbd> puis onglet <b>Console</b>) et colle cette ligne, puis <kbd>Entrée</kbd> :",
+  "<pre>var k='sapiProject',p=JSON.parse(localStorage.getItem(k));\np.updated_at-=11*24*3600;localStorage.setItem(k,JSON.stringify(p));\nconsole.log('projet vieilli de 11 jours');</pre>",
+  "Recharge la page."
+ ],
+ look:"Avant la ligne collée : ton projet est là. <b>Après</b> : il a disparu, la page est revenue à son état neutre, comme pour un nouveau visiteur. Si la console te fait peur, saute juste l'étape 3 et 4 et dis-moi que le point 2 fonctionne : je testerai l'expiration autrement.",
+ ph:"Dis-moi au moins si le point 2 fonctionne (le projet survit à un rechargement normal)."
+},
+{
+ n:"7", t:"Le clavier retrouve sa place",
+ why:"Cassé depuis toujours, en silence : le code cherchait une méthode qui n'existe pas.",
+ steps:[
+  "Ouvre <b>une fiche produit</b>.",
+  "Navigue uniquement à la touche <kbd>Tab</kbd> jusqu'à ce que la pastille « Comment choisir ? » soit entourée d'un liseré.",
+  "Appuie sur <kbd>Entrée</kbd> pour ouvrir la modale.",
+  "Ferme-la avec <kbd>Échap</kbd>.",
+  "Appuie sur <kbd>Tab</kbd> une seule fois."
+ ],
+ look:"Après la fermeture, le liseré doit être <b>revenu sur la pastille</b>, et le Tab suivant doit continuer depuis là. Avant, tu repartais du tout début de la page.",
+ ph:"Si le liseré n'est pas visible du tout, dis-le : c'est un autre sujet."
+},
+{
+ n:"8", t:"Escalier standard donne la taille moyenne",
+ crit:"Ce test ne peut passer que si le <b>test 0</b> est validé : « escalier standard » doit être réglé sur <b>Moyenne</b> et enregistré. Sinon tu mesures l'ancien réglage, pas le correctif.",
+ why:"Le serveur disait « petite », le navigateur disait « moyenne ». Deux visiteurs identiques recevaient deux recommandations différentes.",
+ steps:[
+  "Nouvelle fenêtre privée → <code>/mes-creations/</code>, Conseiller.",
+  "Réponds : pièce <b>Cage d'escalier</b> → type <b>Escalier standard</b>, puis va jusqu'au bout du questionnaire.",
+  "Regarde la sélection proposée.",
+  "Clique un des modèles pour ouvrir sa fiche, et regarde la taille pré-sélectionnée."
+ ],
+ look:"La taille pré-sélectionnée sur la fiche doit être une taille <b>intermédiaire</b>, pas la plus petite du modèle. Refais ensuite le même parcours avec <b>Grand escalier ouvert</b> : là, tu dois obtenir <b>la plus grande taille disponible</b>.",
+ ph:"Note les deux tailles obtenues (escalier standard / escalier ouvert)."
+},
+{
+ n:"9", t:"L'écran de contact dit de quoi il parle",
+ why:"Il affichait « Grand » tout seul, juste avant de demander ton adresse. Grand quoi ?",
+ steps:[
+  "Nouvelle fenêtre privée → <code>/mes-creations/</code>, Conseiller, porte de la conversation.",
+  "Écris quelque chose qui te fera basculer vers le contact, par exemple : <i>« Je suis hôtelier, il me faut 30 chambres équipées »</i>",
+  "Robin doit te proposer un formulaire avec ton adresse et un message.",
+  "Regarde les pastilles au-dessus du formulaire, sous le titre « Ton projet »."
+ ],
+ look:"Chaque pastille doit porter <b>le mot de la question ET la réponse</b> — « Pièce : Chambre », « Taille : Grand » — et non plus la réponse seule.",
+ ph:"Recopie une pastille telle qu'elle s'affiche."
+},
+{
+ n:"10", t:"L'inscription newsletter fonctionne toujours",
+ crit:"J'ai ajouté trois garde-fous anti-robot sur ce formulaire. Le risque, c'est d'avoir bloqué de vraies personnes sans le voir.",
+ why:"Une inscription qui échoue en silence, tu ne l'apprends jamais : la personne s'en va, c'est tout.",
+ steps:[
+  "Va sur la page <b>Inspiration</b> du site test.",
+  "Trouve la carte « Recevez les coulisses de mon atelier ».",
+  "<b>Attends au moins 5 secondes</b> après l'affichage de la page, puis saisis une adresse à toi et valide.",
+  "Vérifie dans Brevo (liste #6) que le contact est bien arrivé, avec SOURCE = inspiration.",
+  "Refais un essai avec une adresse volontairement fausse, du genre <code>abc</code>."
+ ],
+ look:"Le premier essai : message de remerciement, et le contact dans Brevo. Le second : « Adresse email invalide », et surtout <b>pas</b> de blocage — tu dois pouvoir réessayer aussitôt avec une adresse correcte.",
+ ph:"Si l'inscription échoue alors que l'adresse est bonne, note le message affiché mot pour mot."
+},
+{
+ n:"11", t:"Le conseil de Robin est toujours enregistré",
+ why:"Non-régression du lot d'hier. J'ai touché aux mêmes fichiers, je veux être sûr de ne pas l'avoir défait.",
+ steps:[
+  "Nouvelle fenêtre privée → <code>/mes-creations/</code>, parcours complet via « Décrire mon projet en détail ».",
+  "Attends que la phrase de Robin finisse de s'écrire et lis-la.",
+  "Admin, recharge, ouvre ta session."
+ ],
+ look:"L'encart <b>« Phrase IA finale (advice_text) »</b> doit contenir exactement la phrase lue sur le site, et parler de la bonne pièce.",
+ ph:"Si le texte est là mais parle d'une autre pièce, colle-moi les deux."
+}
+];
+
+const list = document.getElementById('list');
+const KEY = 'sapi-recette-lot-dette';
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){}
+
+T.forEach(function(x){
+  const d = document.createElement('div');
+  d.className = 'q'; d.dataset.n = x.n;
+  d.innerHTML =
+    '<h3><span class="n">'+x.n+'</span>'+x.t+'</h3>'+
+    '<p class="why">'+x.why+'</p>'+
+    (x.crit ? '<div class="crit">'+x.crit+'</div>' : '')+
+    '<ol class="steps">'+x.steps.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ol>'+
+    '<div class="look"><b>Ce que tu dois voir</b>'+x.look+'</div>'+
+    '<div class="choix">'+
+      '<label><input type="radio" name="r'+x.n+'" value="ok">C\'est bon</label>'+
+      '<label class="ko"><input type="radio" name="r'+x.n+'" value="ko">Ça ne va pas</label>'+
+      '<label class="ko"><input type="radio" name="r'+x.n+'" value="?">Je ne comprends pas</label>'+
+    '</div>'+
+    '<textarea data-c="'+x.n+'" placeholder="'+x.ph.replace(/"/g,'&quot;')+'"></textarea>';
+  list.appendChild(d);
+});
+
+function etat(){
+  let n = 0;
+  T.forEach(function(x){
+    const c = document.querySelector('input[name="r'+x.n+'"]:checked');
+    const card = document.querySelector('.q[data-n="'+x.n+'"]');
+    card.classList.remove('is-ok','is-ko');
+    if (c) { n++; card.classList.add(c.value === 'ok' ? 'is-ok' : 'is-ko'); }
+  });
+  document.getElementById('pi').style.width = (n / T.length * 100) + '%';
+  document.getElementById('pc').innerHTML = '<b>'+n+'</b> / '+T.length;
+}
+
+function sauve(){
+  const o = {};
+  document.querySelectorAll('input[type=radio]:checked').forEach(function(i){ o[i.name] = i.value; });
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){ if (t.value.trim()) o['c'+t.dataset.c] = t.value; });
+  try { localStorage.setItem(KEY, JSON.stringify(o)); } catch(e){}
+}
+
+Object.keys(saved).forEach(function(k){
+  if (k.charAt(0) === 'c') {
+    const t = document.querySelector('textarea[data-c="'+k.slice(1)+'"]');
+    if (t) t.value = saved[k];
+  } else {
+    const i = document.querySelector('input[name="'+k+'"][value="'+saved[k]+'"]');
+    if (i) i.checked = true;
+  }
+});
+etat();
+
+document.addEventListener('change', function(){ etat(); sauve(); });
+document.addEventListener('input', function(e){ if (e.target.tagName === 'TEXTAREA') sauve(); });
+
+function texte(){
+  let s = '# Recette — lot dette\n\n';
+  let vide = true;
+  T.forEach(function(x){
+    const c = document.querySelector('input[name="r'+x.n+'"]:checked');
+    const t = document.querySelector('textarea[data-c="'+x.n+'"]');
+    const com = t && t.value.trim();
+    if (!c && !com) return;
+    vide = false;
+    const lib = c ? ({ok:'OK', ko:'NE VA PAS', '?':'PAS COMPRIS'})[c.value] : 'sans réponse';
+    s += '## ' + x.n + '. ' + x.t + ' — **' + lib + '**\n';
+    if (com) s += com + '\n';
+    s += '\n';
+  });
+  return vide ? '(rien de rempli)' : s;
+}
+
+document.getElementById('bExport').onclick = function(){
+  const z = document.getElementById('zone'), t = document.getElementById('txt');
+  t.value = texte(); z.classList.add('on');
+  try {
+    navigator.clipboard.writeText(t.value);
+    this.textContent = 'Copié ✓';
+    setTimeout(function(){ document.getElementById('bExport').textContent = 'Copier pour Claude'; }, 1800);
+  } catch(e) { t.select(); }
+  z.scrollIntoView({behavior:'smooth', block:'nearest'});
+};
+
+document.getElementById('bFile').onclick = function(){
+  const b = new Blob([texte()], {type:'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'recette-lot-dette.md';
+  a.click();
+};
+
+document.getElementById('bClear').onclick = function(){
+  if (!confirm('Effacer toutes tes réponses ?')) return;
+  document.querySelectorAll('input[type=radio]').forEach(function(i){ i.checked = false; });
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){ t.value = ''; });
+  try { localStorage.removeItem(KEY); } catch(e){}
+  etat();
+};
+</script>
+</body>
+</html>

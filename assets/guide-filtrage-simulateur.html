@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robin Conseiller — Simulateur & éditeur de règles</title>
+<style>
+  :root{
+    --bg:#faf8f5; --card:#fff; --ink:#2b2b2b; --muted:#6b7280; --line:#e7e1d8;
+    --accent:#e35b24; --wood:#937d68;
+    --pref:#3f8f5f; --sec:#c98a1b; --out:#b3413a; --cat:#2f6f9f; --format:#7b5ea7; --ampoule:#c98a1b; --essence:#937d68;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:1080px;margin:0 auto;padding:26px 18px 90px}
+  header.top{border-bottom:3px solid var(--accent);padding-bottom:14px;margin-bottom:18px}
+  header.top h1{font-size:24px;margin:0 0 4px}
+  header.top .sub{color:var(--muted);font-size:14px}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .panel>h2{font-size:17px;margin:0 0 4px;display:flex;align-items:center;gap:9px}
+  .panel>h2 .pic{width:25px;height:25px;border-radius:7px;background:var(--accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex:none}
+  .panel>.intro{color:var(--muted);font-size:13px;margin:0 0 14px;line-height:1.5}
+
+  .rcard{border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:12px;background:#fcfbf9}
+  .rcard h3{font-size:15px;margin:0 0 2px}
+  .rcard .rdesc{font-size:12.5px;color:var(--muted);margin:0 0 11px;line-height:1.5}
+  .ctrl{margin:11px 0}
+  .ctrl .clabel{font-size:13px;font-weight:700;margin-bottom:2px}
+  .ctrl .cdesc{font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.45}
+  .note{background:#fff;border:1px dashed var(--line);border-radius:8px;padding:8px 11px;font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff;flex-wrap:wrap}
+  .seg button{border:none;background:#fff;padding:7px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+  .seg button.on{background:var(--accent);color:#fff;font-weight:700}
+  .seg button+button{border-left:1px solid var(--line)}
+
+  .chips-edit{display:flex;flex-wrap:wrap;gap:6px}
+  .chiptog{border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 11px;font-size:12.5px;cursor:pointer;color:#888;font-weight:600}
+  .chiptog.on{background:#e7f1ea;border-color:#bcdcc6;color:#2f7a45}
+
+  table.rt{width:100%;border-collapse:collapse;margin-top:4px}
+  table.rt th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);padding:6px 8px;border-bottom:2px solid var(--line)}
+  table.rt td{padding:8px;border-bottom:1px solid #f0ece5;vertical-align:middle}
+  table.rt tr:last-child td{border-bottom:none}
+  table.rt td.rowname{font-weight:700;font-size:13.5px;white-space:nowrap}
+  table.rt select{padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px}
+
+  .implist{list-style:none;margin:0;padding:0}
+  .implist li{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;margin-bottom:6px;background:#fff}
+  .implist .num{width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px}
+  .implist .ltxt{flex:1}
+  .implist .ltxt .lname{font-size:13.5px;font-weight:700}
+  .implist .ltxt .ldesc{font-size:12px;font-weight:400;color:var(--muted);margin-top:2px;line-height:1.45}
+  .implist .arrows{margin-left:auto;display:flex;gap:4px}
+  .implist .arrows button{border:1px solid var(--line);background:#fcfbf9;border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:13px}
+  .implist .arrows button:disabled{opacity:.3;cursor:default}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .field{margin-bottom:12px}
+  .field.hidden{display:none}
+  .field label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);margin-bottom:4px}
+  .field select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#fcfbf9;font-size:15px;color:var(--ink)}
+  .why-hidden{font-size:12px;color:var(--muted);font-style:italic;margin-top:8px}
+
+  .dec{display:flex;flex-direction:column;gap:10px}
+  .dchip{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .dchip .t{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+  .dchip.cat .t{color:var(--cat)} .dchip.fmt .t{color:var(--format)} .dchip.amp .t{color:var(--ampoule)} .dchip.ess .t{color:var(--essence)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-size:12px;border-radius:6px;padding:2px 8px;background:#f1ede7;color:#444;font-weight:600}
+  .tag.kept{background:#e7f1ea;color:#2f7a45}
+  .tag.pref{background:var(--pref);color:#fff}
+  .tag.gone{background:#f7e6e4;color:var(--out);text-decoration:line-through}
+  .reason{font-size:12.5px;color:var(--muted);margin-top:6px}
+
+  .plist{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+  .prod{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:13.5px;flex-wrap:wrap}
+  .prod .rank{width:24px;height:24px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;background:#c98a1b}
+  .prod.best .rank{background:var(--pref)}
+  .prod .nm{font-weight:700}
+  .prod .meta{color:var(--muted);font-size:12px}
+  .prod .pbadges{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+  .pb{font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 6px}
+  .pb.y{background:#e7f1ea;color:var(--pref)} .pb.n{background:#f3eef0;color:#9a8a90}
+  .prod.out{opacity:.62;border-style:dashed}
+  .prod.out .nm{text-decoration:line-through;font-weight:600}
+  .prod .outreason{margin-left:auto;font-size:11.5px;color:var(--out);font-weight:600}
+  .pick{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:8px 11px;font-size:13.5px;margin-top:7px;flex-wrap:wrap}
+  .pick .role{font-size:11px;color:var(--muted);font-weight:700;min-width:92px}
+  .count{font-size:12px;color:var(--muted);font-weight:600;margin-left:6px}
+  .empty{font-size:13px;color:var(--out);font-style:italic;padding:6px 0}
+  h3.sub{font-size:13.5px;margin:14px 0 4px;color:#444}
+  .legend{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6}
+  .btnreset{float:right;font-size:12px;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 11px;cursor:pointer;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Simulateur & éditeur de règles — Robin Conseiller</h1>
+    <div class="sub">1) Tu règles les règles question par question. 2) Tu testes une situation. 3) Tu vois le résultat. Bac à sable : ne touche pas au site.</div>
+  </header>
+
+  <div class="panel" style="border-left:4px solid var(--accent)">
+    <h2><span class="pic">i</span>Le fonctionnement visé (refonte)</h2>
+    <p class="intro">Le filtrage tourne <b>uniquement côté serveur (PHP)</b> : un seul cerveau, zéro filtrage JavaScript. Il est appelé à <b>deux moments seulement</b> : au chargement de la page avec une pièce, et à la fermeture de la modale.</p>
+    <ol style="margin:0;padding-left:20px;font-size:14px;line-height:1.65;color:#333">
+      <li>Le visiteur choisit une <b>pièce</b> via un room-picker (home ou page Mes créations).</li>
+      <li><b>Appel 1 — au chargement</b> de Mes créations avec cette pièce : le serveur filtre et affiche une <b>sélection au niveau pièce</b>. Le visiteur pressé a déjà quelque chose de logique à voir.</li>
+      <li>Pour affiner, il ouvre la <b>modale</b> et répond aux questions. <b>Rien ne se re-filtre pendant</b> qu'il répond (il ne voit pas la grille derrière, c'est inutile).</li>
+      <li><b>Appel 2 — à la fermeture de la modale</b>, qu'il ait <b>terminé ou qu'il s'arrête en cours</b> : le serveur re-filtre avec les réponses données et met à jour la sélection. Celui qui abandonne garde donc une sélection cohérente.</li>
+      <li>S'il a <b>terminé</b> le questionnaire, l'IA ajoute en plus un <b>commentaire personnalisé</b> (Sonnet).</li>
+    </ol>
+    <div class="note" style="margin-top:12px">Donc <b>2 appels serveur seulement</b> (chargement + fermeture modale), pas un par réponse. Tout le filtrage vit en PHP ; le JavaScript ne fait qu'afficher le résultat. Différence avec le site actuel, qui lui filtre en direct dans le navigateur. Les réglages ci-dessous, c'est exactement ce que ce filtrage serveur appliquera.</div>
+  </div>
+
+  <div class="panel">
+    <h2><span class="pic">1</span>Les règles, question par question <button class="btnreset" id="reset">Réinitialiser</button></h2>
+    <p class="intro">Ici tu décides ce que fait chaque réponse. Tout ce que tu changes se répercute en bas (sections 3 et 4) immédiatement.</p>
+    <div id="rules"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <h2><span class="pic">2</span>La situation du visiteur</h2>
+      <p class="intro">Compose un cas concret pour tester tes règles.</p>
+      <div class="field" data-f="piece"><label>Pièce</label>
+        <select id="piece">
+          <option value="salon">Salon / Salle à manger</option>
+          <option value="chambre">Chambre</option>
+          <option value="chambre-enfant">Chambre enfant</option>
+          <option value="cuisine">Cuisine</option>
+          <option value="bureau">Bureau / Atelier</option>
+          <option value="entree">Entrée / Couloir</option>
+          <option value="escalier">Cage d'escalier</option>
+        </select>
+      </div>
+      <div class="field" data-f="taille"><label>Taille de la pièce</label>
+        <select id="taille">
+          <option value="petite">Petite</option>
+          <option value="moyenne" selected>Standard (moyenne)</option>
+          <option value="grande">Grande</option>
+          <option value="ne-sais-pas">Je ne sais pas</option>
+        </select>
+      </div>
+      <div class="field" data-f="taille_escalier"><label>Type d'escalier</label>
+        <select id="taille_escalier">
+          <option value="standard">Escalier standard</option>
+          <option value="ouvert">Grand escalier ouvert</option>
+        </select>
+      </div>
+      <div class="field" data-f="eclairage"><label>Éclairage</label>
+        <select id="eclairage">
+          <option value="principal">Source principale</option>
+          <option value="secondaire">Complément (secondaire)</option>
+        </select>
+      </div>
+      <div class="field" data-f="sortie"><label>Où installer</label>
+        <select id="sortie">
+          <option value="plafond">Au plafond</option>
+          <option value="mur">Au mur</option>
+          <option value="pas-de-sortie">Sur prise 230V</option>
+          <option value="ne-sais-pas">Je ne sais pas</option>
+        </select>
+      </div>
+      <div class="field" data-f="hauteur"><label>Hauteur sous plafond</label>
+        <select id="hauteur">
+          <option value="standard">Standard (&lt; 2,50 m)</option>
+          <option value="confortable">Confortable (2,50 à 3 m)</option>
+          <option value="haute">Haute (&gt; 3 m)</option>
+        </select>
+      </div>
+      <div class="field" data-f="style"><label>Style</label>
+        <select id="style">
+          <option value="moderne">Moderne (clair)</option>
+          <option value="ancien">Ancien (chaud)</option>
+          <option value="neutre">Pas de préférence</option>
+        </select>
+      </div>
+      <div class="why-hidden" id="whyHidden"></div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="pic">3</span>Ce que le filtrage décide</h2>
+      <p class="intro">Le résultat de tes règles sur la situation choisie.</p>
+      <div class="dec">
+        <div class="dchip cat"><div class="t">Catégories gardées</div><div class="tags" id="decCat"></div><div class="reason" id="decCatWhy"></div></div>
+        <div class="dchip fmt"><div class="t">Format (suspensions)</div><div class="reason" id="decFmt"></div></div>
+        <div class="dchip amp"><div class="t">Ampoule</div><div class="tags" id="decAmp"></div><div class="reason" id="decAmpWhy"></div></div>
+        <div class="dchip ess"><div class="t">Essence mise en avant</div><div class="reason" id="decEss"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2><span class="pic">4</span>Sur un catalogue exemple</h2>
+    <p class="intro">Catalogue fictif, juste pour rendre la mécanique visible.</p>
+    <h3 class="sub">Ordre du slider immersion <span class="count" id="cntSlider"></span></h3>
+    <div class="plist" id="sliderList"></div>
+    <h3 class="sub">Les 4 retenus (quiz / modale) <span class="count" id="cntPicks"></span></h3>
+    <div id="picksList"></div>
+    <h3 class="sub">Écartés par le filtre <span class="count" id="cntOut"></span></h3>
+    <div class="plist" id="outList"></div>
+    <div class="legend">
+      Le <b>chiffre</b> à gauche est le score de priorité (0 = le mieux placé). Les pastilles <span class="pb y">✓</span>/<span class="pb n">✗</span> disent sur quels critères le produit est préféré. L'ordre combine les priorités selon l'ordre d'importance que tu as réglé. Les 4 picks sont pris des mieux classés vers les moins bien classés (meilleure vente, plus récent, 2e vente, +1 dans chaque groupe).
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var AMP_LABEL={ampoule_degagee:'Dégagée', semi_degagee:'Semi-dégagée', ampoule_entouree:'Entourée'};
+  var AMP_ORDER=['ampoule_degagee','semi_degagee','ampoule_entouree'];
+  var CAT_LABEL={suspensions:'Suspensions', appliques:'Appliques', lampadaires:'Lampadaires', lampesaposer:'Lampes à poser'};
+  var CAT_ORDER=['suspensions','appliques','lampadaires','lampesaposer'];
+  var FMT_LABEL={horizontal:'horizontal', vertical:'vertical', boule:'boule'};
+  var FMT_ORDER=['boule','horizontal','vertical'];
+  var ESS_LABEL={peuplier:'Peuplier', okoume:'Okoumé', '':'Aucune'};
+  var PIECES=[['salon','Salon / SAM'],['chambre','Chambre'],['chambre-enfant','Chambre enfant'],['cuisine','Cuisine'],['bureau','Bureau / Atelier'],['entree','Entrée / Couloir'],['escalier','Cage d\'escalier']];
+  var SORTIES=[['plafond','Au plafond'],['mur','Au mur'],['pas-de-sortie','Prise 230V'],['ne-sais-pas','Je ne sais pas']];
+  var STYLES=[['moderne','Moderne'],['ancien','Ancien'],['neutre','Pas de préférence']];
+  var CRIT_LABEL={categorie:'Catégorie', ampoule:'Ampoule', format:'Format'};
+  var CRIT_DESC={
+    categorie:'Mettre un type de luminaire (suspension, applique…) devant les autres quand plusieurs passent. Se règle par sortie, dans « Où installer ».',
+    ampoule:'Mettre un type d\'ampoule (entourée, dégagée…) devant l\'autre. Se règle par pièce, dans « Pièce ».',
+    format:'Mettre une forme de suspension (boule, horizontale…) devant les autres. Se règle par pièce, dans « Pièce ».'
+  };
+
+  function defaultConfig(){
+    return {
+      prio:true, mode:'souple',
+      importance:['categorie','ampoule','format'],
+      piece:{
+        salon:{amp:['ampoule_entouree','semi_degagee'], pref:'ampoule_entouree'},
+        chambre:{amp:['ampoule_entouree','semi_degagee'], pref:'ampoule_entouree'},
+        'chambre-enfant':{amp:['ampoule_entouree','semi_degagee'], pref:'ampoule_entouree'},
+        cuisine:{amp:['ampoule_degagee','semi_degagee'], pref:'ampoule_degagee'},
+        bureau:{amp:['ampoule_degagee','semi_degagee'], pref:'ampoule_degagee'},
+        entree:{amp:['ampoule_entouree','semi_degagee'], pref:'ampoule_entouree'},
+        escalier:{amp:[], pref:null}
+      },
+      formatPref:{salon:'', chambre:'', 'chambre-enfant':'', cuisine:'', bureau:'', entree:'', escalier:''},
+      cuisineRemove:['lampesaposer'],
+      grandeSkipAmpoule:true,
+      sortie:{plafond:['suspensions'], mur:['appliques'], 'pas-de-sortie':['lampadaires','lampesaposer','appliques'], 'ne-sais-pas':['suspensions','lampadaires','lampesaposer','appliques']},
+      catPriority:{plafond:'', mur:'', 'pas-de-sortie':'', 'ne-sais-pas':''},
+      secondairePool:['lampadaires','lampesaposer','appliques'],
+      verticalHaute:true, verticalEntreeConfort:true, verticalPetiteConfort:true,
+      horizontalPetiteHaute:true,
+      grandeExclut2Tailles:true,
+      style:{moderne:'peuplier', ancien:'okoume', neutre:''},
+      escalierMap:{standard:'petite', ouvert:'grande'}
+    };
+  }
+  var C = defaultConfig();
+
+  var CATALOG=[
+    {id:101,nm:'Olivia',cat:'suspensions',format:'horizontal',ampoule:'ampoule_entouree',sales:40},
+    {id:102,nm:'Gaston',cat:'suspensions',format:'boule',ampoule:'ampoule_entouree',sales:65},
+    {id:103,nm:'Timothée',cat:'suspensions',format:'vertical',ampoule:'semi_degagee',sales:12},
+    {id:104,nm:'Myriam',cat:'suspensions',format:'horizontal',ampoule:'semi_degagee',sales:30},
+    {id:105,nm:'Claudine',cat:'suspensions',format:'boule',ampoule:'semi_degagee',sales:22},
+    {id:106,nm:'Léon',cat:'suspensions',format:'vertical',ampoule:'ampoule_entouree',sales:8},
+    {id:107,nm:'Joséphine',cat:'suspensions',format:'horizontal',ampoule:'ampoule_degagee',sales:50},
+    {id:108,nm:'Achille',cat:'suspensions',format:'boule',ampoule:'ampoule_degagee',sales:18},
+    {id:120,nm:'Joseph',cat:'suspensions',format:'horizontal',ampoule:'ampoule_entouree',sales:33},
+    {id:109,nm:'Margaux',cat:'appliques',format:'',ampoule:'ampoule_entouree',sales:25},
+    {id:110,nm:'Hugo',cat:'appliques',format:'',ampoule:'semi_degagee',sales:14},
+    {id:111,nm:'Colette',cat:'appliques',format:'',ampoule:'ampoule_degagee',sales:9},
+    {id:112,nm:'Auguste',cat:'lampadaires',format:'',ampoule:'semi_degagee',sales:11},
+    {id:113,nm:'Brigitte',cat:'lampadaires',format:'',ampoule:'ampoule_entouree',sales:7},
+    {id:114,nm:'Suzanne',cat:'lampesaposer',format:'',ampoule:'ampoule_entouree',sales:16},
+    {id:115,nm:'Marcel',cat:'lampesaposer',format:'',ampoule:'semi_degagee',sales:5}
+  ];
+
+  function mk(tag,cls,html){var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e;}
+  function val(id){var e=document.getElementById(id); return e?e.value:'';}
+  function segCtrl(opts,cur,onPick){
+    var s=mk('div','seg');
+    opts.forEach(function(o){var b=mk('button', o.v===cur?'on':'', o.label); b.type='button'; b.addEventListener('click',function(){onPick(o.v);}); s.appendChild(b);});
+    return s;
+  }
+  function segBool(cur,onPick){ return segCtrl([{v:true,label:'Oui'},{v:false,label:'Non'}], cur, onPick); }
+  function chipsGroup(allOpts,selected,onToggle){
+    var g=mk('div','chips-edit');
+    allOpts.forEach(function(o){var on=selected.indexOf(o.v)!==-1; var b=mk('button','chiptog'+(on?' on':''),o.label); b.type='button'; b.addEventListener('click',function(){onToggle(o.v);}); g.appendChild(b);});
+    return g;
+  }
+  function ctrl(label,desc,el){var w=mk('div','ctrl'); w.appendChild(mk('div','clabel',label)); if(desc)w.appendChild(mk('div','cdesc',desc)); w.appendChild(el); return w;}
+  function selectCtrl(opts,cur,onChange){
+    var sel=mk('select');
+    opts.forEach(function(o){var op=document.createElement('option'); op.value=o.v; op.textContent=o.label; if(o.v===cur)op.selected=true; sel.appendChild(op);});
+    sel.addEventListener('change',function(){onChange(sel.value);});
+    return sel;
+  }
+  var AMP_OPTS=AMP_ORDER.map(function(s){return {v:s,label:AMP_LABEL[s]};});
+  var CAT_OPTS=CAT_ORDER.map(function(c){return {v:c,label:CAT_LABEL[c]};});
+  var FMT_OPTS=[{v:'',label:'Aucune'}].concat(FMT_ORDER.map(function(f){return {v:f,label:FMT_LABEL[f].charAt(0).toUpperCase()+FMT_LABEL[f].slice(1)};}));
+
+  function rebuild(){ buildRules(); refresh(); }
+
+  function buildRules(){
+    var root=document.getElementById('rules'); root.innerHTML='';
+
+    // Priorité + ordre d'importance
+    var cP=mk('div','rcard');
+    cP.appendChild(mk('h3',null,'Priorité (transversal)'));
+    cP.appendChild(mk('div','rdesc','Faut-il mettre certains produits en avant parmi ceux qui passent le filtre ? Si oui, trois critères peuvent jouer : ampoule (par pièce), catégorie (par sortie) et format (par pièce). L\'ordre ci-dessous décide lequel l\'emporte quand ils se contredisent.'));
+    cP.appendChild(ctrl('Activer la priorité','Désactivée : tout est à égalité, classé seulement par les ventes (comportement actuel du site).', segBool(C.prio,function(v){C.prio=v;rebuild();})));
+    cP.appendChild(ctrl('Mode','Souple : les préférés passent devant mais on complète avec les autres s\'il manque du choix. Strict : on ne montre que les mieux classés tant qu\'il y en a.', segCtrl([{v:'souple',label:'Souple'},{v:'strict',label:'Strict'}], C.mode, function(v){C.mode=v;rebuild();})));
+    var imp=mk('div','ctrl'); imp.appendChild(mk('div','clabel','Ordre d\'importance des critères')); imp.appendChild(mk('div','cdesc','Le 1er l\'emporte sur le 2e, qui l\'emporte sur le 3e. Réorganise avec les flèches.'));
+    var ul=mk('ul','implist');
+    C.importance.forEach(function(crit,i){
+      var li=mk('li');
+      li.appendChild(mk('span','num',(i+1)));
+      var txt=mk('div','ltxt');
+      txt.appendChild(mk('div','lname',CRIT_LABEL[crit]));
+      txt.appendChild(mk('div','ldesc',CRIT_DESC[crit]));
+      li.appendChild(txt);
+      var ar=mk('span','arrows');
+      var up=mk('button',null,'▲'); up.type='button'; up.disabled=(i===0); up.addEventListener('click',function(){moveImp(i,-1);});
+      var dn=mk('button',null,'▼'); dn.type='button'; dn.disabled=(i===C.importance.length-1); dn.addEventListener('click',function(){moveImp(i,1);});
+      ar.appendChild(up); ar.appendChild(dn); li.appendChild(ar);
+      ul.appendChild(li);
+    });
+    imp.appendChild(ul); cP.appendChild(imp);
+    root.appendChild(cP);
+
+    // Pièce
+    var cPiece=mk('div','rcard');
+    cPiece.appendChild(mk('h3',null,'Pièce'));
+    cPiece.appendChild(mk('div','rdesc','Pour chaque pièce : ampoules acceptées (cases vertes), ampoule préférée, et format préféré. La pièce ne décide pas de la catégorie (c\'est « Où installer »).'));
+    var tbl=mk('table','rt');
+    tbl.appendChild(mk('tr',null,'<th>Pièce</th><th>Ampoules acceptées</th><th>Ampoule préférée</th><th>Format préféré</th>'));
+    PIECES.forEach(function(p){
+      var slug=p[0], cfg=C.piece[slug];
+      var tr=mk('tr');
+      tr.appendChild(mk('td','rowname',p[1]));
+      var tdA=mk('td'); tdA.appendChild(chipsGroup(AMP_OPTS, cfg.amp, function(v){toggleAmp(slug,v);})); tr.appendChild(tdA);
+      var tdP=mk('td');
+      if(!cfg.amp.length){ tdP.innerHTML='<span class="reason">Aucun filtre</span>'; }
+      else {
+        var accepted=AMP_ORDER.filter(function(s){return cfg.amp.indexOf(s)!==-1;}).map(function(s){return {v:s,label:AMP_LABEL[s]};});
+        tdP.appendChild(selectCtrl(accepted, cfg.pref, function(v){cfg.pref=v;rebuild();}));
+      }
+      tr.appendChild(tdP);
+      var tdF=mk('td'); tdF.appendChild(selectCtrl(FMT_OPTS, C.formatPref[slug]||'', function(v){C.formatPref[slug]=v;rebuild();})); tr.appendChild(tdF);
+      tbl.appendChild(tr);
+    });
+    cPiece.appendChild(tbl);
+    cPiece.appendChild(ctrl('Cuisine : catégories à retirer','Coche les catégories à NE PAS proposer en cuisine (une lampe à poser ou un lampadaire au sol n\'ont pas leur place près d\'un plan de travail).', chipsGroup(CAT_OPTS, C.cuisineRemove, function(v){toggleCat('cuisineRemove',null,v);})));
+    root.appendChild(cPiece);
+
+    // Où installer (sortie) + catégorie prioritaire
+    var cS=mk('div','rcard');
+    cS.appendChild(mk('h3',null,'Où installer (sortie électrique)'));
+    cS.appendChild(mk('div','rdesc','Pour chaque sortie : quelles catégories sont proposées, et laquelle mettre en avant quand plusieurs passent (surtout utile pour « je ne sais pas »).'));
+    var tblS=mk('table','rt');
+    tblS.appendChild(mk('tr',null,'<th>Sortie</th><th>Catégories proposées</th><th>Catégorie prioritaire</th>'));
+    SORTIES.forEach(function(s){
+      var slug=s[0];
+      var tr=mk('tr');
+      tr.appendChild(mk('td','rowname',s[1]));
+      var td=mk('td'); td.appendChild(chipsGroup(CAT_OPTS, C.sortie[slug], function(v){toggleCat('sortie',slug,v);})); tr.appendChild(td);
+      var tdP=mk('td');
+      var opts=[{v:'',label:'Aucune'}].concat(CAT_ORDER.filter(function(c){return C.sortie[slug].indexOf(c)!==-1;}).map(function(c){return {v:c,label:CAT_LABEL[c]};}));
+      tdP.appendChild(selectCtrl(opts, C.catPriority[slug]||'', function(v){C.catPriority[slug]=v;rebuild();}));
+      tr.appendChild(tdP);
+      tblS.appendChild(tr);
+    });
+    cS.appendChild(tblS);
+    root.appendChild(cS);
+
+    // Hauteur / format (filtre dur)
+    var cH=mk('div','rcard');
+    cH.appendChild(mk('h3',null,'Hauteur et format des suspensions'));
+    cH.appendChild(mk('div','rdesc','Quand une suspension allongée (verticale) ou large (horizontale) est autorisée. La boule est toujours autorisée. Ceci est un filtre dur (passe ou pas) ; la mise en avant d\'un format, elle, se règle dans « Pièce ».'));
+    cH.appendChild(ctrl('Vertical autorisé dès que le plafond est haut (> 3 m), toutes pièces','Sinon, le vertical reste réservé aux cas ci-dessous.', segBool(C.verticalHaute,function(v){C.verticalHaute=v;rebuild();})));
+    cH.appendChild(ctrl('Vertical autorisé en entrée si plafond confortable ou haut','', segBool(C.verticalEntreeConfort,function(v){C.verticalEntreeConfort=v;rebuild();})));
+    cH.appendChild(ctrl('Vertical autorisé en petite pièce si plafond confortable ou haut','', segBool(C.verticalPetiteConfort,function(v){C.verticalPetiteConfort=v;rebuild();})));
+    cH.appendChild(ctrl('Horizontal exclu en petite pièce + plafond haut','', segBool(C.horizontalPetiteHaute,function(v){C.horizontalPetiteHaute=v;rebuild();})));
+    cH.appendChild(mk('div','note','Escalier : vertical toujours autorisé, horizontal toujours exclu (règle fixe).'));
+    root.appendChild(cH);
+
+    // Taille
+    var cT=mk('div','rcard');
+    cT.appendChild(mk('h3',null,'Taille de la pièce'));
+    cT.appendChild(mk('div','rdesc','La taille choisit la dimension de variation (petite → 1re, standard → 2e, grande → 3e). Réglages pour la grande pièce :'));
+    cT.appendChild(ctrl('Grande pièce : exclure les suspensions à 2 tailles ou moins','Relâché s\'il ne reste plus rien.', segBool(C.grandeExclut2Tailles,function(v){C.grandeExclut2Tailles=v;rebuild();})));
+    cT.appendChild(ctrl('Grande pièce de travail (cuisine, bureau) : lever le filtre d\'ampoule','', segBool(C.grandeSkipAmpoule,function(v){C.grandeSkipAmpoule=v;rebuild();})));
+    root.appendChild(cT);
+
+    // Éclairage
+    var cE=mk('div','rcard');
+    cE.appendChild(mk('h3',null,'Éclairage (grande pièce uniquement)'));
+    cE.appendChild(mk('div','rdesc','Pour un éclairage secondaire, on part de ce pool de catégories, ensuite affiné par la sortie.'));
+    cE.appendChild(ctrl('Pool de départ pour l\'éclairage secondaire','', chipsGroup(CAT_OPTS, C.secondairePool, function(v){toggleCat('secondairePool',null,v);})));
+    root.appendChild(cE);
+
+    // Style
+    var cSt=mk('div','rcard');
+    cSt.appendChild(mk('h3',null,'Style'));
+    cSt.appendChild(mk('div','rdesc','Le style met une essence en avant sur la variation affichée (ne change pas quels produits passent).'));
+    var tblSt=mk('table','rt');
+    tblSt.appendChild(mk('tr',null,'<th>Style</th><th>Essence</th>'));
+    STYLES.forEach(function(s){
+      var slug=s[0]; var tr=mk('tr'); tr.appendChild(mk('td','rowname',s[1]));
+      var td=mk('td'); td.appendChild(segCtrl([{v:'peuplier',label:'Peuplier'},{v:'okoume',label:'Okoumé'},{v:'',label:'Aucune'}], C.style[slug], function(v){C.style[slug]=v;rebuild();})); tr.appendChild(td);
+      tblSt.appendChild(tr);
+    });
+    cSt.appendChild(tblSt);
+    root.appendChild(cSt);
+
+    // Escalier
+    var cEs=mk('div','rcard');
+    cEs.appendChild(mk('h3',null,'Type d\'escalier'));
+    cEs.appendChild(mk('div','rdesc','L\'escalier n\'a pas de taille classique : son type est converti en taille.'));
+    cEs.appendChild(ctrl('Escalier standard → traité comme','', segCtrl([{v:'petite',label:'Petite'},{v:'grande',label:'Grande'}], C.escalierMap.standard, function(v){C.escalierMap.standard=v;rebuild();})));
+    cEs.appendChild(ctrl('Grand escalier ouvert → traité comme','', segCtrl([{v:'petite',label:'Petite'},{v:'grande',label:'Grande'}], C.escalierMap.ouvert, function(v){C.escalierMap.ouvert=v;rebuild();})));
+    root.appendChild(cEs);
+  }
+
+  function moveImp(i,dir){
+    var j=i+dir; if(j<0||j>=C.importance.length) return;
+    var t=C.importance[i]; C.importance[i]=C.importance[j]; C.importance[j]=t; rebuild();
+  }
+  function toggleAmp(piece,slug){
+    var cfg=C.piece[piece]; var i=cfg.amp.indexOf(slug);
+    if(i===-1) cfg.amp.push(slug); else cfg.amp.splice(i,1);
+    cfg.amp=AMP_ORDER.filter(function(s){return cfg.amp.indexOf(s)!==-1;});
+    if(cfg.amp.indexOf(cfg.pref)===-1) cfg.pref=cfg.amp[0]||null;
+    rebuild();
+  }
+  function toggleCat(where,key,slug){
+    var arr=key?C[where][key]:C[where]; var i=arr.indexOf(slug);
+    if(i===-1) arr.push(slug); else arr.splice(i,1);
+    var sorted=CAT_ORDER.filter(function(c){return arr.indexOf(c)!==-1;});
+    if(key){ C[where][key]=sorted; if(C.catPriority[key] && sorted.indexOf(C.catPriority[key])===-1) C.catPriority[key]=''; }
+    else C[where]=sorted;
+    rebuild();
+  }
+
+  /* ===== Filtrage ===== */
+  function derived(){
+    var a={piece:val('piece'),taille:val('taille'),taille_escalier:val('taille_escalier'),eclairage:val('eclairage'),sortie:val('sortie'),hauteur:val('hauteur'),style:val('style')};
+    if(a.piece==='escalier') a.taille=C.escalierMap[a.taille_escalier]||'petite';
+    return a;
+  }
+  function visibility(a){
+    return {piece:true, taille:a.piece!=='escalier', taille_escalier:a.piece==='escalier',
+      eclairage:a.piece!=='escalier'&&a.taille==='grande', sortie:!!a.piece,
+      hauteur:a.sortie==='plafond'&&['cuisine','bureau','salon','chambre','chambre-enfant','entree'].indexOf(a.piece)!==-1, style:true};
+  }
+  function getCategories(a){
+    var sortie=a.sortie,piece=a.piece;
+    if(piece!=='escalier'&&a.taille==='grande'&&a.eclairage==='secondaire'){
+      var pool=C.secondairePool.slice();
+      if(sortie==='plafond') pool=['suspensions']; else if(sortie==='mur') pool=['appliques'];
+      if(piece==='cuisine') pool=pool.filter(function(c){return C.cuisineRemove.indexOf(c)===-1;});
+      return pool;
+    }
+    var cats=(C.sortie[sortie]||C.sortie['ne-sais-pas']).slice();
+    if(piece==='cuisine') cats=cats.filter(function(c){return C.cuisineRemove.indexOf(c)===-1;});
+    return cats;
+  }
+  function getAmpouleFilter(a){
+    if((a.piece==='cuisine'||a.piece==='bureau')&&a.taille==='grande'&&C.grandeSkipAmpoule) return null;
+    var cfg=C.piece[a.piece];
+    return (cfg&&cfg.amp.length)?cfg.amp.slice():null;
+  }
+  function getAmpPref(a){ if(!C.prio) return null; var f=getAmpouleFilter(a); if(!f) return null; var p=C.piece[a.piece]?C.piece[a.piece].pref:null; return (p&&f.indexOf(p)!==-1)?p:null; }
+  function getCatPref(a){ if(!C.prio) return ''; return C.catPriority[a.sortie]||''; }
+  function getFmtPref(a){ if(!C.prio) return ''; return C.formatPref[a.piece]||''; }
+  function allowVertical(a){
+    if(a.piece==='escalier') return true;
+    if(C.verticalHaute&&a.hauteur==='haute') return true;
+    if(C.verticalEntreeConfort&&a.piece==='entree'&&(a.hauteur==='confortable'||a.hauteur==='haute')) return true;
+    if(C.verticalPetiteConfort&&a.taille==='petite'&&(a.hauteur==='confortable'||a.hauteur==='haute')) return true;
+    return false;
+  }
+  function excludeHorizontal(a){ if(a.piece==='escalier') return true; return C.horizontalPetiteHaute&&a.taille==='petite'&&a.hauteur==='haute'; }
+
+  function ranks(p,a,ampPref,catPref,fmtPref){
+    var amp = ampPref ? (p.ampoule===ampPref?0:1) : 0;
+    var cat = catPref ? (p.cat===catPref?0:1) : 0;
+    var fmt = (fmtPref && p.cat==='suspensions') ? (p.format===fmtPref?0:1) : 0;
+    return {ampoule:amp, categorie:cat, format:fmt};
+  }
+  function score(rk){ var s=0; C.importance.forEach(function(crit){ s=s*10+rk[crit]; }); return s; }
+
+  function evalProduct(p,a,cats,ampFilter){
+    if(cats.indexOf(p.cat)===-1) return {keep:false,reason:'catégorie non retenue'};
+    if(p.cat==='suspensions'){
+      if(p.format==='vertical'&&!allowVertical(a)) return {keep:false,reason:'format vertical exclu'};
+      if(p.format==='horizontal'&&excludeHorizontal(a)) return {keep:false,reason:'format horizontal exclu'};
+    }
+    if(ampFilter&&ampFilter.indexOf(p.ampoule)===-1) return {keep:false,reason:'ampoule non adaptée'};
+    return {keep:true};
+  }
+  function pickFromPool(pool,need){
+    var rem=pool.slice(),picks=[];
+    function take(fn){if(!rem.length||picks.length>=need)return;rem.sort(fn);picks.push(rem.shift());}
+    take(function(x,y){return y.sales-x.sales;});
+    take(function(x,y){return y.id-x.id;});
+    take(function(x,y){return y.sales-x.sales;});
+    if(rem.length&&picks.length<need) picks.push(rem[0]);
+    return picks.slice(0,need);
+  }
+
+  function refresh(){
+    var a=derived(), vis=visibility(a);
+    ['taille','taille_escalier','eclairage','sortie','hauteur','style'].forEach(function(f){
+      document.querySelector('[data-f="'+f+'"]').classList.toggle('hidden', !vis[f]);
+    });
+    var msgs=[];
+    if(a.piece==='escalier') msgs.push('Escalier : type d\'escalier au lieu de la taille, et pas de hauteur.');
+    if(!vis.eclairage&&a.piece!=='escalier') msgs.push('L\'éclairage n\'est demandé qu\'en grande pièce.');
+    if(a.sortie!=='plafond'&&vis.sortie) msgs.push('La hauteur n\'est demandée que si la sortie est au plafond.');
+    document.getElementById('whyHidden').textContent=msgs.join(' ');
+
+    var cats=getCategories(a), ampFilter=getAmpouleFilter(a);
+    var ampPref=getAmpPref(a), catPref=getCatPref(a), fmtPref=getFmtPref(a);
+
+    // décision catégories
+    var cb=document.getElementById('decCat'); cb.innerHTML='';
+    CAT_ORDER.forEach(function(c){ cb.appendChild(mk('span','tag '+(cats.indexOf(c)!==-1?'kept':'gone'),CAT_LABEL[c])); });
+    var why={plafond:'Sortie plafond.',mur:'Sortie mur.','pas-de-sortie':'Prise 230V.','ne-sais-pas':'Sortie inconnue.'}[a.sortie]||'';
+    if(a.piece!=='escalier'&&a.taille==='grande'&&a.eclairage==='secondaire') why='Éclairage secondaire → pool affiné par la sortie. '+why;
+    if(a.piece==='cuisine'&&C.cuisineRemove.length) why+=' Cuisine → retiré : '+C.cuisineRemove.map(function(c){return CAT_LABEL[c];}).join(', ')+'.';
+    if(catPref) why+=' Priorité : '+CAT_LABEL[catPref]+' en tête.';
+    document.getElementById('decCatWhy').textContent=why;
+
+    // décision format
+    var fmt;
+    if(cats.indexOf('suspensions')===-1) fmt='Pas de suspension ici.';
+    else { fmt=(allowVertical(a)?'Vertical autorisé':'Vertical exclu')+', '+(excludeHorizontal(a)?'horizontal exclu':'horizontal autorisé')+', boule toujours autorisée.'; if(fmtPref) fmt+=' Préféré : '+FMT_LABEL[fmtPref]+'.'; }
+    document.getElementById('decFmt').textContent=fmt;
+
+    // décision ampoule
+    var ab=document.getElementById('decAmp'); ab.innerHTML='';
+    if(!ampFilter){ document.getElementById('decAmpWhy').textContent=(a.piece==='escalier')?'Escalier : aucun filtre d\'ampoule.':'Grande pièce de travail : filtre levé.'; }
+    else {
+      AMP_ORDER.forEach(function(s){ var kept=ampFilter.indexOf(s)!==-1,isPref=(s===ampPref); ab.appendChild(mk('span','tag '+(isPref?'pref':(kept?'kept':'gone')),AMP_LABEL[s]+(isPref?' ★':''))); });
+      var w=ampFilter.map(function(s){return AMP_LABEL[s];}).join(' et ')+' acceptées.';
+      if(ampPref) w+=' Préférée : '+AMP_LABEL[ampPref]+'.'; else if(!C.prio) w+=' (priorité désactivée)';
+      document.getElementById('decAmpWhy').textContent=w;
+    }
+
+    // décision essence
+    var ess=C.style[a.style];
+    document.getElementById('decEss').textContent= ess?('Style '+a.style+' → '+ESS_LABEL[ess]+'.'):'Pas de préférence d\'essence.';
+
+    // catalogue
+    var kept=[],out=[];
+    CATALOG.forEach(function(p){
+      var r=evalProduct(p,a,cats,ampFilter);
+      if(r.keep){ var rk=ranks(p,a,ampPref,catPref,fmtPref); kept.push(Object.assign({},p,{rk:rk,score:score(rk)})); }
+      else out.push(Object.assign({},p,{reason:r.reason}));
+    });
+    var strict=(C.mode==='strict'&&C.prio);
+    var slider=kept.slice().sort(function(x,y){return x.score-y.score;});
+    if(strict&&slider.length){ var best=slider[0].score; slider=slider.filter(function(p){return p.score===best;}); }
+
+    // picks : groupes de score croissants
+    var byScore={}; kept.forEach(function(p){ (byScore[p.score]=byScore[p.score]||[]).push(p); });
+    var scores=Object.keys(byScore).map(Number).sort(function(a,b){return a-b;});
+    var picks=[], need=4;
+    for(var i=0;i<scores.length && need>0;i++){ var got=pickFromPool(byScore[scores[i]], need); picks=picks.concat(got); need-=got.length; if(strict) break; }
+
+    renderProds('sliderList',slider,false,{ampPref:ampPref,catPref:catPref,fmtPref:fmtPref});
+    renderPicks('picksList',picks,{ampPref:ampPref,catPref:catPref,fmtPref:fmtPref});
+    renderProds('outList',out,true);
+    document.getElementById('cntSlider').textContent='('+slider.length+')';
+    document.getElementById('cntPicks').textContent='('+picks.length+')';
+    document.getElementById('cntOut').textContent='('+out.length+')';
+  }
+
+  function prodMeta(p){var b=[CAT_LABEL[p.cat]]; if(p.format)b.push(FMT_LABEL[p.format]); b.push(AMP_LABEL[p.ampoule]); b.push(p.sales+' ventes'); return b.join(' · ');}
+  function prefBadges(p,pr){
+    var out=[];
+    if(pr.ampPref) out.push('<span class="pb '+(p.ampoule===pr.ampPref?'y':'n')+'">ampoule '+(p.ampoule===pr.ampPref?'✓':'✗')+'</span>');
+    if(pr.catPref) out.push('<span class="pb '+(p.cat===pr.catPref?'y':'n')+'">catég. '+(p.cat===pr.catPref?'✓':'✗')+'</span>');
+    if(pr.fmtPref&&p.cat==='suspensions') out.push('<span class="pb '+(p.format===pr.fmtPref?'y':'n')+'">forme '+(p.format===pr.fmtPref?'✓':'✗')+'</span>');
+    return out.join('');
+  }
+  function renderProds(id,list,isOut,pr){
+    var box=document.getElementById(id); box.innerHTML='';
+    if(!list.length){box.innerHTML='<div class="empty">Aucun.</div>';return;}
+    list.forEach(function(p){
+      var d;
+      if(isOut){ d=mk('div','prod out','<span class="nm">'+p.nm+'</span><span class="meta">&nbsp;'+prodMeta(p)+'</span><span class="outreason">'+p.reason+'</span>'); }
+      else { d=mk('div','prod'+(p.score===0?' best':''),'<span class="rank">'+p.score+'</span><span class="nm">'+p.nm+'</span><span class="meta">&nbsp;'+prodMeta(p)+'</span><span class="pbadges">'+prefBadges(p,pr)+'</span>'); }
+      box.appendChild(d);
+    });
+  }
+  function renderPicks(id,list,pr){
+    var box=document.getElementById(id); box.innerHTML='';
+    if(!list.length){box.innerHTML='<div class="empty">Aucun produit ne passe le filtre.</div>';return;}
+    var roles=['meilleure vente','plus récent','2e vente','+1'];
+    list.forEach(function(p,i){ box.appendChild(mk('div','pick','<span class="role">'+(roles[i]||'')+'</span><span class="nm">'+p.nm+'</span><span class="meta">&nbsp;'+prodMeta(p)+'</span><span class="pbadges">'+prefBadges(p,pr)+'</span>')); });
+  }
+
+  ['piece','taille','taille_escalier','eclairage','sortie','hauteur','style'].forEach(function(id){ document.getElementById(id).addEventListener('change',refresh); });
+  document.getElementById('reset').addEventListener('click',function(){C=defaultConfig();rebuild();});
+
+  buildRules();
+  refresh();
+})();
+</script>
+</body>
+</html>

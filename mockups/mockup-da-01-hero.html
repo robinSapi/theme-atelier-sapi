@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA Home · 01 Hero — variantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-wood:#8B7355;
+  --color-wood-dark:#4A3F35;
+  --color-wood-mid:#6B5A4A;
+  --color-warm:#FBF6EA;
+  --color-orange:#E35B24;
+  --color-ink:#3a322b;
+  --shadow-card:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:#efe9dc;color:var(--color-ink);line-height:1.55}
+.devnote{background:var(--color-wood-dark);color:var(--color-warm);padding:14px 28px;font-size:13px;letter-spacing:.02em}
+.devnote strong{color:#fff}
+.devnote em{color:#e9c9a8;font-style:normal}
+.wrap{max-width:1400px;margin:0 auto;padding:48px 24px 80px}
+.variant-head{margin:56px 0 18px}
+.variant-head .tag{display:inline-block;background:var(--color-wood);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:50px}
+.variant-head h2{font-family:'Square Peg',cursive;font-size:40px;color:var(--color-wood-dark);font-weight:400;margin-top:8px}
+.variant-head p{max-width:760px;color:var(--color-wood-mid);font-size:14.5px;margin-top:2px}
+
+/* ---- HERO base ---- */
+.hero{position:relative;width:100%;height:660px;border-radius:18px;overflow:hidden;box-shadow:var(--shadow-card)}
+.hero-slide{position:absolute;inset:0;background-size:cover;background-position:center}
+.hero-arrows{position:absolute;top:50%;transform:translateY(-50%);left:0;right:0;display:flex;justify-content:space-between;padding:0 22px;pointer-events:none;z-index:6}
+.hero-arrow{pointer-events:auto;width:54px;height:54px;border-radius:50%;background:rgba(74,63,53,.42);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.25s}
+.hero-arrow:hover{background:var(--color-orange)}
+.hero-dots{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:6}
+.hero-dots span{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.45)}
+.hero-dots span.on{background:#fff;width:26px;border-radius:5px}
+
+/* Variant A — bandeau-crédit pleine largeur */
+.heroA .veil{position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(to top,rgba(74,63,53,.86) 0%,rgba(74,63,53,.55) 38%,rgba(74,63,53,0) 100%);z-index:2}
+.creditA{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:34px 48px 40px;cursor:pointer;display:flex;align-items:flex-end;justify-content:space-between;gap:30px}
+.creditA .eyebrow{color:#e9c9a8;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px}
+.nameblock .firstname{display:block;font-family:'Montserrat';font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#fff;font-size:28px;line-height:1}
+.nameblock .restname{display:block;font-family:'Square Peg',cursive;color:#fff;font-size:54px;line-height:.9;margin-top:-2px}
+.discoverA{color:#fff;font-size:15px;font-weight:600;letter-spacing:.02em;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.4);padding-bottom:4px;transition:.25s}
+.creditA:hover .discoverA{color:#ffd9b0;border-color:#ffd9b0}
+.creditA .discoverA .arr{display:inline-block;transition:transform .25s}
+.creditA:hover .discoverA .arr{transform:translateX(5px)}
+
+/* H1 SEO discret en haut */
+.hero-h1{position:absolute;top:40px;left:48px;z-index:5;font-family:'Square Peg',cursive;color:#fff;font-size:46px;line-height:1;text-shadow:0 2px 18px rgba(0,0,0,.4);max-width:520px}
+
+/* Variant B — encart aligné gauche */
+.heroB .veil{position:absolute;inset:0;background:linear-gradient(105deg,rgba(74,63,53,.78) 0%,rgba(74,63,53,.32) 46%,rgba(74,63,53,0) 70%);z-index:2}
+.creditB{position:absolute;left:48px;bottom:46px;z-index:5;cursor:pointer;max-width:430px}
+.creditB .card-inner{background:rgba(74,63,53,.34);backdrop-filter:blur(7px);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:26px 30px;transition:.3s}
+.creditB:hover .card-inner{background:rgba(74,63,53,.55)}
+.creditB .eyebrow{color:#e9c9a8;font-size:11.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:9px}
+.creditB .discoverB{margin-top:16px;display:inline-flex;align-items:center;gap:9px;color:#fff;font-weight:600;font-size:14.5px}
+.creditB .discoverB .arr{transition:transform .25s}
+.creditB:hover .discoverB .arr{transform:translateX(5px);color:#ffd9b0}
+.zone-note{position:absolute;inset:0;z-index:4;cursor:pointer}
+
+.note{font-size:13px;color:var(--color-wood-mid);background:#fff;border-left:3px solid var(--color-wood);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:18px;max-width:900px}
+</style>
+</head>
+<body>
+<div class="devnote"><strong>DA HOME · Section 01 — Hero (carrousel conservé)</strong> &nbsp;·&nbsp; <em>Photos provisoires (site de test). On retravaille l'overlay (voile bois, pas gris froid) + la naming card → bandeau-crédit ancré qui appartient à l'image. Nom au format formatter (prénom Montserrat caps + surnom Square Peg). Toute la zone basse cliquable. Flèches de carrousel visibles.</em></div>
+
+<div class="wrap">
+
+  <!-- VARIANTE A -->
+  <div class="variant-head">
+    <span class="tag">Variante A</span>
+    <h2>Bandeau-crédit pleine largeur, discret</h2>
+    <p>Le voile bois sombre monte du bas comme une légende de photo. Le nom du modèle est posé à gauche, « Découvrir » à droite. Toute la bande basse est cliquable. Lecture éditoriale, propre, l'image domine.</p>
+  </div>
+  <div class="hero heroA">
+    <div class="hero-slide" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Vincent-Ambiance3-1536x1237.jpg')"></div>
+    <div class="veil"></div>
+    <h1 class="hero-h1">Des luminaires en bois, façonnés main à Lyon</h1>
+    <div class="hero-arrows">
+      <div class="hero-arrow">‹</div>
+      <div class="hero-arrow">›</div>
+    </div>
+    <a class="creditA" href="#">
+      <div class="nameblock">
+        <span class="eyebrow">Le modèle de cette photo</span>
+        <span class="firstname">VINCENT</span>
+        <span class="restname">Le Phare</span>
+      </div>
+      <span class="discoverA">Découvrir Vincent <span class="arr">→</span></span>
+    </a>
+    <div class="hero-dots"><span class="on"></span><span></span><span></span></div>
+  </div>
+  <div class="note">Zone cliquable = toute la bande basse (photo + naming). Le H1 SEO reste en haut, discret, en Square Peg blanc.</div>
+
+  <!-- VARIANTE B -->
+  <div class="variant-head">
+    <span class="tag">Variante B</span>
+    <h2>Encart-légende aligné à gauche</h2>
+    <p>Le crédit devient un petit encart verre dépoli ancré en bas à gauche, le voile vient en diagonale depuis la gauche. Plus affirmé, plus « signé ». L'œil va d'abord au nom, puis à la lumière.</p>
+  </div>
+  <div class="hero heroB">
+    <div class="hero-slide" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2026/05/Claudine-La-turbine-Cuisine-bois-1536x1237.jpg')"></div>
+    <div class="veil"></div>
+    <h1 class="hero-h1" style="left:auto;right:48px;text-align:right">Des luminaires en bois, façonnés main à Lyon</h1>
+    <a class="zone-note" href="#" aria-label="Découvrir le modèle"></a>
+    <div class="hero-arrows">
+      <div class="hero-arrow">‹</div>
+      <div class="hero-arrow">›</div>
+    </div>
+    <a class="creditB" href="#">
+      <div class="card-inner">
+        <span class="eyebrow">Le modèle de cette photo</span>
+        <div class="nameblock">
+          <span class="firstname">CLAUDINE</span>
+          <span class="restname">La Turbine</span>
+        </div>
+        <span class="discoverB">Découvrir Claudine <span class="arr">→</span></span>
+      </div>
+    </a>
+    <div class="hero-dots"><span></span><span class="on"></span><span></span></div>
+  </div>
+  <div class="note">Toute la photo est cliquable (zone invisible) + l'encart explicite l'action. Voile diagonal = on garde la lumière chaude du luminaire intacte côté droit.</div>
+
+</div>
+</body>
+</html>

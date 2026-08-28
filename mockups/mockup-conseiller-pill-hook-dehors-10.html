@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conseiller — pill + accroche Square Peg hors pill (10 pistes)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#8B7355; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24; --cream:#FBF6EA; --ink:#3a322b;
+    --robin:url('https://atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice.jpg');
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Montserrat',sans-serif;color:var(--ink);background:#efe9dc}
+  .devnote{background:var(--wood-dark);color:#f0e7d8;font-size:13px;padding:14px 28px}.devnote b{color:#fff}
+  .band{background:var(--cream);background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.05) 0,rgba(139,115,85,.05) 1px,transparent 1px,transparent 7px);
+    padding:38px 24px 28px;text-align:center;border-top:1px solid #efe6da;margin-bottom:12px;position:relative}
+  .tag{position:absolute;left:22px;top:12px;background:var(--wood);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;border-radius:50px;padding:4px 12px}
+  .h2{font-weight:700;font-size:clamp(1.7rem,3.2vw,2.2rem);color:var(--wood-dark);margin-top:4px}
+
+  /* pill = dark, avatar SANS contour + eyebrow seul */
+  .pill{display:inline-flex;align-items:center;gap:9px;background:var(--wood-dark);border-radius:60px;padding:4px 16px 4px 4px}
+  .pill .av{width:34px;height:34px;border-radius:50%;background-image:var(--robin);background-size:cover;background-position:center 22%;flex-shrink:0}
+  .pill .eye{font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#e0a878;font-size:10px}
+  /* accroche Square Peg hors pill, sur crème */
+  .hook{font-family:'Square Peg';color:var(--wood-dark);line-height:1}
+
+  .stack{display:inline-flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:14px}
+
+  /* V1 — hook dessous, centré, 26px */
+  .v1 .hook{font-size:26px}
+  /* V2 — hook dessous plus grand (sous-titre), 34px */
+  .v2 .hook{font-size:34px}
+  /* V3 — hook à DROITE de la pill (en ligne) */
+  .v3{flex-direction:row;gap:14px;align-items:center}
+  .v3 .hook{font-size:26px}
+  /* V4 — hook dessous + filet orange fin */
+  .v4 .hook{font-size:28px}
+  .v4 .rule{width:54px;height:2px;background:var(--orange);border-radius:2px;margin-top:2px}
+  /* V5 — pill plus compacte, hook 28px */
+  .v5 .pill{padding:3px 14px 3px 3px}.v5 .pill .av{width:30px;height:30px}.v5 .pill .eye{font-size:9px}
+  .v5 .hook{font-size:28px}
+  /* V6 — hook discret 22px wood-mid */
+  .v6 .hook{font-size:22px;color:var(--wood-mid)}
+  /* V7 — avatar qui dépasse à gauche de la pill */
+  .v7 .pill{padding-left:22px;position:relative}
+  .v7 .pill .av{position:absolute;left:-6px;width:40px;height:40px;border:2px solid var(--cream)}
+  .v7 .hook{font-size:26px}
+  /* V8 — avatar séparé À GAUCHE du bloc, pill = caps seul */
+  .v8{flex-direction:row;gap:14px;align-items:center}
+  .v8 .av-out{width:48px;height:48px;border-radius:50%;background-image:var(--robin);background-size:cover;background-position:center 20%;flex-shrink:0}
+  .v8 .pill .av{display:none}.v8 .pill{padding:6px 16px}
+  .v8 .col{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+  .v8 .hook{font-size:26px}
+  /* V9 — hook en orange chaud */
+  .v9 .hook{font-size:28px;color:#c84d1c}
+  /* V10 — hook dessous + guillemet Square Peg */
+  .v10 .hook{font-size:28px}
+  .v10 .q{font-family:'Square Peg';color:var(--orange);font-size:30px;line-height:.4;display:block;margin-bottom:-6px}
+</style>
+</head>
+<body>
+<div class="devnote"><b>Pill « Le conseil de Robin » — accroche Square Peg SORTIE de la pill</b> &nbsp;·&nbsp; photo sans contour. La pill (sombre) ne garde que « LE CONSEIL DE ROBIN » ; l'accroche manuscrite passe sur le crème en bois sombre (lisible). 10 pistes, au-dessus du vrai titre.</div>
+
+<div class="band"><span class="tag">V1 — accroche dessous, 26px</span>
+  <span class="stack v1"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V2 — accroche dessous, grande (sous-titre)</span>
+  <span class="stack v2"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V3 — accroche à droite de la pill</span>
+  <span class="stack v3"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V4 — accroche dessous + filet orange</span>
+  <span class="stack v4"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook">Mon regard d'artisan sur ton projet</span><span class="rule"></span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V5 — pill très compacte</span>
+  <span class="stack v5"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V6 — accroche discrète (bois mid)</span>
+  <span class="stack v6"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V7 — photo qui dépasse à gauche</span>
+  <span class="stack v7"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V8 — photo séparée à gauche, pill = caps</span>
+  <span class="stack v8"><span class="av-out"></span><span class="col"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook">Mon regard d'artisan sur ton projet</span></span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V9 — accroche en orange chaud</span>
+  <span class="stack v9"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V10 — accroche + guillemet orange</span>
+  <span class="stack v10"><span class="pill"><span class="av"></span><span class="eye">Le conseil de Robin</span></span><span class="hook"><span class="q">&laquo;</span>Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+</body>
+</html>

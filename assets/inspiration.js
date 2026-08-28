@@ -7,6 +7,11 @@
 (function () {
   'use strict';
 
+  /* Instant où le script démarre, c'est-à-dire où la page s'affiche chez le
+     visiteur. Sert à mesurer le temps qu'il met à soumettre : un robot poste
+     en quelques millisecondes, une personne met plusieurs secondes. */
+  var AFFICHE_A = Date.now();
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
@@ -59,6 +64,15 @@
       body.append('action', 'sapi_inspiration_brevo_subscribe');
       body.append('nonce', window.sapiInspiration.nonce);
       body.append('email', email);
+      /* Anti-spam : le piège à robots et l'horodatage signé posés par le
+         gabarit. Un robot qui reconstruit la requête à la main les oublie —
+         c'est tout l'intérêt. Un humain ne les voit jamais. */
+      var hp = form.querySelector('input[name="website"]');
+      body.append('website', hp ? hp.value : '');
+      /* Délai depuis l'affichage du formulaire, mesuré ici et pas au serveur :
+         cette page est mise en cache, un horodatage posé au rendu serait celui
+         du cache. Voir la note dans page-inspiration.php. */
+      body.append('delai_ms', String(Date.now() - AFFICHE_A));
 
       fetchWithTimeout(window.sapiInspiration.ajaxUrl, {
         method: 'POST',
@@ -78,6 +92,13 @@
             var msg = (json && json.data && json.data.message) || 'erreur';
             if (msg === 'invalid_email') {
               setStatus(status, 'Adresse email invalide.', 'error');
+            } else if (msg === 'rate_limited') {
+              /* Une vraie personne peut l'atteindre : plusieurs essais après
+                 une faute de frappe. Elle mérite de comprendre pourquoi, sinon
+                 elle relance sans fin. Le refus anti-spam, lui, reste dans le
+                 message générique en dessous : on n'explique pas à un robot
+                 ce qui l'a fait tomber. */
+              setStatus(status, 'Trop de tentatives. Réessayez dans une heure.', 'error');
             } else {
               setStatus(status, 'Une erreur est survenue, merci de réessayer.', 'error');
             }

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recette — rappel de projet</title>
+<style>
+  :root{
+    --bois:#937D68; --orange:#E35B24; --encre:#2B2118;
+    --fond:#FAF7F2; --carte:#FFFFFF; --trait:#E6DED3; --doux:#8A7F73;
+    --ok:#3F7D58; --ko:#B4402B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fond);color:var(--encre);
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:880px;margin:0 auto;padding:24px 18px 160px}
+  header{padding:20px 0 6px}
+  h1{margin:0 0 6px;font-size:23px;letter-spacing:-.01em}
+  .sub{color:var(--doux);font-size:14px;margin:0}
+
+  .bar{position:sticky;top:0;z-index:20;background:rgba(250,247,242,.94);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--trait);
+    margin:14px -18px 0;padding:10px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .prog{flex:1 1 160px;height:7px;background:var(--trait);border-radius:99px;overflow:hidden;min-width:110px}
+  .prog i{display:block;height:100%;width:0;background:var(--bois);transition:width .3s}
+  .count{font-size:13px;color:var(--doux);white-space:nowrap}
+  .count b{color:var(--encre)}
+
+  .avant{background:#F7F0E6;border:1px solid #E4D3B5;border-radius:12px;padding:14px 16px;margin:18px 0 4px}
+  .avant h2{margin:0 0 7px;font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:#8A6A2F}
+  .avant ol{margin:0;padding-left:19px}
+  .avant li{margin:6px 0}
+
+  .q{background:var(--carte);border:1px solid var(--trait);border-radius:12px;
+    padding:16px 17px;margin:14px 0}
+  .q.is-ok{border-color:#BFD9CB;box-shadow:inset 3px 0 0 var(--ok)}
+  .q.is-ko{border-color:#E8C4BB;box-shadow:inset 3px 0 0 var(--ko)}
+  .q h3{margin:0 0 3px;font-size:16.5px;line-height:1.35}
+  .q .n{color:var(--bois);font-weight:700;margin-right:7px}
+  .why{margin:2px 0 10px;font-size:13.5px;color:var(--doux);font-style:italic}
+  .crit{background:#FBEFEC;border:1px solid #E8C4BB;border-radius:8px;
+    padding:8px 11px;margin:9px 0 0;font-size:13px;color:#8C3A26}
+
+  .steps{margin:10px 0 0;padding-left:0;list-style:none;counter-reset:s}
+  .steps li{counter-increment:s;position:relative;padding-left:30px;margin:7px 0}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:1px;
+    width:20px;height:20px;border-radius:50%;background:var(--bois);color:#fff;
+    font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+  .look{margin:12px 0 0;padding:11px 13px;background:#FCFAF7;border:1px dashed var(--trait);border-radius:9px}
+  .look b{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--orange);margin-bottom:3px;font-weight:700}
+
+  .choix{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .choix label{flex:1 1 130px;text-align:center;padding:9px 10px;border:1px solid var(--trait);
+    border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;background:#FCFAF7;user-select:none}
+  .choix input{position:absolute;opacity:0;pointer-events:none}
+  .choix label:has(input:checked){background:var(--bois);border-color:var(--bois);color:#fff}
+  .choix label.ko:has(input:checked){background:var(--ko);border-color:var(--ko)}
+
+  textarea{width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--trait);
+    border-radius:9px;background:#FCFAF7;font:16px/1.5 inherit;resize:vertical;min-height:46px;color:inherit}
+  textarea:focus{outline:2px solid var(--bois);outline-offset:-1px;background:#fff}
+  textarea::placeholder{color:#B3A899}
+
+  .foot{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(250,247,242,.96);
+    backdrop-filter:blur(10px);border-top:1px solid var(--trait);padding:11px 18px;
+    padding-bottom:calc(11px + env(safe-area-inset-bottom));display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+  button{font:inherit;font-weight:700;font-size:14px;padding:11px 18px;border-radius:9px;
+    border:1px solid var(--trait);background:#fff;color:var(--encre);cursor:pointer}
+  button.p{background:var(--orange);border-color:var(--orange);color:#fff}
+  button.g{background:transparent;color:var(--doux)}
+  .out{max-width:880px;margin:0 auto;padding:0 18px}
+  #zone{display:none;margin:16px 0 0}#zone.on{display:block}
+  #txt{width:100%;min-height:280px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace}
+  .note{font-size:12.5px;color:var(--doux);margin:7px 0 0}
+  code{background:#F1EBE2;padding:1px 5px;border-radius:4px;font-size:12.5px;word-break:break-word}
+  pre{background:#F1EBE2;padding:9px 11px;border-radius:7px;overflow-x:auto;
+    font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;margin:8px 0 0}
+
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--fond:#1A1512;--carte:#231C17;--trait:#3A2F27;--encre:#F0E9E0;--doux:#A2958A}
+    :root:not([data-theme="light"]) textarea{background:#1E1813}
+    :root:not([data-theme="light"]) .choix label{background:#2A221C}
+    :root:not([data-theme="light"]) button{background:#2A221C;color:var(--encre)}
+    :root:not([data-theme="light"]) .bar{background:rgba(26,21,18,.94)}
+    :root:not([data-theme="light"]) .foot{background:rgba(26,21,18,.96)}
+    :root:not([data-theme="light"]) code,
+    :root:not([data-theme="light"]) pre{background:#2E251E}
+    :root:not([data-theme="light"]) .look{background:#1E1813}
+    :root:not([data-theme="light"]) .avant{background:#2A2016;border-color:#4A3A22}
+    :root:not([data-theme="light"]) .avant h2{color:#D8B36A}
+    :root:not([data-theme="light"]) .crit{background:#2E1B16;border-color:#5A2E22;color:#E8A08A}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Recette — le rappel de projet</h1>
+    <p class="sub">Variante A : une ligne au-dessus des cases quand un projet est en mémoire. Trois sélecteurs concernés, et cinq situations où il doit se taire.</p>
+  </header>
+
+  <div class="bar">
+    <div class="prog"><i id="pi"></i></div>
+    <div class="count" id="pc">0 / 8</div>
+  </div>
+
+  <div class="avant">
+    <h2>Avant de commencer</h2>
+    <ol>
+      <li>Pousse sur le site test et <strong>attends la fin du déploiement</strong>.</li>
+      <li><strong>Il te faut un projet en mémoire.</strong> En fenêtre normale (pas privée), va sur <code>test.atelier-sapi.fr/mes-creations/</code>, clique <strong>Salon</strong>, puis « Décrire mon projet en détail » et réponds jusqu'au bout. Ce projet servira à tous les tests.</li>
+      <li><strong>Garde cette même fenêtre</strong> pour les tests 1 à 5 : c'est elle qui se souvient. La navigation privée oublie tout, elle sert seulement au test 6.</li>
+      <li>Le rappel apparaît <strong>après</strong> le chargement de la page — il pousse les cases vers le bas d'environ 45 px. C'est normal et c'est assumé, ce n'est pas un défaut à signaler.</li>
+    </ol>
+  </div>
+
+  <div id="list"></div>
+</div>
+
+<div class="foot">
+  <button class="p" id="bExport">Copier pour Claude</button>
+  <button id="bFile">Télécharger .md</button>
+  <button class="g" id="bClear">Tout effacer</button>
+</div>
+<div class="out"><div id="zone"><textarea id="txt" readonly></textarea>
+<p class="note">Colle ça dans la conversation. Seuls les tests où tu as répondu sont exportés.</p></div></div>
+
+<script>
+const T = [
+{
+ n:"1", t:"Le rappel se voit sur l'accueil",
+ crit:"Le point qui a bloqué le push : je l'avais posé sur crème, exactement la couleur du fond. Ce test ne demande pas s'il existe, il demande s'il <b>se voit</b>.",
+ why:"Une ligne que personne ne remarque, c'est une fonctionnalité qu'on n'a pas faite.",
+ steps:[
+  "Dans ta fenêtre normale, va sur la <b>page d'accueil</b> du site test.",
+  "Descends jusqu'au bloc « Pour quelle pièce cherches-tu un luminaire ? ».",
+  "Regarde juste au-dessus des sept cases."
+ ],
+ look:"Une pastille <b>blanche</b>, nettement détachée du fond crème, qui dit : <b>Tu cherchais pour ton salon · Reprendre ma sélection</b>. « ton salon » en gras, « Reprendre ma sélection » en orange souligné. Si tu dois la chercher des yeux, c'est un échec — dis-le-moi.",
+ ph:"Si elle est là mais peu visible, dis-le franchement : c'est exactement ce qu'on cherche à éviter."
+},
+{
+ n:"2", t:"Le rappel est sur les trois sélecteurs",
+ why:"Il y en a trois sur le site, et le troisième est celui qui compte le plus : c'est le hero de Mes créations.",
+ steps:[
+  "Toujours dans ta fenêtre normale, va sur la page <b>Conseils éclairés</b> et trouve le sélecteur de pièce.",
+  "Puis va sur <code>test.atelier-sapi.fr/mes-creations/</code> — <b>par le menu</b>, pas par un lien avec une pièce dedans.",
+  "Regarde le grand bloc « Pour quelle pièce… » qui sert de hero."
+ ],
+ look:"La même pastille aux deux endroits, avec le même texte. Sur Mes créations elle est dans le hero, au-dessus des cases.",
+ ph:"Précise sur laquelle des deux pages ça ne va pas, le cas échéant."
+},
+{
+ n:"3", t:"Reprendre ramène le projet entier",
+ crit:"Pas seulement la pièce : les six réponses. Une reprise qui perdrait la taille ou la sortie électrique donnerait une autre sélection que celle que tu avais.",
+ why:"C'est la promesse du lien. S'il ramène un projet amputé, il vaut mieux ne pas le proposer.",
+ steps:[
+  "Depuis l'accueil, clique <b>Reprendre ma sélection</b>.",
+  "Tu arrives sur Mes créations. <b>Regarde l'adresse dans la barre du navigateur.</b>",
+  "Regarde la sélection affichée et la phrase de Robin."
+ ],
+ look:"L'adresse doit contenir <b>toutes</b> tes réponses, pas juste la pièce — quelque chose comme <code>?piece=salon&taille=grande&sortie=plafond&hauteur=…&style=…</code>. Et la page doit afficher ta sélection, pas le sélecteur de pièce.",
+ ph:"Recopie-moi l'adresse obtenue si quelque chose te semble manquer."
+},
+{
+ n:"4", t:"Reprendre ne gonfle pas tes statistiques",
+ crit:"J'ai décidé qu'une reprise ne compte PAS comme une nouvelle sélection de pièce, sinon le même visiteur compterait deux fois dans « Top pièces demandées ». Ce test vérifie cette décision — dis-moi si tu la trouves mauvaise.",
+ why:"Ton classement des pièces doit compter des personnes, pas des allers-retours.",
+ steps:[
+  "Ouvre <b>WP-admin → Robin Conseiller</b> dans un autre onglet et note le nombre total de sessions.",
+  "Reviens sur l'accueil, clique <b>Reprendre ma sélection</b>, laisse la page s'afficher, puis repars sur l'accueil.",
+  "Refais ça deux fois de plus.",
+  "Recharge la page d'admin et compare le total."
+ ],
+ look:"Le total ne doit <b>pas</b> avoir augmenté de trois. En revanche, si tu cliques une <b>case de pièce</b> (pas le rappel), là une session doit bien se créer — c'est la différence entre choisir et reprendre.",
+ ph:"Note les deux totaux, avant et après. Et dis-moi si tu préférerais que les reprises soient comptées."
+},
+{
+ n:"5", t:"Le rappel dit la bonne pièce, avec le bon article",
+ why:"« ton salon », « ta cuisine », « ta cage d'escalier ». Le genre se trompe vite, et « ton chambre » sur ta page d'accueil se remarque.",
+ steps:[
+  "Sur Mes créations, change de projet : clique la case <b>Cuisine</b>, et réponds au questionnaire jusqu'au bout.",
+  "Retourne sur la page d'accueil.",
+  "Recommence avec <b>Chambre</b>, puis avec <b>Cage d'escalier</b>."
+ ],
+ look:"Le rappel doit suivre : <b>ta cuisine</b>, puis <b>ta chambre</b>, puis <b>ta cage d'escalier</b>. Jamais « ton cuisine » ni « ta salon ».",
+ ph:"Si une formulation cloche, recopie-la telle quelle."
+},
+{
+ n:"6", t:"Le rappel se tait quand il n'a rien à dire",
+ crit:"Cinq situations doivent le faire disparaître. C'est le contre-test : une ligne qui s'affiche à vide serait pire que pas de ligne du tout.",
+ why:"Un rappel qui parle d'un projet inexistant fait douter de tout le reste.",
+ steps:[
+  "Ouvre une <b>fenêtre de navigation privée</b> et va sur l'accueil : aucun projet en mémoire.",
+  "Va aussi sur Conseils éclairés et sur Mes créations, dans cette même fenêtre privée.",
+  "Dans ta fenêtre normale, va sur <code>/mes-creations/?piece=salon</code> (donc avec une pièce déjà choisie).",
+  "Toujours en fenêtre normale, ouvre <b>une fiche produit</b>, puis la page <b>Contact</b>."
+ ],
+ look:"<b>Aucune pastille nulle part.</b> En privé, le sélecteur est exactement comme avant. Sur Mes créations avec une pièce, c'est l'immersion qui s'affiche, sans sélecteur ni rappel. Et rien sur une fiche produit ni sur Contact.",
+ ph:"Si une pastille apparaît quelque part dans cette liste, dis où."
+},
+{
+ n:"7", t:"L'affichage tient sur mobile",
+ why:"La pastille contient deux morceaux de texte et un lien. Sur un écran étroit, ils passent à la ligne.",
+ steps:[
+  "Sur ton iPhone, ou en réduisant la fenêtre du navigateur à moins de 768 px de large.",
+  "Va sur l'accueil, puis sur Mes créations, avec ton projet en mémoire.",
+  "Regarde la pastille."
+ ],
+ look:"Elle passe en <b>rectangle à coins arrondis</b> plutôt qu'en pilule allongée, elle reste lisible, et si le texte passe à la ligne le <b>point de séparation</b> reste visible entre les deux moitiés. Rien ne doit déborder sur les côtés.",
+ ph:"Une capture si quelque chose se chevauche."
+},
+{
+ n:"8", t:"Rien n'a cassé ailleurs",
+ why:"J'ai touché au chargement des scripts et supprimé une table dupliquée. C'est le genre de retrait qui casse un voisin sans prévenir.",
+ steps:[
+  "Sur l'accueil, écris une phrase dans le champ <b>« Décris ton projet en quelques mots »</b> et valide.",
+  "Fais la même chose depuis <b>Mes créations</b>.",
+  "Ouvre une fiche produit et vérifie que la pastille « Comment choisir ? » ouvre bien la modale.",
+  "Ouvre le Conseiller depuis Mes créations et va jusqu'au bout d'un parcours."
+ ],
+ look:"Les deux champs libres t'emmènent bien vers la conversation avec Robin. La modale s'ouvre normalement depuis les deux endroits. Aucun texte bizarre du genre « ta pièce » là où une vraie pièce devrait s'afficher.",
+ ph:"Note tout ce qui te paraît différent d'avant, même un détail."
+}
+];
+
+const list = document.getElementById('list');
+const KEY = 'sapi-recette-rappel-projet';
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){}
+
+T.forEach(function(x){
+  const d = document.createElement('div');
+  d.className = 'q'; d.dataset.n = x.n;
+  d.innerHTML =
+    '<h3><span class="n">'+x.n+'</span>'+x.t+'</h3>'+
+    '<p class="why">'+x.why+'</p>'+
+    (x.crit ? '<div class="crit">'+x.crit+'</div>' : '')+
+    '<ol class="steps">'+x.steps.map(function(s){return '<li>'+s+'</li>';}).join('')+'</ol>'+
+    '<div class="look"><b>Ce que tu dois voir</b>'+x.look+'</div>'+
+    '<div class="choix">'+
+      '<label><input type="radio" name="r'+x.n+'" value="ok">C\'est bon</label>'+
+      '<label class="ko"><input type="radio" name="r'+x.n+'" value="ko">Ça ne va pas</label>'+
+      '<label class="ko"><input type="radio" name="r'+x.n+'" value="?">Je ne comprends pas</label>'+
+    '</div>'+
+    '<textarea data-c="'+x.n+'" placeholder="'+x.ph.replace(/"/g,'&quot;')+'"></textarea>';
+  list.appendChild(d);
+});
+
+function etat(){
+  let n = 0;
+  T.forEach(function(x){
+    const c = document.querySelector('input[name="r'+x.n+'"]:checked');
+    const card = document.querySelector('.q[data-n="'+x.n+'"]');
+    card.classList.remove('is-ok','is-ko');
+    if (c) { n++; card.classList.add(c.value === 'ok' ? 'is-ok' : 'is-ko'); }
+  });
+  document.getElementById('pi').style.width = (n / T.length * 100) + '%';
+  document.getElementById('pc').innerHTML = '<b>'+n+'</b> / '+T.length;
+}
+
+function sauve(){
+  const o = {};
+  document.querySelectorAll('input[type=radio]:checked').forEach(function(i){ o[i.name] = i.value; });
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){ if (t.value.trim()) o['c'+t.dataset.c] = t.value; });
+  try { localStorage.setItem(KEY, JSON.stringify(o)); } catch(e){}
+}
+
+Object.keys(saved).forEach(function(k){
+  if (k.charAt(0) === 'c') {
+    const t = document.querySelector('textarea[data-c="'+k.slice(1)+'"]');
+    if (t) t.value = saved[k];
+  } else {
+    const i = document.querySelector('input[name="'+k+'"][value="'+saved[k]+'"]');
+    if (i) i.checked = true;
+  }
+});
+etat();
+
+document.addEventListener('change', function(){ etat(); sauve(); });
+document.addEventListener('input', function(e){ if (e.target.tagName === 'TEXTAREA') sauve(); });
+
+function texte(){
+  let s = '# Recette — rappel de projet\n\n';
+  let vide = true;
+  T.forEach(function(x){
+    const c = document.querySelector('input[name="r'+x.n+'"]:checked');
+    const t = document.querySelector('textarea[data-c="'+x.n+'"]');
+    const com = t && t.value.trim();
+    if (!c && !com) return;
+    vide = false;
+    const lib = c ? ({ok:'OK', ko:'NE VA PAS', '?':'PAS COMPRIS'})[c.value] : 'sans réponse';
+    s += '## ' + x.n + '. ' + x.t + ' — **' + lib + '**\n';
+    if (com) s += com + '\n';
+    s += '\n';
+  });
+  return vide ? '(rien de rempli)' : s;
+}
+
+document.getElementById('bExport').onclick = function(){
+  const z = document.getElementById('zone'), t = document.getElementById('txt');
+  t.value = texte(); z.classList.add('on');
+  try {
+    navigator.clipboard.writeText(t.value);
+    this.textContent = 'Copié ✓';
+    setTimeout(function(){ document.getElementById('bExport').textContent = 'Copier pour Claude'; }, 1800);
+  } catch(e) { t.select(); }
+  z.scrollIntoView({behavior:'smooth', block:'nearest'});
+};
+
+document.getElementById('bFile').onclick = function(){
+  const b = new Blob([texte()], {type:'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'recette-rappel-projet.md';
+  a.click();
+};
+
+document.getElementById('bClear').onclick = function(){
+  if (!confirm('Effacer toutes tes réponses ?')) return;
+  document.querySelectorAll('input[type=radio]').forEach(function(i){ i.checked = false; });
+  document.querySelectorAll('textarea[data-c]').forEach(function(t){ t.value = ''; });
+  try { localStorage.removeItem(KEY); } catch(e){}
+  etat();
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup 16 — Idées B, C, D (immersion) — Atelier Sâpi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#8B7355; --wood-dark:#4A3F35; --wood-mid:#6B5A4A;
+    --orange:#E35B24; --cream:#FBF6EA; --ink:#3a322b; --border:#e7ded2;
+    --shadow-card:0 2px 8px rgba(147,125,104,.12), 0 6px 28px rgba(147,125,104,.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Montserrat',sans-serif;color:var(--ink);background:#fff;line-height:1.55}
+  img{max-width:100%;display:block}
+
+  .devnote{background:var(--wood-dark);color:#f0e7d8;font-size:12px;text-align:center;padding:8px 14px;position:relative;z-index:50}
+  .devnote b{color:#fff}
+  .idea-tag{position:relative;z-index:5;display:flex;justify-content:center;padding:46px 20px 10px}
+  .idea-tag span{background:#fff;border:1px solid var(--border);border-radius:50px;padding:8px 22px;font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--wood)}
+  .spacer{height:120px;position:relative;z-index:1}
+
+  /* ===== Toggle D ===== */
+  .d-toggle{position:fixed;right:16px;top:16px;z-index:100;background:#fff;border:1px solid var(--orange);color:var(--orange);border-radius:50px;padding:10px 18px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-card)}
+  .d-toggle.off{border-color:var(--border);color:var(--wood-mid)}
+
+  /* ===== D — fil de gravure ===== */
+  #laser-thread{position:absolute;top:0;left:0;width:100%;z-index:2;pointer-events:none;transition:opacity .4s}
+  #laser-thread.hidden{opacity:0}
+  #laser-thread path{stroke:rgba(139,115,85,.32);stroke-width:1.6;fill:none}
+
+  /* ===== B — room picker photographique ===== */
+  .b-picker{position:relative;min-height:560px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 24px;overflow:hidden;z-index:3}
+  .b-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity .7s ease;transform:scale(1.04)}
+  .b-bg.on{opacity:1}
+  .b-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(31,24,18,.55) 0%,rgba(31,24,18,.3) 45%,rgba(31,24,18,.55) 100%)}
+  .b-inner{position:relative;z-index:2;max-width:860px}
+  .b-inner .eyebrow{font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:.82rem;color:#f3c9ae;display:block;margin-bottom:8px}
+  .b-inner h2{font-weight:600;font-size:clamp(1.7rem,3.4vw,2.5rem);color:#fff;margin-bottom:30px;text-shadow:0 2px 14px rgba(0,0,0,.35)}
+  .b-chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .b-chip{background:rgba(255,255,255,.92);border:none;border-radius:50px;padding:14px 26px;font-family:inherit;font-size:14px;font-weight:600;color:var(--wood-dark);cursor:pointer;transition:transform .2s,background .2s;display:flex;align-items:center;gap:8px}
+  .b-chip:hover{transform:translateY(-2px);background:#fff}
+  .b-chip.active{background:var(--orange);color:#fff}
+  .b-or{margin:26px auto 18px;font-size:13px;color:rgba(255,255,255,.75);position:relative;max-width:420px}
+  .b-or::before,.b-or::after{content:"";position:absolute;top:50%;width:40%;height:1px;background:rgba(255,255,255,.35)}
+  .b-or::before{left:0}.b-or::after{right:0}
+  .b-free{display:flex;gap:10px;max-width:520px;margin:0 auto}
+  .b-free input{flex:1;border:none;border-radius:50px;padding:15px 22px;font-size:14px;font-family:inherit;background:rgba(255,255,255,.94)}
+  .b-free button{border:none;background:var(--orange);color:#fff;border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+  .b-free button svg{width:18px;height:18px}
+  .b-caption{position:absolute;bottom:14px;right:18px;z-index:2;font-size:11px;color:rgba(255,255,255,.65)}
+
+  /* ===== C — bande atelier (design category-editorial) ===== */
+  .c-band{position:relative;padding:90px 24px 70px;overflow:hidden;z-index:3}
+  .c-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0}
+  .c-band::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(135deg,rgba(254,253,251,.92) 0%,rgba(251,246,234,.88) 50%,rgba(250,246,240,.92) 100%);transition:background .5s}
+  .c-band.dark::before{background:linear-gradient(135deg,rgba(40,31,23,.82) 0%,rgba(58,46,35,.74) 50%,rgba(40,31,23,.85) 100%)}
+  .c-inner{position:relative;z-index:2;max-width:1000px;margin:0 auto}
+  .c-head{display:flex;align-items:baseline;gap:16px;margin-bottom:26px}
+  .c-num{font-weight:700;letter-spacing:.12em;color:var(--wood);font-size:1.4rem}
+  .c-head h2{font-weight:600;font-size:clamp(1.6rem,3.4vw,2.4rem);color:var(--wood-dark)}
+  .c-band.dark .c-head h2{color:#fff}
+  .c-band.dark .c-num{color:#f3c9ae}
+  .c-title-script{font-family:'Square Peg';font-weight:400;font-size:clamp(2.6rem,5vw,3.6rem);color:var(--wood-dark);line-height:1;margin-bottom:14px}
+  .c-band.dark .c-title-script{color:#fff}
+  .c-text{max-width:620px;font-size:15px;color:var(--wood-mid);margin-bottom:10px}
+  .c-band.dark .c-text{color:#efe3d2}
+  .c-cta{display:inline-flex;align-items:center;gap:8px;border-radius:50px;padding:13px 28px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--wood);color:#fff;text-decoration:none;margin:14px 0 40px}
+  .c-strip{display:flex;gap:14px}
+  .c-step{flex:1;background:rgba(255,255,255,.85);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-card)}
+  .c-band.dark .c-step{background:rgba(255,255,255,.12)}
+  .c-step img{height:110px;width:100%;object-fit:cover}
+  .c-step .lbl{display:block;font-size:12px;font-weight:600;color:var(--wood-mid);padding:8px 10px}
+  .c-band.dark .c-step .lbl{color:#f0e5d3}
+  .c-step .lbl b{color:var(--wood);font-weight:700;letter-spacing:.08em;margin-right:4px}
+  .c-band.dark .c-step .lbl b{color:#f3c9ae}
+  .c-switch{position:absolute;right:18px;top:18px;z-index:3;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:50px;padding:8px 16px;font-family:inherit;font-size:12px;font-weight:600;color:var(--wood-mid);cursor:pointer}
+
+  @media(max-width:760px){
+    .c-strip{flex-wrap:wrap}
+    .c-step{flex:1 1 45%}
+    .b-chips{gap:8px}
+    .b-chip{padding:11px 18px;font-size:13px}
+  }
+</style>
+</head>
+<body>
+
+<div class="devnote">Maquette d'intention — idées <b>B</b> (room picker photographique), <b>C</b> (bande atelier immersive) et <b>D</b> (fil de gravure, bouton en haut à droite) · vraies photos du site de test</div>
+
+<button class="d-toggle" id="dToggle">Fil de gravure : ON</button>
+
+<svg id="laser-thread" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"></svg>
+
+<!-- ======================= IDÉE B ======================= -->
+<div class="idea-tag"><span>IDÉE B — Room picker photographique (survole les pièces)</span></div>
+<section class="b-picker" id="bPicker">
+  <div class="b-bg on" data-room="default" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/10/Large-5-1536x1024.jpg')"></div>
+  <div class="b-bg" data-room="salon" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/10/Large-5-1536x1024.jpg')"></div>
+  <div class="b-bg" data-room="cuisine" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2026/05/Claudine-La-turbine-Cuisine-bois-1536x1237.jpg')"></div>
+  <div class="b-bg" data-room="chambre" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Vincent-Ambiance3-1536x1237.jpg')"></div>
+  <div class="b-bg" data-room="bureau" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/A7404411-1536x905.jpg')"></div>
+  <div class="b-bg" data-room="entree" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5851-1536x1136.jpg')"></div>
+  <div class="b-bg" data-room="escalier" style="background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Suspensions-Lin-bois-1536x1536.jpg')"></div>
+  <div class="b-scrim"></div>
+  <div class="b-inner">
+    <span class="eyebrow">Ton projet</span>
+    <h2>Pour quelle pièce cherches-tu un luminaire ?</h2>
+    <div class="b-chips">
+      <button class="b-chip" data-room="salon">Salon</button>
+      <button class="b-chip" data-room="cuisine">Cuisine</button>
+      <button class="b-chip" data-room="chambre">Chambre</button>
+      <button class="b-chip" data-room="bureau">Bureau</button>
+      <button class="b-chip" data-room="entree">Entrée</button>
+      <button class="b-chip" data-room="escalier">Escalier</button>
+    </div>
+    <div class="b-or">ou</div>
+    <form class="b-free" onsubmit="return false">
+      <input type="text" placeholder="Décris ton projet en quelques mots…">
+      <button aria-label="Envoyer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+    </form>
+  </div>
+  <span class="b-caption">survol d'une pièce = l'ambiance change derrière</span>
+</section>
+
+<div class="spacer"></div>
+
+<!-- ======================= IDÉE C ======================= -->
+<div class="idea-tag"><span>IDÉE C — Bande atelier immersive (design storytelling des pages catégories)</span></div>
+<section class="c-band" id="cBand">
+  <img class="c-img" src="https://test.atelier-sapi.fr/wp-content/uploads/2026/02/Bandeau-2-1536x721.jpg" alt="">
+  <button class="c-switch" id="cSwitch">Voile : crème (comme pages catégories)</button>
+  <div class="c-inner">
+    <div class="c-head"><span class="c-num">04</span><h2>L'atelier</h2></div>
+    <div class="c-title-script">Des sculptures lumineuses</div>
+    <p class="c-text">Du croquis à l'assemblage final, chaque pièce est façonnée dans mon atelier lyonnais. Le bois prend forme sous mes mains, la lumière fait le reste.</p>
+    <p class="c-text" style="font-size:13.5px;opacity:.92">Je dessine et fabrique à la commande des suspensions, appliques, lampes à poser et lampadaires en bois massif. Chaque luminaire est découpé au laser puis assemblé à la main.</p>
+    <a class="c-cta">Découvrir l'artisan</a>
+    <div class="c-strip">
+      <div class="c-step"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/03/P_SLM_XL_det5-400x400.jpg" alt=""><span class="lbl"><b>01</b> Dessin</span></div>
+      <div class="c-step"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5851-400x296.jpg" alt=""><span class="lbl"><b>02</b> Découpe laser</span></div>
+      <div class="c-step"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/04/A7404411-400x236.jpg" alt=""><span class="lbl"><b>03</b> Finitions</span></div>
+      <div class="c-step"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/04/DLD_P_R.jpg" alt=""><span class="lbl"><b>04</b> Assemblage</span></div>
+      <div class="c-step"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/07/Claudine-bandeau-1-1024x482.jpg" alt=""><span class="lbl"><b>05</b> Expédition</span></div>
+    </div>
+    <p style="position:relative;z-index:2;font-size:11.5px;color:var(--wood-mid);margin-top:14px;opacity:.8">NB : photo de fond provisoire — sera remplacée par ta nouvelle photo d'atelier. La photo de toi (colonne ou vignette) renverra vers la page Artisan ; la localisation vit désormais dans la card carte du bento (P12, piste 1).</p>
+  </div>
+</section>
+
+<div class="spacer"></div>
+<div class="spacer"></div>
+
+<script>
+  // ===== B : crossfade des ambiances au survol des chips
+  (function(){
+    var bgs = document.querySelectorAll('.b-bg');
+    var chips = document.querySelectorAll('.b-chip');
+    function show(room){
+      bgs.forEach(function(b){ b.classList.toggle('on', b.dataset.room === room); });
+    }
+    chips.forEach(function(c){
+      c.addEventListener('mouseenter', function(){
+        chips.forEach(function(x){ x.classList.remove('active'); });
+        c.classList.add('active');
+        show(c.dataset.room);
+      });
+      c.addEventListener('click', function(){ show(c.dataset.room); });
+    });
+    document.getElementById('bPicker').addEventListener('mouseleave', function(){
+      chips.forEach(function(x){ x.classList.remove('active'); });
+      show('default');
+    });
+  })();
+
+  // ===== C : switch voile crème / sombre
+  (function(){
+    var band = document.getElementById('cBand');
+    var btn = document.getElementById('cSwitch');
+    btn.addEventListener('click', function(){
+      band.classList.toggle('dark');
+      btn.textContent = band.classList.contains('dark') ? 'Voile : sombre (version cinéma)' : 'Voile : crème (comme pages catégories)';
+    });
+  })();
+
+  // ===== D : fil de gravure laser tracé au scroll
+  (function(){
+    var svg = document.getElementById('laser-thread');
+    var toggle = document.getElementById('dToggle');
+    var path = null;
+
+    function build(){
+      var H = document.body.scrollHeight;
+      var W = window.innerWidth;
+      svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      svg.setAttribute('width', W);
+      svg.setAttribute('height', H);
+      var x1 = W * 0.07, x2 = W * 0.93;
+      var d = 'M ' + (W*0.5) + ' 0';
+      var y = 60;
+      var i = 0;
+      while (y < H - 200) {
+        var x = (i % 2 === 0) ? x2 : x1;
+        var yNext = Math.min(y + 520, H - 200);
+        d += ' C ' + (W*0.5) + ' ' + (y + 140) + ', ' + x + ' ' + (y + 180) + ', ' + x + ' ' + (y + 300);
+        d += ' S ' + (W*0.5) + ' ' + yNext + ', ' + (W*0.5) + ' ' + (yNext + 60);
+        y = yNext + 60;
+        i++;
+      }
+      svg.innerHTML = '<path d="' + d + '"/>';
+      path = svg.querySelector('path');
+      var len = path.getTotalLength();
+      path.style.strokeDasharray = len;
+      path.style.strokeDashoffset = len;
+      draw();
+    }
+
+    function draw(){
+      if (!path) return;
+      var len = path.getTotalLength();
+      var progress = (window.scrollY + window.innerHeight) / document.body.scrollHeight;
+      path.style.strokeDashoffset = Math.max(0, len * (1 - progress * 1.1));
+    }
+
+    toggle.addEventListener('click', function(){
+      svg.classList.toggle('hidden');
+      var off = svg.classList.contains('hidden');
+      toggle.classList.toggle('off', off);
+      toggle.textContent = 'Fil de gravure : ' + (off ? 'OFF' : 'ON');
+    });
+
+    window.addEventListener('scroll', draw, { passive: true });
+    window.addEventListener('resize', build);
+    window.addEventListener('load', build);
+    build();
+  })();
+</script>
+</body>
+</html>

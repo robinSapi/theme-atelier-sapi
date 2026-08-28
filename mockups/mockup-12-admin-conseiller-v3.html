@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Mockup — Robin Conseiller V3 (admin)</title>
+<style>
+  :root {
+    --wp-bg: #f0f0f1;
+    --wp-card: #fff;
+    --wp-border: #c3c4c7;
+    --wp-border-light: #dcdcde;
+    --wp-text: #1d2327;
+    --wp-text-soft: #50575e;
+    --wp-text-mute: #8c8f94;
+    --wp-primary: #2271b1;
+    --wp-primary-hover: #135e96;
+    --sapi-orange: #E35B24;
+    --sapi-wood: #937D68;
+    --sapi-wood-dark: #4A3F35;
+    --sapi-green: #2E7D32;
+    --sapi-blue: #1565C0;
+    --sapi-purple: #7B1FA2;
+    --sapi-red: #B71C1C;
+  }
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--wp-text);
+    background: var(--wp-bg);
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ── Layout WP admin ─────────────────────────────────────── */
+  .wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px 24px 60px;
+  }
+  .wrap h1 {
+    font-size: 23px;
+    font-weight: 400;
+    margin: 0;
+    padding: 9px 0 4px;
+    color: var(--wp-text);
+  }
+  .wrap h1 .count {
+    font-size: 0.55em;
+    color: var(--wp-text-mute);
+    margin-left: 6px;
+  }
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--wp-card);
+    border: 1px solid var(--wp-primary);
+    color: var(--wp-primary);
+    padding: 5px 11px;
+    border-radius: 3px;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .button:hover {
+    background: #f6f7f7;
+    border-color: var(--wp-primary-hover);
+    color: var(--wp-primary-hover);
+  }
+  .button-primary {
+    background: var(--wp-primary);
+    color: #fff;
+  }
+  .button-primary:hover {
+    background: var(--wp-primary-hover);
+    color: #fff;
+  }
+
+  /* ── Dashboard stats ─────────────────────────────────────── */
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 16px 0 20px;
+  }
+  .stat-card {
+    background: var(--wp-card);
+    border: 1px solid var(--wp-border-light);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .stat-card__label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--wp-text-mute);
+    font-weight: 600;
+  }
+  .stat-card__value {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 4px 0 2px;
+    color: var(--wp-text);
+    line-height: 1;
+  }
+  .stat-card__sub {
+    font-size: 12px;
+    color: var(--wp-text-soft);
+  }
+  .stat-card__sub .delta-up { color: var(--sapi-green); font-weight: 600; }
+  .stat-card__sub .delta-down { color: var(--sapi-red); font-weight: 600; }
+
+  .dashboard-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .ranking-card {
+    background: var(--wp-card);
+    border: 1px solid var(--wp-border-light);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .ranking-card__title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--wp-text-mute);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .ranking-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .ranking-row:last-child { margin-bottom: 0; }
+  .ranking-row__label {
+    flex: 0 0 90px;
+    font-size: 13px;
+    color: var(--wp-text);
+  }
+  .ranking-row__bar {
+    flex: 1;
+    height: 8px;
+    background: #f0f0f1;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .ranking-row__fill {
+    height: 100%;
+    background: var(--sapi-wood);
+    border-radius: 4px;
+  }
+  .ranking-row__pct {
+    flex: 0 0 50px;
+    text-align: right;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--wp-text-soft);
+  }
+
+  /* ── Filtres rapides ────────────────────────────────────── */
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--wp-card);
+    border: 1px solid var(--wp-border-light);
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+  .filter-label {
+    font-size: 12px;
+    color: var(--wp-text-mute);
+    margin-right: 4px;
+  }
+  .filter-select {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 4px 10px;
+    border: 1px solid var(--wp-border);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--wp-text);
+  }
+  .filter-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--wp-border-light);
+    margin: 0 4px;
+  }
+  .filter-search {
+    flex: 1;
+    min-width: 180px;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 4px 10px;
+    border: 1px solid var(--wp-border);
+    border-radius: 3px;
+  }
+
+  /* ── Tableau ────────────────────────────────────────────── */
+  .table-wrap {
+    background: var(--wp-card);
+    border: 1px solid var(--wp-border-light);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  table.widefat {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.widefat thead th {
+    background: #f6f7f7;
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: var(--wp-text);
+    border-bottom: 1px solid var(--wp-border-light);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  table.widefat tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f1;
+    vertical-align: middle;
+  }
+  table.widefat tbody tr {
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  table.widefat tbody tr:hover { background: #f6f7f7; }
+  table.widefat tbody tr:last-child td { border-bottom: none; }
+  td.nowrap { white-space: nowrap; }
+  td.center { text-align: center; }
+  td.muted { color: var(--wp-text-mute); }
+
+  /* ── Pills ──────────────────────────────────────────────── */
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .pill--home { background: var(--sapi-green); }
+  .pill--mes-creations { background: var(--sapi-orange); }
+  .pill--product { background: var(--sapi-blue); }
+  .pill--freetext { background: var(--sapi-purple); }
+  .pill--small {
+    padding: 1px 7px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .pill--pro { background: var(--sapi-purple); }
+  .pill--sur-mesure { background: var(--sapi-orange); }
+  .pill--simple { background: var(--sapi-blue); }
+  .pill--outline {
+    background: transparent;
+    color: var(--wp-text-soft);
+    border: 1px solid var(--wp-border);
+  }
+
+  .check { color: var(--sapi-green); font-weight: 700; font-size: 15px; }
+  .dash { color: var(--wp-text-mute); }
+
+  /* ── Pagination ─────────────────────────────────────────── */
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--wp-text-soft);
+  }
+  .pagination__pages a {
+    color: var(--wp-primary);
+    text-decoration: none;
+    margin: 0 4px;
+  }
+  .pagination__pages span.current {
+    background: var(--wp-primary);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin: 0 4px;
+  }
+
+  /* ── Drill-down (modal) ─────────────────────────────────── */
+  .drill-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 40px 20px;
+  }
+  .drill-overlay.is-open { display: flex; }
+  .drill {
+    background: var(--wp-card);
+    border-radius: 8px;
+    max-width: 880px;
+    width: 100%;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+  }
+  .drill__header {
+    background: #f6f7f7;
+    border-bottom: 1px solid var(--wp-border-light);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .drill__header h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .drill__close {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--wp-text-mute);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+  .drill__close:hover { color: var(--wp-text); }
+  .drill__body { padding: 20px 24px; }
+
+  .drill-section { margin-bottom: 22px; }
+  .drill-section:last-child { margin-bottom: 0; }
+  .drill-section h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--wp-text-mute);
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+
+  .answer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 24px;
+    font-size: 13px;
+  }
+  .answer-grid .a-key {
+    color: var(--wp-text-soft);
+    margin-right: 8px;
+  }
+  .answer-grid .a-val {
+    color: var(--wp-text);
+    font-weight: 600;
+  }
+
+  .quote-box {
+    background: #faf8f4;
+    border-left: 3px solid var(--sapi-wood);
+    padding: 10px 14px;
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--wp-text);
+  }
+
+  .chat-thread {
+    background: #faf8f4;
+    border-radius: 6px;
+    padding: 12px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .chat-msg {
+    display: flex;
+    margin-bottom: 8px;
+  }
+  .chat-msg:last-child { margin-bottom: 0; }
+  .chat-msg__bubble {
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    max-width: 75%;
+    line-height: 1.4;
+  }
+  .chat-msg--visitor { justify-content: flex-end; }
+  .chat-msg--visitor .chat-msg__bubble {
+    background: var(--sapi-wood);
+    color: #fff;
+    border-bottom-right-radius: 3px;
+  }
+  .chat-msg--robin { justify-content: flex-start; }
+  .chat-msg--robin .chat-msg__bubble {
+    background: #fff;
+    color: var(--wp-text);
+    border-bottom-left-radius: 3px;
+    border: 1px solid var(--wp-border-light);
+  }
+
+  .contact-box {
+    background: #fff7f3;
+    border: 1px solid #fce2d4;
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  .contact-box__row { margin-bottom: 5px; }
+  .contact-box__row:last-child { margin-bottom: 0; }
+  .contact-box__key {
+    display: inline-block;
+    width: 80px;
+    color: var(--wp-text-soft);
+    font-size: 12px;
+  }
+  .contact-box__val { color: var(--wp-text); font-weight: 500; }
+
+  .product-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .product-tag {
+    display: inline-block;
+    padding: 3px 9px;
+    background: #f6f7f7;
+    border: 1px solid var(--wp-border-light);
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--wp-primary);
+    text-decoration: none;
+  }
+  .product-tag:hover {
+    background: #eef0f1;
+    color: var(--wp-primary-hover);
+  }
+
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 24px;
+    font-size: 12px;
+    color: var(--wp-text-soft);
+  }
+  .tech-grid .t-key { color: var(--wp-text-mute); margin-right: 6px; }
+
+  .drill__actions {
+    padding: 14px 24px;
+    background: #f6f7f7;
+    border-top: 1px solid var(--wp-border-light);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .drill__actions .left { display: flex; gap: 8px; }
+  .delete-button {
+    background: #fff;
+    border: 1px solid var(--sapi-red);
+    color: var(--sapi-red);
+    padding: 5px 11px;
+    border-radius: 3px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* Responsive minimal */
+  @media (max-width: 900px) {
+    .dashboard { grid-template-columns: repeat(2, 1fr); }
+    .dashboard-row-2 { grid-template-columns: 1fr; }
+    .answer-grid { grid-template-columns: 1fr; }
+    .tech-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <div class="header-row">
+    <h1>Robin Conseiller — Sessions <span class="count">(247)</span></h1>
+    <a href="#" class="button button-primary">📥 Exporter CSV</a>
+  </div>
+
+  <!-- ═══════════════ DASHBOARD ═══════════════ -->
+  <div class="dashboard">
+    <div class="stat-card">
+      <div class="stat-card__label">Sessions · 7 jours</div>
+      <div class="stat-card__value">47</div>
+      <div class="stat-card__sub"><span class="delta-up">▲ 12 %</span> vs 7j précédents</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Quiz complétés</div>
+      <div class="stat-card__value">68 %</div>
+      <div class="stat-card__sub">32 sessions sur 47</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">IA chat utilisée</div>
+      <div class="stat-card__value">30 %</div>
+      <div class="stat-card__sub">14 conversations</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__label">Contacts envoyés</div>
+      <div class="stat-card__value">5</div>
+      <div class="stat-card__sub">1 pro · 2 sur-mesure · 2 simple</div>
+    </div>
+  </div>
+
+  <div class="dashboard-row-2">
+    <div class="ranking-card">
+      <div class="ranking-card__title">Top pièces demandées (7j)</div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Salon</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:62%;"></div></div>
+        <div class="ranking-row__pct">38 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Cuisine</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:36%;"></div></div>
+        <div class="ranking-row__pct">22 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Chambre</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:27%;"></div></div>
+        <div class="ranking-row__pct">17 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Bureau</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:20%;"></div></div>
+        <div class="ranking-row__pct">13 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Entrée</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:10%;"></div></div>
+        <div class="ranking-row__pct">6 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Escalier</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:7%;"></div></div>
+        <div class="ranking-row__pct">4 %</div>
+      </div>
+    </div>
+
+    <div class="ranking-card">
+      <div class="ranking-card__title">Top styles demandés (7j)</div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Moderne</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:82%; background:#E35B24;"></div></div>
+        <div class="ranking-row__pct">51 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Neutre</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:48%; background:#E35B24;"></div></div>
+        <div class="ranking-row__pct">30 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Ancien</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:30%; background:#E35B24;"></div></div>
+        <div class="ranking-row__pct">19 %</div>
+      </div>
+      <div style="margin-top: 22px;" class="ranking-card__title">Provenance des sessions (7j)</div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Accueil</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:70%; background:#2E7D32;"></div></div>
+        <div class="ranking-row__pct">43 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Mes Créations</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:50%; background:#E35B24;"></div></div>
+        <div class="ranking-row__pct">31 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Fiche produit</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:30%; background:#1565C0;"></div></div>
+        <div class="ranking-row__pct">19 %</div>
+      </div>
+      <div class="ranking-row">
+        <div class="ranking-row__label">Texte libre</div>
+        <div class="ranking-row__bar"><div class="ranking-row__fill" style="width:12%; background:#7B1FA2;"></div></div>
+        <div class="ranking-row__pct">7 %</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ FILTRES ═══════════════ -->
+  <div class="filters">
+    <span class="filter-label">Période :</span>
+    <select class="filter-select">
+      <option>7 derniers jours</option>
+      <option>30 derniers jours</option>
+      <option>Tout</option>
+    </select>
+    <span class="filter-sep"></span>
+    <span class="filter-label">Provenance :</span>
+    <select class="filter-select">
+      <option>Toutes</option>
+      <option>Accueil</option>
+      <option>Mes créations</option>
+      <option>Fiche produit</option>
+      <option>Texte libre</option>
+    </select>
+    <span class="filter-sep"></span>
+    <span class="filter-label">Pièce :</span>
+    <select class="filter-select">
+      <option>Toutes</option>
+      <option>Salon</option>
+      <option>Cuisine</option>
+      <option>Chambre</option>
+      <option>Bureau</option>
+      <option>Entrée</option>
+      <option>Escalier</option>
+    </select>
+    <span class="filter-sep"></span>
+    <select class="filter-select">
+      <option>Tous devices</option>
+      <option>Desktop</option>
+      <option>Mobile</option>
+    </select>
+    <select class="filter-select">
+      <option>Toutes les sessions</option>
+      <option>Avec chat IA</option>
+      <option>Avec contact</option>
+      <option>Quiz complets</option>
+    </select>
+    <input type="search" class="filter-search" placeholder="Rechercher (lieu, IP, texte libre…)" />
+  </div>
+
+  <!-- ═══════════════ TABLEAU ═══════════════ -->
+  <div class="table-wrap">
+    <table class="widefat">
+      <thead>
+        <tr>
+          <th class="nowrap">Date</th>
+          <th>Provenance</th>
+          <th class="nowrap">Device</th>
+          <th>Lieu</th>
+          <th>Pièce</th>
+          <th>Taille</th>
+          <th>Sortie</th>
+          <th>Style</th>
+          <th class="center">IA</th>
+          <th class="center">Chat</th>
+          <th>Contact</th>
+        </tr>
+      </thead>
+      <tbody id="sessions-tbody">
+        <tr onclick="openDrill(this)" data-session='{"id":1,"date":"25/05 10:42","entry":"home_picker"}'>
+          <td class="nowrap">25/05 · 10:42</td>
+          <td><span class="pill pill--home pill--small">Accueil</span></td>
+          <td class="nowrap muted">Desktop · Chrome</td>
+          <td>Lyon · FR</td>
+          <td>Salon</td>
+          <td>Spacieuse</td>
+          <td>Plafond</td>
+          <td>Moderne</td>
+          <td class="center muted">2</td>
+          <td class="center dash">—</td>
+          <td class="dash">—</td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">25/05 · 09:15</td>
+          <td><span class="pill pill--mes-creations pill--small">Mes créations</span></td>
+          <td class="nowrap muted">Mobile · Safari</td>
+          <td>Paris · FR</td>
+          <td>Cuisine</td>
+          <td>Petite</td>
+          <td>Mur</td>
+          <td>Moderne</td>
+          <td class="center muted">5</td>
+          <td class="center"><span class="check">✓</span> <small class="muted">(4)</small></td>
+          <td class="dash">—</td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">25/05 · 08:33</td>
+          <td><span class="pill pill--product pill--small">Fiche produit</span></td>
+          <td class="nowrap muted">Mobile · Chrome</td>
+          <td>Lille · FR</td>
+          <td>Salon</td>
+          <td>Confortable</td>
+          <td>Plafond</td>
+          <td>Neutre</td>
+          <td class="center muted">1</td>
+          <td class="center dash">—</td>
+          <td><span class="pill pill--pro pill--small">PRO</span></td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">24/05 · 19:48</td>
+          <td><span class="pill pill--freetext pill--small">Texte libre</span></td>
+          <td class="nowrap muted">Desktop · Firefox</td>
+          <td>Bruxelles · BE</td>
+          <td>Bureau</td>
+          <td>Confortable</td>
+          <td>Pas de sortie</td>
+          <td>Moderne</td>
+          <td class="center muted">8</td>
+          <td class="center"><span class="check">✓</span> <small class="muted">(7)</small></td>
+          <td><span class="pill pill--sur-mesure pill--small">SUR-MESURE</span></td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">24/05 · 18:21</td>
+          <td><span class="pill pill--home pill--small">Accueil</span></td>
+          <td class="nowrap muted">Mobile · Safari</td>
+          <td>Marseille · FR</td>
+          <td>Chambre</td>
+          <td>Intime</td>
+          <td>Plafond</td>
+          <td>Ancien</td>
+          <td class="center muted">2</td>
+          <td class="center dash">—</td>
+          <td class="dash">—</td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">24/05 · 14:55</td>
+          <td><span class="pill pill--mes-creations pill--small">Mes créations</span></td>
+          <td class="nowrap muted">Desktop · Edge</td>
+          <td>Bordeaux · FR</td>
+          <td>Cuisine</td>
+          <td>Spacieuse</td>
+          <td>Mur</td>
+          <td>Moderne</td>
+          <td class="center muted">3</td>
+          <td class="center"><span class="check">✓</span> <small class="muted">(2)</small></td>
+          <td class="dash">—</td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">23/05 · 22:10</td>
+          <td><span class="pill pill--home pill--small">Accueil</span></td>
+          <td class="nowrap muted">Desktop · Chrome</td>
+          <td>Montréal · CA</td>
+          <td>Salon</td>
+          <td>Spacieuse</td>
+          <td>Plafond</td>
+          <td>Moderne</td>
+          <td class="center muted">2</td>
+          <td class="center dash">—</td>
+          <td><span class="pill pill--simple pill--small">SIMPLE</span></td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">23/05 · 16:34</td>
+          <td><span class="pill pill--product pill--small">Fiche produit</span></td>
+          <td class="nowrap muted">Mobile · Chrome</td>
+          <td>Toulouse · FR</td>
+          <td>Entrée</td>
+          <td class="dash">—</td>
+          <td class="dash">—</td>
+          <td class="dash">—</td>
+          <td class="center muted">1</td>
+          <td class="center dash">—</td>
+          <td><span class="pill pill--outline pill--small">Abandon</span></td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">23/05 · 11:20</td>
+          <td><span class="pill pill--mes-creations pill--small">Mes créations</span></td>
+          <td class="nowrap muted">Desktop · Safari</td>
+          <td>Lyon · FR</td>
+          <td>Salon</td>
+          <td>Confortable</td>
+          <td>Ne sais pas</td>
+          <td>Moderne</td>
+          <td class="center muted">4</td>
+          <td class="center"><span class="check">✓</span> <small class="muted">(3)</small></td>
+          <td class="dash">—</td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">23/05 · 09:48</td>
+          <td><span class="pill pill--home pill--small">Accueil</span></td>
+          <td class="nowrap muted">Mobile · Safari</td>
+          <td>Genève · CH</td>
+          <td>Cuisine</td>
+          <td>Petite</td>
+          <td>Mur</td>
+          <td>Neutre</td>
+          <td class="center muted">2</td>
+          <td class="center dash">—</td>
+          <td class="dash">—</td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">22/05 · 21:15</td>
+          <td><span class="pill pill--freetext pill--small">Texte libre</span></td>
+          <td class="nowrap muted">Desktop · Chrome</td>
+          <td>Nice · FR</td>
+          <td>Bureau</td>
+          <td>Spacieuse</td>
+          <td>Plafond</td>
+          <td>Moderne</td>
+          <td class="center muted">6</td>
+          <td class="center"><span class="check">✓</span> <small class="muted">(5)</small></td>
+          <td><span class="pill pill--pro pill--small">PRO</span></td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">22/05 · 17:42</td>
+          <td><span class="pill pill--mes-creations pill--small">Mes créations</span></td>
+          <td class="nowrap muted">Mobile · Chrome</td>
+          <td>Rennes · FR</td>
+          <td>Escalier</td>
+          <td>Tournant</td>
+          <td>Plafond</td>
+          <td>Moderne</td>
+          <td class="center muted">2</td>
+          <td class="center dash">—</td>
+          <td class="dash">—</td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">22/05 · 12:08</td>
+          <td><span class="pill pill--product pill--small">Fiche produit</span></td>
+          <td class="nowrap muted">Desktop · Firefox</td>
+          <td>Lyon · FR</td>
+          <td>Salon</td>
+          <td>Intime</td>
+          <td>Mur</td>
+          <td>Ancien</td>
+          <td class="center muted">1</td>
+          <td class="center dash">—</td>
+          <td class="dash">—</td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">22/05 · 10:30</td>
+          <td><span class="pill pill--home pill--small">Accueil</span></td>
+          <td class="nowrap muted">Mobile · Safari</td>
+          <td>Strasbourg · FR</td>
+          <td>Chambre</td>
+          <td>Confortable</td>
+          <td>Plafond</td>
+          <td>Moderne</td>
+          <td class="center muted">4</td>
+          <td class="center"><span class="check">✓</span> <small class="muted">(3)</small></td>
+          <td><span class="pill pill--sur-mesure pill--small">SUR-MESURE</span></td>
+        </tr>
+        <tr onclick="openDrill(this)">
+          <td class="nowrap">21/05 · 19:55</td>
+          <td><span class="pill pill--mes-creations pill--small">Mes créations</span></td>
+          <td class="nowrap muted">Desktop · Chrome</td>
+          <td>Lyon · FR</td>
+          <td>Salon</td>
+          <td>Spacieuse</td>
+          <td>Plafond</td>
+          <td>Moderne</td>
+          <td class="center muted">2</td>
+          <td class="center dash">—</td>
+          <td class="dash">—</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="pagination">
+      <div>Affichage 1 - 15 sur 247</div>
+      <div class="pagination__pages">
+        <a href="#">‹ Précédent</a>
+        <span class="current">1</span>
+        <a href="#">2</a>
+        <a href="#">3</a>
+        <span>…</span>
+        <a href="#">17</a>
+        <a href="#">Suivant ›</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ DRILL-DOWN MODAL ═══════════════ -->
+<div class="drill-overlay" id="drill" onclick="if(event.target===this) closeDrill()">
+  <div class="drill">
+    <div class="drill__header">
+      <h2>Session du 24/05/2026 à 19:48 <span style="font-size:0.7em;color:#8c8f94;font-weight:400;">— Bureau · Pro</span></h2>
+      <button class="drill__close" onclick="closeDrill()">×</button>
+    </div>
+
+    <div class="drill__body">
+
+      <div class="drill-section">
+        <h3>Provenance</h3>
+        <div style="font-size:13px;">
+          <span class="pill pill--freetext pill--small">Texte libre</span>
+          &nbsp;via <strong>page d'accueil</strong> · saisie initiale :
+        </div>
+        <div class="quote-box" style="margin-top:8px;">
+          « J'aménage 12 bureaux dans un coworking à Lyon, j'aimerais quelque chose de moderne, en bois, avec une lumière directe pour la concentration. Quelles sont vos possibilités pour une commande pro ? »
+        </div>
+      </div>
+
+      <div class="drill-section">
+        <h3>Récap projet</h3>
+        <div class="answer-grid">
+          <div><span class="a-key">Pièce :</span> <span class="a-val">Bureau</span></div>
+          <div><span class="a-key">Taille :</span> <span class="a-val">Confortable</span></div>
+          <div><span class="a-key">Sortie élec :</span> <span class="a-val">Pas de sortie</span></div>
+          <div><span class="a-key">Hauteur :</span> <span class="a-val">Standard (2,50 m)</span></div>
+          <div><span class="a-key">Éclairage :</span> <span class="a-val">Principal</span></div>
+          <div><span class="a-key">Au-dessus d'un meuble :</span> <span class="a-val">Oui — bureau</span></div>
+          <div><span class="a-key">Style :</span> <span class="a-val">Moderne</span></div>
+        </div>
+      </div>
+
+      <div class="drill-section">
+        <h3>Conversation chat (7 échanges)</h3>
+        <div class="chat-thread">
+          <div class="chat-msg chat-msg--visitor">
+            <div class="chat-msg__bubble">J'aménage 12 bureaux dans un coworking à Lyon, j'aimerais quelque chose de moderne en bois.</div>
+          </div>
+          <div class="chat-msg chat-msg--robin">
+            <div class="chat-msg__bubble">Pour 12 bureaux, ça représente une belle commande ! Robin peut tout à fait répondre à ce volume. Tu veux que je te propose des modèles à poser sur les bureaux ou plutôt des suspensions ?</div>
+          </div>
+          <div class="chat-msg chat-msg--visitor">
+            <div class="chat-msg__bubble">Pas de sortie au plafond, donc plutôt à poser sur les bureaux directement.</div>
+          </div>
+          <div class="chat-msg chat-msg--robin">
+            <div class="chat-msg__bubble">Compris. Pour un usage de concentration sur bureau, je te propose des lampes à poser à ampoule dégagée — la lumière reste franche sur le plan de travail. Tu as une teinte de bois en tête ?</div>
+          </div>
+          <div class="chat-msg chat-msg--visitor">
+            <div class="chat-msg__bubble">Plutôt clair, pour matcher avec nos bureaux en chêne blanchi.</div>
+          </div>
+          <div class="chat-msg chat-msg--robin">
+            <div class="chat-msg__bubble">Le Peuplier sera parfait pour ton aménagement. Tu préfères qu'on en discute par email pour bâtir une offre adaptée à ton volume ?</div>
+          </div>
+          <div class="chat-msg chat-msg--visitor">
+            <div class="chat-msg__bubble">Oui exactement, peux-tu me transmettre une proposition ?</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="drill-section">
+        <h3>Phrase IA finale (advice_text)</h3>
+        <div class="quote-box">
+          Pour ton coworking de 12 bureaux à Lyon, Robin pourrait te concevoir une série de lampes à poser en Peuplier clair — la lumière directe sur le plan de travail, l'essence claire qui s'accorde au chêne blanchi. On se voit par email pour bâtir l'offre.
+        </div>
+      </div>
+
+      <div class="drill-section">
+        <h3>Demande de contact</h3>
+        <div class="contact-box">
+          <div class="contact-box__row"><span class="contact-box__key">Type :</span> <span class="contact-box__val"><span class="pill pill--sur-mesure pill--small">SUR-MESURE</span> (kind = sur-mesure)</span></div>
+          <div class="contact-box__row"><span class="contact-box__key">Sujet :</span> <span class="contact-box__val">Commande pro — 12 lampes à poser pour coworking Lyon</span></div>
+          <div class="contact-box__row"><span class="contact-box__key">Email :</span> <span class="contact-box__val">julie.berthier@kollective-coworking.fr</span></div>
+          <div class="contact-box__row"><span class="contact-box__key">Message :</span></div>
+          <div class="contact-box__row" style="padding-left:6px;color:#1d2327;font-style:italic;font-size:12.5px;">
+            « Bonjour Robin, nous ouvrons un nouveau coworking dans le 3e à Lyon et j'aimerais équiper 12 bureaux en lampes à poser, plutôt Peuplier pour matcher avec nos bureaux. Pouvez-vous me proposer une offre avec délais ? »
+          </div>
+          <div class="contact-box__row"><span class="contact-box__key">Envoyé :</span> <span class="contact-box__val"><span class="check">✓ Oui</span> · 24/05/2026 à 19:55</span></div>
+        </div>
+      </div>
+
+      <div class="drill-section">
+        <h3>Catalogue présenté (8 produits matchés)</h3>
+        <div class="product-list">
+          <a href="#" class="product-tag">Élise (3119)</a>
+          <a href="#" class="product-tag">Gaston (3119)</a>
+          <a href="#" class="product-tag">Timothée (7906)</a>
+          <a href="#" class="product-tag">Olivia (5035)</a>
+          <a href="#" class="product-tag">Myriam (6240)</a>
+          <a href="#" class="product-tag">Léon (8125)</a>
+          <a href="#" class="product-tag">Henri (5582)</a>
+          <a href="#" class="product-tag">Albert (4910)</a>
+        </div>
+      </div>
+
+      <div class="drill-section">
+        <h3>Technique</h3>
+        <div class="tech-grid">
+          <div><span class="t-key">Session ID :</span> mfs_a7d2b9c4e1f80345</div>
+          <div><span class="t-key">Device :</span> Desktop · Firefox 138</div>
+          <div><span class="t-key">IP :</span> 91.151.224.18</div>
+          <div><span class="t-key">Localisation :</span> Bruxelles, Belgique</div>
+          <div><span class="t-key">Référent :</span> google.com</div>
+          <div><span class="t-key">Appels IA :</span> 8 (1 Haiku + 7 Sonnet)</div>
+          <div><span class="t-key">Page d'entrée :</span> /</div>
+          <div><span class="t-key">Durée session :</span> 7 min 12 s</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="drill__actions">
+      <div class="left">
+        <a href="mailto:julie.berthier@kollective-coworking.fr" class="button button-primary">📧 Répondre par email</a>
+        <a href="#" class="button">📋 Copier le récap</a>
+      </div>
+      <button class="delete-button" onclick="if(confirm('Supprimer cette session ?')) closeDrill()">Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openDrill(row) {
+    document.getElementById('drill').classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrill() {
+    document.getElementById('drill').classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDrill();
+  });
+</script>
+
+</body>
+</html>

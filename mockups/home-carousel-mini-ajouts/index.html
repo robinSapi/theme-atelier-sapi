@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mockup — Carousel home avec card naming + nav (version finale)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-wood: #8B7355;
+      --color-wood-dark: #4A3F35;
+      --color-warm: #FBF6EA;
+      --color-orange: #E35B24;
+      --color-white: #fff;
+      --font-body: 'Montserrat', system-ui, sans-serif;
+      --font-display: 'Square Peg', cursive;
+      --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: #fff; font-family: var(--font-body); color: var(--color-wood-dark); -webkit-font-smoothing: antialiased; }
+
+    .section-label {
+      padding: 30px 40px 18px;
+      background: var(--color-warm);
+      border-top: 4px solid var(--color-wood-dark);
+      text-align: center;
+    }
+    .section-label .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: var(--color-wood-dark);
+      color: var(--color-warm);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+    .section-label h2 {
+      font-family: var(--font-display);
+      font-size: 38px;
+      color: var(--color-wood-dark);
+      line-height: 1;
+      font-weight: 400;
+    }
+    .section-label p {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #6B5A4A;
+      max-width: 760px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.55;
+    }
+
+    /* ============== HEADER simulé ============== */
+    .header-mock {
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: 18px 40px; z-index: 5;
+      display: flex; justify-content: space-between; align-items: center;
+      color: white; pointer-events: none;
+    }
+    .header-mock .logo {
+      font-family: var(--font-display); font-size: 26px; line-height: 1;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+    .header-mock nav {
+      display: flex; gap: 28px; font-size: 12px; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+
+    /* ============== HERO CAROUSEL — architecture 2 zones ============== */
+    .hero-carousel {
+      position: relative;
+      width: 100%; height: 90vh; min-height: 580px;
+      overflow: hidden;
+    }
+
+    /* Couche 1 : image (slide cliquable M22) */
+    .carousel-image {
+      position: absolute; inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 70% at 70% 35%, rgba(255, 200, 130, 0.5) 0%, transparent 65%),
+        radial-gradient(circle at 30% 80%, rgba(0,0,0,0.45) 0%, transparent 55%),
+        linear-gradient(135deg, #2c1f15 0%, #4a3a23 50%, #8b6234 100%);
+      cursor: pointer; /* cliquable vers fiche produit */
+    }
+    .carousel-image::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 35% 55% at 65% 40%, rgba(255, 235, 180, 0.18), transparent);
+    }
+    .carousel-image::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, transparent 35%, rgba(0,0,0,0.45) 75%, rgba(0,0,0,0.65) 100%);
+      pointer-events: none;
+    }
+
+    /* Couche 2 : foreground (flex column = 2 zones empilées) */
+    .carousel-foreground {
+      position: absolute; inset: 0;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      pointer-events: none; /* laisse passer les clics sur l'image */
+    }
+
+    /* Zone 1 : H1 + H2 (prend tout l'espace dispo) */
+    .hero-text-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      padding: 0 3rem;
+    }
+    .hero-h1 {
+      font-family: var(--font-body);
+      font-size: clamp(15px, 1.7vw, 24px);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0 0 14px;
+      text-shadow: 0 2px 18px rgba(0,0,0,0.55);
+    }
+    .hero-h2 {
+      font-family: var(--font-display);
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 1;
+      color: #FBF6EA;
+      text-shadow: 0 2px 15px rgba(0,0,0,0.5);
+    }
+
+    /* Zone 2 : card area (réservée, hauteur min) */
+    .card-area {
+      min-height: 130px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      padding: 0 36px 28px;
+    }
+
+    /* La card */
+    .naming-card {
+      pointer-events: auto;
+      background: rgba(251, 246, 234, 0.96);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-radius: 16px;
+      padding: 18px 24px;
+      display: flex; flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Naming cliquable */
+    .naming-link {
+      font-size: 1.5rem; line-height: 1;
+      color: var(--color-wood-dark);
+      white-space: nowrap;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s var(--ease-smooth);
+    }
+    .naming-link:hover { color: var(--color-orange); }
+    .naming-link .firstname {
+      font-family: var(--font-body);
+      font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.55em;
+      vertical-align: baseline;
+      margin-right: 0.4em;
+      opacity: 0.95;
+    }
+    .naming-link .restname {
+      font-family: var(--font-display);
+      font-size: 1.6em;
+      line-height: 1;
+      vertical-align: baseline;
+    }
+
+    /* Controls dans la card */
+    .card-controls {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .arrow {
+      width: 32px; height: 32px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: rgba(74, 63, 53, 0.06);
+      border: 1px solid rgba(74, 63, 53, 0.22);
+      border-radius: 50%;
+      color: var(--color-wood-dark);
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .arrow:hover {
+      background: rgba(74, 63, 53, 0.12);
+      border-color: rgba(74, 63, 53, 0.4);
+    }
+    .arrow svg { width: 16px; height: 16px; }
+
+    .dots {
+      display: flex; gap: 10px;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      border: 1.5px solid rgba(139, 115, 85, 0.5);
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.3s var(--ease-smooth);
+    }
+    .dot.active { background: var(--color-wood); border-color: var(--color-wood); }
+    .dot:hover:not(.active) { background: rgba(139, 115, 85, 0.3); }
+
+    /* ============== MOBILE — Card compacte horizontale ============== */
+    @media (max-width: 768px) {
+      .header-mock { padding: 14px 20px; }
+      .header-mock nav { display: none; }
+
+      /* Card centrée sur mobile */
+      .card-area {
+        justify-content: center;
+        padding: 0 16px 24px;
+        min-height: 90px;
+      }
+
+      /* Layout horizontal compact : ‹ NAMING › */
+      .naming-card {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        max-width: calc(100% - 8px);
+      }
+
+      /* Sur mobile : pas de dots */
+      .naming-card .dots { display: none; }
+
+      /* Les flèches deviennent siblings du naming dans le flex */
+      .naming-link { font-size: 1.2rem; }
+      .arrow { width: 30px; height: 30px; flex-shrink: 0; }
+      .arrow svg { width: 14px; height: 14px; }
+
+      /* Réordonner : flèche prev / naming / flèche next */
+      .card-controls { display: contents; }
+      .card-controls .arrow:first-child { order: -1; }
+      .card-controls .arrow:last-child { order: 1; }
+      .naming-link { order: 0; }
+    }
+
+    /* Bandeau Mon Projet simulé */
+    .mon-projet {
+      padding: 14px 24px;
+      background: var(--color-warm);
+      display: flex; justify-content: center; align-items: center;
+      gap: 28px; flex-wrap: wrap;
+      font-size: 12px; color: var(--color-wood-dark);
+    }
+    .mon-projet .item { display: flex; align-items: center; gap: 6px; opacity: 0.85; }
+    .mon-projet .cta {
+      padding: 7px 14px;
+      background: var(--color-wood);
+      color: white;
+      border-radius: 50px;
+      font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    /* Légende flottante */
+    .mockup-legend {
+      position: sticky; bottom: 0;
+      background: rgba(28, 24, 20, 0.96);
+      backdrop-filter: blur(8px);
+      color: #FBF6EA;
+      padding: 14px 24px;
+      font-size: 12px; line-height: 1.5;
+      z-index: 200;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+    }
+    .mockup-legend strong { color: #fff; font-weight: 600; }
+    .mockup-legend code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+  <div class="section-label">
+    <span class="badge">Version finale</span>
+    <h2>Card naming + nav</h2>
+    <p>Architecture deux zones : <code>.hero-text-area</code> (H1+H2 centré) prend l'espace disponible, <code>.card-area</code> (min-height 130px desktop / 90px mobile) est réservée pour la card. Aucun chevauchement possible. Naming cliquable vers la fiche produit. Sur mobile : layout horizontal <code>‹ NAMING ›</code> sans dots, plus swipe tactile.</p>
+  </div>
+
+  <section class="hero-carousel">
+    <header class="header-mock">
+      <div class="logo">Atelier Sâpi</div>
+      <nav>
+        <span>Mes créations</span>
+        <span>Sur mesure</span>
+        <span>L'artisan</span>
+        <span>Conseils</span>
+        <span>Contact</span>
+      </nav>
+    </header>
+
+    <!-- Couche 1 : image cliquable (slide M22) -->
+    <a class="carousel-image" href="#" aria-label="Découvrir Vincent l'incandescent"></a>
+
+    <!-- Couche 2 : foreground en flex column -->
+    <div class="carousel-foreground">
+      <!-- Zone 1 : H1 + H2 -->
+      <div class="hero-text-area">
+        <h1 class="hero-h1">Luminaires en bois · Atelier Sâpi</h1>
+        <p class="hero-h2">Fabriqués à la main, à la commande, dans mon atelier à Lyon</p>
+      </div>
+
+      <!-- Zone 2 : card area (réservée) -->
+      <div class="card-area">
+        <div class="naming-card">
+          <a class="naming-link" href="#">
+            <span class="firstname">Vincent</span><span class="restname">L'incandescent</span>
+          </a>
+          <div class="card-controls">
+            <button class="arrow" aria-label="Slide précédente">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            </button>
+            <div class="dots">
+              <button class="dot active"></button>
+              <button class="dot"></button>
+              <button class="dot"></button>
+              <button class="dot"></button>
+              <button class="dot"></button>
+              <button class="dot"></button>
+              <button class="dot"></button>
+              <button class="dot"></button>
+            </div>
+            <button class="arrow" aria-label="Slide suivante">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mon-projet">
+    <span class="item">⏵ Livraison 48-72h</span>
+    <span class="item">⏵ Fabrication &lt; 5 jours</span>
+    <span class="item">⏵ Retours 30 jours</span>
+    <span class="item">⏵ Paiement sécurisé</span>
+    <span class="cta">✎ Démarrer mon projet</span>
+  </div>
+
+  <div class="mockup-legend">
+    <strong>Pour tester le mobile</strong> — DevTools → mode responsive → ≤ 768 px. Tu verras la card passer en horizontal compact <code>‹ NAMING ›</code> sans dots, centrée bas. Le naming reste cliquable, l'image aussi.
+  </div>
+
+</body>
+</html>

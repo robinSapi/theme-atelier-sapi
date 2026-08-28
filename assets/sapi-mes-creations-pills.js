@@ -42,6 +42,15 @@
 
   function updateUrl(catSlug) {
     if (!window.history || !window.history.pushState) return;
+    /* ⚠️ EN IMMERSION, ON N'ÉCRIT RIEN DANS L'ADRESSE.
+       `?product_cat=` fait basculer WordPress sur le gabarit de catégorie :
+       l'immersion DISPARAÎT. Tant que le visiteur ne recharge pas, ça ne se
+       voit pas — le filtrage des cartes est purement visuel. Mais s'il
+       rafraîchit, ou s'il copie l'adresse pour l'envoyer, la sélection qu'on
+       vient de rendre partageable a disparu et il ne reste que le catalogue nu.
+       Le défaut existait déjà ; il devient sérieux à partir du moment où
+       l'adresse est une chose qu'on transmet. */
+    if (document.querySelector('[data-immersion]')) return;
     var url = new URL(window.location.href);
     if (catSlug === 'all' || !catSlug) {
       url.searchParams.delete('product_cat');

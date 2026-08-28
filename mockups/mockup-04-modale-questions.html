@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #4 — Modale mode questions guidées</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+    --shadow-card: 0 2px 8px rgba(147,125,104,0.12), 0 6px 28px rgba(147,125,104,0.15);
+    --shadow-card-hover: 0 4px 14px rgba(147,125,104,0.16), 0 12px 44px rgba(147,125,104,0.22);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+
+  /* Modale plein écran */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: var(--color-bg);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+  }
+  .modal__header {
+    flex-shrink: 0;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--color-line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+  }
+  .modal__title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+  }
+  .modal__close {
+    background: none;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--color-wood-dark);
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .modal__close:hover { background: var(--color-warm); }
+
+  .modal__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 20px 40px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  /* Card Conseiller universelle */
+  .conseiller-card {
+    position: relative;
+    width: 100%;
+    max-width: 880px;
+    background: var(--color-warm);
+    border-radius: 16px;
+    padding: 36px 40px 28px;
+    text-align: center;
+  }
+  .conseiller-card::before {
+    content: '';
+    position: absolute;
+    inset: 12px;
+    border: 1.5px dashed rgba(139, 115, 85, 0.35);
+    border-radius: 12px;
+    pointer-events: none;
+  }
+
+  /* Barre de progression fine en haut */
+  .progress {
+    position: relative;
+    height: 4px;
+    background: rgba(139, 115, 85, 0.18);
+    border-radius: 50px;
+    margin-bottom: 26px;
+    overflow: hidden;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .progress__fill {
+    height: 100%;
+    width: 28%; /* étape 2 / 7 environ */
+    background: var(--color-wood-dark);
+    border-radius: 50px;
+    transition: width 0.4s ease;
+  }
+
+  .conseiller-card__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    background: var(--color-wood-dark);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 50px;
+    margin-bottom: 22px;
+  }
+  .conseiller-card__badge svg { width: 11px; height: 11px; }
+
+  .conseiller-card__title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: clamp(20px, 3vw, 28px);
+    color: var(--color-wood-dark);
+    line-height: 1.25;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    max-width: 640px;
+    margin: 0 auto 32px;
+  }
+
+  /* Grille des choix (gros boutons-cards) */
+  .choices {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .choice {
+    background: #fff;
+    border: 1px solid var(--color-line);
+    border-radius: 12px;
+    padding: 22px 14px 18px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    font-family: inherit;
+    color: inherit;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+  }
+  .choice:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--color-wood);
+  }
+  .choice__icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    background: var(--color-warm);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+  }
+  .choice__icon svg { width: 24px; height: 24px; }
+  .choice__label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-wood-dark);
+  }
+
+  /* Footer de navigation */
+  .nav {
+    margin-top: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .nav__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--color-wood);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .nav__back:hover { color: var(--color-orange); }
+  .nav__hint {
+    font-size: 12px;
+    color: var(--color-wood-mid);
+    opacity: 0.75;
+  }
+
+  /* Footer mockup */
+  .mockup-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 11px;
+    opacity: 0.9;
+    z-index: 999;
+  }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .modal__body { padding: 20px 14px 60px; }
+    .conseiller-card { padding: 28px 22px 22px; }
+    .conseiller-card::before { inset: 8px; }
+    .conseiller-card__title { font-size: 18px; margin-bottom: 24px; }
+    .choices {
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .choice { padding: 18px 10px 14px; }
+    .choice__icon { width: 42px; height: 42px; margin-bottom: 10px; }
+    .choice__icon svg { width: 20px; height: 20px; }
+    .choice__label { font-size: 11px; }
+    .nav { margin-top: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="modal">
+
+  <header class="modal__header">
+    <span class="modal__title">Décrire mon projet</span>
+    <button class="modal__close" aria-label="Fermer">×</button>
+  </header>
+
+  <div class="modal__body">
+
+    <div class="conseiller-card">
+
+      <!-- Barre de progression discrète, sans chiffres -->
+      <div class="progress" aria-label="Progression du questionnaire">
+        <div class="progress__fill"></div>
+      </div>
+
+      <span class="conseiller-card__badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        Conseil de Robin
+      </span>
+
+      <h2 class="conseiller-card__title">Pour quelle pièce cherchez-vous un luminaire ?</h2>
+
+      <!-- Les 6 choix de pièce — icônes du roompicker existant -->
+      <div class="choices">
+
+        <button class="choice" type="button">
+          <span class="choice__icon">
+            <!-- dining / cuisine -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V20H6Z"/>
+              <line x1="6" y1="17" x2="18" y2="17"/>
+            </svg>
+          </span>
+          <span class="choice__label">Cuisine</span>
+        </button>
+
+        <button class="choice" type="button">
+          <span class="choice__icon">
+            <!-- monitor / bureau -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8m-4-4v4"/>
+            </svg>
+          </span>
+          <span class="choice__label">Bureau / Atelier</span>
+        </button>
+
+        <button class="choice" type="button">
+          <span class="choice__icon">
+            <!-- sofa / salon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3"/>
+              <rect x="2" y="11" width="20" height="7" rx="2"/>
+              <path d="M5 18v2m14-2v2"/>
+            </svg>
+          </span>
+          <span class="choice__label">Salon / Salle à manger</span>
+        </button>
+
+        <button class="choice" type="button">
+          <span class="choice__icon">
+            <!-- bed / chambre -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/>
+              <path d="M2 14h20"/>
+              <path d="M2 10V7a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3"/>
+            </svg>
+          </span>
+          <span class="choice__label">Chambre</span>
+        </button>
+
+        <button class="choice" type="button">
+          <span class="choice__icon">
+            <!-- door / entrée -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2"/>
+              <circle cx="15" cy="12" r="1"/>
+            </svg>
+          </span>
+          <span class="choice__label">Entrée / Couloir</span>
+        </button>
+
+        <button class="choice" type="button">
+          <span class="choice__icon">
+            <!-- stairs / escalier -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 21h4v-4h4v-4h4v-4h4V5"/>
+            </svg>
+          </span>
+          <span class="choice__label">Cage d'escalier</span>
+        </button>
+
+      </div>
+
+      <!-- Nav -->
+      <div class="nav">
+        <button class="nav__back" type="button">← Retour</button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div class="mockup-footer">
+  Mockup #4 — Mode questions guidées · 1 question / écran · gros boutons-cards · auto-advance au clic
+</div>
+
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA Home · 03 Collections — variantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-wood:#8B7355;--color-wood-dark:#4A3F35;--color-wood-mid:#6B5A4A;
+  --color-warm:#FBF6EA;--color-orange:#E35B24;--color-ink:#3a322b;
+  --shadow-card:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+  --shadow-hover:0 4px 14px rgba(147,125,104,.16),0 12px 44px rgba(147,125,104,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:#efe9dc;color:var(--color-ink);line-height:1.55}
+.devnote{background:var(--color-wood-dark);color:var(--color-warm);padding:14px 28px;font-size:13px}
+.devnote strong{color:#fff}.devnote em{color:#e9c9a8;font-style:normal}
+.wrap{max-width:1400px;margin:0 auto;padding:48px 24px 80px}
+.variant-head{margin:56px 24px 18px}
+.variant-head .tag{display:inline-block;background:var(--color-wood);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:50px}
+.variant-head h2{font-family:'Square Peg',cursive;font-size:40px;color:var(--color-wood-dark);font-weight:400;margin-top:8px}
+.variant-head p{max-width:820px;color:var(--color-wood-mid);font-size:14.5px;margin-top:2px}
+.sec-eyebrow{padding:0 24px;margin-bottom:14px;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--color-wood)}
+
+/* carrousel commun */
+.rail{display:flex;gap:24px;overflow-x:auto;padding:8px 24px 26px;scroll-snap-type:x mandatory}
+.rail::-webkit-scrollbar{height:8px}
+.rail::-webkit-scrollbar-thumb{background:rgba(139,115,85,.3);border-radius:4px}
+.rail .card{scroll-snap-align:start;flex:0 0 auto}
+
+/* ---- Variant A : nom sur image, scrim allégé ---- */
+.cardA{width:340px;height:460px;border-radius:16px;overflow:hidden;position:relative;box-shadow:var(--shadow-card);cursor:pointer;transition:.3s}
+.cardA:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.cardA img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.cardA:hover img{transform:scale(1.04)}
+.cardA .scrim{position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(to top,rgba(74,63,53,.72),rgba(74,63,53,0));}
+.cardA .label{position:absolute;left:24px;bottom:24px;color:#fff;z-index:2}
+.cardA .label .count{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.cardA .label .name{font-family:'Montserrat';font-weight:700;font-size:24px;letter-spacing:.01em;line-height:1.05;text-shadow:0 1px 10px rgba(0,0,0,.3)}
+
+/* ---- Variant B : nom hors image, cards plus grandes ---- */
+.cardB{width:420px;cursor:pointer}
+.cardB .photo{width:100%;height:520px;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-card);position:relative;transition:.3s}
+.cardB:hover .photo{box-shadow:var(--shadow-hover)}
+.cardB .photo img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.cardB:hover .photo img{transform:scale(1.04)}
+.cardB .caption{padding:16px 4px 0}
+.cardB .caption .name{font-family:'Montserrat';font-weight:700;font-size:19px;color:var(--color-wood-dark);letter-spacing:.01em}
+.cardB .caption .count{font-size:13px;color:var(--color-wood-mid);margin-top:2px}
+.cardB .caption .go{display:inline-flex;align-items:center;gap:7px;margin-top:8px;color:var(--color-orange);font-weight:600;font-size:14px}
+.cardB:hover .go .arr{transform:translateX(4px)}
+.go .arr{transition:transform .25s;display:inline-block}
+
+.note{font-size:13px;color:var(--color-wood-mid);background:#fff;border-left:3px solid var(--color-wood);padding:12px 16px;border-radius:0 8px 8px 0;margin:8px 24px 0;max-width:1000px}
+.note.warn{border-color:var(--color-orange);background:#fdf0e9}
+</style>
+</head>
+<body>
+<div class="devnote"><strong>DA HOME · Section 03 — Collections</strong> &nbsp;·&nbsp; <em>Montre le compromis. A = état actuel amélioré (scrim allégé, nom sur image). B = nom HORS image + cards plus grandes → carrousel qui dépasse (2,5-3 cards visibles, débord). Photos provisoires.</em></div>
+
+<div class="wrap">
+
+  <!-- VARIANTE A -->
+  <div class="variant-head">
+    <span class="tag">Variante A</span>
+    <h2>État actuel amélioré — nom sur image, scrim allégé</h2>
+    <p>On garde la grammaire actuelle (nom blanc sur la photo) mais on allège le voile de pied de carte pour qu'il cesse de faire « stock card ». Changement local et réversible, aucun impact site-wide. Le débord de la carte suivante est conservé.</p>
+  </div>
+</div>
+<div class="sec-eyebrow">Explore par collection</div>
+<div class="rail">
+  <div class="card cardA"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Vincent-Ambiance3-1536x1237.jpg" alt=""><div class="scrim"></div><div class="label"><div class="count">12 modèles</div><div class="name">Suspensions</div></div></div>
+  <div class="card cardA"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2026/05/Claudine-La-turbine-Cuisine-bois-1536x1237.jpg" alt=""><div class="scrim"></div><div class="label"><div class="count">8 modèles</div><div class="name">Lampes à poser</div></div></div>
+  <div class="card cardA"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/10/Large-5-1536x1024.jpg" alt=""><div class="scrim"></div><div class="label"><div class="count">6 modèles</div><div class="name">Lampadaires</div></div></div>
+  <div class="card cardA"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Suspensions-Lin-bois-1536x1536.jpg" alt=""><div class="scrim"></div><div class="label"><div class="count">5 modèles</div><div class="name">Appliques</div></div></div>
+  <div class="card cardA"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/04/A7404411-1536x905.jpg" alt=""><div class="scrim"></div><div class="label"><div class="count">7 modèles</div><div class="name">Sur mesure</div></div></div>
+</div>
+<div class="note">Scrim passé de ~72 % opaque sur 50 % de hauteur → 72 % sur 42 % seulement, dégradé plus court. La photo respire, le nom reste lisible.</div>
+
+<div class="wrap" style="padding-top:0">
+  <!-- VARIANTE B -->
+  <div class="variant-head">
+    <span class="tag">Variante B</span>
+    <h2>Nom hors image + cards plus grandes (façon galerie)</h2>
+    <p>Le nom de catégorie sort sous la carte, en petit. La photo est totalement libérée du voile : la matière et la lumière deviennent le seul sujet. Cards plus grandes (420×520) → on n'en voit plus que 2,5-3 à l'écran, le carrousel dépasse franchement = générosité et mouvement.</p>
+  </div>
+</div>
+<div class="sec-eyebrow">Explore par collection</div>
+<div class="rail">
+  <div class="card cardB"><div class="photo"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Vincent-Ambiance3-1536x1237.jpg" alt=""></div><div class="caption"><div class="name">Suspensions</div><div class="count">12 modèles · à partir de 95 €</div><span class="go">Découvrir <span class="arr">→</span></span></div></div>
+  <div class="card cardB"><div class="photo"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2026/05/Claudine-La-turbine-Cuisine-bois-1536x1237.jpg" alt=""></div><div class="caption"><div class="name">Lampes à poser</div><div class="count">8 modèles · à partir de 75 €</div><span class="go">Découvrir <span class="arr">→</span></span></div></div>
+  <div class="card cardB"><div class="photo"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/10/Large-5-1536x1024.jpg" alt=""></div><div class="caption"><div class="name">Lampadaires</div><div class="count">6 modèles · à partir de 145 €</div><span class="go">Découvrir <span class="arr">→</span></span></div></div>
+  <div class="card cardB"><div class="photo"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Suspensions-Lin-bois-1536x1536.jpg" alt=""></div><div class="caption"><div class="name">Appliques</div><div class="count">5 modèles</div><span class="go">Découvrir <span class="arr">→</span></span></div></div>
+</div>
+<div class="note warn"><strong>⚠️ B = changement site-wide.</strong> Sortir le nom hors image touche la card partagée (catégories <em>et</em> produits) : à valider globalement avant de l'adopter. Agrandir les cards seul est local/réversible.</div>
+
+</body>
+</html>

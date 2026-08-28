@@ -612,6 +612,57 @@ select:focus-visible {
   border-color: var(--color-wood);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   16px MINIMUM SUR TOUT CHAMP DE SAISIE EN MOBILE.
+   ──────────────────────────────────────────────────────────────────────────
+   ⚠️ CONTRAINTE DU NAVIGATEUR, PAS UN CHOIX DE DESIGN. Safari iOS zoome
+   automatiquement sur un champ dès que sa police fait MOINS de 16px, pour le
+   rendre lisible — et il ne dézoome pas ensuite : la page reste agrandie et
+   décalée, et le visiteur doit pincer pour revenir. C'est ce que Robin a
+   constaté (« quand on clique sur mobile ça zoome »).
+   Le seuil est exactement 16px : 15,5px suffit à déclencher le zoom.
+
+   `!important` assumé, et c'est le seul endroit du fichier où il se justifie
+   ainsi : une dizaine de composants fixent leur propre taille plus bas
+   (jusqu'à 12px pour le champ des room-pickers), certains dans des media
+   queries, et il ne s'agit pas d'une préférence esthétique qu'un composant
+   pourrait légitimement vouloir écraser. Sans lui, il faudrait rouvrir chaque
+   composant — et le prochain champ ajouté au site retomberait dans le piège.
+
+   ⚠️ Ne PAS lever cette règle pour « rendre un champ plus discret ». Le gain
+   visuel se paierait par un zoom subi à chaque saisie. Pour un champ plus
+   discret, jouer sur la couleur, le rembourrage ou la hauteur, jamais sur la
+   taille du texte.
+
+   ⚠️ DEUX CONDITIONS, ET LA SECONDE N'EST PAS REDONDANTE. La largeur couvre
+   les téléphones ; `(hover: none) and (pointer: coarse)` couvre TOUT appareil
+   tactile quelle que soit sa largeur — notamment un iPad en paysage, large de
+   1024px, qui zoome exactement pareil et que la seule borne de largeur aurait
+   laissé de côté. À l'inverse, un navigateur de bureau réduit à 700px de large
+   ne zoome pas, mais reçoit la règle : sans conséquence, les champs y sont
+   simplement lisibles.
+
+   Couverture vérifiée sur le thème : les types réellement utilisés sont text,
+   email, search, number, date, tel, plus `textarea` et `select`. `url`,
+   `password` et `input` sans type sont listés par précaution, pour les champs
+   rendus par WooCommerce et les extensions. Aucun `contenteditable` ni
+   `::placeholder` avec sa propre taille (vérifié). */
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+  input[type="text"],
+  input[type="email"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="number"],
+  input[type="password"],
+  input[type="date"],
+  input:not([type]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 /* Nav dropdown keyboard support */
 .primary-nav > ul > li:focus-within > .sub-menu,
 .primary-nav > ul > li:focus-within > ul {
@@ -1752,40 +1803,19 @@ button:hover,
 /* --- État replié --- */
 
 
-
-
-
-
-
-
 /* --- Boutons d'action (dans le bandeau déplié) --- */
-
-
-
-
-
 
 
 /* --- Bouton toggle --- */
 
 
-
 /* --- État déplié --- */
-
 
 
 /* --- Question row --- */
 
 
-
 /* --- Choix --- */
-
-
-
-
-
-
-
 
 
 /* --- Responsive Tablet --- */
@@ -1796,14 +1826,6 @@ button:hover,
 
 /* --- Responsive Mobile --- */
 @media (max-width: 600px) {
-
-
-
-
-
-
-
-
 
 
 }
@@ -2102,111 +2124,15 @@ ul.products li.product {
 }
 
 /* Recap card — visible only when filters are active */
-.why-sapi-recap {
-  max-width: 1400px;
-  margin: 2rem auto 0;
-  padding: 0 3rem;
-}
 
-.why-sapi-recap-inner {
-  background: var(--color-warm, #FBF6EA);
-  border-radius: var(--radius-lg, 16px);
-  border: 2px solid rgba(147, 125, 104, 0.12);
-  padding: 3rem;
-  text-align: center;
-}
-
-.why-sapi-recap-inner > h2 {
-  font-family: var(--font-display, 'Square Peg', cursive);
-  font-size: 2.5rem;
-  color: var(--color-wood, #937D68);
-  margin: 0 0 2rem;
-  font-weight: 400;
-}
-
-.why-sapi-recap-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.why-sapi-recap-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.why-sapi-recap-item h3 {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--color-dark, #323232);
-  margin: 0;
-}
-
-.why-sapi-recap-item p {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: rgba(50, 50, 50, 0.65);
-  margin: 0;
-}
-
-.why-sapi-recap-highlight {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, rgba(227, 91, 36, 0.04) 0%, rgba(227, 91, 36, 0.08) 100%);
-  border-radius: 12px;
-  text-align: left;
-}
-
-.why-sapi-recap-highlight .product-text-card-icon {
-  background: rgba(227, 91, 36, 0.1);
-  color: var(--color-orange, #E35B24);
-  flex-shrink: 0;
-}
-
-.why-sapi-recap-highlight h3 {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--color-dark, #323232);
-  margin: 0 0 0.25rem;
-}
-
-.why-sapi-recap-highlight p {
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  font-size: 0.85rem;
-  line-height: 1.6;
-  color: rgba(50, 50, 50, 0.65);
-  margin: 0;
-}
 
 @media (max-width: 900px) {
-  .why-sapi-recap-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+
 }
 
 @media (max-width: 480px) {
-  .why-sapi-recap {
-    padding: 0 1.5rem;
-  }
-  .why-sapi-recap-inner {
-    padding: 2rem 1.5rem;
-  }
-  .why-sapi-recap-grid {
-    grid-template-columns: 1fr;
-  }
-  .why-sapi-recap-highlight {
-    flex-direction: column;
-    text-align: center;
-  }
+
+
 }
 
 /* EXCEPTION: Carousel slides have fixed width */
@@ -7185,11 +7111,7 @@ li.carousel-editorial-slide,
 /* Header : badge + chips */
 
 
-
-
-
 /* Body : guillemet + texte + signature */
-
 
 
 /* ─── Robin Conseil : Loading state ─── */
@@ -7200,18 +7122,10 @@ li.carousel-editorial-slide,
 }
 
 
-
-
-
-
-
-
 /* Actions */
 
 
-
 /* Produits recommandés dans la card Robin */
-
 
 
 /* Card "Création sur mesure" dans la grille produits */
@@ -7310,28 +7224,12 @@ li.carousel-editorial-slide,
 /* Formulaire contact inline — Contacter Robin */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 @media (max-width: 900px) {
 
 
 }
 
 @media (max-width: 600px) {
-
-
-
 
 
 }
@@ -7905,15 +7803,9 @@ li.carousel-editorial-slide,
     padding: 36px 20px;
   }
 
-  .advice-room-picker .room-picker-cards {
-    gap: 0.75rem;
-  }
-
-  .advice-room-picker .room-card {
-    flex: 0 0 calc(50% - 0.5rem);
-    max-width: none;
-    padding: 1rem 0.75rem;
-  }
+  /* (gap des cards et disposition des cartes : voir le « BLOC MOBILE PARTAGÉ »
+     un peu plus bas dans ce fichier. Ne rien redéclarer ici — ce bloc-ci est
+     AU-DESSUS, il serait donc écrasé, et on croirait à un réglage sans effet.) */
 
   .advice-room-picker-section {
     padding: 0 1rem;
@@ -7966,11 +7858,31 @@ li.carousel-editorial-slide,
 @media (min-width: 769px) {
   .home-projet .room-picker-title { white-space: nowrap; }
 }
+/* ⚠️ BLOC MOBILE PARTAGÉ — LES TROIS room-pickers du site :
+     · la home                       → .home-projet
+     · /mes-creations/ sans pièce    → .mescreations-picker-hero
+     · /conseils-eclaires/           → .advice-room-picker
+   Les trois réutilisent les mêmes classes globales (.room-card,
+   .room-card-icon, .room-card-label) mais les préfixent chacun avec la sienne,
+   donc à spécificité égale (0,2,0) c'est le bloc le plus BAS dans le fichier qui
+   gagne. Le hero de /mes-creations/ étant déclaré ~16 700 lignes plus loin, il a
+   déjà annulé deux fois ces réglages mobiles sans qu'on le voie (cartes 1,5× trop
+   larges en 1ʳᵉ passe, icônes 60px au lieu de 34px en 2ᵉ passe).
+   RÈGLE : toute règle mobile de CARTE va ici, en sélecteur partagé — jamais dans
+   le bloc d'un picker en particulier. Chacun ne garde que ce qui lui est propre
+   (enveloppe, titre, sous-titre, rembourrage de section).
+   ⚠️ Un quatrième picker ajouté un jour doit être inscrit ICI, sinon il gardera
+   la disposition verticale et ses icônes de 60px — c'est exactement l'oubli
+   qu'ont connu les deux premiers, à deux reprises. */
 @media (max-width: 768px) {
   .home-projet-section { padding: 3.5rem 14px 2.5rem; }
-  .home-projet .room-picker-cards { gap: 0.75rem; }
+  .home-projet .room-picker-cards,
+  .mescreations-picker-hero .room-picker-cards,
+  .advice-room-picker .room-picker-cards { gap: 0.75rem; }
   /* Mobile — cards réponses compactes, layout horizontal (icône à gauche, texte à droite aligné à gauche) */
-  .home-projet .room-card {
+  .home-projet .room-card,
+  .mescreations-picker-hero .room-card,
+  .advice-room-picker .room-card {
     flex: 0 0 calc(50% - 0.5rem);
     max-width: none;
     flex-direction: row;
@@ -7980,9 +7892,15 @@ li.carousel-editorial-slide,
     gap: 0.55rem;
     padding: 0.55rem 0.7rem;
   }
-  .home-projet .room-card-icon { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; }
-  .home-projet .room-card-icon svg { width: 18px; height: 18px; }
-  .home-projet .room-card-label { font-size: 11.5px; letter-spacing: 0.04em; text-align: left; line-height: 1.2; }
+  .home-projet .room-card-icon,
+  .mescreations-picker-hero .room-card-icon,
+  .advice-room-picker .room-card-icon { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; }
+  .home-projet .room-card-icon svg,
+  .mescreations-picker-hero .room-card-icon svg,
+  .advice-room-picker .room-card-icon svg { width: 18px; height: 18px; }
+  .home-projet .room-card-label,
+  .mescreations-picker-hero .room-card-label,
+  .advice-room-picker .room-card-label { font-size: 11.5px; letter-spacing: 0.04em; text-align: left; line-height: 1.2; }
 }
 
 /* ===== DA #3 — Conseiller : signature de Robin (composant réutilisable) + réchauffe ===== */
@@ -10753,6 +10671,77 @@ a.carousel-slide-product {
   text-align: center;
 }
 
+/* Rappel « tu as un projet en cours », posé par sapi-room-picker.js au-dessus
+   des cases quand un projet est mémorisé (variante A, 28/08).
+   ⚠️ FOND BLANC, PAS `--color-warm`. J'avais mis `--color-warm` : c'est la
+   couleur des TROIS conteneurs qui l'accueillent (`.home-projet-section`,
+   `.advice-room-picker`, `.mescreations-picker-hero`). Le rappel était donc
+   exactement de la couleur de son fond, séparé par un liseré à 18 %
+   d'opacité — invisible sur les trois pages. Le blanc sur crème est le
+   contraste que ce site utilise déjà pour tout élément actif posé sur ces
+   sections : c'est ce que fait le champ texte libre juste en dessous
+   (`.room-picker-freetext__input`), avec le même liseré et le même arrondi.
+   ⚠️ CE BLOC S'AJOUTE APRÈS L'AFFICHAGE, donc il POUSSE le contenu d'environ
+   45 px. Ce n'est pas un clignotement, c'est un décalage — et sur
+   /mes-creations/ il a lieu dans le hero. C'est le prix de la variante A, qui
+   reste plus discret qu'un hero entier remplacé. Ne pas le décrire comme
+   « invisible ».
+   Pas d'ombre : ce n'est pas une card. */
+.room-picker-reprise {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 10px;
+  flex-wrap: wrap;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  background: var(--color-white);
+  border: 1.5px solid var(--color-line);
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: var(--color-wood-mid);
+  text-align: center;
+}
+
+.room-picker-reprise strong {
+  color: var(--color-wood-dark);
+  font-weight: 700;
+}
+
+/* Le point médian de la maquette validée. En `flex-wrap`, il reste sur la
+   première ligne et marque la coupure ; sans lui, les deux moitiés se
+   retrouvent l'une sous l'autre sans rien entre elles. */
+.room-picker-reprise__sep {
+  color: var(--color-wood);
+  opacity: 0.6;
+}
+
+.room-picker-reprise__lien {
+  color: var(--color-orange);
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1.5px solid currentColor;
+  white-space: nowrap;
+}
+
+.room-picker-reprise__lien:hover,
+.room-picker-reprise__lien:focus {
+  color: var(--color-orange-hover);
+}
+
+/* 768 px, PAS 600 : c'est le point de bascule de la home, et les cases du
+   sélecteur passent en disposition mobile là. Entre les deux, le rappel
+   serait resté en pilule pendant que les cases étaient déjà empilées. */
+@media (max-width: 768px) {
+  .room-picker-reprise {
+    border-radius: 14px;
+    padding: 11px 16px;
+  }
+}
+
 .room-picker-cards {
   display: flex;
   justify-content: center;
@@ -10828,6 +10817,13 @@ button.room-card {
   text-transform: uppercase;
   color: var(--color-wood-dark);
   line-height: 1.3;
+  /* ⚠️ Nécessaire pour les libellés sur DEUX lignes (« Chambre enfant »).
+     La carte est un flex centré : la boîte du libellé se réduit donc à la
+     largeur de sa plus longue ligne, et sans ça la seconde ligne se colle à
+     gauche à l'intérieur. La boîte paraissait centrée, le texte non.
+     Les blocs mobiles (spécificité 0,2,0) repassent volontairement à `left`
+     pour la disposition en ligne, ils ne sont pas concernés. */
+  text-align: center;
 }
 
 .room-picker-sub a {
@@ -22339,12 +22335,6 @@ body.woocommerce-cart div.woocommerce-wrapper {
    Variantes du pattern universel : Conseil (sans projet) / Mon projet
    ============================================================ */
 
-.conseiller-cards-zone {
-  /* Alignée sur .shop-products .product-grid : max-width 1400 + padding 0 3rem */
-  max-width: 1400px;
-  margin: 32px auto 0;
-  padding: 0 3rem;
-}
 
 /* Variante Conseil — centrée, accent CTA orange. Card entière cliquable
    (les éléments internes — pièces + form — captent leur propre clic ;
@@ -22949,10 +22939,7 @@ body.woocommerce-cart div.woocommerce-wrapper {
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
-  .conseiller-cards-zone {
-    margin: 22px auto 0;
-    padding: 0 1rem;
-  }
+
   .conseiller-card--conseil {
     padding: 36px 20px 40px;
   }
@@ -22966,12 +22953,21 @@ body.woocommerce-cart div.woocommerce-wrapper {
    Plein écran 100dvh, header fixe + body scrollable + card unique
    ============================================================ */
 
-/* Garde-fou défensif : tout élément `[hidden]` à l'intérieur de la modale
-   ou de la cards-zone doit rester invisible, même si une règle author a
-   forcé display:flex/grid sur lui (le user-agent stylesheet a une
-   spécificité inférieure et peut être écrasé). Nous a déjà piégé 2 fois. */
-.conseiller-modal [hidden],
-.conseiller-cards-zone [hidden] {
+/* Garde-fou défensif : tout élément `[hidden]` à l'intérieur de la modale doit
+   rester invisible, même si une règle author a forcé display:flex/grid sur lui
+   (la feuille du navigateur a une spécificité inférieure et peut être écrasée).
+   Nous a déjà piégé 3 fois.
+   ⚠️ LA 3e, LE 28/08 : ce sélecteur avait un jumeau, `.conseiller-cards-zone
+   [hidden]`, retiré avec le reste de cette classe morte. Mon script a coupé à
+   partir de la ligne portant l'accolade — donc la SECONDE — et a laissé
+   « .conseiller-modal [hidden], » orphelin, virgule comprise. Cette virgule
+   raccrochait le sélecteur à la règle suivante : chaque écran masqué de la
+   modale devenait un voile sombre plein écran en z-index 10050, empilé
+   par-dessus la carte. La modale s'ouvrait, on la voyait, et on ne pouvait
+   plus rien cliquer dedans.
+   Quand on retire un sélecteur d'une liste, il faut retirer LE SÉLECTEUR, pas
+   la règle. */
+.conseiller-modal [hidden] {
   display: none !important;
 }
 
@@ -23461,6 +23457,12 @@ button.chip--project {
   font-family: inherit;
   text-transform: none;
   letter-spacing: 0.02em;
+  /* ⚠️ Les navigateurs centrent le contenu d'un <button> par défaut. Ça ne se
+     voyait que sur la pastille « Éclairage » : son libellé (« Ce sera la
+     principale source d'éclairage ») est le seul assez long pour passer à la
+     ligne, et ses deux lignes se centraient au milieu de pastilles par
+     ailleurs alignées à gauche. Relevé par Robin en recette. */
+  text-align: left;
   cursor: pointer;
   -webkit-transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
@@ -23501,6 +23503,97 @@ button.chip--project:focus-visible {
 .chip__value {
   font-weight: 700;
   color: var(--color-wood-dark);
+}
+
+/* Pastille « empilée » : mot-clé AU-DESSUS de la valeur.
+   ⚠️ Réservée au récap de la fiche produit, où le mot-clé « Taille de la
+   pièce » est long : côte à côte, la pastille ferait à elle seule plus de la
+   moitié d'un écran d'iPhone. L'écran « Voici ton projet » garde la forme
+   côte à côte, il n'est pas concerné.
+   Le mot-clé DOIT rester affiché : c'est ce qui distingue la taille de la
+   PIÈCE (ici) de la taille du LUMINAIRE (dans l'encart juste en dessous).
+   Deux autres endroits de la modale l'ont laissé tomber et affichent « Grand »
+   tout seul, ce qui ne veut rien dire. */
+.chip--stacked .chip__label {
+  display: block;
+  margin-right: 0;
+  margin-bottom: 1px;
+  line-height: 1.1;
+}
+.chip--stacked {
+  padding-top: 7px;
+  padding-bottom: 7px;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+/* ⚠️ CADRAGE DU RÉCAP FICHE PRODUIT — ne pas retirer.
+   `.modal__body-content` est en `align-items: center` : chaque bloc prend sa
+   largeur de contenu et se centre. Sur l'écran S3, `.recap-group__chips` est
+   enveloppée dans `.recap-groups`, qui porte la contrainte de largeur. Ici on
+   réutilise la classe SANS son enveloppe : sans ces règles, le bloc de
+   pastilles s'étale sur toute la largeur dès qu'elles passent à la ligne,
+   pendant que le titre « TON PROJET » reste centré — et le titre se retrouve
+   à 138 px de la première pastille qu'il est censé coiffer.
+   Les trois blocs partagent la largeur de `.recap-card` (380 px) pour que
+   titres, pastilles et encart s'alignent sur le même bord gauche. */
+[data-screen="s-product-recap"] .chips-label,
+[data-screen="s-product-recap"] [data-product-recap-project] {
+  width: 100%;
+  max-width: 380px;
+  text-align: left;
+}
+[data-screen="s-product-recap"] [data-product-recap-project] {
+  -webkit-justify-content: flex-start;
+  justify-content: flex-start;
+}
+/* ── Les trois respirations de l'écran ────────────────────────────────────
+   Il n'y a pas UN écart uniforme mais trois moments : ce que tu as dit, ce que
+   Robin en fait, et ce que tu peux faire. L'écart de bloc générique (10 px en
+   mobile) sert à l'intérieur de chaque moment ; ces marges-ci séparent les
+   moments entre eux, et c'est ce qui rend l'écran lisible d'un coup d'œil.
+   Financées par la sortie des deux phrases de conseil, passées DANS la carte :
+   elles ne coûtent plus deux écarts de bloc. Le contenu tient avec de la marge,
+   la place existe. */
+[data-screen="s-product-recap"] [data-product-recap-reco-label] {
+  margin-top: 20px;
+}
+[data-screen="s-product-recap"] .actions-3 {
+  margin-top: 18px;
+}
+
+/* ── Densité mobile du récap produit ──────────────────────────────────────
+   Recette Robin sur iPhone SE : l'écran déborde et oblige à faire défiler.
+   Quatre gisements, aucun ne touche à la taille du texte de contenu (règle
+   posée lors de la refonte de densité du 25/08) :
+     • l'écart entre blocs : 16 px, SIX fois (l'écran a sept enfants) → −36 px ;
+     • l'encart, que la règle mobile générale passe à UNE colonne — il occupe
+       alors quatre lignes (ESSENCE / Peuplier / TAILLE DU LUMINAIRE / 95 cm)
+       là où deux suffisent. La colonne de gauche prend la largeur de son
+       libellé, la valeur occupe le reste → −44 px ;
+     • le rembourrage des pastilles, qui sont ici sur trois lignes → −12 px ;
+     • les deux phrases de conseil, passées DANS la carte : elles ne coûtent
+       plus deux écarts de bloc → −20 px.
+   Total ≈ 97 px, soit à peu près la hauteur des deux phrases que Robin
+   trouvait coûteuses — sans avoir à les supprimer.
+
+   ⚠️ La marge restante sur iPhone SE est d'environ 9 px. Ce n'est PAS un
+   filet : `.modal__body-content` est en `justify-content: center`, donc un
+   débordement résiduel rogne le HAUT autant que le bas, et le haut n'est pas
+   rattrapable au défilement. Le premier élément à disparaître serait le titre
+   « TON PROJET ». Le vrai correctif est un `justify-content: flex-start` scopé
+   sur cet écran en mobile — noté dans questions_ouvertes.md. */
+@media (max-width: 600px) {
+  [data-screen="s-product-recap"] .modal__body-content { gap: 10px; }
+  [data-screen="s-product-recap"] .recap-card {
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+  }
+  /* Le raccourci rabote aussi l'horizontal (10→8 à gauche, 14→12 à droite). */
+  [data-screen="s-product-recap"] .chip--stacked {
+    padding: 5px 12px 5px 8px;
+    gap: 7px;
+  }
 }
 
 /* Récap projet groupé par thème (s3) */
@@ -23584,6 +23677,27 @@ button.chip--project:focus-visible {
   color: #fff;
 }
 .action-btn--primary:hover { background: var(--color-orange-hover); }
+/* Sortie secondaire du chat (« En parler à Robin ») : présente mais discrète,
+   elle ne doit pas concurrencer la sélection. Sans fond, juste un liseré. */
+.action-btn--ghost {
+  background: transparent;
+  color: var(--color-wood-dark);
+  border: 1px solid var(--color-line);
+}
+.action-btn--ghost:hover { background: rgba(147, 125, 104, .08); }
+.action-btn[hidden] { display: none; }
+/* Les deux sorties du chat côte à côte. Elles s'empilent d'elles-mêmes quand
+   la place manque — donc en mobile, sans media query. */
+.modal__foot--duo {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 8px;
+}
+.modal__foot--duo .action-btn { -webkit-flex: 1 1 auto; flex: 1 1 auto; }
 .action-btn--secondary {
   background: #fff;
   color: var(--color-wood-dark);
@@ -23845,6 +23959,24 @@ button.chip--project:focus-visible {
   font-weight: 600;
   color: var(--color-wood-dark);
 }
+/* L'explication d'une ligne : pleine largeur, juste sous la valeur qu'elle
+   commente. `1 / -1` traverse la grille quel que soit le nombre de colonnes —
+   deux en mobile comme en desktop. Alignée à gauche, contrairement aux
+   anciennes phrases flottantes qui étaient centrées : elle appartient
+   visiblement à la ligne au-dessus. */
+.recap-card__note {
+  grid-column: 1 / -1;
+  /* Aucune marge : c'est l'écart de ligne de la grille qui espace, et il le
+     fait uniformément, y compris quand une note est masquée. Une marge
+     propre aurait demandé de savoir quelle note est la dernière VISIBLE —
+     `:last-child` est structurel, pas visuel. */
+  margin: 0;
+  font-style: italic;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--color-wood-mid);
+  text-align: left;
+}
 /* Round 4 — Si le label est hidden (essence/taille non applicable), cache
    aussi la valeur qui suit immédiatement, sinon une cellule grid vide
    s'affiche. Sélecteur adjacent + qui matche `value` directement après un
@@ -23852,6 +23984,11 @@ button.chip--project:focus-visible {
 .recap-card__item-label[hidden] + .recap-card__item-value {
   display: none;
 }
+/* ⚠️ PLUS AUCUN PORTEUR depuis le 26/08 : les deux phrases de conseil du récap
+   produit sont passées DANS la carte (`.recap-card__note`), sous la ligne
+   qu'elles expliquent. Classe conservée telle quelle — elle décrit le style
+   « conseil de Robin » et le prochain écran qui en aura besoin la retrouvera.
+   Ne pas la modifier en croyant agir sur le récap produit. */
 .conseil-italic {
   font-style: italic;
   font-size: 13px;
@@ -23861,40 +23998,203 @@ button.chip--project:focus-visible {
   max-width: 420px;
 }
 
-/* Mobile */
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE — DENSITÉ DE LA MODALE (refonte 25/08).
+   ──────────────────────────────────────────────────────────────────────────
+   Constat de Robin : « le texte est bien, mais tout le reste est trop gros et
+   la zone de texte se retrouve trop petite ». Mesuré sur l'écran le plus
+   contraint (chat texte libre, iPhone 390×844) : **417px de décor pour 284px
+   de lecture — près de 60 % de l'écran ne disait rien**. Et en largeur, six
+   boîtes emboîtées ne laissaient que 155px de texte utile, soit ~23 caractères
+   par ligne : une réponse de Robin y prenait treize lignes.
+
+   Les quatre leviers, par rentabilité :
+     1. le rembourrage de la carte, HÉRITÉ ET JAMAIS VOULU (+68 v, +56 h) ;
+     2. la modale en plein écran (+64 v, +40 h) ;
+     3. la suppression du cadre clair autour du chat (+36 v, +65 h) ;
+     4. les boutons d'action compactés, qui repassent sur une ligne (+27 v).
+   Le décor tombe à ~176px et la largeur du texte double.
+
+   ⚠️ AUCUNE TAILLE DE TEXTE DE CONTENU N'EST TOUCHÉE. Robin a dit que le texte
+   lui convenait : tout le gain vient des marges, jamais de la lisibilité.
+   ⚠️ AUCUNE POLICE DE CHAMP NON PLUS — la règle des 16px (contrainte iOS,
+   voir le début du fichier) est intouchable. On gagne sur le rembourrage.
+   ══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 600px) {
+  /* ── 2. Plein écran ────────────────────────────────────────────────────
+     Le voile de 32px tout autour n'a pas de sens sur un téléphone : il fait
+     32px en haut, 32 en bas, 20 de chaque côté, pour montrer un fond flou
+     qu'on ne regarde pas. La modale devient une feuille plein écran, comme
+     partout ailleurs sur mobile.
+     ⚠️ `env(safe-area-inset-*)` OBLIGATOIRE une fois le plein écran posé :
+     sans ça, le bouton du pied passe sous l'indicateur d'accueil des iPhone
+     à encoche et devient partiellement intouchable. */
+  .conseiller-modal { padding: 0; }
   .conseiller-card--modal {
     max-width: 100%;
-    /* Fix mobile — la modale parente a padding: 32px 20px (64px vertical),
-       donc la card doit tenir dans 100dvh - 64px sinon elle déborde
-       au-dessus du viewport et masque la croix de fermeture. */
-    height: calc(100dvh - 64px);
-    max-height: calc(100dvh - 64px);
+    width: 100%;
+    /* ── 1. LE MEILLEUR RAPPORT DU LOT, et une ligne suffit.
+       `.conseiller-card--modal` ne déclarait pas de `padding` : il héritait
+       donc du `36px 28px 32px` de `.conseiller-card`, une règle écrite pour
+       les cards de /mes-creations/ et de la fiche produit. Personne ne l'avait
+       décidé pour la modale, et head/body/foot portent déjà le leur.
+       ⚠️ NE JAMAIS corriger ça à la source : `.conseiller-card` habille aussi
+       la card « Conseil de Robin », la card « Mon projet », la card Sur-mesure
+       de la grille produit et la pill « Comment choisir ? ». L'override doit
+       rester ici, dans le bloc mobile de la modale. */
+    padding: 0;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    box-shadow: none;
   }
   .conseiller-card--modal::before { inset: 0; }
-  .modal__head { padding: 20px 22px 8px; }
-  .modal__body { padding: 8px 22px; gap: 12px; }
-  .modal__foot { padding: 10px 22px 22px; }
+  /* ── 5. Marges intérieures resserrées ⇦ les trois chiffres de gauche */
+  .modal__head {
+    padding: 8px 14px 6px;
+    padding-top: calc(8px + env(safe-area-inset-top, 0px));
+  }
+  .modal__body { padding: 6px 14px; gap: 10px; }
+  .modal__foot {
+    padding: 8px 14px 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
   .h2 { font-size: 15.5px; }
   .h1 { font-size: 28px; }
   .choices { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .choices--4col { grid-template-columns: repeat(2, 1fr); }
-  .choice { padding: 12px 6px 9px; }
-  .recap-card { grid-template-columns: 1fr; gap: 6px; }
+
+  /* ── Boutons de choix compacts, calqués sur le room-picker mobile ───────
+     Demande de Robin : « sur mobile les boutons sont trop gros, s'inspirer du
+     nouveau room-picker version mobile ». Mêmes valeurs que lui : icône 34px
+     (svg 18), libellé 11,5px aligné à gauche, rembourrage 0.55/0.7rem. La
+     hauteur d'un bouton passe d'environ 116px à ~50px.
+
+     ⚠️ GRILLE ET NON FLEX EN LIGNE, contrairement au room-picker. Ces boutons
+     ont un TROISIÈME enfant que les cartes de pièce n'ont pas : `.choice__dim`,
+     la précision entre parenthèses (« moins de 10 m² »…). En flex-ligne, elle
+     se retrouverait à côté du libellé au lieu d'être dessous. Ici l'icône
+     occupe la colonne 1 sur toute la hauteur, libellé et précision s'empilent
+     en colonne 2 — et quand il n'y a pas de précision, la mise en page reste
+     juste sans règle supplémentaire.
+
+     ⚠️ TOUT EST PRÉFIXÉ `.conseiller-card--modal`, ET C'EST OBLIGATOIRE.
+     `.choice` sert à DEUX composants : les questions de la modale (ici) et la
+     chip-question posée sur la card « Mon projet », qui a sa propre mise en
+     page horizontale (cf. `.conseiller-mon-projet__inline-question .choice`).
+     Sans préfixe, la plupart des règles seraient bien écrasées par celles de
+     la chip (spécificité 0,2,0 contre 0,1,0) — mais pas toutes : le rayon de
+     l'icône, l'interlettrage et l'interligne du libellé ne sont PAS
+     redéclarés par la chip, ils auraient donc fui dessus. Une fuite discrète,
+     et sur un composant qui n'a rien demandé. */
+  .conseiller-card--modal .choices .choice {
+    display: -ms-grid;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    -webkit-column-gap: 0.55rem;
+    column-gap: 0.55rem;
+    -webkit-align-items: center;
+    align-items: center;
+    padding: 0.55rem 0.7rem;
+    min-height: 0;
+    text-align: left;
+  }
+  .conseiller-card--modal .choices .choice__icon {
+    grid-row: 1 / -1;
+    width: 34px;
+    height: 34px;
+    margin: 0;
+    border-radius: 9px;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+  }
+  .conseiller-card--modal .choices .choice__icon svg { width: 18px; height: 18px; }
+  .conseiller-card--modal .choices .choice__label {
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-align: left;
+  }
+  .conseiller-card--modal .choices .choice__dim {
+    font-size: 10.5px;
+    line-height: 1.2;
+    text-align: left;
+    color: var(--color-wood-mid);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .recap-card { grid-template-columns: 1fr; gap: 6px; padding: 10px 12px; }
+
+  /* ── 3. LE CADRE CLAIR AUTOUR DU CHAT DISPARAÎT ────────────────────────
+     C'est la troisième boîte que Robin a repérée sur sa capture. Sur 390px de
+     large elle ne dessine rien : elle prend 16px de rembourrage de chaque
+     côté, une bordure et 12px de marge basse, pour encadrer un contenu qui
+     occupe déjà toute la largeur.
+     ⚠️ Retirer `overflow-y: auto` ici change QUI défile : le débordement
+     retombe sur `.modal__body`, ce qui est justement l'hypothèse du JS
+     (`scrollChatToBottom`). Voir le correctif JS associé — les deux vont
+     ensemble, et c'est ce qui répare la dernière bulle coupée. */
+  [data-screen="s2-chat"] .chat-bubbles {
+    border: 0;
+    background: none;
+    padding: 0;
+    margin-bottom: 8px;
+    overflow-y: visible;
+  }
+  /* La bulle prend toute la largeur : 85 % d'une colonne déjà étroite ne
+     laissait que ~23 caractères par ligne. */
+  .chat-bubble { max-width: 100%; padding: 9px 12px; }
+
+  /* ── 4. Boutons d'action compactés ⇦ le libellé le plus long
+     (« VOIR LA SÉLECTION POUR MON PROJET ») repasse sur UNE ligne. Le gain se
+     retrouve sur le chat, le récapitulatif, la fiche produit et le contact,
+     d'un seul réglage. */
+  .action-btn {
+    padding: 9px 14px;
+    font-size: 11px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── Pill de Robin : présente sur les NEUF rendus de la modale, donc le
+     réglage le plus transversal du fichier. Avatar 34 → 28, accroche 24 → 19. */
+  .conseiller-card--modal .conseiller-sig--v1 { padding: 4px 14px 4px 4px; }
+  .conseiller-card--modal .conseiller-sig--v1 .conseiller-sig__avatar { width: 28px; height: 28px; }
+  .conseiller-card--modal .conseiller-sig--v1 .conseiller-sig__hook { font-size: 19px; }
+
+  /* ── Champ de saisie : on gagne sur le rembourrage, JAMAIS sur la police
+     (16px = contrainte iOS, voir le début du fichier). */
+  .text-input { padding: 10px 46px 10px 14px; }
+  .text-submit { width: 32px; height: 32px; }
+
+  /* ── Finitions par écran ─────────────────────────────────────────────── */
+  .recap-groups { gap: 8px; }
+  .recap-group { gap: 5px; }
+  .contact-form { gap: 8px; }
+  .contact-form textarea { min-height: 72px; }
+  .contact-disclaimer { margin-top: 2px; }
+  .separator-or { margin: 0; }
+  .separator-or__text { padding: 2px 10px; }
+
   /* Mobile — croix renforcée visuellement (sur cream, le SVG transparent
      wood-mid était quasi-invisible). Fond blanc subtil + couleur wood-dark
-     + SVG un peu plus grand pour bonne cible tactile. */
+     + SVG un peu plus grand pour bonne cible tactile.
+     ⚠️ RESSERRÉE EN MÊME TEMPS QUE LE HEAD, ET CE N'EST PAS COSMÉTIQUE : la
+     croix et la pill ne se croisaient que grâce à 8px de dégagement vertical.
+     Le head vient d'en perdre 48 — sans réduire la croix et la remonter, les
+     deux se chevauchaient. Les deux réglages sont appairés. */
   .modal__close {
-    top: 12px;
-    right: 12px;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid rgba(139, 115, 85, 0.18);
     color: var(--color-wood-dark);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   }
   .modal__close svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -24081,7 +24381,6 @@ button.chip--project:focus-visible {
    [.mes-creations-selection] = card englobante "Mon projet"
        (badge dynamique N luminaires + phrase IA + lien Modifier
         + slot grille peuplé par JS via clones depuis la grille basse)
-   [.mes-creations-section-divider] = filet fin centré (Option B)
    [.mes-creations-catalogue] = section "Toutes mes créations"
        (H2 + sous-titre + placeholder pills cat + grille shop-products)
    ============================================================ */
@@ -24271,13 +24570,7 @@ button.chip--project:focus-visible {
 
 /* Séparateur entre "Ma sélection" et "Toutes mes créations" — Option B :
    un seul filet fin court (80px), centré, opacity faible. Pas de dots. */
-.mes-creations-section-divider {
-  width: 80px;
-  height: 1px;
-  margin: 70px auto 0;
-  background: var(--color-line);
-  opacity: 0.6;
-}
+
 
 /* Section "Toutes mes créations" — H2 + sous-titre + placeholder pills. */
 .mes-creations-catalogue {
@@ -24419,9 +24712,7 @@ button.chip--project:focus-visible {
     font-size: 12.5px;
   }
   /* Séparateur mobile : resserré verticalement, même largeur 80px */
-  .mes-creations-section-divider {
-    margin-top: 48px;
-  }
+
   /* Section "Toutes mes créations" */
   .mes-creations-catalogue {
     padding: 0 14px 60px;
@@ -24571,4 +24862,1342 @@ button.chip--project:focus-visible {
 .mes-creations-surmesure-card__cta svg {
   width: 12px;
   height: 12px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Refonte /mes-creations/ — état B « immersion » (arrivée depuis room-picker)
+   Gated par body.mescreations-immersion-on (?piece= valide, cf. functions.php +
+   archive-product.php). Contrôleur : assets/sapi-mescreations-immersion.js.
+   Étape 1 : header laissé normal (transparent-over-photo = passe suivante).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════════════
+   TÂCHE 4 — État A /mes-creations/ (sans ?piece=) : le room-picker EST le hero.
+   Réutilise les classes .room-picker-* / .room-card / .conseiller-sig--v1 déjà
+   stylées globalement ; ce bloc ne fournit que l'enveloppe « hero » (fond warm
+   + texture papier, comme .home-projet-section) et le calage des cartes.
+   ════════════════════════════════════════════════════════════════════════ */
+.mescreations-picker-hero {
+  position: relative;
+  background: var(--color-warm);
+  padding: clamp(40px, 6vw, 64px) 24px clamp(32px, 4vw, 48px);
+  border-bottom: 1px solid var(--color-line);
+}
+.mescreations-picker-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(92deg, rgba(139, 115, 85, .045) 0, rgba(139, 115, 85, .045) 1px, transparent 1px, transparent 7px);
+  pointer-events: none;
+}
+.mescreations-picker-hero .room-picker-inner {
+  position: relative;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0; /* le padding est porté par .mescreations-picker-hero */
+}
+.mescreations-picker-hero .room-picker-title {
+  font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.mescreations-picker-hero .room-picker-sub {
+  margin: -6px auto 2px;
+  max-width: 560px;
+  color: var(--color-wood-mid);
+  font-size: 15px;
+  line-height: 1.45;
+}
+.mescreations-picker-hero .room-picker-cards {
+  flex-wrap: wrap;
+  max-width: 760px;
+  margin: 0 auto;
+}
+/* ⚠️ Calage desktop des cartes, VOLONTAIREMENT enfermé dans min-width:769px.
+   Une media query n'ajoute PAS de spécificité : sans cette borne, cette règle
+   (0,2,0, déclarée ligne ~24 640) écraserait le bloc mobile partagé de la home
+   (0,2,0, déclaré ligne ~7 970) — le plus bas dans le fichier l'emporte. C'est
+   exactement le piège qui a produit les deux régressions du room-picker mobile. */
+@media (min-width: 769px) {
+  .mescreations-picker-hero .room-card {
+    flex: 1 1 150px;
+    max-width: 190px;
+  }
+}
+/* Mobile — le hero de /mes-creations/ doit être AUSSI compact que le room-picker
+   de la home. On s'aligne sur le breakpoint de la home (768px, pas 600px).
+   ⚠️ Ce bloc ne porte QUE ce qui est propre au hero (enveloppe, titre, sous-titre).
+   Tout ce qui concerne les CARTES (colonnes, disposition ligne, taille d'icône,
+   label, padding, gap) vit dans le bloc mobile PARTAGÉ déclaré avec la home
+   (chercher « BLOC MOBILE PARTAGÉ » dans ce fichier). Raison : ce bloc-ci est
+   ~16 700 lignes plus bas, donc à spécificité égale il écrase silencieusement la
+   home — c'est ce qui a produit deux régressions de suite. Ne pas y redéclarer
+   .room-card. */
+@media (max-width: 768px) {
+  .mescreations-picker-hero {
+    padding: 28px 16px 24px;
+  }
+  .mescreations-picker-hero .room-picker-title {
+    font-size: 20px;
+  }
+  .mescreations-picker-hero .room-picker-sub {
+    font-size: 13.5px;
+    margin: -2px auto 2px;
+  }
+}
+
+/* État B : masque le hero croquis et le bandeau global tant qu'il n'est pas
+   repositionné en JS (cf. home).
+   `.conseiller-cards-zone` et `.mes-creations-section-divider` retirés le
+   28/08 : ces deux éléments n'existent plus dans aucun gabarit, on masquait
+   donc du vide. */
+body.mescreations-immersion-on .shop-hero-artisan,
+body.mescreations-immersion-on .robin-bandeau:not(.home-repositioned-bar) { display: none !important; }
+
+/* Le contenu du site est dans une colonne centrée (.site-content ~1440px).
+   Pour un vrai plein écran, le hero immersif sort de cette colonne (full-bleed
+   100vw). overflow-x:clip neutralise la barre de scroll horizontale du 100vw
+   sans casser le position:sticky du header (même technique que la home). */
+body.mescreations-immersion-on { overflow-x: clip; }
+
+/* ── Header : MÊME comportement que la home (.home .site-header) — fixed +
+   blanc translucide 35% par-dessus la photo (texte normal) → blanc opaque au
+   scroll (.is-scrolled). Valeurs reprises à l'identique, scopées immersion. ── */
+body.mescreations-immersion-on .site-header {
+  position: fixed;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.35) !important;
+  box-shadow: none !important;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+body.mescreations-immersion-on .site-header.is-scrolled {
+  background: rgba(255, 255, 255, 1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+/* Le catalogue passe sous le header fixed → marge de scroll pour les ancres. */
+/* Calage du catalogue sous le header quand on lui saute dessus (indice « Voir
+   le catalogue complet », et future 3ᵉ position d'ancrage). ⚠️ Le header ne
+   fait pas la même hauteur partout : 90px en desktop, 64px en mobile — sans
+   la borne, le catalogue se calait 26px trop bas sur téléphone. */
+body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90px; }
+@media (max-width: 768px) {
+  body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 64px; }
+}
+
+/* Repère de fin de révélation : 1px, invisible, hors flux. Il donne au JS la
+   distance EXACTE sur laquelle la révélation doit se jouer, mesurée dans les
+   mêmes unités que la mise en page. Voir le commentaire du markup dans
+   archive-product.php. Le track est `position: relative`, donc ce `top` se
+   compte bien depuis son sommet. */
+.mescreations-immersion__mark {
+  position: absolute;
+  top: 100vh;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Track de scroll-pinning : full-bleed (sort de la colonne .site-content), sa
+   hauteur = durée de la zone épinglée. 250vh → 150vh de scroll épinglé : la
+   révélation se joue sur les ~100 premiers vh, puis PAUSE courte (~50vh, état
+   « cards révélées » figé) avant de relâcher vers le catalogue. */
+.mescreations-immersion-track {
+  position: relative;
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  /* ⚠️ CETTE HAUTEUR FIXE DEUX CHOSES À LA FOIS.
+     La scène épinglée fait 100vh, donc l'épinglage dure `hauteur - 100vh` ;
+     la révélation, elle, se termine sur le repère, à 100vh. D'où :
+       · le PLATEAU = `hauteur - 200vh` — la zone après la révélation où la
+         scène reste épinglée et où l'écran est identique au pixel près. C'est
+         la « pause » : elle permet de scroller un peu sans que rien ne bouge,
+         et elle masque le va-et-vient du hero quand l'aimant ramène un petit
+         geste en arrière ;
+       · l'ÉCART entre les positions d'ancrage 2 et 3 = `hauteur - 100vh`.
+
+     200vh → plateau ZÉRO, écart 100vh entre les positions 2 et 3.
+
+     ⚠️ LE PLATEAU N'A PLUS DE RAISON D'ÊTRE DEPUIS LE PASSAGE EN CARROUSEL, et
+     c'est ce qui autorise ce raccourcissement. La « pause » servait à pouvoir
+     s'arrêter après la révélation sans que le hero ne reparte : elle a d'abord
+     été portée à 100vh à la demande de Robin. Or on ne peut désormais plus
+     s'arrêter entre deux étapes — la position 2 EST un point d'arrêt, et le
+     seul. Un écran entier de scroll pendant lequel rien ne se passait n'était
+     plus qu'une longueur de page inutile.
+     ⚠️ NE PAS raccourcir davantage, et NE PAS rallonger « pour la pause » sans
+     avoir d'abord retiré le carrousel : les deux réglages vont ensemble. Un
+     raccourcissement avait déjà été tenté AVANT le carrousel et Robin l'avait
+     vu immédiatement (« tu as retiré le stop / pause »).
+
+     ⚠️ NE PAS RACCOURCIR pour « rapprocher les étapes ». Ça a été essayé
+     (200vh) et Robin l'a immédiatement vu : ça supprime la pause, et le hero
+     amorce son départ au moindre geste. L'aimant du catalogue qui ne mordait
+     pas n'était PAS un problème de longueur mais de règle d'accroche (une
+     fenêtre de 30vh au lieu de « la position la plus proche ») — corrigé côté
+     JS, et il fonctionne très bien avec cette longueur-ci. */
+  height: 200vh;
+}
+/* Le hero = scène épinglée (sticky) de 100vh. --reveal (0→1) est piloté par le
+   scroll en JS et anime flou photo + remontée texte + apparition des cards. */
+.mescreations-immersion {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  text-align: center;
+  background: var(--color-wood-dark);
+  --reveal: 0;
+  /* Mobile — la barre d'adresse (Safari/Chrome iOS) recouvre le bas du viewport
+     `vh` : les éléments ancrés en bottom passent dessous. On décale les ancrages
+     bas de la hauteur réellement occupée par cette barre.
+     ⚠️ On garde le bloc en 100vh (pas svh) : en svh il serait plus court que le
+     viewport barre rétractée → bande de fond visible sous le hero. */
+  --safe-bottom: 0px;
+}
+/* Ce qu'on cherche : quelle PART du bloc (haut de `height:100vh`) est à cet
+   instant masquée sous la barre d'adresse. Réponse : `100vh - 100dvh`.
+
+   ⚠️ SENS DES UNITÉS — c'est contre-intuitif et je me suis trompé une fois :
+     · `svh` = viewport quand le chrome est DÉPLOYÉ  → le PLUS PETIT
+     · `lvh` = viewport quand le chrome est RÉTRACTÉ → le PLUS GRAND (== `vh` sur iOS)
+     · `dvh` = état courant, il suit la barre en temps réel
+   Donc barre visible → `dvh == svh` → `100vh - 100dvh` = hauteur de barre ✅
+        barre rétractée → `dvh == lvh == vh` → `100vh - 100dvh` = 0 ✅
+        desktop → `vh == dvh` → 0, sans média query ni garde ✅
+   La formule inverse (`100dvh - 100svh`) donne exactement le contraire : rien
+   n'est décalé quand la barre masque le bas, et tout remonte de 90px pour rien
+   quand elle est rétractée. Symptômes observés : chevron de l'indice coupé
+   barre déployée, card coupée par le bas du viewport.
+
+   ⚠️ CE QUE CETTE VARIABLE NE PEUT PAS CORRIGER : le chevauchement entre le bloc
+   sélection et l'indice « Voir le catalogue complet ». Les deux portent la MÊME
+   valeur, elle s'annule dans l'écart qui les sépare. Cet écart vaut
+   `X vh - 60px` (X = bottom du bloc sélection, 60px = coût fixe de l'indice) et
+   diverge sur les petits écrans : +30px en desktop, -7px sur iPhone, -20px sur
+   iPhone SE. Aucune valeur de X ne le referme — c'est structurel, à traiter en
+   passant les zones du hero en flux. Ne PAS tenter de compenser ici.
+
+   `dvh` se recalcule pendant le scroll : seuls des éléments en position absolue
+   en dépendent (indices + bloc sélection), pas la mise en page du hero.
+
+   ⚠️ DÉCLARÉE SOUS `min-width: 769px` DEPUIS LE MODÈLE À ZONES (25/08). En
+   mobile, le décalage est porté par la couche de contenu, en UNE transform sur
+   UN élément. Garder `--safe-bottom` en mobile coûterait cher pour rien : une
+   custom property qui change invalide le style de TOUT le sous-arbre qui en
+   hérite, à chaque frame du mouvement de barre, qu'elle soit consommée ou non.
+   On la déplace plutôt que la supprimer : les 5 `bottom: calc(… + var(--safe-bottom))`
+   sont des règles de BASE, actives en desktop — les effacer y casserait la
+   mise en page (un absolu sans top ni bottom retombe en haut du hero). */
+@media (min-width: 769px) {
+  @supports (height: 100dvh) {
+    .mescreations-immersion { --safe-bottom: calc(100vh - 100dvh); }
+  }
+}
+/* ── VERROU DU CARROUSEL — posé par le JS, jamais écrit en dur ────────────
+   Interdit le défilement vertical au doigt DANS le hero : c'est ce qui permet
+   au premier mouvement de déclencher le passage à l'étape suivante au lieu de
+   faire glisser la page.
+   ⚠️ Il DOIT être en CSS : le navigateur décide au tout premier `touchmove` si
+   un geste est un défilement, et ignore ensuite toute annulation en JS —
+   `touch-action`, lui, est consulté quand le doigt SE POSE.
+   ⚠️ `pan-x pinch-zoom`, surtout PAS `none` : le slider des cards est un
+   descendant du hero et `touch-action` se compose le long des ancêtres. `none`
+   tuerait le swipe horizontal, et le pincer-zoomer avec (accessibilité).
+   ⚠️ La classe est ajoutée par le JS et seulement hors mouvement réduit : si le
+   script ne tourne pas, la page reste normalement défilable. C'est un verrou
+   dur, il ne doit jamais survivre à l'absence de ce qui le pilote. */
+.mescreations-immersion.is-carousel {
+  -ms-touch-action: pan-x pinch-zoom;
+  touch-action: pan-x pinch-zoom;
+}
+
+.mescreations-immersion__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  -webkit-filter: blur(calc(var(--reveal) * 16px)) brightness(calc(1 - var(--reveal) * 0.26));
+  filter: blur(calc(var(--reveal) * 16px)) brightness(calc(1 - var(--reveal) * 0.26));
+  -webkit-transform: scale(calc(1 + var(--reveal) * 0.08));
+  transform: scale(calc(1 + var(--reveal) * 0.08));
+}
+.mescreations-immersion__bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100% !important;
+  max-width: none; /* annule le img{max-width:100%} global */
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+.mescreations-immersion__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(20,14,8,.34) 0%, rgba(20,14,8,.12) 35%, rgba(20,14,8,.50) 100%);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COUCHE DE CONTENU — MODÈLE À ZONES, désormais SUR TOUS LES ÉCRANS.
+   ──────────────────────────────────────────────────────────────────────────
+   Les trois zones (texte / carrousel / indice) se PARTAGENT une hauteur au
+   lieu d'être punaisées chacune à une distance du bas. Deux zones qui se
+   partagent une hauteur ne peuvent pas se chevaucher : c'est structurel, ce
+   n'est plus un réglage à deviner.
+
+   Historique : livré d'abord en mobile (25/08), étendu au desktop le même
+   jour à la demande de Robin. Le desktop était devenu la moitié fragile —
+   ses cards ne pouvaient grandir qu'en mangeant l'écart avec le texte, et il
+   ne restait qu'une dizaine de pixels sous les cards.
+
+   ⚠️ Les 5 `bottom: calc(… + var(--safe-bottom))` et les 4 hauteurs
+   `product-media` en vh qui subsistent plus bas sont désormais INERTES : les
+   règles ci-dessous les neutralisent (`position: relative` + `bottom: auto`,
+   `height: auto`). On les laisse en place volontairement — les retirer est
+   un nettoyage à part, à faire une fois la recette desktop validée, pas au
+   milieu d'une refonte.
+
+   `100svh` = viewport le plus PETIT (barre d'adresse déployée), donc un budget
+   CONSTANT : les zones ne se redistribuent jamais quand la barre bouge.
+   `translateY(100dvh - 100svh)` fait glisser le bloc entier vers le bas quand
+   la barre se rétracte, pour qu'il épouse la zone visible — une transform ne
+   coûte aucun recalcul de mise en page.
+   ⚠️ Le repli `height: 100vh` n'est pas décoratif : si `100svh` est inconnu,
+   `height` tomberait à `auto`, `flex: 1` ne distribuerait plus rien et la
+   chaîne de hauteurs des cards ne résoudrait plus. Rupture dure. */
+.mescreations-immersion__layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  height: 100vh;   /* repli — voir ci-dessus */
+  height: 100svh;  /* budget constant */
+  -webkit-transform: translateY(calc(100dvh - 100svh));
+  transform: translateY(calc(100dvh - 100svh));
+  will-change: transform;
+  /* Place du header fixe. ⇦ à garder en phase avec la hauteur réelle du header
+     (le mobile a sa propre valeur plus bas). */
+  padding-top: 90px;
+}
+
+/* ── ZONE 1 — pill + phrase + bouton ────────────────────────────────────
+   EN FLUX : elle prend sa hauteur naturelle en haut de la couche, et ne peut
+   donc plus recouvrir le carrousel ni l'indice.
+   Au repos (--reveal 0), elle est simplement DESCENDUE au centre et un peu
+   agrandie — deux transforms, donc aucun recalcul. Ce n'est pas une autre
+   mise en page : c'est le même bloc, déplacé.
+   ⇦ --imm-a-drop et le coefficient du `scale` sont purement ESTHÉTIQUES : ils
+   décident de l'allure au repos, pas des frontières entre zones (celles-ci
+   sont garanties par le flux). Seule réserve : ne pas gonfler `--imm-a-drop`
+   au point de descendre sur l'indice, qui est visible au repos.
+   Le `max-width` de la phrase (plus bas) garantit qu'aucun agrandissement ne
+   la fait déborder de l'écran. */
+.mescreations-immersion__inner {
+  position: relative;
+  top: auto;
+  bottom: auto;
+  z-index: 2;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* ⚠️ La zone 1 occupe désormais sa hauteur NATURELLE (avant, elle était
+     réduite à 72 % par un `scale`, donc elle prenait visuellement 28 % de
+     moins). Sans dégonflage, le passage en flux lui ferait manger PLUS de
+     place au carrousel qu'avant — l'inverse de la demande de Robin.
+     D'où le gap resserré ici, la pill sans marge basse et le bouton sans
+     marge haute juste en dessous : ~64px rendus au carrousel. */
+  gap: 12px;
+  --imm-a-drop: 20vh;
+  isolation: isolate; /* garantit que le voile ::before reste derrière le texte */
+  -webkit-transform-origin: center top;
+  transform-origin: center top;
+  -webkit-transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * 0.2));
+  transform: translateY(calc((1 - var(--reveal)) * var(--imm-a-drop))) scale(calc(1 + (1 - var(--reveal)) * 0.2));
+  /* Transféré sur la couche : on n'empile pas deux calques promus imbriqués. */
+  will-change: auto;
+}
+
+/* ── Voile sombre DERRIÈRE LE TEXTE seulement (demande Robin) ─────────────
+   Le conseil manquait de contraste sur les photos claires. On aurait pu
+   assombrir le scrim général, mais ça aurait terni TOUTE la pièce — or c'est
+   la photo qui vend. Ce voile est donc un dégradé ovale, flouté, qui ne
+   couvre que le bloc texte et s'éteint avant les bords : la photo reste
+   lumineuse partout ailleurs.
+   Il suit le bloc (même transform, même sortie d'écran en mobile) puisqu'il
+   en est le pseudo-élément. `inset` négatif : il déborde du texte pour que
+   son dégradé s'éteigne au-delà, sans bord visible.
+   ⇦ Le premier `rgba` règle l'intensité. */
+.mescreations-immersion__inner::before {
+  content: "";
+  position: absolute;
+  inset: -8% -6%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center,
+    rgba(18, 12, 7, .58) 0%,
+    rgba(18, 12, 7, .40) 45%,
+    rgba(18, 12, 7, 0) 72%);
+  -webkit-filter: blur(18px);
+  filter: blur(18px);
+}
+
+/* Pill V1 — fade-in. `margin-bottom: 0` : la pill partagée (.conseiller-sig--v1)
+   porte 16px de marge basse qui s'ADDITIONNAIENT au `gap` du flex. Préfixé,
+   donc la home et /conseils-eclaires/ gardent la leur. */
+.mescreations-immersion__sig {
+  margin-bottom: 0;
+  opacity: 0;
+  -webkit-transform: translateY(10px);
+  transform: translateY(10px);
+  transition: opacity .5s ease, -webkit-transform .5s ease, transform .5s ease;
+}
+.mescreations-immersion__sig.is-in {
+  opacity: 1;
+  -webkit-transform: none;
+  transform: none;
+}
+
+/* Phrase de conseil (machine à écrire) */
+.mescreations-immersion__phrase {
+  color: #fff;
+  /* Taille FIXE (lignes figées → pas de reflow/saut pendant le scroll).
+     Dimensionnée pour l'état ANCRÉ (--reveal 1) ; au repos, c'est le `scale`
+     de __inner qui l'agrandit. */
+  font-size: clamp(1.3rem, 2.2vw, 1.85rem);
+  /* ⚠️ Garde-fou du `scale` : la phrase ne peut pas déborder de l'écran une
+     fois agrandie, puisqu'elle est bornée en em. 27em × 1,2 ≈ 930px, très en
+     deçà des 1272px utiles du bloc.
+     ⇦ C'est aussi LA LARGEUR DE LA ZONE DE TEXTE (demande Robin : plus large).
+     L'élargir a un bénéfice caché : moins de lignes, donc une zone 1 plus
+     courte, donc des cards plus hautes. */
+  max-width: 27em;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.35;
+  font-style: italic;
+  font-weight: 500;
+  text-shadow: 0 2px 24px rgba(0,0,0,.45);
+  min-height: 2.4em;
+  margin: 0;
+}
+/* Machine à écrire en fondu : chaque lettre apparaît en opacity (mot = bloc
+   inline-block pour ne pas couper un mot en fin de ligne). */
+.mescreations-immersion__word { display: inline-block; }
+.mescreations-immersion__char {
+  opacity: 0;
+  -webkit-transition: opacity .55s ease;
+  transition: opacity .55s ease;
+}
+.mescreations-immersion__char.is-shown { opacity: 1; }
+
+/* Loader « Robin rédige son conseil » : 3 points qui pulsent doucement, pendant
+   le calcul du commentaire IA (entre la fin du questionnaire et son arrivée). */
+.mescreations-immersion__dots {
+  display: -webkit-inline-flex;
+  display: inline-flex;
+  -webkit-align-items: center;
+  align-items: center;
+  gap: 0.4em;
+  vertical-align: middle;
+}
+.mescreations-immersion__dots span {
+  width: 0.42em;
+  height: 0.42em;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.28;
+  -webkit-animation: sapi-immersion-dot 1.3s infinite ease-in-out;
+  animation: sapi-immersion-dot 1.3s infinite ease-in-out;
+}
+.mescreations-immersion__dots span:nth-child(2) { -webkit-animation-delay: 0.18s; animation-delay: 0.18s; }
+.mescreations-immersion__dots span:nth-child(3) { -webkit-animation-delay: 0.36s; animation-delay: 0.36s; }
+@-webkit-keyframes sapi-immersion-dot { 0%, 65%, 100% { opacity: 0.28; } 32% { opacity: 1; } }
+@keyframes sapi-immersion-dot { 0%, 65%, 100% { opacity: 0.28; } 32% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .mescreations-immersion__dots span { -webkit-animation: none; animation: none; opacity: 0.6; }
+}
+
+/* Question d'affinage */
+/* Bouton « Décrire mon projet en détail » sous la citation (ouvre la modale). */
+/* ── Bouton PRINCIPAL de l'écran d'accueil : « Découvrir ma sélection » ────
+   Remplace l'ancien indice, un petit texte gris en bas d'écran que Robin
+   trouvait trop discret. Fond blanc plein, donc plus fort que le bouton
+   translucide : c'est l'action principale, et la hiérarchie était inversée.
+   Il vit dans le bloc de Robin, donc il sort de l'écran avec lui en mobile et
+   s'efface au scroll en desktop (voir plus bas) : à l'arrivée sur la
+   sélection, il proposerait d'aller là où on est déjà. */
+.mescreations-immersion__reveal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  /* ⇦ Air supplémentaire avec la phrase de Robin. Une marge plutôt qu'un `gap`
+     plus large : le `gap` de __inner sépare AUSSI la pill de la phrase, et
+     celui-là ne doit pas bouger. */
+  margin: 8px auto 0;
+  padding: 13px 28px;
+  /* Fond translucide flouté plutôt que blanc plein : en plein il attirait trop
+     l'œil et volait la vedette à la photo. Il reste plus marqué que le bouton
+     « Décrire mon projet » (30 % contre 18 %, texte en gras, liseré), donc la
+     hiérarchie tient toujours — c'est l'action principale. */
+  background: rgba(255, 255, 255, .30);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, .38);
+  border-radius: 50px;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .35);
+  cursor: pointer;
+  /* Mêmes états d'entrée que l'ancien bouton : masqué jusqu'à la fin de la
+     machine à écrire, puis fondu montant (piloté en JS par .is-in). */
+  opacity: 0;
+  pointer-events: none;
+  -webkit-transform: translateY(10px);
+  transform: translateY(10px);
+  transition: opacity .5s ease, -webkit-transform .5s ease, transform .5s ease, background .2s ease;
+}
+.mescreations-immersion__reveal-btn.is-in {
+  opacity: 1;
+  pointer-events: auto;
+  -webkit-transform: none;
+  transform: none;
+}
+/* Une fois la sélection révélée, il n'a plus d'objet : il s'efface, mais
+   GARDE SA PLACE — la retirer du flux recalculerait la mise en page pendant
+   le scroll, ce qu'on s'interdit depuis le début de ce chantier. */
+.mescreations-immersion__reveal-btn.is-in {
+  opacity: clamp(0, calc(1 - var(--reveal) * 2.6), 1);
+}
+.mescreations-immersion__reveal-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+@media (hover: hover) {
+  .mescreations-immersion__reveal-btn:hover { background: rgba(255, 255, 255, .42); }
+}
+
+.mescreations-immersion__describe {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 560px;
+  /* Centré dans la zone sélection, qui est un flex COLONNE (donc `align-self`
+     et non `margin: auto`, sans quoi il s'étirerait sur toute la largeur). */
+  -ms-flex-item-align: center;
+  align-self: center;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  /* L'air est désormais AU-DESSUS : le bouton est passé sous le carrousel. */
+  margin: 14px auto 0;
+  padding: 11px 24px;
+  background: rgba(255, 255, 255, .18);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: none;
+  border-radius: 50px;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-transform: none;
+  text-align: left;
+  line-height: 1.25;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .35);
+  cursor: pointer;
+  /* ⚠️ PLUS D'ÉTAT D'ENTRÉE ICI (opacity 0 + .is-in piloté en JS). Depuis
+     qu'il vit dans la zone sélection, c'est l'opacité de cette zone, pilotée
+     par --reveal, qui le fait apparaître avec le carrousel. Le laisser à
+     `opacity: 0` en attendant un `.is-in` que plus personne ne lui donne le
+     rendrait définitivement invisible. */
+  transition: background .2s ease;
+}
+.mescreations-immersion__describe:hover {
+  background: rgba(255, 255, 255, .3);
+}
+.mescreations-immersion__describe svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+/* Scroll hint = 2 indices pilotés par --reveal. Le conteneur est révélé par la
+   séquence de chargement (.is-in) ; à l'intérieur, l'indice « Découvre ta
+   sélection » monte+disparaît au scroll, puis « Voir le catalogue complet »
+   apparaît une fois la sélection révélée (pause). */
+/* ── ZONE 2 — l'indice, dernier en flux, hauteur RÉSERVÉE ──────────────
+   ⚠️ `position: relative` (et non `static`) est OBLIGATOIRE : les deux indices
+   sont en `position: absolute` À L'INTÉRIEUR. En `static`, ils se
+   résoudraient contre .mescreations-immersion et repartiraient se coller au
+   bas du hero — le chevron coupé sous la barre d'adresse serait de retour.
+   La hauteur explicite est ce qui fait que la zone RÉSERVE sa place : ses
+   enfants étant absolus, ils ne mesurent rien. */
+.mescreations-immersion__scrollhint {
+  position: relative;
+  bottom: auto;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  /* Bande resserrée : chaque pixel rendu ici part dans la photo des cards,
+     puisque le carrousel absorbe l'espace restant. On ne descend pas plus
+     bas, le chevron doit rester cliquable et lisible. */
+  height: 34px;
+  margin-bottom: 14px;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity .6s ease .3s;
+  pointer-events: none;
+}
+.mescreations-immersion__scrollhint.is-in { opacity: 1; }
+.mescreations-immersion__hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0,0,0,.5);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.mescreations-immersion__hint-label { transition: opacity .2s ease; }
+.mescreations-immersion__hint:hover .mescreations-immersion__hint-label { opacity: .7; }
+/* Indice 1 réduit à la flèche seule (décision Robin) : le texte a migré dans
+   le bouton blanc du bloc de Robin, le répéter ici ferait doublon. La flèche
+   reste, pour suggérer le geste à qui ne lit pas les boutons. Elle s'aligne
+   sur le bas de la bande, dont la hauteur est dictée par l'indice 2 qui, lui,
+   garde son libellé. */
+.mescreations-immersion__hint--arrow-only {
+  justify-content: flex-end;
+  gap: 0;
+}
+@media (hover: hover) {
+  .mescreations-immersion__hint--arrow-only:hover svg { opacity: .7; }
+}
+/* Indice 1 : visible au départ, monte et s'efface à mesure qu'on révèle. */
+.mescreations-immersion__hint--reveal {
+  opacity: calc(1 - var(--reveal) * 2.4);
+  -webkit-transform: translateY(calc(var(--reveal) * -38px));
+  transform: translateY(calc(var(--reveal) * -38px));
+}
+/* Indice 2 : apparaît seulement une fois la sélection révélée (≥ 0.85). */
+.mescreations-immersion__hint--catalogue {
+  opacity: clamp(0, calc((var(--reveal) - 0.85) / 0.15), 1);
+}
+.mescreations-immersion__hint svg {
+  width: 18px;
+  height: 18px;
+  -webkit-animation: immersionBob 1.6s ease-in-out infinite;
+  animation: immersionBob 1.6s ease-in-out infinite;
+}
+@-webkit-keyframes immersionBob { 50% { -webkit-transform: translateY(5px); } }
+@keyframes immersionBob { 50% { transform: translateY(5px); } }
+
+/* ── ZONE 3 — le carrousel : il ABSORBE tout l'espace restant ────────────
+   C'est ce qui répond à la demande de Robin « augmenter la hauteur des cards
+   en desktop » sans avoir à deviner un chiffre : les cards prennent ce qui
+   reste une fois le texte et l'indice servis, et elles grandissent donc
+   d'elles-mêmes sur les grands écrans.
+   ⚠️ `flex: 1 1 0` et NON `1 1 auto` : avec une base `auto`, la hauteur
+   dépendrait encore du contenu, et pendant les ~220 ms où swapCards() vide le
+   slider au moment 2, la zone 1 bougerait. Base `0` = « exactement ce qui
+   reste », quoi que la zone contienne. */
+.mescreations-immersion__selection {
+  position: relative;
+  bottom: auto;
+  z-index: 2;
+  -webkit-box-flex: 1;
+  -ms-flex: 1 1 0px;
+  flex: 1 1 0;
+  min-height: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  /* ⇦ L'air AUTOUR du carrousel. C'est le SEUL endroit qui le gouverne
+     maintenant que les zones sont en flux : le haut sépare de la phrase de
+     Robin, le bas sépare de l'indice.
+     Le haut est resserré à la demande de Robin, pour remonter le carrousel et
+     rendre la hauteur gagnée aux cards. En desktop, la zone 1 prenant sa
+     hauteur naturelle et la zone 3 tout le reste, ce padding EST l'écart
+     entre le texte et le titre de la sélection : il n'y a pas d'espace
+     résiduel ailleurs. */
+  padding: 12px 24px 16px;
+  /* Apparaît un peu plus tard que la remontée du texte (de 0.3 à 1) → les deux
+     zones ne se croisent pas. */
+  opacity: clamp(0, calc((var(--reveal) - 0.3) / 0.7), 1);
+  -webkit-transform: translateY(calc((1 - var(--reveal)) * 30px));
+  transform: translateY(calc((1 - var(--reveal)) * 30px));
+}
+.mescreations-immersion__selection-head {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+.mescreations-immersion__selection-title {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 10px rgba(0,0,0,.4);
+}
+.mescreations-immersion__slider {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  /* Empêche le défilement HORIZONTAL de « déborder » sur la page : arrivé en
+     butée sur la dernière card, iOS enchaîne sinon sur le scroller parent, et
+     un swipe de trop relâche la page vers le catalogue.
+     ⚠️ SUR L'AXE X UNIQUEMENT, et c'est vital. `overscroll-behavior: contain`
+     tout court s'applique aux DEUX axes. Or `overflow-x: auto` fait aussi de
+     cet élément un scroller vertical (l'autre axe passe de `visible` à `auto`
+     automatiquement) — même s'il n'a rien à faire défiler en hauteur. Le
+     `contain` y bloquait donc la propagation vers la page : le scroll vertical
+     ne marchait plus dès que le doigt ou le pointeur était sur le carrousel.
+     Régression constatée par Robin en recette du lot 1. */
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.mescreations-immersion__slider::-webkit-scrollbar { display: none; }
+/* Prix centré dans la card du slider (demande Robin). `.product-price` est un
+   FLEX (« À partir de » + montant alignés sur la baseline) : c'est
+   justify-content qui centre, pas text-align. Même traitement que le catalogue
+   .creations-grid juste en dessous, donc la colonne reste cohérente.
+   ⚠️ Préfixe obligatoire : .product-card-cinetique est partagé avec /nos-creations/. */
+.mescreations-immersion__slider .product-price { justify-content: center; }
+
+/* Cards produit = EXACTEMENT le design du catalogue (.product-card-cinetique).
+   3 visibles par page (slider à flèches + dots, comme le reste du site). */
+.mescreations-immersion__slider .product-card-cinetique,
+.mescreations-immersion__pcard--sur {
+  flex: 0 0 calc((100% - 36px) / 3);
+  scroll-snap-align: start;
+}
+/* ── La card REMPLIT sa zone, et c'est la PHOTO qui absorbe ──────────────
+   Le markup réel est .product-card-cinetique > a.product-card-link > (media,
+   info, actions). **Le lien intermédiaire doit être rendu flex lui aussi**,
+   sinon la chaîne de hauteurs est rompue et rien ne se passe — c'est la
+   couche invisible de ce mécanisme.
+   Plus aucune hauteur de photo réglée à la main : elle prend ce qui reste
+   après le nom, la catégorie et le prix. Les `height: 25vh / 30vh / 23vh /
+   17vh` qui subsistent au-dessus et au-dessous sont désormais inertes.
+   ⚠️ TOUT est préfixé .mescreations-immersion__slider : .product-card-cinetique
+   est partagé avec /nos-creations/ et avec le catalogue sous ce hero. */
+.mescreations-immersion__slider .product-card-cinetique {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  height: 100%;
+}
+.mescreations-immersion__slider .product-card-link {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-flex: 1;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.mescreations-immersion__slider .product-card-cinetique .product-media {
+  aspect-ratio: auto;
+  height: auto;
+  -webkit-box-flex: 1;
+  -ms-flex: 1 1 auto;
+  flex: 1 1 auto;
+  min-height: 80px; /* ⇦ plancher de la photo */
+}
+.mescreations-immersion__slider .product-info,
+.mescreations-immersion__slider .product-actions {
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+/* Rééquilibrage card du slider (desktop + mobile) : la card était à ~60 % de
+   texte pour 40 % de photo. On resserre l'info pour rendre la place à l'image,
+   SANS toucher au catalogue (préfixe .mescreations-immersion__slider).
+   .product-firstname (0.75em) et .product-restname (1.6em) sont relatifs à
+   .product-name : le réduire suffit pour le nom ET le surnom Square Peg. */
+.mescreations-immersion__slider .product-info { padding: 0.7rem 0.6rem 0.4rem; }
+/* Nom remonté (retour Robin : « les titres des produits sont trop petits »).
+   Il était aussi plus PETIT que le prix — hiérarchie inversée : c'est le nom
+   du modèle qu'on vend, pas le chiffre. */
+.mescreations-immersion__slider .product-name { font-size: 1.05rem !important; }
+.mescreations-immersion__slider .product-category { font-size: 0.75rem; margin-bottom: 0.25rem; }
+.mescreations-immersion__slider .price-from { font-size: 0.7rem; }
+.mescreations-immersion__slider .price-value { font-size: 1rem; }
+/* `margin-top: auto` (règle de base de .product-price) poussait le prix tout
+   en bas de la zone texte et y creusait un vide. */
+.mescreations-immersion__slider .product-price { margin-top: 0; gap: 0.35rem; }
+.mescreations-immersion__slider .product-actions { margin-bottom: 0.6rem; }
+
+/* ── Dots du carrousel (remis à la demande de Robin, mobile + desktop) ────
+   Générés en JS (le nombre de cards varie selon la pièce et change au moment
+   2). Zone de frappe élargie par le padding : la pastille visible fait 7px,
+   la cible tactile 22px. */
+.mescreations-immersion__dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  margin-top: 4px;
+  min-height: 20px;
+}
+.mescreations-immersion__dots[hidden] { display: none; }
+.mescreations-immersion__dot {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: none;
+  padding: 8px 4px;
+  cursor: pointer;
+  line-height: 0;
+}
+.mescreations-immersion__dot::before {
+  content: "";
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .45);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .35);
+  transition: width .25s ease, background .25s ease;
+}
+.mescreations-immersion__dot.is-active::before {
+  width: 20px;
+  background: #fff;
+}
+
+/* Flèches de part et d'autre du slider (pas de dots). 1 card par clic.
+   `align-items: stretch` : les cards remplissent la hauteur du slider au lieu
+   d'y être centrées — sans ça, un vide se creuse au-dessus ET en dessous.
+   `flex: 1 1 0` + `min-height: 0` : le slider prend toute la hauteur de la
+   zone 3, indépendamment de ce qu'il contient. */
+.mescreations-immersion__slider-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  -webkit-box-flex: 1;
+  -ms-flex: 1 1 0px;
+  flex: 1 1 0;
+  min-height: 0;
+}
+.mescreations-immersion__slider-wrap .mescreations-immersion__arrow { align-self: center; }
+.mescreations-immersion__slider-wrap .mescreations-immersion__slider {
+  height: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.mescreations-immersion__arrow {
+  flex: 0 0 auto;
+}
+.mescreations-immersion__arrow[hidden] { display: none; }
+
+/* Carte sur-mesure en fin de slider (CTA, volontairement distincte) */
+.mescreations-immersion__pcard--sur {
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  background: var(--color-orange);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 24px 18px;
+  position: relative;
+}
+.mescreations-immersion__pcard--sur::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border: 1.5px dashed rgba(255,255,255,.5);
+  border-radius: 9px;
+  pointer-events: none;
+}
+.mescreations-immersion__sur-eyebrow {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  opacity: .9;
+  margin-bottom: 8px;
+  position: relative;
+}
+.mescreations-immersion__sur-title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1;
+  margin-bottom: 8px;
+  position: relative;
+}
+.mescreations-immersion__sur-sub {
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: .95;
+  margin-bottom: 14px;
+  position: relative;
+}
+.mescreations-immersion__sur-cta {
+  position: relative;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  border-bottom: 1px solid #fff;
+  padding-bottom: 2px;
+}
+
+@media (max-width: 900px) {
+  .mescreations-immersion__slider .product-card-cinetique,
+  .mescreations-immersion__pcard--sur { flex-basis: calc((100% - 18px) / 2); }
+}
+@media (max-width: 600px) {
+  .mescreations-immersion__slider .product-card-cinetique,
+  .mescreations-immersion__pcard--sur { flex-basis: 82%; }
+  .mescreations-immersion__selection { bottom: calc(8vh + var(--safe-bottom)); }
+  .mescreations-immersion__inner { gap: 14px; }
+}
+
+/* ── Mobile : densité de l'immersion ────────────────────────────────────────
+   Trois causes de chevauchement / photos minuscules, corrigées ici :
+   (a) la phrase tombait sur le MINIMUM du clamp desktop (1,85rem = 29,6px sur
+       390px de large, car 3.6vw n'y vaut que 14px) → ~10 lignes, la moitié de
+       l'écran, et collision avec le titre de la sélection ;
+   (b) les flèches étaient DANS le flux flex : 2×36px + 2×10px de gap = 92px,
+       soit 24 % de la largeur. Il ne restait que ~27px de la card suivante.
+       On les superpose (le swipe reste le geste principal sur mobile) ;
+   (c) les cards étaient à 60 % texte / 40 % photo. On réduit les textes du
+       slider UNIQUEMENT et on rend la hauteur gagnée à l'image.
+   ⚠️ .product-card-cinetique est PARTAGÉ avec le catalogue : tout est préfixé
+   par .mescreations-immersion__slider pour ne pas toucher /nos-creations/.
+   Placé AVANT les blocs max-height pour que ceux-ci gardent la main sur les
+   écrans courts (iPhone SE), où il faut compacter davantage. */
+@media (max-width: 768px) {
+  /* (a) */
+  .mescreations-immersion__phrase { font-size: clamp(1.15rem, 5vw, 1.75rem); }
+  .mescreations-immersion__inner { padding: 0 16px; }
+  .mescreations-immersion__selection { padding: 0 16px; }
+
+  /* (b) */
+  .mescreations-immersion__slider-wrap { position: relative; }
+  .mescreations-immersion__arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 4;
+    opacity: .92;
+    -webkit-transform: translateY(-50%);
+    transform: translateY(-50%);
+  }
+  .mescreations-immersion__arrow[data-immersion-prev] { left: -2px; }
+  .mescreations-immersion__arrow[data-immersion-next] { right: -2px; }
+  /* Largeur récupérée → on montre franchement le modèle suivant. */
+  .mescreations-immersion__slider .product-card-cinetique,
+  .mescreations-immersion__pcard--sur { flex-basis: 78%; }
+
+  /* (d) Marge avant la 1ʳᵉ card : elle démarrait au ras du bord gauche, sous la
+     flèche « précédent » (superposée à left:-2px), d'où une photo qui paraissait
+     décalée à gauche. `scroll-padding-left` est INDISPENSABLE en plus du padding :
+     sans lui, `scroll-snap-align: start` recale la card contre le bord du
+     scroll-port au premier snap et annule le décalage. Les deux valeurs doivent
+     rester ÉGALES — c'est le seul chiffre à toucher pour ajuster le cadrage. */
+  .mescreations-immersion__slider {
+    padding-left: 20px;
+    scroll-padding-left: 20px;
+  }
+
+  /* (c) — card plus haute (demande Robin) : 26vh → 30vh ici, 20 → 23vh sous
+     840px de haut, 15 → 17vh sous 700px. C'EST LE RÉGLAGE À SURVEILLER : la card
+     est ancrée par le bas, donc l'agrandir la fait remonter vers la phrase et
+     peut recréer la collision corrigée en 1ʳᵉ passe. Marge gagnée au passage :
+     --safe-bottom est désormais dynamique et retombe à 0 barre rétractée, donc
+     le bloc sélection descend d'autant au moment où il s'affiche. */
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 30vh; }
+  .mescreations-immersion__slider .product-info { padding: 0.5rem 0.5rem 0.35rem; }
+  /* .product-firstname (0.75em) et .product-restname (1.6em) suivent
+     proportionnellement — un seul levier suffit pour le nom + le surnom. */
+  .mescreations-immersion__slider .product-name { font-size: 0.72rem !important; }
+  .mescreations-immersion__slider .product-category { font-size: 0.65rem; margin-bottom: 0.25rem; }
+  .mescreations-immersion__slider .price-from { font-size: 0.7rem; }
+  .mescreations-immersion__slider .price-value { font-size: 1.05rem; }
+  .mescreations-immersion__slider .product-actions { margin-bottom: 0.6rem; }
+  .mescreations-immersion__slider .btn-view { font-size: 0.68rem; }
+}
+
+/* Écrans peu hauts (large + bas) : on compacte pour que texte + cards + hint
+   tiennent dans les 100vh sans se chevaucher (l'info des cards est en px fixe,
+   donc proportionnellement haute quand le viewport est court). */
+@media (max-height: 840px) {
+  .mescreations-immersion__phrase { font-size: clamp(1.4rem, 2.6vw, 2.05rem); }
+  .mescreations-immersion__inner { gap: 12px; }
+  .mescreations-immersion__describe { margin-top: 2px; padding: 9px 20px; font-size: 13px; }
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 23vh; }
+  .mescreations-immersion__selection { bottom: calc(7vh + var(--safe-bottom)); }
+}
+@media (max-height: 700px) {
+  .mescreations-immersion__phrase { font-size: clamp(1.2rem, 2.3vw, 1.75rem); }
+  .mescreations-immersion__slider .product-card-cinetique .product-media { height: 17vh; }
+  .mescreations-immersion__selection { bottom: calc(6vh + var(--safe-bottom)); }
+  .mescreations-immersion__describe { font-size: 12.5px; padding: 8px 18px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LOT A — MODÈLE À ZONES (mobile). Proposition de Robin, 25/08/2026.
+   ──────────────────────────────────────────────────────────────────────────
+   AVANT : les trois blocs du hero étaient PUNAISÉS indépendamment, chacun à
+   une distance du bas mesurée à la main (10vh / 8vh / 7vh / 6vh selon
+   l'écran, 24px pour l'indice). Aucun ne connaissait l'existence des autres →
+   dès que l'écran rétrécissait, deux punaises se rapprochaient jusqu'au
+   chevauchement, et rien dans le système ne pouvait l'empêcher. Les quatre
+   valeurs successives n'étaient pas quatre réglages mais quatre tentatives de
+   deviner la bonne distance.
+
+   APRÈS : les trois zones se PARTAGENT une hauteur. Deux zones qui se
+   partagent une hauteur ne peuvent pas se chevaucher — c'est structurel, ce
+   n'est plus un réglage.
+
+   ⚠️ CE BLOC DOIT RESTER LE DERNIER DU FICHIER. Les blocs @media
+   (max-height: 840px / 700px) juste au-dessus redéclarent __phrase{font-size},
+   __inner{gap} et __selection{bottom} À SPÉCIFICITÉ ÉGALE, et surtout SANS
+   borne de largeur : un petit téléphone en paysage les matche ET matche
+   `max-width: 768px`. Une media query n'ajoutant pas de spécificité, c'est le
+   plus BAS dans le fichier qui gagne. Remonté ailleurs, ce bloc serait
+   silencieusement écrasé, précisément dans le cas le plus contraint.
+
+   ⚠️ ON NEUTRALISE, ON NE SUPPRIME JAMAIS. Les `bottom:` et les hauteurs `vh`
+   qui subsistent dans les règles de base sont désormais inertes (neutralisés
+   là-haut). Les retirer est un nettoyage à part, à faire une fois la recette
+   desktop validée — pas au milieu d'une refonte.
+
+   ⚠️ CE BLOC NE PORTE QUE LES DIFFÉRENCES DU MOBILE. Le modèle à zones
+   lui-même (couche, flux, chaîne de hauteurs des cards) est en RÈGLE DE BASE
+   depuis l'extension au desktop. Ne rien y redupliquer : deux copies d'une
+   même règle finissent toujours par diverger.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  .mescreations-immersion__layer {
+    /* Header plus bas en mobile. ⇦ à garder en phase avec le `top` de la zone 1. */
+    padding-top: 64px;
+    /* Le carrousel et l'indice sont calés EN BAS. L'espace libre tombe donc en
+       haut, là où flotte la zone 1 (hors flux en mobile) — c'est ce qui fait
+       que le carrousel « s'affiche entièrement » quelle que soit la taille
+       d'écran. En desktop la zone 1 reste dans le flux, donc pas de flex-end. */
+    -webkit-box-pack: end;
+    -ms-flex-pack: end;
+    justify-content: flex-end;
+  }
+
+  /* ── ZONE 1 — pill + phrase + bouton : ELLE SORT DE L'ÉCRAN AU SCROLL ──
+     Proposition de Robin (25/08) : « le scroll fait carrément sortir le
+     conteneur du haut plutôt que le réduire ».
+     Elle SIMPLIFIE le système au lieu de le compliquer, et c'est ce qui la
+     rend meilleure : un bloc qui s'en va n'a plus besoin de rétrécir. Trois
+     réglages disparaissent d'un coup — l'agrandissement au repos (`scale`),
+     le bridage de largeur qui compensait son débordement, et le décalage
+     `--imm-a-drop` qui devait le recentrer. Le texte est simplement centré
+     dans l'espace disponible, puis il s'en va.
+
+     Hors flux (`position: absolute`), donc il ne prend AUCUNE place au
+     carrousel : celui-ci est servi le premier et occupe tout le bas.
+     ⚠️ Aucun risque de chevauchement pour autant : le bloc est BORNÉ par
+     `top` ET `bottom`, donc il ne peut pas descendre sur l'indice, et son
+     `overflow: hidden` coupe un texte trop long au lieu de le laisser pousser.
+
+     `translateY(--reveal * -100%)` : le `-100%` se rapporte à la HAUTEUR DE
+     L'ÉLÉMENT LUI-MÊME, pas à l'écran. La sortie est donc exactement de ce
+     qu'il faut, et elle s'adapte seule à chaque taille d'écran — c'est la
+     demande de Robin (« ça dépendra donc de la taille de l'écran ») obtenue
+     sans mesurer quoi que ce soit en JS.
+     Le fondu évite qu'il ne survole le carrousel pendant la traversée. */
+  .mescreations-immersion__inner {
+    position: absolute;
+    top: 64px;      /* sous le header, comme le padding de la couche */
+    bottom: 52px;   /* = hauteur de la bande d'indice (34 + 18) */
+    left: 0;
+    right: 0;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    overflow: hidden;
+    -webkit-transform: translateY(calc(var(--reveal) * -100%));
+    transform: translateY(calc(var(--reveal) * -100%));
+    opacity: clamp(0, calc(1 - var(--reveal) * 1.7), 1);
+    /* Transféré sur la couche : on n'empile pas deux calques promus imbriqués. */
+    will-change: auto;
+    gap: clamp(8px, 1.8svh, 20px);
+  }
+
+  /* La phrase est dimensionnée sur la HAUTEUR d'écran, pas sur la largeur :
+     c'est la hauteur qui est la ressource rare. L'ancien clamp en `vw`
+     produisait un texte grand sur un budget nul (écran large et bas).
+     Elle peut être plus généreuse depuis que la zone 1 s'en va : elle n'a plus
+     à cohabiter avec le carrousel, seulement à tenir dans l'écran A. */
+  .mescreations-immersion__phrase {
+    font-size: clamp(1.05rem, 3.1svh, 1.9rem);
+    line-height: 1.3;
+    overflow: hidden;
+  }
+
+  /* ── ZONE 3 — le carrousel : IL OCCUPE TOUT, son bloc est CENTRÉ ──────
+     Demande de Robin (recette du 25/08) : « pourquoi c'est la hauteur du
+     carrousel qui dépend de la longueur du texte et pas l'inverse ? » puis,
+     une fois la zone 1 sortie de l'écran : « il faut centrer le carrousel et
+     lui faire occuper l'espace ».
+     La zone 1 étant hors flux, la question ne se pose plus : le carrousel a
+     TOUT l'espace, et son bloc (titre + cards) y est centré. La longueur du
+     conseil n'a plus aucun effet sur la taille des photos. */
+  .mescreations-immersion__selection {
+    position: relative;
+    bottom: auto;
+    /* La zone 1 étant hors flux, le carrousel occupe TOUT l'espace libre, et
+       son bloc (titre + cards) y est CENTRÉ. Plus aucune hauteur réglée à la
+       main : `--imm-selection-h` a disparu. C'est désormais le RAPPORT DE
+       FORME de la photo qui décide de la taille des cards (voir plus bas) —
+       un réglage qui se voit à l'œil au lieu d'un pourcentage d'écran. */
+    -webkit-box-flex: 1;
+    -ms-flex: 1 1 auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    /* Marge de sécurité en haut. L'aération du bloc ne se règle plus ici :
+       elle vient du centrage (`justify-content: center`) et de la hauteur des
+       cards, elle-même donnée par le rapport de forme de la photo. */
+    padding-top: clamp(6px, 1.4svh, 14px);
+  }
+  .mescreations-immersion__selection-head {
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    margin-bottom: clamp(6px, 1.2svh, 14px);
+  }
+  /* Le bloc des cards est dimensionné par son CONTENU (donc par le rapport de
+     forme de la photo), pas par la zone : c'est ce qui permet de le centrer.
+     `flex: 0 1 auto` + `min-height: 0` : il ne grandit pas, mais il PEUT
+     rétrécir si l'écran est trop court — la photo cède alors sur sa hauteur
+     plutôt que la card de déborder. */
+  .mescreations-immersion__slider-wrap {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    /* stretch : toutes les cards s'alignent sur la plus haute (un nom qui
+       passe sur deux lignes ne décale pas ses voisines). Les flèches sont en
+       absolu en mobile, elles ne s'étirent pas. */
+    -webkit-box-align: stretch;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+  }
+  .mescreations-immersion__slider { height: auto; max-height: 100%; }
+
+  /* En mobile la card n'est PAS étirée à la zone : sa hauteur vient du rapport
+     de forme de la photo, ce qui permet de centrer le bloc. (La mise en flex
+     de la card et du lien est en règle de base, ne pas la redupliquer ici.) */
+  .mescreations-immersion__slider .product-card-cinetique {
+    height: auto;
+    max-height: 100%;
+  }
+  /* ⇦ LE RÉGLAGE DE LA TAILLE DES CARDS EN MOBILE, et le seul.
+     La hauteur de la photo dépend de la HAUTEUR de l'écran (`49svh`), bornée
+     par sa LARGEUR (`101vw`) — les trois valeurs du `clamp()` se lisent ainsi :
+
+       clamp(  60px  ,  49svh  ,  101vw  )
+              ↑         ↑          ↑
+              |         |          └─ PLAFOND DE FORME. La card fait 76vw de
+              |         |             large ; 76 × 4/3 = 101, donc la photo ne
+              |         |             peut jamais devenir plus haute qu'un
+              |         |             format 3/4. Sans ce plafond, un écran
+              |         |             étroit et haut la transformerait en bande
+              |         |             verticale : une vue de pièce y serait
+              |         |             recadrée en fente et le luminaire
+              |         |             sortirait du cadre.
+              |         └─ LA TAILLE VOULUE. 49 % de la hauteur d'écran = les
+              |            370px actuels sur un iPhone de 752. C'est CE chiffre
+              |            qu'on touche pour agrandir ou réduire les cards.
+              └─ Plancher absolu, pour que la photo ne disparaisse jamais.
+
+     Demande de Robin : « en mobile, il faudrait que la hauteur des cartes
+     dépende aussi de la hauteur de l'écran ». C'était le cas en desktop
+     (le carrousel y absorbe l'espace restant) mais pas en mobile, où la
+     hauteur ne venait que de la largeur via un rapport de forme — sur un
+     téléphone plus haut, l'espace en trop devenait de l'air.
+     On ne pouvait pas pour autant faire remplir la card comme en desktop :
+     c'est justement ce qui produit la bande verticale. D'où le plafond.
+
+     Pourquoi pas un carré (décision Robin, après calcul) : une photo carrée ne
+     peut pas être plus haute que la card n'est LARGE, et la largeur est
+     plafonnée par l'écran — elle serait plus PETITE qu'avant. Photo carrée +
+     grande + aperçu de la card suivante : il faut en abandonner un des trois.
+     ⚠️ `101vw` est LIÉ au `76vw` de la largeur de card : si l'un change,
+     l'autre doit suivre (largeur × 4/3).
+     `flex: 0 1 auto` + `min-height` : filet ultime sur écran très court, la
+     photo cède avant que la card ne déborde. Nom et prix restent visibles. */
+  .mescreations-immersion__slider .product-card-cinetique .product-media {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    aspect-ratio: auto;
+    height: clamp(60px, 49svh, 101vw);
+    min-height: 60px;
+  }
+  /* ── Carrousel PLEINE LARGEUR, card active CENTRÉE (retour Robin) ──────
+     Les cards sont coupées par le bord de l'écran, de façon symétrique.
+     ⚠️ TOUT EST EN `vw`, PAS EN `%`, ET C'EST OBLIGATOIRE. Un `flex-basis` en
+     % se calcule sur la BOÎTE DE CONTENU du slider (donc padding déduit),
+     alors qu'un padding en % se calcule sur la largeur du parent. Les deux ne
+     se rapportent pas à la même référence : en %, `12 + 76 + 12` ne ferait
+     PAS 100. En `vw`, tout se rapporte à l'écran et l'addition tombe juste.
+     ⇦ Les trois valeurs doivent toujours faire 100 : 12 + 76 + 12.
+     Élargir la card (76 → 80) agrandit la photo mais rétrécit d'autant les
+     morceaux visibles sur les côtés — c'est le même arbitrage qu'avant.
+     Le padding latéral est ce qui permet à la PREMIÈRE et à la DERNIÈRE card
+     de venir au centre : sans lui, elles resteraient collées à leur bord. */
+  .mescreations-immersion__selection {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  /* Le titre, lui, garde ses marges — c'est du texte, pas une image. */
+  .mescreations-immersion__selection-head { padding: 0 16px; }
+  .mescreations-immersion__slider {
+    padding-left: 12vw;
+    padding-right: 12vw;
+    scroll-padding-left: 0;
+  }
+  .mescreations-immersion__slider .product-card-cinetique,
+  .mescreations-immersion__pcard--sur {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 76vw;
+    flex: 0 0 76vw;
+    /* `center` (et non `start`) : c'est ce mot que le JS lit pour savoir qu'il
+       doit viser le centre quand on clique sur une flèche. */
+    scroll-snap-align: center;
+  }
+
+  /* ── Rééquilibrage du texte des cards (retour Robin, 25/08) ────────────
+     Tout ce qu'on gagne ici part directement dans la PHOTO, puisque celle-ci
+     absorbe l'espace restant.
+     1. Le bouton « Découvrir » est MASQUÉ en mobile : `product-actions` est À
+        L'INTÉRIEUR du `<a class="product-card-link">` qui enveloppe toute la
+        card, donc taper n'importe où ouvrait déjà la fiche. Vérifié dans
+        sapi_immersion_render_product_card(). ~45px rendus à la photo.
+     2. Hiérarchie inversée : le NOM (11,5px) était plus petit que le PRIX
+        (16,8px). C'est le nom qu'on vend, pas le chiffre.
+     3. Le grand vide au-dessus du prix venait de `.product-card-cinetique
+        .product-price { margin-top: auto }` (règle de base) : `.product-info`
+        étant en flex-colonne avec `flex: 1`, ce `auto` poussait le prix tout
+        en bas de la zone texte.
+     ⚠️ `!important` sur .product-name : la règle desktop en porte un ; à
+     spécificité égale, seul un `!important` plus BAS dans le fichier gagne. */
+  .mescreations-immersion__slider .product-actions { display: none; }
+  .mescreations-immersion__slider .product-info { padding: 0.5rem 0.5rem 0.7rem; }
+  .mescreations-immersion__slider .product-name { font-size: 0.95rem !important; }
+  .mescreations-immersion__slider .product-category { font-size: 0.68rem; margin-bottom: 0.15rem; }
+  .mescreations-immersion__slider .product-price { margin-top: 0; gap: 0.3rem; }
+  .mescreations-immersion__slider .price-from { font-size: 0.62rem; }
+  .mescreations-immersion__slider .price-value { font-size: 0.9rem; }
+
+  /* ── ZONE 2 — l'indice, en bas, hauteur RÉSERVÉE ──────────────────────
+     ⚠️ `position: relative` OBLIGATOIRE (et non `static`) : les DEUX indices
+     sont en `position: absolute` à l'intérieur. En `static`, ils se
+     résoudraient contre .mescreations-immersion et repartiraient se coller au
+     bas du hero — on réintroduirait exactement le chevron coupé sous la barre
+     d'adresse, corrigé en 1ʳᵉ passe.
+     La hauteur explicite est ce qui fait que la zone RÉSERVE sa place : sans
+     elle, des enfants absolus ne mesurant rien, elle ne vaudrait que son
+     padding. */
+  .mescreations-immersion__scrollhint {
+    position: relative;
+    bottom: auto;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 auto;
+    flex: 0 0 auto;
+    /* Bande resserrée (retour Robin) : chaque pixel rendu ici part dans la
+       photo des cards, la zone 3 ayant une hauteur fixe et la photo absorbant
+       le reste. On ne descend pas plus bas : le chevron doit rester touchable. */
+    height: 34px;
+    margin-bottom: 18px;
+  }
+  .mescreations-immersion__hint { gap: 2px; }
+  .mescreations-immersion__hint svg { width: 15px; height: 15px; }
+
+  /* ── Bouton « Décrire mon projet » : moins large, moins imposant ────────
+     Il s'étalait d'un bord à l'autre de l'écran. C'est un effet de bord du
+     carrousel pleine largeur : la zone sélection a perdu ses marges latérales
+     pour que les cards soient coupées par les bords, et le bouton, qui vit
+     dans cette zone, les a perdues avec.
+     ⇦ `76vw` n'est pas un chiffre au hasard : c'est EXACTEMENT la largeur des
+     cards. Le bouton s'aligne donc sur la card active, ce qui se voit à
+     l'œil. Garder les deux en phase si l'un des deux change.
+     Taille de texte et rembourrage réduits d'un cran au passage : c'est
+     l'action secondaire, elle ne doit pas peser autant que la sélection. */
+  .mescreations-immersion__describe {
+    max-width: 76vw;
+    padding: 9px 18px;
+    font-size: 12.5px;
+    gap: 8px;
+  }
+  .mescreations-immersion__describe svg { width: 15px; height: 15px; }
 }

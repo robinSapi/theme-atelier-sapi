@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup 17 — Citation sur photo de Robin pleine page — Atelier Sâpi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#8B7355; --wood-dark:#4A3F35; --orange:#E35B24; --cream:#FBF6EA; --ink:#3a322b; --border:#e7ded2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Montserrat',sans-serif;color:var(--ink);background:#fff;line-height:1.55}
+
+  .devnote{background:var(--wood-dark);color:#f0e7d8;font-size:12px;text-align:center;padding:8px 14px}
+  .devnote b{color:#fff}
+  .controls{display:flex;justify-content:center;gap:10px;padding:14px;flex-wrap:wrap;background:#faf8f4;border-bottom:1px solid var(--border)}
+  .controls button{border:1px solid var(--border);background:#fff;color:var(--wood-dark);border-radius:50px;padding:9px 18px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+  .controls button.on{border-color:var(--orange);color:var(--orange)}
+
+  .quote-band{position:relative;min-height:72vh;display:flex;align-items:center;overflow:hidden}
+  .quote-band .bg{position:absolute;inset:0;background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/05/Robin-Sapi-A.jpg');background-size:cover;background-position:center 30%}
+  .quote-band .scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(31,24,18,.72) 0%,rgba(31,24,18,.45) 50%,rgba(31,24,18,.2) 100%);transition:background .4s}
+  .quote-band.center .scrim{background:linear-gradient(180deg,rgba(31,24,18,.35) 0%,rgba(31,24,18,.55) 60%,rgba(31,24,18,.7) 100%)}
+  .quote-inner{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:80px 48px;width:100%}
+  .quote-band.center .quote-inner{text-align:center;max-width:880px}
+
+  .q-mark{font-family:'Square Peg';font-size:96px;color:var(--orange);line-height:.5;display:block;margin-bottom:6px}
+  .q-text{font-family:'Square Peg';font-weight:400;font-size:clamp(2.4rem,4.6vw,4rem);line-height:1.04;color:#fff;max-width:620px;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+  .quote-band.center .q-text{max-width:none}
+  .q-sig{display:flex;align-items:center;gap:14px;margin-top:30px}
+  .quote-band.center .q-sig{justify-content:center}
+  .q-sig .who{color:#f3e9dc}
+  .q-sig .who b{display:block;font-size:14px;font-weight:600;color:#fff}
+  .q-sig .who span{font-size:12px;opacity:.85}
+  .q-links{display:flex;gap:22px;margin-top:26px;flex-wrap:wrap}
+  .quote-band.center .q-links{justify-content:center}
+  .q-links a{font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+  .q-links .l1{color:#fff;background:var(--orange);border-radius:50px;padding:12px 24px}
+  .q-links .l2{color:#f3e9dc;border-bottom:1px solid rgba(243,233,220,.5);padding-bottom:2px}
+  .q-links .l2:hover{color:#fff}
+
+  .after{padding:40px 24px;text-align:center;font-size:12.5px;color:#937D68;background:#fff}
+  .after b{color:#4A3F35}
+
+  .map-card{position:absolute;right:42px;bottom:36px;z-index:3;width:280px;background:rgba(255,255,255,.96);border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+  .map-card .mmap{position:relative;height:104px;background:#F5EFE4;overflow:hidden}
+  .map-card .mmap svg.roads{position:absolute;inset:0;width:100%;height:100%}
+  .map-card .pin{position:absolute;left:50%;top:60%;width:28px;height:28px;transform:translate(-50%,-100%)}
+  .map-card .pin::after{content:"";position:absolute;left:50%;top:50%;width:8px;height:8px;background:rgba(227,91,36,.35);border-radius:50%;transform:translate(-50%,-50%);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(227,91,36,.35)}70%{box-shadow:0 0 0 14px rgba(227,91,36,0)}100%{box-shadow:0 0 0 0 rgba(227,91,36,0)}}
+  .map-card .minfo{padding:12px 14px}
+  .map-card .minfo .t{font-size:13.5px;font-weight:600;color:#4A3F35}
+  .map-card .minfo .s{font-size:11px;color:#937D68;margin:3px 0 8px}
+  .map-card .minfo .itin{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#E35B24;text-decoration:none}
+  @media(max-width:900px){
+    .map-card{position:relative;right:auto;bottom:auto;margin:30px auto 0;}
+    .quote-band{padding-bottom:50px}
+  }
+  @media(max-width:700px){
+    .quote-band{min-height:78vh}
+    .quote-inner{padding:60px 22px}
+    .q-mark{font-size:70px}
+  }
+</style>
+</head>
+<body>
+
+<div class="devnote">Maquette d'intention — <b>citation sur photo de Robin pleine page</b> · la photo actuelle est PROVISOIRE (remplacée par ta nouvelle photo) · 2 dispositions à comparer ci-dessous</div>
+<div class="controls">
+  <button id="bLeft" class="on">Disposition A — citation à gauche, photo lisible à droite</button>
+  <button id="bCenter">Disposition B — citation centrée, voile bas</button>
+</div>
+
+<section class="quote-band" id="band">
+  <div class="bg"></div>
+  <div class="scrim"></div>
+  <div class="quote-inner">
+    <span class="q-mark">«</span>
+    <div class="q-text">Éclairer une pièce, c'est un peu comme choisir la bonne sauce pour ses pâtes : tout est une question de préférence et de dosage !</div>
+    <div class="q-sig">
+      <div class="who"><b>Robin</b><span>artisan de l'Atelier Sâpi · Lyon</span></div>
+    </div>
+    <div class="q-links">
+      <a class="l1" href="#">Les conseils de Robin</a>
+      <a class="l2" href="#">Faire connaissance →</a>
+    </div>
+  </div>
+
+  <div class="map-card">
+    <div class="mmap">
+      <svg class="roads" viewBox="0 0 280 104" preserveAspectRatio="none"><path d="M0 70 C56 62 84 84 140 76 S224 52 280 62" stroke="#DECDAF" stroke-width="6" fill="none"/><path d="M38 0 C46 36 32 70 50 104" stroke="#E8DCC8" stroke-width="4" fill="none"/><path d="M0 26 C74 33 168 22 280 30" stroke="#E8DCC8" stroke-width="3.5" fill="none"/><path d="M196 0 C187 44 210 78 200 104" stroke="#DECDAF" stroke-width="4" fill="none"/></svg>
+      <svg class="pin" viewBox="0 0 24 24" fill="#E35B24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3" fill="#fff"/></svg>
+    </div>
+    <div class="minfo">
+      <div class="t">Venir me voir à l'atelier</div>
+      <div class="s">Collonges-au-Mont-d'Or, à 15 min de Lyon · sur rendez-vous</div>
+      <a class="itin" href="https://maps.app.goo.gl/a3MiaeoG3ySfyUQT9" target="_blank" rel="noopener noreferrer">Itinéraire <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 5l7 7-7 7"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<div class="after">
+  <b>Où elle vit :</b> cette bande remplace la card « Conseil » du bento divers (qui ne garde plus que Carte cadeau + Flash actu),
+  et la card carte P12 vit ICI, posée sur la bande (plus besoin de la mettre dans le bento).
+  Position proposée : entre « Ils en parlent » et le bento, pour enchaîner preuve sociale → visage de l'artisan → le lieu.
+  Le CTA orange reprend le lien des conseils éclairés, le lien discret va vers la page Artisan, la card carte vers Google Maps.
+</div>
+
+<script>
+  var band = document.getElementById('band');
+  var bl = document.getElementById('bLeft');
+  var bc = document.getElementById('bCenter');
+  bl.addEventListener('click', function(){ band.classList.remove('center'); bl.classList.add('on'); bc.classList.remove('on'); });
+  bc.addEventListener('click', function(){ band.classList.add('center'); bc.classList.add('on'); bl.classList.remove('on'); });
+</script>
+</body>
+</html>

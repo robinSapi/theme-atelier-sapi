@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA Home · 04b L'atelier — NOUVELLES directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-wood:#8B7355;--color-wood-dark:#4A3F35;--color-wood-mid:#6B5A4A;
+  --color-warm:#FBF6EA;--color-orange:#E35B24;--color-ink:#3a322b;
+  --shadow-card:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+  --shadow-hover:0 4px 14px rgba(147,125,104,.16),0 12px 44px rgba(147,125,104,.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:#efe9dc;color:var(--color-ink);line-height:1.55}
+.devnote{background:var(--color-wood-dark);color:var(--color-warm);padding:14px 28px;font-size:13px}
+.devnote strong{color:#fff}.devnote em{color:#e9c9a8;font-style:normal}
+.wrap{max-width:1400px;margin:0 auto;padding:48px 24px 90px}
+.variant-head{margin:64px 0 18px}
+.variant-head:first-of-type{margin-top:8px}
+.variant-head .tag{display:inline-block;background:var(--color-wood);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:50px}
+.variant-head .tag.alt{background:var(--color-orange)}
+.variant-head h2{font-family:'Square Peg',cursive;font-size:42px;color:var(--color-wood-dark);font-weight:400;margin-top:8px;line-height:1}
+.variant-head p{max-width:880px;color:var(--color-wood-mid);font-size:14.5px;margin-top:6px}
+.note{font-size:13px;color:var(--color-wood-mid);background:#fff;border-left:3px solid var(--color-wood);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:18px;max-width:1040px}
+
+/* eyebrow + heading shared */
+.eyebrow{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.cta{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:15px;border-radius:50px;padding:14px 30px;text-decoration:none;transition:.22s}
+.cta .arr{transition:transform .25s}
+.cta:hover .arr{transform:translateX(4px)}
+.cta-wood{background:var(--color-wood);color:#fff}.cta-wood:hover{background:var(--color-wood-dark)}
+.cta-orange{background:var(--color-orange);color:#fff}.cta-orange:hover{background:#c84d1c}
+.cta-white{background:#fff;color:var(--color-wood-dark)}.cta-white:hover{background:#f3ead9}
+
+/* SEO mesh shared */
+.seo-mesh{display:flex;flex-wrap:wrap;gap:10px}
+.seo-mesh a{font-size:13.5px;text-decoration:none;border-radius:50px;padding:8px 18px;transition:.2s}
+.seo-mesh.onDark a{color:#f3ead9;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22)}
+.seo-mesh.onDark a:hover{background:var(--color-orange);border-color:var(--color-orange);color:#fff}
+
+/* =========================================================
+   VARIANTE C — IMMERSION PAR LA LUMIÈRE
+   Fond = luminaire ALLUMÉ plein cadre. Dégradé latéral sombre
+   franc → colonne lisible nette à gauche. Process en ruban bas.
+   ========================================================= */
+.lumiere{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);min-height:600px;display:flex;align-items:stretch}
+.lumiere .bg{position:absolute;inset:0;background:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Vincent-Ambiance3-1536x1237.jpg') center/cover}
+/* dégradé FRANC : colonne quasi opaque à gauche, photo nette à droite */
+.lumiere .veil{position:absolute;inset:0;background:linear-gradient(95deg,rgba(40,33,27,.94) 0%,rgba(40,33,27,.9) 34%,rgba(40,33,27,.55) 52%,rgba(40,33,27,.12) 74%,rgba(40,33,27,0) 100%)}
+.lumiere .col{position:relative;z-index:2;width:50%;padding:58px 56px;display:flex;flex-direction:column;justify-content:center;color:#fff}
+.lumiere .eyebrow{color:#f0b07e}
+.lumiere h3{font-family:'Square Peg',cursive;font-size:64px;font-weight:400;line-height:.92;color:#fff;margin:8px 0 16px}
+.lumiere p{font-size:16px;color:#ece3d6;max-width:430px;margin-bottom:22px}
+.lumiere .seo-mesh{margin-bottom:26px}
+.lumiere .process-strip{position:absolute;z-index:2;right:30px;bottom:26px;display:flex;gap:10px}
+.lumiere .ps{display:flex;align-items:center;gap:9px;background:rgba(40,33,27,.62);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.18);border-radius:50px;padding:8px 16px 8px 8px}
+.lumiere .ps .n{width:26px;height:26px;border-radius:50%;background:var(--color-orange);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.lumiere .ps .t{color:#f3ead9;font-size:12.5px;font-weight:600;letter-spacing:.02em}
+
+/* =========================================================
+   VARIANTE D — SPLIT ÉDITORIAL
+   Moitié image immersive (geste) | moitié panneau bois sombre
+   FRANC qui porte tout le texte. Process en ruban DESSOUS.
+   ========================================================= */
+.split{display:grid;grid-template-columns:1fr 1fr;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);min-height:480px}
+.split .img{position:relative;overflow:hidden}
+.split .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* léger glow chaud bas pour relier au reste, mais l'image reste nette */
+.split .img::after{content:"";position:absolute;inset:0;background:linear-gradient(to right,transparent 70%,rgba(40,33,27,.25) 100%)}
+.split .panel{background:var(--color-wood-dark);padding:56px 52px;display:flex;flex-direction:column;justify-content:center;color:#fff}
+.split .panel .eyebrow{color:#e0a878}
+.split .panel h3{font-family:'Square Peg',cursive;font-size:60px;font-weight:400;line-height:.92;color:#fff;margin:8px 0 16px}
+.split .panel p{font-size:15.5px;color:#e7ddcf;max-width:440px;margin-bottom:22px}
+.split .panel .seo-mesh{margin-bottom:26px}
+.split-process{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
+.split-process .pc{position:relative;border-radius:14px;overflow:hidden;height:150px;box-shadow:var(--shadow-card)}
+.split-process .pc img{width:100%;height:100%;object-fit:cover}
+.split-process .pc::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(40,33,27,.7),transparent 55%)}
+.split-process .pc .lab{position:absolute;left:14px;bottom:11px;z-index:2;color:#fff}
+.split-process .pc .lab .n{font-size:11px;font-weight:700;letter-spacing:.1em;color:#ffcfa3}
+.split-process .pc .lab .t{font-size:13.5px;font-weight:600;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+
+/* =========================================================
+   VARIANTE E — IMMERSION PAR LA MATIÈRE
+   Fond bois sombre + macro de bois en bandeau immersif +
+   2 médaillons de geste. Texte sur bois sombre FRANC.
+   ========================================================= */
+.matiere{position:relative;border-radius:20px;overflow:hidden;box-shadow:var(--shadow-card);background:var(--color-wood-dark)}
+/* bandeau matière immersif en haut : macro bois découpé, plein cadre */
+.matiere .hero-mat{position:relative;height:260px;overflow:hidden}
+.matiere .hero-mat img{width:100%;height:100%;object-fit:cover;object-position:center 60%}
+.matiere .hero-mat::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(40,33,27,.15) 0%,rgba(40,33,27,.55) 70%,var(--color-wood-dark) 100%)}
+.matiere .hero-mat .float-eyebrow{position:absolute;left:52px;top:28px;z-index:2;color:#fff;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;text-shadow:0 1px 10px rgba(0,0,0,.6)}
+.matiere .body{display:grid;grid-template-columns:1.25fr .9fr;gap:44px;padding:40px 52px 52px;align-items:center;margin-top:-40px;position:relative;z-index:2}
+.matiere h3{font-family:'Square Peg',cursive;font-size:62px;font-weight:400;line-height:.92;color:#fff;margin:0 0 16px}
+.matiere p{font-size:15.5px;color:#e7ddcf;max-width:470px;margin-bottom:22px}
+.matiere .seo-mesh{margin-bottom:26px}
+.matiere .medallions{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.matiere .med{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:1/1;box-shadow:0 8px 26px rgba(0,0,0,.35)}
+.matiere .med img{width:100%;height:100%;object-fit:cover}
+.matiere .med::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(40,33,27,.65),transparent 50%)}
+.matiere .med .lab{position:absolute;left:12px;bottom:10px;z-index:2;color:#fff;font-size:12px;font-weight:600;letter-spacing:.02em;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.matiere .med.tall{grid-column:1/-1;aspect-ratio:auto;height:150px}
+</style>
+</head>
+<body>
+<div class="devnote"><strong>DA HOME · Section 04 — L'atelier · NOUVELLES directions (04b)</strong> &nbsp;·&nbsp; <em>Robin a refusé A (« textes invisibles ») et B (« on n'a plus assez d'images d'atelier, l'idée était l'immersion »). Problème à résoudre : créer l'IMMERSION artisanale SANS dépendre d'un beau reportage d'atelier, et garder le texte PARFAITEMENT lisible. 3 directions ci-dessous. Toutes gardent : titre « Des sculptures lumineuses », maillage SEO (4 liens), un CTA, le process. Photos provisoires (vraies images test).</em></div>
+
+<div class="wrap">
+
+  <!-- ============ VARIANTE C ============ -->
+  <div class="variant-head">
+    <span class="tag alt">Variante C · reco</span>
+    <h2>Immersion par la lumière</h2>
+    <p><strong>Intention :</strong> l'immersion ne vient plus de l'atelier mais de la LUMIÈRE. Grand luminaire allumé en ambiance plein cadre (lueur chaude, ombres projetées sur le bois) : c'est ça, le « waouh ». Un dégradé sombre franc crée une colonne quasi opaque à gauche, donc le texte est lisible à 100 % pendant que la photo reste nette à droite. Le process devient un ruban discret de pastilles posé sur l'image. Zéro dépendance à une photo d'établi.</p>
+  </div>
+  <section class="lumiere">
+    <div class="bg"></div><div class="veil"></div>
+    <div class="col">
+      <div class="eyebrow">L'atelier · Lyon</div>
+      <h3>Des sculptures lumineuses</h3>
+      <p>Je ne vends pas des lampes, je façonne des objets qui s'allument. Chaque luminaire est dessiné, découpé au laser puis assemblé pièce par pièce dans mon atelier, à 15 min de Lyon. La lumière que tu vois ici, je l'ai réglée à la main avant de te l'envoyer.</p>
+      <div class="seo-mesh onDark">
+        <a href="#">Suspensions</a><a href="#">Lampes à poser</a><a href="#">Lampadaires</a><a href="#">Appliques</a>
+      </div>
+      <a class="cta cta-orange" href="#">Découvrir l'atelier <span class="arr">→</span></a>
+    </div>
+    <div class="process-strip">
+      <div class="ps"><span class="n">1</span><span class="t">Je dessine</span></div>
+      <div class="ps"><span class="n">2</span><span class="t">Je découpe</span></div>
+      <div class="ps"><span class="n">3</span><span class="t">J'assemble</span></div>
+      <div class="ps"><span class="n">4</span><span class="t">J'allume</span></div>
+    </div>
+  </section>
+  <div class="note">La photo allumée porte toute la chaleur, le dégradé franc règle l'échec de la variante A (lisibilité). Le ruban process reste léger pour ne pas charger l'image. Marche avec n'importe quelle belle ambiance produit, sans photo d'atelier.</div>
+
+  <!-- ============ VARIANTE D ============ -->
+  <div class="variant-head">
+    <span class="tag">Variante D</span>
+    <h2>Split éditorial</h2>
+    <p><strong>Intention :</strong> contraste net = lisibilité garantie. Moitié gauche = une image immersive d'un geste (ici le ponçage, mains + matière). Moitié droite = un panneau bois sombre PLEIN, franc, qui porte le titre Square Peg, le texte, les 4 liens catégories et le CTA. Aucun texte posé sur une photo. Le process passe en ruban de 4 vignettes dessous. On garde l'immersion (la grande image) sans jamais sacrifier la lecture.</p>
+  </div>
+  <section>
+    <div class="split">
+      <div class="img"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Poncage-1536x682.jpg" alt="Ponçage du bois à l'atelier"></div>
+      <div class="panel">
+        <div class="eyebrow">L'atelier · Lyon</div>
+        <h3>Des sculptures lumineuses</h3>
+        <p>Je ne vends pas des lampes, je façonne des objets qui s'allument. Le bois, je le choisis, je le découpe au laser, je le ponce et je l'assemble pièce par pièce, à 15 min de Lyon. Chacun part de chez moi allumé une dernière fois.</p>
+        <div class="seo-mesh onDark">
+          <a href="#">Suspensions</a><a href="#">Lampes à poser</a><a href="#">Lampadaires</a><a href="#">Appliques</a>
+        </div>
+        <a class="cta cta-white" href="#">Découvrir l'atelier <span class="arr">→</span></a>
+      </div>
+    </div>
+    <div class="split-process">
+      <div class="pc"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_7638-1024x744.jpg" alt=""><div class="lab"><div class="n">01</div><div class="t">La découpe laser</div></div></div>
+      <div class="pc"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/03/P_SLM_XL_det5.jpg" alt=""><div class="lab"><div class="n">02</div><div class="t">Le détail du bois</div></div></div>
+      <div class="pc"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Poncage-1024x454.jpg" alt=""><div class="lab"><div class="n">03</div><div class="t">L'assemblage</div></div></div>
+      <div class="pc"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Vincent-Ambiance3-1536x1237.jpg" alt=""><div class="lab"><div class="n">04</div><div class="t">L'allumage</div></div></div>
+    </div>
+  </section>
+  <div class="note">Le texte vit sur le bois sombre franc : impossible qu'il devienne illisible. La grande image de geste donne l'immersion, le ruban dessous raconte la fabrication. Si une seule belle photo de geste existe, elle suffit pour la moitié gauche.</div>
+
+  <!-- ============ VARIANTE E ============ -->
+  <div class="variant-head">
+    <span class="tag">Variante E</span>
+    <h2>Immersion par la matière</h2>
+    <p><strong>Intention :</strong> et si l'immersion venait du BOIS lui-même ? Un bandeau macro de bois découpé en plein cadre coiffe la section, fond bois sombre franc dessous. Le texte est posé sur le bois sombre (jamais sur la photo claire), et deux médaillons de geste (laser, détail) suffisent à incarner la main. On crée la sensation tactile « atelier » avec de la matière, pas avec un reportage.</p>
+  </div>
+  <section class="matiere">
+    <div class="hero-mat">
+      <img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/03/P_SLM_XL_det5.jpg" alt="Détail macro du bois découpé">
+      <div class="float-eyebrow">L'atelier · Lyon</div>
+    </div>
+    <div class="body">
+      <div>
+        <h3>Des sculptures lumineuses</h3>
+        <p>Je ne vends pas des lampes, je façonne des objets qui s'allument. Tout commence par cette matière : du bois clair que je dessine, découpe au laser et assemble pièce par pièce dans mon atelier, à 15 min de Lyon.</p>
+        <div class="seo-mesh onDark">
+          <a href="#">Suspensions</a><a href="#">Lampes à poser</a><a href="#">Lampadaires</a><a href="#">Appliques</a>
+        </div>
+        <a class="cta cta-orange" href="#">Découvrir l'atelier <span class="arr">→</span></a>
+      </div>
+      <div class="medallions">
+        <div class="med"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/05/IMG_7638-768x558.jpg" alt=""><div class="lab">La découpe</div></div>
+        <div class="med"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Poncage-768x341.jpg" alt=""><div class="lab">Le ponçage</div></div>
+        <div class="med tall"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2025/09/Vincent-Ambiance3-1536x1237.jpg" alt=""><div class="lab">L'allumage</div></div>
+      </div>
+    </div>
+  </section>
+  <div class="note">L'immersion vient de la texture du bois (le héros = la matière, pas l'établi). Le texte sur bois sombre franc reste impeccablement lisible. Les médaillons sont petits : une ou deux photos de geste « correctes » suffisent, pas besoin d'un reportage soigné.</div>
+
+</div>
+</body>
+</html>

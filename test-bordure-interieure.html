@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test bordure intérieure — Modale Robin</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+  :root {
+    --color-cream: #FEFDFB;
+    --color-warm: #FBF6EA;
+    --color-wood: #937D68;
+    --color-wood-rgb: 147, 125, 104;
+    --color-dark: #323232;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+    padding: 3rem 1rem;
+  }
+
+  h2 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-wood);
+    margin-bottom: 0.5rem;
+  }
+
+  .label {
+    font-size: 0.7rem;
+    color: rgba(147, 125, 104, 0.6);
+    margin-bottom: 1rem;
+  }
+
+  /* ─── Simulation modale ─── */
+  .mock-modal {
+    width: 520px;
+    max-width: 90vw;
+    height: 400px;
+    background: var(--color-cream);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mock-header {
+    padding: 1rem 1.5rem;
+    background: var(--color-warm);
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #fff;
+  }
+  .mock-header span {
+    background: var(--color-wood);
+    padding: 0.3rem 0.75rem;
+    border-radius: 50px;
+  }
+
+  .mock-body {
+    flex: 1;
+    background: var(--color-cream);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: var(--color-wood);
+  }
+
+  /* ─── Test sur fond sombre ─── */
+  .dark-bg {
+    background: var(--color-dark);
+    padding: 3rem;
+    border-radius: 20px;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .dark-bg h2 { color: rgba(255,255,255,0.5); }
+  .dark-bg .label { color: rgba(255,255,255,0.3); }
+
+  /* ═══════════════════════════════════
+     VARIANTE A — Pas de bordure (actuel)
+  ═══════════════════════════════════ */
+  .variant-a {
+    /* rien */
+  }
+
+  /* ═══════════════════════════════════
+     VARIANTE B — Bordure intérieure via box-shadow inset
+  ═══════════════════════════════════ */
+  .variant-b {
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.12),
+      inset 0 0 0 3px var(--color-cream),
+      inset 0 0 0 5px rgba(var(--color-wood-rgb), 0.25);
+  }
+
+  /* ═══════════════════════════════════
+     VARIANTE C — Bordure intérieure via ::after dashed
+  ═══════════════════════════════════ */
+  .variant-c::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 2px dashed rgba(var(--color-wood-rgb), 0.2);
+    border-radius: 16px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* ═══════════════════════════════════
+     VARIANTE D — Bordure intérieure via ::after dashed + plus d'espace
+  ═══════════════════════════════════ */
+  .variant-d::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1.5px dashed rgba(var(--color-wood-rgb), 0.3);
+    border-radius: 14px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* ═══════════════════════════════════
+     VARIANTE E — Double bordure : solide ext + pointillée int
+  ═══════════════════════════════════ */
+  .variant-e {
+    border: 1px solid rgba(var(--color-wood-rgb), 0.1);
+  }
+  .variant-e::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1.5px dashed rgba(var(--color-wood-rgb), 0.2);
+    border-radius: 15px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+</style>
+</head>
+<body>
+
+<h2>Sur fond clair</h2>
+
+<div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
+  <div>
+    <p class="label">A — Sans bordure (actuel)</p>
+    <div class="mock-modal variant-a">
+      <div class="mock-header"><span>Conseil de Robin</span></div>
+      <div class="mock-body">Contenu de la modale</div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label">B — Inset box-shadow (solide)</p>
+    <div class="mock-modal variant-b">
+      <div class="mock-header"><span>Conseil de Robin</span></div>
+      <div class="mock-body">Contenu de la modale</div>
+    </div>
+  </div>
+</div>
+
+<div style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
+  <div>
+    <p class="label">C — ::after dashed 5px</p>
+    <div class="mock-modal variant-c">
+      <div class="mock-header"><span>Conseil de Robin</span></div>
+      <div class="mock-body">Contenu de la modale</div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label">D — ::after dashed 8px (plus aéré)</p>
+    <div class="mock-modal variant-d">
+      <div class="mock-header"><span>Conseil de Robin</span></div>
+      <div class="mock-body">Contenu de la modale</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <p class="label">E — Solide ext + pointillée int</p>
+  <div class="mock-modal variant-e">
+    <div class="mock-header"><span>Conseil de Robin</span></div>
+    <div class="mock-body">Contenu de la modale</div>
+  </div>
+</div>
+
+<h2>Sur fond sombre (overlay)</h2>
+
+<div class="dark-bg">
+  <div>
+    <p class="label">A — Sans bordure</p>
+    <div class="mock-modal variant-a">
+      <div class="mock-header"><span>Conseil de Robin</span></div>
+      <div class="mock-body">Contenu</div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label">C — Dashed 5px</p>
+    <div class="mock-modal variant-c">
+      <div class="mock-header"><span>Conseil de Robin</span></div>
+      <div class="mock-body">Contenu</div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label">D — Dashed 8px</p>
+    <div class="mock-modal variant-d">
+      <div class="mock-header"><span>Conseil de Robin</span></div>
+      <div class="mock-body">Contenu</div>
+    </div>
+  </div>
+
+  <div>
+    <p class="label">E — Solide + dashed</p>
+    <div class="mock-modal variant-e">
+      <div class="mock-header"><span>Conseil de Robin</span></div>
+      <div class="mock-body">Contenu</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

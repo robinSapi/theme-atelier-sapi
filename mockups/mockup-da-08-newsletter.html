@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DA Home · 08 Newsletter — variantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+:root{
+  --color-wood:#8B7355;--color-wood-dark:#4A3F35;--color-wood-mid:#6B5A4A;
+  --color-warm:#FBF6EA;--color-orange:#E35B24;--color-ink:#3a322b;
+  --shadow-card:0 2px 8px rgba(147,125,104,.12),0 6px 28px rgba(147,125,104,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Montserrat',sans-serif;background:#efe9dc;color:var(--color-ink);line-height:1.55}
+.devnote{background:var(--color-wood-dark);color:var(--color-warm);padding:14px 28px;font-size:13px}
+.devnote strong{color:#fff}.devnote em{color:#e9c9a8;font-style:normal}
+.wrap{max-width:1300px;margin:0 auto;padding:48px 24px 80px}
+.variant-head{margin:56px 0 18px}
+.variant-head .tag{display:inline-block;background:var(--color-wood);color:#fff;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:50px}
+.variant-head h2{font-family:'Square Peg',cursive;font-size:40px;color:var(--color-wood-dark);font-weight:400;margin-top:8px}
+.variant-head p{max-width:820px;color:var(--color-wood-mid);font-size:14.5px;margin-top:2px}
+
+/* commun : aéré, calme, vide (différencier de l'atelier dense) */
+.nl{position:relative;border-radius:18px;overflow:hidden;box-shadow:var(--shadow-card);min-height:380px;display:flex;align-items:center;justify-content:center;text-align:center;padding:70px 24px}
+.nl .photo{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(3px);transform:scale(1.06)}
+.nl .inner{position:relative;z-index:3;max-width:560px}
+.nl .eyebrow{font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:12px}
+.nl h3{font-family:'Square Peg',cursive;font-size:50px;font-weight:400;line-height:1;margin-bottom:12px}
+.nl p{font-size:15.5px;margin-bottom:30px}
+.nl-form{display:flex;gap:12px;max-width:480px;margin:0 auto}
+.nl-form input{flex:1;border:none;border-radius:50px;padding:16px 24px;font-family:inherit;font-size:15px}
+.nl-form button{border:none;background:var(--color-orange);color:#fff;font-weight:600;font-size:15px;border-radius:50px;padding:16px 32px;cursor:pointer;white-space:nowrap}
+.nl .fineprint{font-size:12px;margin-top:16px;opacity:.7}
+
+/* Variant A : bois sombre + photo floutée en filigrane */
+.nlA .photo{background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5851-1536x1136.jpg');opacity:.22}
+.nlA{background:var(--color-wood-dark)}
+.nlA .veil{position:absolute;inset:0;background:rgba(74,63,53,.74);z-index:2}
+.nlA .eyebrow{color:#e0a878}
+.nlA h3{color:#fff}
+.nlA p{color:#e7ddcf}
+.nlA .fineprint{color:#d8ccba}
+
+/* Variant B : bois plus chaud/clair (creuse l'écart avec l'atelier sombre) */
+.nlB .photo{background-image:url('https://test.atelier-sapi.fr/wp-content/uploads/2025/04/IMG_5851-1536x1136.jpg');opacity:.16}
+.nlB{background:linear-gradient(135deg,#a98a64,#8B7355)}
+.nlB .veil{position:absolute;inset:0;background:rgba(139,115,85,.55);z-index:2}
+.nlB .eyebrow{color:#ffe7cc}
+.nlB h3{color:#fff}
+.nlB p{color:#fbf2e4}
+.nlB .fineprint{color:#f3e8d8}
+
+.note{font-size:13px;color:var(--color-wood-mid);background:#fff;border-left:3px solid var(--color-wood);padding:12px 16px;border-radius:0 8px 8px 0;margin-top:18px;max-width:1000px}
+</style>
+</head>
+<body>
+<div class="devnote"><strong>DA HOME · Section 08 — Newsletter</strong> &nbsp;·&nbsp; <em>Photo d'atelier en filigrane/floutée sur fond bois sombre. Version AÉRÉE (champ email + bouton orange centrés). Différenciée de la section Atelier par la DENSITÉ : ici calme et vide. Photo provisoire.</em></div>
+
+<div class="wrap">
+
+  <!-- VARIANTE A -->
+  <div class="variant-head">
+    <span class="tag">Variante A</span>
+    <h2>Bois sombre + photo d'atelier floutée en filigrane</h2>
+    <p>Fond bois sombre, photo d'atelier très en retrait et floutée pour la texture, pas pour la montrer. Tout est centré, beaucoup de vide autour : la respiration finale après une page riche. Le bouton orange reste le seul point chaud.</p>
+  </div>
+  <div class="nl nlA">
+    <div class="photo"></div><div class="veil"></div>
+    <div class="inner">
+      <div class="eyebrow">La lettre de l'atelier</div>
+      <h3>Reste dans la lumière</h3>
+      <p>Une fois par mois, je te raconte un nouveau modèle, un coulisse d'atelier, une astuce déco. Pas de spam, juste l'essentiel.</p>
+      <form class="nl-form" onsubmit="return false">
+        <input type="email" placeholder="Ton adresse email">
+        <button>Je m'inscris</button>
+      </form>
+      <div class="fineprint">Désinscription en un clic. Je ne partage jamais ton adresse.</div>
+    </div>
+  </div>
+  <div class="note">Densité minimale = contraste net avec la section Atelier (riche en images process). Même si les deux sont sombres, on ne les confond pas.</div>
+
+  <!-- VARIANTE B -->
+  <div class="variant-head">
+    <span class="tag">Variante B</span>
+    <h2>Bois plus chaud / clair — pour creuser l'écart avec l'atelier sombre</h2>
+    <p>Si la section Atelier est déjà très sombre, on évite la répétition : ici le fond passe en bois chaud lumineux (dégradé miel/bois). Plus doux, plus accueillant, clairement une autre ambiance. Même structure aérée et centrée.</p>
+  </div>
+  <div class="nl nlB">
+    <div class="photo"></div><div class="veil"></div>
+    <div class="inner">
+      <div class="eyebrow">La lettre de l'atelier</div>
+      <h3>Reste dans la lumière</h3>
+      <p>Une fois par mois, je te raconte un nouveau modèle, un coulisse d'atelier, une astuce déco. Pas de spam, juste l'essentiel.</p>
+      <form class="nl-form" onsubmit="return false">
+        <input type="email" placeholder="Ton adresse email">
+        <button>Je m'inscris</button>
+      </form>
+      <div class="fineprint">Désinscription en un clic. Je ne partage jamais ton adresse.</div>
+    </div>
+  </div>
+  <div class="note">À choisir selon la teinte finale de l'Atelier (mockup 04) : si Atelier = variante B sombre, prendre cette newsletter chaude/claire pour ne pas enchaîner deux blocs sombres.</div>
+
+</div>
+</body>
+</html>

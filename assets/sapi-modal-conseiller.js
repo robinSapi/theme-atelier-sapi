@@ -5,7 +5,8 @@
  * État S1 : questions guidées (boutons-cards, avance auto, retour, progress)
  * État S3 : récap (chips + phrase IA Sonnet + CTA "Voir la sélection")
  *
- * Listener : event 'sapi:open-modal' (dispatché par sapi-cards-conseiller)
+ * Listener : event 'sapi:open-modal' (dispatché par l'immersion /mes-creations/,
+ * la pill fiche produit, ou le param ?freetext= au load)
  *   detail.state = 's0' → tunnel complet depuis le début
  *   detail.state = 's3' → récap direct (projet existant, mode Modifier)
  *
@@ -61,23 +62,14 @@
   var CONTACT_SURMESURE_URL = config.contactSurmesureUrl || '/sur-mesure/';
   var CONTACT_EMAIL         = config.contactEmail || 'robin@atelier-sapi.fr';
 
-  // Mapping projet → essence (legacy mon-projet.js pré-F1c)
-  var ESSENCE_FROM_STYLE = { moderne: 'peuplier', ancien: 'okoume' };
+  /* ⚠️ LES TABLES DE TRADUCTION DU PROJET VIVENT DANS `sapi-project.js`.
+     `style → essence` existait ici, dans `sapi-product-preselect.js` et dans
+     `sapi-photo-swap.js` ; `taille → index` existait ici et là-bas, **avec une
+     divergence réelle sur l'escalier** qui faisait appliquer une taille et en
+     annoncer une autre sur le même écran. Ne pas les réintroduire.
+     Seuls restent ici les libellés d'affichage, qui ne sont lus que par la
+     modale. */
   var ESSENCE_LABEL      = { peuplier: 'Peuplier', okoume: 'Okoumé' };
-  // Mapping taille → index dans le select WC (legacy)
-  var TAILLE_TO_INDEX    = { petite: 0, moyenne: 1, grande: 2 };
-
-  // F2a-ter : labels humains des clés pour les chips récap S3 ("Pièce : Salon").
-  var KEY_LABELS = {
-    piece: 'Pièce',
-    taille: 'Taille',
-    taille_escalier: 'Escalier',
-    eclairage: 'Éclairage',
-    sortie: 'Sortie',
-    hauteur: 'Hauteur',
-    table: 'Au-dessus',
-    style: 'Style',
-  };
 
   /* ─────────────────────────────────────────────
      State
@@ -92,12 +84,24 @@
     transition: false,    // F2a-bis : true pendant l'écran "Robin réfléchit"
     aiController: null,   // Audit #7 : AbortController de la requête IA en cours, abort sur close/replace
     shortMode: false,     // F2b Phase 2 — true quand ouvert depuis fiche produit
-    editFromS3: false,    // Round 4 — true quand on édite une chip depuis S3 (retour direct au récap après modif)
+    /* Où revenir après avoir corrigé une réponse depuis une pastille.
+       `null` = on n'édite pas. Sinon `'s3'` (écran « Voir ton projet ») ou
+       `'product'` (récap de la fiche produit).
+       ⚠️ C'était un BOOLÉEN `editFromS3`, et le retour était codé en dur vers
+       l'écran S3. Rendre les pastilles du récap produit cliquables avec ce
+       booléen aurait éjecté le visiteur de la fiche qu'il regardait : le bouton
+       principal de S3 fait quitter le produit.
+       ⚠️ Une DESTINATION, pas un second drapeau. Ce drapeau-ci a déjà fui d'une
+       ouverture à l'autre une fois ; en ajouter un deuxième rouvrirait la même
+       famille de défaut. */
+    retourApresEdition: null,
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
       sessionId: null,
       status: 'idle',     // 'idle' | 'thinking'
       maxUserMessages: config.maxMessages || 15,
+      // Catégorie déduite par le serveur quand il n'en trouve qu'UNE. Sert de
+      // destination au bouton « Voir… » lorsque le projet n'a pas de pièce.
     },
   };
 
@@ -111,6 +115,97 @@
      submit contact. sendBeacon avec fallback fetch keepalive
      pour résilience au unload.
      ───────────────────────────────────────────── */
+  /* ⚠️ LU AU CHARGEMENT DU SCRIPT, AVANT TOUT LE RESTE — ne pas déplacer.
+     `init()` retire `?freetext=` de l'URL puis ouvre la modale 100 ms plus
+     tard. Lu plus tard, on relirait une adresse DÉJÀ NETTOYÉE et la phrase
+     serait perdue : c'est la seule occasion de l'attraper.
+     ⚠️ CE QU'ELLE NE SERT PLUS À FAIRE (28/08) : décider de la provenance.
+     `entry_point` répond désormais à « sur quelle PAGE ? » et pas à « par
+     quelle méthode ? » — avoir écrit une phrase n'est pas un endroit. La
+     phrase elle-même part dans `ai_freetext_input`.
+     ⚠️ CETTE COLONNE NE DIT PAS « le visiteur a écrit quelque part » : elle ne
+     contient QUE ce qui a été saisi avant l'arrivée, dans un des sélecteurs.
+     Quelqu'un qui clique une pièce puis écrit DANS la modale la laisse vide —
+     ses mots sont dans `ai_chat_messages`.
+     `entry_url` ne portera donc plus `freetext` non plus : sans importance,
+     puisque la phrase a sa propre colonne. */
+  /* ⚠️ CE QUE LE VISITEUR A RÉPONDU AUJOURD'HUI, et rien d'autre.
+     Le tableau de bord comptait comme « quiz complété » des réponses données
+     lors d'une visite PRÉCÉDENTE : `openModal()` recopie le projet mémorisé
+     dans l'état, le premier changement d'écran déclenche un enregistrement, et
+     la ligne partait avec « salon / grande / plafond / moderne » alors que le
+     visiteur n'avait rien répondu. Ouvrir puis refermer aussitôt suffisait.
+     Pire : l'identifiant est régénéré à chaque chargement de page, donc
+     quelqu'un qui ouvre la pastille sur quatre fiches produit produisait
+     QUATRE lignes identiques, toutes marquées « quiz complet ».
+     Robin décide sur ce chiffre. On ne l'enregistre donc que s'il correspond à
+     quelque chose que le visiteur a fait maintenant.
+     Volontairement à l'échelle de la PAGE, pas de l'ouverture de modale : la
+     ligne en base est la même d'une ouverture à l'autre, l'information doit
+     donc l'être aussi. */
+  var REPONSES_DE_CETTE_SESSION = {};
+  function noterReponse(stepId) {
+    if (stepId) REPONSES_DE_CETTE_SESSION[stepId] = true;
+  }
+  /* Le visiteur n'a rien RETAPÉ, mais il a explicitement VALIDÉ son projet —
+     « Voir ma sélection » depuis le récap, « Appliquer cette sélection » sur
+     une fiche produit, et « Voir la sélection » à la sortie du chat. C'est un
+     acte d'aujourd'hui, pas un souvenir de localStorage.
+     Les trois appellent `noterValidation()` — le troisième ne le faisait pas,
+     et sa session partait sans pièce. Si un quatrième chemin de validation
+     apparaît un jour, il doit l'appeler aussi.
+     Sans ça, le visiteur fidèle qui revient, valide et repart disparaissait des
+     statistiques : la règle « rien de répondu, rien d'enregistré » supprimait
+     bien les lignes en double, mais elle emportait aussi les vrais retours.
+     Une confirmation vaut une réponse. */
+  function noterValidation() {
+    Object.keys(state.answers || {}).forEach(noterReponse);
+  }
+
+  /* ⚠️ MÊME RAISONNEMENT QUE `REPONSES_DE_CETTE_SESSION`, POUR LE CONSEIL.
+     L'export du 28/08 l'a montré noir sur blanc : sur 31 lignes portant un
+     conseil, 9 nommaient une AUTRE pièce que la leur (« Pour ton salon… » sur
+     une session cuisine) et 2 en portaient un sans avoir aucune pièce. Le
+     conseil partait sans condition, y compris quand il traînait dans le
+     localStorage depuis une visite d'il y a trois semaines.
+     Une colonne vide se remarque. Une colonne remplie de la mauvaise phrase,
+     non : Robin l'aurait lue comme ce que Robin a dit à ce visiteur-là.
+     On n'envoie donc que ce qui a été produit pendant cette visite. */
+  var CONSEIL_DE_CETTE_SESSION = false;
+  function noterConseil() { CONSEIL_DE_CETTE_SESSION = true; }
+
+  /* La pièce hors catalogue signalée par l'IA pendant cette visite. Sert
+     uniquement au tableau de bord de Robin : savoir quelles pièces on lui
+     demande et qu'il ne fait pas. Jamais affichée au visiteur. */
+  var PIECE_HORS_PERIMETRE = '';
+  function noterPieceHorsPerimetre(mot) {
+    /* ⚠️ ON ÉCRASE AUSSI AVEC DU VIDE, ET C'EST VOULU. Si le visiteur parle
+       d'abord d'une salle de bain puis redécrit son projet en salon, l'IA ne
+       renvoie plus de pièce hors périmètre : garder l'ancien mot collerait
+       « salle de bain » à une session qui a fini sur un salon, et gonflerait
+       le classement de Robin avec des demandes qui n'existent pas. */
+    PIECE_HORS_PERIMETRE = (typeof mot === 'string' && mot) ? mot : '';
+  }
+
+  var ENTREE_FREETEXT = '';
+  /* Posée par les TROIS sélecteurs de pièce : `from=home` (accueil),
+     `from=conseils` (Conseils éclairés), `from=mes_creations` (le sélecteur qui
+     sert de hero à /mes-creations/ tant qu'aucune pièce n'est choisie).
+     Lue au chargement du script, comme `freetext` et pour la même raison :
+     l'adresse est réécrite ensuite — et depuis le 28/08, `from` en est même
+     retiré explicitement une fois la session ouverte.
+     Le champ libre de l'accueil et de Conseils porte les DEUX paramètres : la
+     phrase part dans `ai_freetext_input`, la provenance reste celle de la PAGE.
+     Celui de /mes-creations/ est un formulaire GET natif, sans JavaScript : il
+     ne porte que `freetext`, et sa provenance sort correctement du test de
+     chemin plus bas. */
+  var ORIGINE_ANNONCEE = '';
+  try {
+    var qs = new URLSearchParams(window.location.search);
+    ENTREE_FREETEXT = qs.get('freetext') || '';
+    ORIGINE_ANNONCEE = qs.get('from') || '';
+  } catch (e) { /* URLSearchParams indisponible — silencieux */ }
+
   var SessionTracker = (function () {
     var sessionId = null;
     var aiCallCount = 0;
@@ -137,18 +232,64 @@
 
     function detectEntryPoint() {
       var body = document.body;
-      if (body && body.classList.contains('home')) return 'home_picker';
+      /* ⚠️ POURQUOI L'ORIGINE EST ANNONCÉE DANS L'ADRESSE. Les trois sélecteurs
+         de pièce REDIRIGENT vers /mes-creations/, et la modale n'est chargée ni
+         sur l'accueil ni sur /conseils-eclaires/ : sans ce paramètre, leurs
+         visiteurs se confondent avec une arrivée directe par Google. C'est
+         pour ça que `home_picker` est resté à zéro depuis le premier jour.
+         ⚠️ MAIS IL NE PASSE PAS EN PREMIER POUR AUTANT — la fiche produit se
+         teste avant lui, voir la note plus bas. J'ai écrit ici l'inverse le
+         28/08, et c'est ce commentaire qui m'aurait fait rouvrir le trou. */
+      /* ⚠️ CETTE COLONNE RÉPOND À « SUR QUELLE PAGE ? », PAS À « COMMENT ? ».
+         Décision Robin du 28/08. Elle contenait aussi `freetext`, qui est une
+         MÉTHODE (avoir écrit une phrase plutôt que cliqué une pièce) et non un
+         endroit : une même page pouvait donc ressortir sous deux provenances,
+         et il fallait arbitrer entre les deux dans un ordre que rien ne rendait
+         évident. C'est ce mélange qui m'a fait casser le compteur du texte
+         libre en réparant celui de l'accueil.
+         Une seule question par colonne. On ne perd rien : la phrase saisie
+         AVANT l'arrivée, sur un des trois sélecteurs, part dans
+         `ai_freetext_input`. (Celles tapées DANS la modale — champ de la
+         première question, messages du chat — vivent dans `ai_chat_messages`,
+         et n'ont jamais eu de rapport avec cette colonne.)
+         `freetext` reste lisible dans le tableau pour les anciennes lignes,
+         mais plus rien ne l'écrit. */
+
       var path = window.location.pathname || '';
-      if (path.indexOf('/mes-creations/') !== -1) {
-        try {
-          var url = new URL(window.location.href);
-          if (url.searchParams.get('freetext')) return 'freetext';
-        } catch (e) { /* swallow */ }
-        return 'mes_creations';
-      }
+
+      /* ⚠️ LA FICHE PRODUIT SE TESTE AVANT TOUT LE RESTE, `from` COMPRIS.
+         Les fiches produit de ce site vivent SOUS /mes-creations/ — par exemple
+         /mes-creations/olivia-la-gardiena/. Avec le test de la page de
+         sélection placé avant, toute fiche produit était étiquetée
+         « mes_creations » et `product_pill` ne pouvait structurellement jamais
+         être écrit : zéro ligne sur 97 dans l'export du 28/08, alors que la
+         pastille est utilisée tous les jours.
+         ⚠️ ET `from` NE DOIT PAS PASSER DEVANT NON PLUS. Il valait `mes_creations`
+         au-dessus de ce bloc : une adresse fabriquée à la main
+         (/mes-creations/olivia/?from=mes_creations) rouvrait exactement le trou
+         que cette note interdit de rouvrir — une fiche produit comptée comme la
+         page de sélection. Aucun lien du site ne produit cette adresse, mais
+         c'était structurel, pas accidentel.
+         Ne rien remettre avant ce bloc. */
       if (body && (body.classList.contains('single-product') || path.indexOf('/produit/') !== -1)) {
         return 'product_pill';
       }
+
+      /* Les trois sélecteurs de pièce annoncent leur page dans l'adresse.
+         C'est la seule façon de le savoir : ils REDIRIGENT vers
+         /mes-creations/, et la modale n'est chargée sur aucune des deux autres
+         pages — sans ce marqueur, tous leurs visiteurs se confondraient avec
+         une arrivée directe. */
+      if (ORIGINE_ANNONCEE === 'home') return 'home_picker';
+      if (ORIGINE_ANNONCEE === 'conseils') return 'conseils_picker';
+      if (ORIGINE_ANNONCEE === 'mes_creations') return 'mes_creations';
+
+      if (path.indexOf('/mes-creations/') !== -1) {
+        return 'mes_creations';
+      }
+      /* Repli : la boutique atteinte autrement que par son adresse propre
+         (une recherche `?post_type=product`, par exemple). Ces lignes sortent
+         en « — » dans le tableau et hors du graphe des provenances. */
       return '';
     }
 
@@ -184,35 +325,43 @@
       } catch (e) { /* swallow */ }
     }
 
-    function getMatchingProductIds() {
-      // Scan DOM de la grille /mes-creations/ : cards WC ont une classe
-      // `post-<id>` sur le <li.product>. Renvoie un CSV des IDs visibles
-      // (filtrés is-filtered-out exclus si présent).
-      var cards = document.querySelectorAll('ul.products li.product');
-      if (!cards.length) return '';
-      var ids = [];
-      cards.forEach(function (card) {
-        if (card.classList && card.classList.contains('is-filtered-out')) return;
-        var m = card.className.match(/post-(\d+)/);
-        if (m) ids.push(m[1]);
-      });
-      return ids.join(',');
-    }
-
     function buildSnapshotPayload() {
       var payload = {};
       var project = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      /* ⚠️ DEUX GARDE-FOUS, MÊME PRINCIPE : on n'enregistre que ce qui a été
+         fait PENDANT cette visite. `answers` est gardé par
+         REPONSES_DE_CETTE_SESSION, `advice_text` par CONSEIL_DE_CETTE_SESSION.
+         Les champs de contact, eux, partent sans condition : ils ne peuvent
+         venir que du formulaire de cette visite.
+         Ne pas retirer l'une de ces deux conditions en croyant simplifier :
+         c'est exactement le défaut mesuré sur l'export du 28/08.
+         Le projet mémorisé vient peut-être d'une visite d'il y a trois
+         semaines : l'enregistrer ferait passer une simple ouverture de modale
+         pour un questionnaire rempli. Voir REPONSES_DE_CETTE_SESSION.
+         Conséquence assumée : une session « ouverte puis refermée » n'a plus
+         ni pièce ni réponses en base. C'est la vérité — et ça supprime du même
+         coup les lignes en double d'un visiteur qui ouvre la pastille sur
+         quatre fiches produit. */
+      var aReponduIci = Object.keys(REPONSES_DE_CETTE_SESSION).length > 0;
       if (project) {
-        if (project.answers && Object.keys(project.answers).length) {
+        if (aReponduIci && project.answers && Object.keys(project.answers).length) {
           payload.answers = project.answers;
         }
-        if (project.advice_text) payload.advice_text = project.advice_text;
+        if (project.advice_text && CONSEIL_DE_CETTE_SESSION) {
+          payload.advice_text = project.advice_text;
+        }
         if (project.contact_kind) payload.contact_kind = project.contact_kind;
+        /* La pièce que le catalogue ne couvre pas, telle que le visiteur l'a
+           nommée. Vit dans `state`, pas dans le projet : ce n'est pas une
+           réponse du visiteur, c'est une observation faite pendant CETTE
+           conversation — la mémoriser d'une visite à l'autre la collerait à des
+           sessions qui n'ont rien demandé de tel. */
+        if (PIECE_HORS_PERIMETRE) payload.piece_hors_perimetre = PIECE_HORS_PERIMETRE;
         if (project.contact_subject) payload.contact_subject = project.contact_subject;
         if (project.contact_message) payload.contact_message = project.contact_message;
       }
       // answers_completed : toutes les questions visibles répondues
-      if (project && project.answers) {
+      if (aReponduIci && project && project.answers) {
         try {
           var visible = getVisibleStepIds(project.answers);
           payload.answers_completed = (visible.length > 0 && visible.every(function (id) {
@@ -224,21 +373,57 @@
       if (state.chat && state.chat.conversation && state.chat.conversation.length) {
         payload.ai_chat_messages = state.chat.conversation;
       }
+      /* La phrase saisie sur la home. Le serveur sait la stocker depuis le
+         début (`ai_freetext_input`) mais le client ne l'envoyait JAMAIS : la
+         colonne était vide sur 100 % des lignes, `ai_freetext_used` restait à
+         0, l'encart « saisie initiale » du détail ne s'affichait jamais, et
+         surtout la recherche du tableau de bord — qui promet « texte libre » —
+         interrogeait une colonne toujours NULL. */
+      if (ENTREE_FREETEXT) payload.ai_freetext_input = ENTREE_FREETEXT;
       if (aiCallCount > 0) payload.ai_call_count = aiCallCount;
-      // Produits matchés (uniquement sur /mes-creations/)
-      var ids = getMatchingProductIds();
-      if (ids) payload.matching_product_ids = ids;
+      /* ⚠️ `matching_product_ids` N'EST PLUS ENVOYÉ, ET C'EST VOULU.
+         Un scan du DOM cherchait ici `ul.products li.product` et la classe
+         `is-filtered-out` : **ni l'un ni l'autre n'existe dans ce thème** (la
+         grille est `#sapi-product-grid > .product-card-cinetique`, la classe
+         est `is-cat-filtered`). Deux sélecteurs faux, aucune erreur levée, une
+         colonne vide depuis le premier jour — et l'écran « Catalogue présenté »
+         du détail ne s'est donc jamais affiché.
+         ⚠️ NE PAS « RÉPARER » LES SÉLECTEURS : même justes, ils viseraient la
+         grille BASSE du catalogue, alors que ce que le visiteur voit comme sa
+         sélection est le carrousel de l'immersion (4 modèles). Le scan répondrait
+         à la mauvaise question.
+         La bonne source est le serveur, qui calcule déjà cette liste dans les
+         deux endpoints IA. La rattacher à la session est un chantier à part,
+         noté dans questions_ouvertes.md. */
       return payload;
     }
 
-    function start() {
-      // Reset compteurs pour la session courante.
+    /* ⚠️ IDEMPOTENT DEPUIS LE 28/08. `start()` peut désormais être appelé à
+       deux moments : à l'arrivée quand le visiteur vient de cliquer un
+       sélecteur de pièce, puis à l'ouverture de la modale. Sans ce garde-fou,
+       le second appel remettrait `aiCallCount` à zéro et renverrait un
+       `entry_point` — ce qui est inoffensif en base (même `session_id`, donc
+       même ligne) mais effacerait le compteur d'appels IA au pire moment. */
+    var demarree = false;
+    function start(extra) {
+      if (demarree) return;
+      demarree = true;
       aiCallCount = 0;
       hasStarted = true;
-      send({
+      var charge = {
         entry_point: detectEntryPoint(),
         entry_url: window.location.pathname + window.location.search,
-      });
+      };
+      /* ⚠️ UN SEUL ENVOI, PAS DEUX. La pièce cliquée partait dans un second
+         `snapshot()` immédiat : deux `sendBeacon` dans le même instant, deux
+         requêtes qui lisent la table avant que l'une n'écrive, et la seconde
+         butait sur l'unicité de `session_id`. L'INSERT échouait, et selon
+         laquelle des deux perdait, on perdait soit la provenance soit la
+         pièce — en silence. On les fusionne. */
+      if (extra && typeof extra === 'object') {
+        Object.keys(extra).forEach(function (k) { charge[k] = extra[k]; });
+      }
+      send(charge);
     }
 
     function snapshot(extra) {
@@ -254,17 +439,33 @@
       if (!hasStarted) return;
       send(buildSnapshotPayload());
       hasStarted = false;
+      /* `demarree` reste vrai : la ligne existe en base, elle ne doit pas être
+         recréée. Une réouverture de la modale repassera par `start()`, qui
+         sortira tout de suite, puis par les `snapshot()` — lesquels exigent
+         `hasStarted`. C'est donc `hasStarted` qu'il faut relever, pas
+         `demarree`. Voir `openModal`. */
     }
 
     function incrementAiCallCount() {
       aiCallCount++;
     }
 
+    /* Rouvre la session pour de nouveaux envois, sans recréer la ligne.
+       Utile quand la modale est refermée puis rouverte dans la même page. */
+    function reprendre() {
+      if (demarree) hasStarted = true;
+    }
+
     return {
       start: start,
+      reprendre: reprendre,
       snapshot: snapshot,
       finalize: finalize,
       incrementAiCallCount: incrementAiCallCount,
+      /* Exposé pour que le formulaire de contact puisse le transmettre au
+         serveur : c'est lui, et lui seul, qui saura marquer la session comme
+         « mail réellement reçu ». */
+      getSessionId: getSessionId,
     };
   })();
 
@@ -403,6 +604,7 @@
     var step = state.currentQuestion;
     state.answers[step] = slug;
     state.labels[step] = label;
+    noterReponse(step); // réponse donnée MAINTENANT — cf. REPONSES_DE_CETTE_SESSION
     cleanInvisibleAnswers();
 
     // Sauvegarde incrémentale dans sapiProject (partielle OK)
@@ -433,14 +635,21 @@
       showQuestion(nextStep);
       // F2a-quater : bascule visuelle S0→S1 (ou no-op si déjà S1)
       if (state.screen !== 's1') showScreen('s1');
-    } else if (state.editFromS3) {
-      // Round 4 — édition d'une chip depuis S3 : retour direct au récap
-      // (toutes les questions suivantes ont déjà des réponses valides).
-      state.editFromS3 = false;
+    } else if (state.retourApresEdition) {
+      /* Correction d'une réponse depuis une pastille : on revient à l'écran
+         D'OÙ ON VENAIT, pas à un écran choisi une fois pour toutes. Les
+         questions suivantes ont déjà des réponses valides, il n'y a rien à
+         redemander. */
+      var destination = state.retourApresEdition;
+      state.retourApresEdition = null;
       if (window.sapiProject) {
-        window.sapiProject.update(state.answers, state.labels);
+        /* `set` et non `update` : après une correction pièce → escalier,
+           `cleanInvisibleAnswers` a retiré `taille` de l'état, mais un patch
+           fusionnant l'aurait laissée en mémoire. L'écran aurait été juste et
+           le stockage faux. */
+        window.sapiProject.set(state.answers, state.labels);
       }
-      showS3Recap();
+      if (destination === 'product') { showProductRecap(); } else { showS3Recap(); }
     } else if (state.shortMode) {
       // F2b Phase 2 — fin du parcours court : récap produit + IA dédiée (pas de
       // morphing modale→card, on reste dans la modale ouverte).
@@ -458,7 +667,33 @@
     // F2a-quater : Retour depuis S1 → revient à la question précédente, ou à
     // l'écran S0 hybride si on est sur la 1re question (history vide).
     if (state.questionHistory.length === 0) {
-      renderS0Hybrid(determineInitialState());
+      /* ⚠️ CUL-DE-SAC CORRIGÉ. `determineInitialState()` peut renvoyer
+         `s3-carrefour` (toutes les réponses visibles sont données), mais
+         `renderS0Hybrid` ne sait traiter que `s0-initial` et `s0-partiel` : il
+         tombait dans la branche « initial » et réaffichait la première
+         question comme si le projet était vide — alors qu'il était complet et
+         toujours en mémoire, et sans aucun chemin de retour vers le récap.
+         Chemin exact : récap → clic sur une chip (qui vide volontairement la
+         pile d'historique) → « Étape précédente ». */
+
+      /* ⚠️ CE CHEMIN AUSSI DOIT CONNAÎTRE LA DESTINATION.
+         Le clic sur une pastille vide l'historique, donc « Étape précédente »
+         tombe TOUJOURS ici. Le retour était codé en dur vers l'écran de la
+         page de sélection : le visiteur qui corrigeait une réponse depuis une
+         fiche produit puis se ravisait était éjecté de sa fiche, au deuxième
+         clic, à tous les coups. C'est exactement l'éjection que ce lot
+         supprime — je l'avais convertie dans la branche de réponse et oubliée
+         ici. Trouvé en relecture. */
+      if (state.retourApresEdition) {
+        var retour = state.retourApresEdition;
+        state.retourApresEdition = null;
+        if (retour === 'product') { showProductRecap(); return; }
+        showS3Recap();
+        return;
+      }
+      var back = determineInitialState();
+      if (back === 's3-carrefour') { showS3Recap(); return; }
+      renderS0Hybrid(back);
       return;
     }
     var prev = state.questionHistory.pop();
@@ -473,9 +708,109 @@
      dans sapiProject.advice_text, puis on ferme la modale.
      ───────────────────────────────────────────── */
 
+  /* Où le visiteur doit-il atterrir en sortant de la modale ?
+     ⚠️ CE TEST MANQUAIT, ET C'EST LE DÉFAUT LE PLUS COÛTEUX DU PARCOURS.
+     La sortie de la modale a été conçue pour la page /mes-creations/ EN MODE
+     IMMERSION : elle émet des événements que le hero écoute pour rafraîchir sa
+     sélection. Mais le hero n'existe que si l'URL porte `?piece=`. Or le champ
+     libre (home, /conseils-eclaires/, état A) envoie vers `?freetext=` SANS
+     pièce : la page n'a donc ni hero, ni slider, personne pour écouter. Le
+     bouton « Voir la sélection pour mon projet » fermait la modale et rien
+     d'autre — alors que le message au-dessus venait d'annoncer des filtres.
+     Quand le filtrage est passé côté serveur, seul le chemin de l'immersion a
+     été rebranché ; la recette de l'époque ne vérifiait que l'OUVERTURE du
+     champ libre, jamais sa sortie.
+     → Sans immersion et avec une pièce connue, on RECHARGE vers
+       /mes-creations/?piece=<pièce> : le visiteur atterrit exactement là où
+       l'aurait mené un clic sur la carte de cette pièce, et `advice_text`,
+       déjà stocké, y est repris et tapé par le hero. On réutilise un chemin
+       éprouvé au lieu d'en inventer un.
+     → Sans pièce du tout (l'extraction n'a rien trouvé : « salle de bain »
+       n'existe pas dans les sept pièces du référentiel), il n'y a nulle part
+       où aller. Décision de Robin : on l'emmène vers le CONTACT plutôt que de
+       le laisser sur une page vide. C'est le seul moment du parcours où il a
+       décidé quelque chose. */
+  function immersionIsOnPage() {
+    return !!document.querySelector('[data-immersion]');
+  }
+  function projectPiece() {
+    try {
+      var p = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      if (p && p.answers && p.answers.piece) return p.answers.piece;
+    } catch (e) { /* swallow */ }
+    return (state.answers && state.answers.piece) || '';
+  }
+  /* ⚠️ ON EMMÈNE LE PROJET ENTIER, PAS SEULEMENT LA PIÈCE.
+     Ce chemin est celui du texte libre : le visiteur a décrit son projet en
+     mots, l'IA en a tiré une pièce, une sortie, un style. N'écrire que la
+     pièce revenait à jeter tout ce qu'il venait de dire — la page d'arrivée
+     recalculait une sélection générique, et le conseil affiché parlait d'autre
+     chose que les produits montrés. C'est exactement la capture du couloir.
+     L'écriture passe par la source unique (`ecrireProjetDansUrl`) : mêmes clés,
+     même ordre que partout ailleurs. */
+  function goToSelectionPage(piece) {
+    var answers = {};
+    try {
+      var p = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      if (p && p.answers) answers = p.answers;
+    } catch (e) { /* swallow */ }
+    if (piece) answers = Object.assign({}, answers, { piece: piece });
+    try {
+      var url = new URL(window.location.href);
+      url.pathname = '/mes-creations/';
+      url.searchParams.delete('freetext');
+      if (window.sapiProject && window.sapiProject.ecrireProjetDansUrl) {
+        window.sapiProject.ecrireProjetDansUrl(url, answers);
+      } else {
+        /* Repli inatteignable, mais propre : voir la note jumelle dans
+           sapi-mescreations-immersion.js. Une adresse neuve plutôt qu'une
+           adresse à moitié corrigée. */
+        url.search = '';
+        url.searchParams.set('piece', piece);
+      }
+      window.location.assign(url.toString());
+    } catch (err) {
+      window.location.href = '/mes-creations/?piece=' + encodeURIComponent(piece);
+    }
+  }
+
   function showTransitionAndExit(opts) {
     opts = opts || {};
     if (state.transition) return; // évite double-trigger
+
+    /* Aucune sélection à révéler sur cette page : on redirige (ou on bascule
+       sur le contact) AVANT de lancer l'animation de sortie et l'appel IA.
+       ⚠️ L'appel IA n'est pas perdu dans le cas « avec pièce » : il est lancé
+       plus bas, son texte est stocké dans le projet, et la page d'arrivée le
+       lit et le tape. C'est justement ce qui rend la redirection gratuite. */
+    if (!immersionIsOnPage()) {
+      var piece = projectPiece();
+      if (!piece) {
+        if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+        showContact({
+          message: 'Je n’ai pas encore assez d’éléments pour te proposer une sélection. Laisse-moi ton mail et deux mots sur ton projet, je te réponds moi-même.'
+        });
+        return;
+      }
+      state.transition = true;
+      if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+      fetchAdviceFromIA(opts).then(function (advice) {
+        if (advice && window.sapiProject && typeof window.sapiProject.setAdviceText === 'function') {
+          window.sapiProject.setAdviceText(advice);
+          noterConseil();
+        }
+        /* ⚠️ CE CHEMIN NE FINALISAIT RIEN DU TOUT. Depuis une fiche produit ou
+           la boutique, la modale ne se ferme pas : la page part vers
+           /mes-creations/. `closeModal()` n'est donc jamais appelé, et aucun
+           envoi final ne partait — ni le conseil, ni les dernières réponses.
+           `send()` passe par `sendBeacon`, qui survit à la navigation : l'appel
+           est sûr ici, juste avant de quitter la page. */
+        SessionTracker.finalize();
+        goToSelectionPage(piece);
+      });
+      return;
+    }
+
     state.transition = true;
 
     // 1. Lancer le fetch IA en parallèle (résolu indépendamment de l'anim)
@@ -486,6 +821,16 @@
       adviceResolved = true;
       return advice;
     });
+
+    // Immersion /mes-creations/ : dès le DÉBUT du calcul (modale encore ouverte),
+    // on fait disparaître la phrase générique et on affiche le loader (3 points).
+    // Le commentaire IA personnalisé la remplacera via 'sapi:advice-ready'.
+    // On porte les réponses dans le detail : l'immersion précharge SA sélection
+    // maintenant (~300ms), pendant que l'IA calcule et que l'animation de sortie
+    // se joue (~1,9s). Les deux attentes se recouvrent au lieu de s'additionner.
+    document.dispatchEvent(new CustomEvent('sapi:advice-loading', {
+      detail: { answers: state.answers || {} }
+    }));
 
     // 2. Save les réponses dans sapiProject SANS advice_text. Add la class
     //    .is-awaiting-advice sur la card AVANT le set, pour que le subscribe
@@ -502,16 +847,22 @@
       state.open = false;
       exitChatMode();
 
-      // Fix audit — Bug 2 : reprendre les notifications sapiProject (sinon
-      // le notify bufferisé de sapiProject.set() ligne 496 n'est jamais
-      // flushé puisque ce chemin ne passe pas par closeModal()) +
-      // finaliser le tracking V3 (sinon la session n'est pas terminée
-      // dans l'admin). Le resume déclenche un render() des cards qui va
-      // basculer Conseil → Ton projet + repopulate le slot.
-      SessionTracker.finalize();
+      /* ⚠️ LA FINALISATION N'EST PLUS ICI, ET C'EST TOUT L'OBJET DU CORRECTIF.
+         Elle partait à cet instant, c'est-à-dire AVANT l'étape 5 où le conseil
+         de Robin est écrit dans le projet. Le dernier envoi ne le contenait
+         donc jamais — et comme `finalize()` pose `hasStarted = false`, tout
+         envoi ultérieur était refusé en silence. Résultat : `advice_text` vide
+         sur 100 % des sessions, alors que c'est le texte le plus visible de
+         tout le parcours. Elle est maintenant appelée dans `finishAdvice()`,
+         une fois le conseil posé. `fetchAdviceFromIA` résout toujours (son
+         `catch` renvoie `null`), donc `finishAdvice` est toujours atteint :
+         déplacer l'appel ne risque pas de perdre la finalisation.
+         Le `resumeNotifications` ci-dessous, lui, reste ici : il n'a rien à
+         voir avec le tracking, il flushe l'affichage des cartes. */
       if (window.sapiProject && typeof window.sapiProject.resumeNotifications === 'function') {
         window.sapiProject.resumeNotifications();
       }
+      dispatchConseillerClosed();
 
       // 4. Refilter la grille (idempotent — déjà déclenché par resume → render)
       if (typeof window.sapiShopRefilter === 'function') window.sapiShopRefilter();
@@ -532,17 +883,6 @@
   }
 
   // Calcule la meta du filtre à la volée avec les answers donnés (élargissement
-  // progressif + IDs matchant). Permet d'envoyer au backend l'image exacte
-  // de ce que le visiteur va voir dans la grille.
-  function buildFilterMeta(answers) {
-    if (window.sapiMegaFilter && typeof window.sapiMegaFilter.computeFilterMeta === 'function') {
-      try {
-        return window.sapiMegaFilter.computeFilterMeta(answers || {});
-      } catch (e) { /* fallback */ }
-    }
-    return { effectiveAnswers: answers || {}, ignoredAnswers: [], matchingIds: [] };
-  }
-
   // Audit #7 : démarre une nouvelle requête IA — abort la précédente s'il y en
   // a une en cours. Retourne le signal à passer à sapiSafeFetch.
   function startAiRequest() {
@@ -558,7 +898,6 @@
 
   // Helper : appel IA dédié, isolé pour pouvoir le tester séparément
   function fetchAdviceFromIA(opts) {
-    var meta = buildFilterMeta(state.answers);
     var signal = startAiRequest();
 
     var fd = new FormData();
@@ -566,8 +905,13 @@
     fd.append('nonce', config.nonce || '');
     fd.append('answers', JSON.stringify(state.answers));
     fd.append('labels',  JSON.stringify(state.labels));
-    fd.append('matching_product_ids', JSON.stringify(meta.matchingIds));
-    fd.append('ignored_answers', JSON.stringify(meta.ignoredAnswers));
+    /* ⚠️ NI `matching_product_ids` NI `ignored_answers` NE SONT ENVOYÉS.
+       Ils venaient de `buildFilterMeta()`, qui lisait un objet global
+       supprimé lors d'une refonte et retombait donc TOUJOURS sur son repli
+       vide. Le serveur recalcule les produits correspondants lui-même, et
+       lit les contraintes relâchées directement dans la sortie du moteur
+       (`sapi_megafilter_format_fallback_notes`) : il ne demande plus au
+       navigateur ce qu'il sait déjà. */
     if (opts.conversation && Array.isArray(opts.conversation) && opts.conversation.length) {
       fd.append('conversation', JSON.stringify(opts.conversation));
     }
@@ -598,12 +942,23 @@
     if (card) card.classList.remove('is-awaiting-advice');
     if (advice && window.sapiProject) {
       window.sapiProject.setAdviceText(advice);
+      noterConseil();
     } else if (window.sapiProject) {
       // Force un re-render même sans advice pour sortir des dots et afficher
       // le texte générique de la pièce. Le typewriter va se déclencher.
       // Hack : notify manuel via un setAdviceText(null) — pas idéal mais OK.
       window.sapiProject.setAdviceText(null);
     }
+    // Immersion : remplacer le loader par le commentaire IA (ou revenir au
+    // texte générique si l'IA n'a rien renvoyé → advice vide).
+    document.dispatchEvent(new CustomEvent('sapi:advice-ready', {
+      detail: { advice: (typeof advice === 'string' ? advice : '') }
+    }));
+    /* La finalisation se fait ICI, et nulle part ailleurs sur ce chemin :
+       c'est le premier instant où `advice_text` existe dans le projet, donc
+       le premier instant où l'envoi final peut le contenir. Voir la note à
+       l'endroit d'où cet appel a été déplacé. */
+    SessionTracker.finalize();
   }
 
   // Séquence de sortie en 3 phases (~2s) :
@@ -678,8 +1033,23 @@
     return slug;
   }
 
-  // Merge un patch {key: slug | null} dans state.answers + state.labels
-  function applyFiltersBatch(filters) {
+  /* Merge un patch {key: slug | null} dans state.answers + state.labels.
+     `replaceAll` : la description libre REMPLACE le projet au lieu de le
+     compléter.
+     ⚠️ SANS CE PARAMÈTRE, L'INTENTION ÉCRITE N'ÉTAIT PAS RÉALISÉE. Le chemin
+     du texte libre vide bien `state.answers` avec le commentaire « nouvelle
+     description complète, on remplace les chips » — mais il appelait ensuite
+     cette fonction, qui termine par `sapiProject.update()`, une FUSION. Vider
+     l'état côté JS ne supprime rien dans la mémoire du navigateur.
+     Cas réel constaté par Robin : mémoire « salon », il écrit « salle de bain ».
+     Cette pièce n'existe pas dans les sept du référentiel, l'extraction ne peut
+     donc rien renvoyer pour `piece` — et « salon » survivait. Le visiteur avait
+     explicitement contredit son projet, l'écran affichait toujours « Salon »,
+     l'IA était nourrie de « salon », et la sélection finale était celle d'un
+     salon. Les deux coexistaient, l'ancien gagnait.
+     `set()` remet aussi `advice_text` et l'état contact à zéro, ce qui est
+     exactement ce qu'on veut quand le projet est redécrit. */
+  function applyFiltersBatch(filters, replaceAll) {
     if (!filters || typeof filters !== 'object') return;
     Object.keys(filters).forEach(function (key) {
       var val = filters[key];
@@ -689,12 +1059,16 @@
       } else if (typeof val === 'string' && val) {
         state.answers[key] = val;
         state.labels[key]  = getChoiceLabel(key, val);
+        noterReponse(key); // extraite de ce que le visiteur vient d'écrire
       }
     });
     cleanInvisibleAnswers();
-    // Sauvegarde incrémentale
     if (window.sapiProject) {
-      window.sapiProject.update(state.answers, state.labels);
+      if (replaceAll) {
+        window.sapiProject.set(state.answers, state.labels);
+      } else {
+        window.sapiProject.update(state.answers, state.labels); // sauvegarde incrémentale
+      }
     }
   }
 
@@ -778,11 +1152,31 @@
     if (el && el.parentNode) el.parentNode.removeChild(el);
   }
 
+  /* Fait défiler la conversation jusqu'à la dernière bulle.
+     ⚠️ ON CHERCHE QUI DÉFILE, ON NE LE SUPPOSE PLUS. La version précédente
+     visait `.modal__body` en dur, avec le commentaire « Round 4 — le scrollable
+     est .modal__body ». C'était vrai à l'époque. Depuis, une passe CSS a posé
+     `flex: 1` + `overflow-y: auto` sur `.chat-bubbles` : c'est ce cadre qui
+     débordait, `.modal__body` avait exactement la hauteur de son contenu, et
+     lui écrire un `scrollTop` ne faisait donc RIEN. La dernière réponse de
+     Robin restait coupée en plein milieu — le défaut visible sur la capture.
+     Une modification CSS avait silencieusement invalidé une hypothèse JS.
+     En remontant jusqu'au premier ancêtre qui déborde réellement, le code
+     survit aux deux mises en page : le cadre en desktop, le corps de la modale
+     en mobile depuis qu'on a retiré le cadre. La recherche s'arrête à la carte
+     de la modale — jamais question de faire défiler la page derrière. */
   function scrollChatToBottom() {
     if (!els.chatMessages) return;
-    // Round 4 — Le scrollable est .modal__body (CSS Grid row 2, overflow-y: auto)
-    var scrollable = els.chatMessages.closest('.modal__body') || els.chatMessages;
-    scrollable.scrollTop = scrollable.scrollHeight;
+    var el = els.chatMessages;
+    var stop = els.modalCard || document.body;
+    while (el) {
+      if (el.scrollHeight > el.clientHeight + 2) {
+        el.scrollTop = el.scrollHeight;
+        return;
+      }
+      if (el === stop) return;
+      el = el.parentElement;
+    }
   }
 
   function setChatFooterState(mode) {
@@ -801,8 +1195,57 @@
     }
   }
 
-  function revealChatCta() {
-    if (els.chatCta) els.chatCta.hidden = false;
+  /* Les deux sorties du chat.
+     ⚠️ UN SEUL BOUTON DEVAIT DEVINER, ET SE TROMPAIT. Quand le projet n'a pas
+     de pièce — cas fréquent : le visiteur nomme une pièce absente des sept du
+     référentiel, « salle de bain » par exemple — le bouton unique basculait
+     sur le contact, alors qu'une vraie sélection existait. Le moteur de
+     filtrage n'a jamais eu besoin de la pièce : « au mur » suffit à déduire
+     les appliques. C'est la PAGE de sélection qui est indexée sur la pièce.
+     L'IA, elle, posait déjà la bonne question : « tu veux qu'on regarde les
+     appliques, ou tu veux en parler directement avec Robin ? ». Les deux
+     boutons reprennent exactement ces deux chemins, et on cesse de choisir à
+     la place du visiteur.
+     Quand la pièce EST connue, le second bouton reste masqué : un seul chemin
+     a du sens, et on ne dilue pas l'action principale. */
+  /* ── LA BARRE DE SORTIE DU CHAT ────────────────────────────────────────────
+     Trois situations, et une seule question pour les départager : **connaît-on
+     la pièce ?** Elle suffit, parce que la page de sélection est indexée
+     dessus — sans pièce, il n'existe aucune URL où envoyer le visiteur.
+
+     1. Pièce connue → un seul bouton, « Voir la sélection ». On ne dilue pas
+        l'action principale avec une sortie contact dont personne n'a besoin.
+     2. Pièce inconnue, conversation EN COURS → **aucune barre**. L'IA vient de
+        poser une question ; lui montrer la sortie au même instant, c'est lui
+        répondre « laisse tomber » pendant qu'on lui demande de préciser.
+     3. Pièce inconnue, conversation TERMINÉE (`forceExit`) → le contact seul,
+        en bouton plein. Là il faut bien proposer quelque chose.
+
+     ⚠️ Le cas « pièce hors périmètre » (salle de bain, garage) ne passe PAS
+     par ici : le serveur renvoie `action: "contact"` et les deux appelants
+     partent sur `showContact()` avant d'arriver à cette fonction. Ne pas
+     confondre « la pièce est hors périmètre » et « on ne connaît pas encore la
+     pièce » — c'est la confusion qui a produit les deux derniers défauts, une
+     fois dans chaque sens. */
+  function revealChatCta(opts) {
+    if (!els.chatCta) return;
+    var forceExit = !!(opts && opts.forceExit);
+    var canSelect = !!projectPiece();
+
+    if (!canSelect && !forceExit) { els.chatCta.hidden = true; return; }
+    els.chatCta.hidden = false;
+
+    var contactBtn = els.chatCta.querySelector('[data-chat-cta-contact]');
+    var primaryBtn = els.chatCta.querySelector('[data-chat-cta-primary]');
+
+    if (primaryBtn) primaryBtn.hidden = !canSelect;
+    if (contactBtn) {
+      contactBtn.hidden = canSelect;
+      /* Seul en piste, le bouton contact cesse d'être secondaire : le style
+         fantôme signifierait « il y a mieux ailleurs », et il n'y a rien. */
+      contactBtn.classList.toggle('action-btn--ghost', false);
+      contactBtn.classList.toggle('action-btn--primary', true);
+    }
   }
 
   // Appel IA : extraction freetext (Haiku) — endpoint F1b existant
@@ -847,14 +1290,29 @@
 
         var data = resp.data || {};
         state.chat.sessionId = data.session_id || state.chat.sessionId;
+        // Catégorie déduite côté serveur : destination du bouton « Voir… »
+        // quand le projet n'a pas de pièce (cf. revealChatCta).
 
+        /* Freetext = nouvelle description complète : on REMPLACE, et on le fait
+           MÊME QUAND L'EXTRACTION NE RENVOIE RIEN.
+           ⚠️ C'ÉTAIT LE TROU DU PREMIER CORRECTIF. Le remplacement était
+           conditionné à `if (Object.keys(filters).length)` : quand le visiteur
+           décrivait quelque chose que le référentiel ne sait pas nommer, le
+           modèle ne renvoyait aucun filtre, la branche était sautée, et
+           l'ANCIEN PROJET SURVIVAIT INTACT — le pire des cas, puisque c'est
+           précisément là que le visiteur a décrit autre chose.
+           Cas réel (Robin) : « une petite lampe pour une salle de bain ». La
+           salle de bain n'existe pas dans les sept pièces, rien n'est extrait,
+           et le site lui reservait la sélection de son projet précédent.
+           Sur ce chemin, le message EST une description de projet par
+           construction (le champ dit « Décris ton projet en quelques mots ») :
+           il n'y a donc pas de cas où l'on voudrait conserver l'ancien.
+           Placé dans la branche de SUCCÈS : une panne réseau ou une erreur IA
+           ne détruit pas le projet du visiteur. */
         var filters = data.filters || {};
-        if (Object.keys(filters).length) {
-          // Freetext = nouvelle description complète, on remplace les chips
-          state.answers = {};
-          state.labels = {};
-          applyFiltersBatch(filters);
-        }
+        state.answers = {};
+        state.labels = {};
+        applyFiltersBatch(filters, true);
 
         addRobinBubble(data.message || '', { filters: filters });
         state.chat.conversation.push({ role: 'user', content: text });
@@ -866,6 +1324,9 @@
         // d'abord showContact mais sapiProject.action est stocké pour que
         // la grille montre la card sur-mesure en 1re position (Lot C3).
         if (data.action === 'contact') {
+          /* Noté avant `showContact`, qui peut interrompre le fil : c'est la
+             seule occasion de le relever, le serveur ne le renvoie qu'ici. */
+          noterPieceHorsPerimetre(data.piece_hors_perimetre);
           showContact(data);
           return;
         }
@@ -903,9 +1364,17 @@
       if (state.chat.conversation[i].role === 'user') userMsgCount++;
     }
     if (userMsgCount >= state.chat.maxUserMessages) {
-      addRobinBubble('On a bien discuté ! Clique sur Voir la sélection pour découvrir les modèles.');
+      /* Plafond atteint : la saisie se verrouille, donc la barre DOIT proposer
+         une sortie — d'où `forceExit`. Et le message doit nommer le bouton qui
+         sera réellement là : sans pièce, « clique sur Voir la sélection »
+         désignait un bouton masqué, sur un écran où l'on ne pouvait plus
+         écrire. Cul-de-sac complet, rare mais total. */
+      var hasPiece = !!projectPiece();
+      addRobinBubble(hasPiece
+        ? 'On a bien discuté ! Clique sur Voir la sélection pour découvrir les modèles.'
+        : 'On a bien discuté ! Pour aller plus loin sur ce projet, le mieux est qu’on en parle directement.');
       setChatFooterState('locked');
-      revealChatCta();
+      revealChatCta({ forceExit: true });
       return;
     }
 
@@ -914,14 +1383,18 @@
     state.chat.status = 'thinking';
     setChatFooterState('loading');
 
-    var meta = buildFilterMeta(state.answers);
 
     var fd = new FormData();
     fd.append('action', 'sapi_megafilter_chat');
     fd.append('nonce', config.nonce || '');
     fd.append('user_message', text);
-    fd.append('matching_product_ids', JSON.stringify(meta.matchingIds));
-    fd.append('ignored_answers', JSON.stringify(meta.ignoredAnswers));
+    /* ⚠️ NI `matching_product_ids` NI `ignored_answers` NE SONT ENVOYÉS.
+       Ils venaient de `buildFilterMeta()`, qui lisait un objet global
+       supprimé lors d'une refonte et retombait donc TOUJOURS sur son repli
+       vide. Le serveur recalcule les produits correspondants lui-même, et
+       lit les contraintes relâchées directement dans la sortie du moteur
+       (`sapi_megafilter_format_fallback_notes`) : il ne demande plus au
+       navigateur ce qu'il sait déjà. */
     fd.append('current_filters', JSON.stringify(state.answers));
     fd.append('conversation', JSON.stringify(state.chat.conversation));
     if (state.chat.sessionId) fd.append('session_id', state.chat.sessionId);
@@ -949,6 +1422,8 @@
 
         var data = resp.data || {};
         state.chat.sessionId = data.session_id || state.chat.sessionId;
+        // Catégorie déduite côté serveur : destination du bouton « Voir… »
+        // quand le projet n'a pas de pièce (cf. revealChatCta).
 
         if (data.filters_update) {
           applyFiltersBatch(data.filters_update);
@@ -964,6 +1439,9 @@
 
         // Round 3 — Lot C2 : action=contact → écran s-contact dédié.
         if (data.action === 'contact') {
+          /* Noté avant `showContact`, qui peut interrompre le fil : c'est la
+             seule occasion de le relever, le serveur ne le renvoie qu'ici. */
+          noterPieceHorsPerimetre(data.piece_hors_perimetre);
           showContact(data);
           return;
         }
@@ -1028,7 +1506,9 @@
     if (mode === 's0-partiel') {
       nextStepId = getNextUnansweredVisibleStep() || 'piece';
       badgeText = 'Ton projet';
-      placeholderText = 'Précise ton projet en quelques mots…';
+      // ⚠️ « Précise » laissait croire à un complément ; le texte saisi
+      // REMPLACE le projet (cf. applyFiltersBatch). Le libellé le dit.
+      placeholderText = 'Décris ton projet en quelques mots…';
       resetVisible = true;
     } else {
       // 's0-initial' (fallback)
@@ -1124,11 +1604,21 @@
     }
     if (els.chatSend) els.chatSend.disabled = false;
 
-    // Bulle initiale de l'assistant (cosmétique, construite côté client — zéro IA)
-    var greeting = getInitialChatGreeting();
+    /* ⚠️ PAS DE BULLE D'ACCUEIL SUR CE CHEMIN — retiré le 25/08.
+       Elle a été conçue pour « Préciser avec Robin » depuis le récapitulatif
+       (`refineFromS3`), où elle a du sens : le visiteur vient de lire le
+       conseil et demande à l'affiner. Réutilisée telle quelle ici, sa prémisse
+       est fausse : le visiteur ne précise rien, il décrit un projet NEUF.
+       Ce que Robin a constaté : il tape « une grande suspension pour une salle
+       de bain », et la conversation s'ouvre sur « Pour un salon, je te propose
+       des luminaires à ampoule entourée… » — le conseil du projet mémorisé,
+       affiché AVANT son propre message, et parlant d'autre chose.
+       Aggravant, et c'était le vrai bug : la bulle était empilée dans
+       `conversation`, donc renvoyée à l'IA aux tours suivants. Le modèle lisait
+       une phrase que Robin n'a jamais dite, affirmant que le projet était un
+       salon, et restait ancré sur la mauvaise pièce.
+       Le fil commence désormais par le message du visiteur, comme il se doit. */
     enterChatMode();
-    addRobinBubble(greeting);
-    state.chat.conversation.push({ role: 'assistant', content: greeting });
 
     // Soumet le texte saisi via le flow freetext existant (Haiku + transition)
     submitFreetext(text);
@@ -1149,6 +1639,7 @@
     state.answers = {};
     state.labels = {};
     state.questionHistory = [];
+    state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
   }
 
@@ -1163,7 +1654,7 @@
   // Esthétique) avec chips icône + label uppercase + valeur.
   var S3_GROUPS = [
     { title: 'Espace',       steps: ['piece', 'taille', 'taille_escalier'] },
-    { title: 'Installation', steps: ['sortie', 'eclairage', 'hauteur', 'table'] },
+    { title: 'Installation', steps: ['sortie', 'eclairage', 'hauteur'] },
     { title: 'Esthétique',   steps: ['style'] }
   ];
   var S3_KEY_LABELS = {
@@ -1173,9 +1664,87 @@
     eclairage: 'Éclairage',
     sortie: 'Sortie électrique',
     hauteur: 'Hauteur sous plafond',
-    table: 'Au-dessus',
     style: 'Style'
   };
+
+  /* ═══════════════════════════════════════════════════════════
+     UNE PASTILLE DE PROJET — le markup n'existe QU'ICI
+     ═══════════════════════════════════════════════════════════
+     ⚠️ Le projet est affiché à plusieurs endroits de la modale, et les formes
+     ont DÉJÀ divergé : l'écran contact et l'encart « Filtres appliqués »
+     affichent la valeur SANS son mot-clé. Résultat, le récap contact dit
+     littéralement « Salon / Salle à manger · Grand · Moderne » — et « Grand »
+     tout seul ne veut rien dire.
+     Cette forme-ci est la canonique : mot-clé + valeur + icône. C'est la seule
+     qui reste juste quand on la sort de son contexte. **Ne pas en écrire une
+     quatrième** ; appeler ce constructeur.
+
+     @param sid       clé de la réponse (piece, taille, style…)
+     @param opts      { cliquable: bool, motCle: string }
+                      `cliquable` : un <button> qui édite la réponse. Le
+                      retour se fait sur l'écran d'où part le clic — voir
+                      `state.retourApresEdition`.
+                      `motCle` : remplace le libellé par défaut (la fiche
+                      produit dit « Taille de la pièce », pas « Taille »). */
+  function buildProjectChip(sid, opts) {
+    opts = opts || {};
+    var slug = state.answers[sid];
+    if (!slug) return null;
+    var step = getStep(sid);
+    /* ⚠️ `state.labels` D'ABORD, comme avant ce refactor. `getChoiceLabel`
+       ne renvoie jamais de chaîne vide — à défaut de correspondance elle rend
+       le slug brut. La mettre en premier rendait les deux termes suivants
+       inatteignables : le jour où un slug disparaît du référentiel, le
+       visiteur lirait « Pièce : chambre-enfant » alors que le libellé humain
+       était disponible juste à côté. Repli silencieux évité. */
+    var labelText = state.labels[sid] || getChoiceLabel(sid, slug) || slug;
+    var keyLabel = opts.motCle || S3_KEY_LABELS[sid] || sid;
+
+    var chip;
+    if (opts.cliquable) {
+      /* ⚠️ `data-step-edit` est écouté sur TOUTE la modale, pas sur un écran :
+         toute pastille qui le porte devient cliquable où qu'elle soit. C'est
+         sans danger depuis que le retour après édition est une DESTINATION
+         (`state.retourApresEdition`) déduite de l'écran d'où part le clic, et
+         non plus un retour codé en dur vers l'écran de la page de sélection.
+         ⚠️ Si tu ajoutes un troisième écran portant ces pastilles, ajoute-lui
+         sa destination dans l'écouteur — sinon il retombera sur `'s3'` et
+         éjectera le visiteur de l'endroit où il était. */
+      chip = document.createElement('button');
+      chip.type = 'button';
+      chip.setAttribute('data-step-edit', sid);
+      chip.setAttribute('aria-label', 'Modifier ' + keyLabel + ' : ' + labelText);
+    } else {
+      chip = document.createElement('span');
+    }
+    chip.className = 'chip chip--project' + (opts.empile ? ' chip--stacked' : '');
+
+    // Icône du choix sélectionné
+    var iconName = null;
+    if (step && step.choices) {
+      for (var i = 0; i < step.choices.length; i++) {
+        if (step.choices[i].slug === slug) { iconName = step.choices[i].icon; break; }
+      }
+    }
+    if (iconName && ICONS[iconName]) {
+      var iconEl = document.createElement('span');
+      iconEl.className = 'chip__icon';
+      iconEl.innerHTML = ICONS[iconName];
+      chip.appendChild(iconEl);
+    }
+
+    var textWrap = document.createElement('span');
+    var labelEl = document.createElement('span');
+    labelEl.className = 'chip__label';
+    labelEl.textContent = keyLabel;
+    var valueEl = document.createElement('span');
+    valueEl.className = 'chip__value';
+    valueEl.textContent = labelText;
+    textWrap.appendChild(labelEl);
+    textWrap.appendChild(valueEl);
+    chip.appendChild(textWrap);
+    return chip;
+  }
 
   function populateRecapChips() {
     if (!els.recapChips) return;
@@ -1199,50 +1768,8 @@
       chipsEl.className = 'recap-group__chips';
 
       stepsWithValue.forEach(function (sid) {
-        var slug = state.answers[sid];
-        var step = getStep(sid);
-        var labelText = state.labels[sid] || slug;
-        var keyLabel = S3_KEY_LABELS[sid] || sid;
-
-        // Round 4 — chip cliquable pour éditer la réponse (mockup-11 hint
-        // promettait cette fonctionnalité). Utilise un <button> au lieu
-        // d'un <span> pour l'accessibilité + cursor pointer naturel.
-        var chip = document.createElement('button');
-        chip.type = 'button';
-        chip.className = 'chip chip--project';
-        chip.setAttribute('data-step-edit', sid);
-        chip.setAttribute('aria-label', 'Modifier ' + keyLabel + ' : ' + labelText);
-
-        // Icône : depuis l'icône du choix sélectionné dans le step
-        var iconName = null;
-        if (step && step.choices) {
-          for (var i = 0; i < step.choices.length; i++) {
-            if (step.choices[i].slug === slug) {
-              iconName = step.choices[i].icon;
-              break;
-            }
-          }
-        }
-        if (iconName && ICONS[iconName]) {
-          var iconEl = document.createElement('span');
-          iconEl.className = 'chip__icon';
-          iconEl.innerHTML = ICONS[iconName];
-          chip.appendChild(iconEl);
-        }
-
-        // Wrapper texte (label uppercase + valeur)
-        var textWrap = document.createElement('span');
-        var labelEl = document.createElement('span');
-        labelEl.className = 'chip__label';
-        labelEl.textContent = keyLabel;
-        var valueEl = document.createElement('span');
-        valueEl.className = 'chip__value';
-        valueEl.textContent = labelText;
-        textWrap.appendChild(labelEl);
-        textWrap.appendChild(valueEl);
-        chip.appendChild(textWrap);
-
-        chipsEl.appendChild(chip);
+        var chip = buildProjectChip(sid, { cliquable: true });
+        if (chip) chipsEl.appendChild(chip);
       });
 
       groupEl.appendChild(chipsEl);
@@ -1260,11 +1787,38 @@
   // éditables, sapiProject.update invalide advice_text à null quand answers
   // change), on relance un nouveau fetch advice via showTransitionAndExit
   // pour avoir une phrase à jour sur la card "Mon projet". Sinon ferme direct.
+  /* ⚠️ LE LIBELLÉ NE DÉCRIVAIT PAS L'EFFET. « Voir la sélection pour mon
+     projet » faisait défiler vers `#sapi-product-grid`, c'est-à-dire le
+     CATALOGUE COMPLET, non filtré (`posts_per_page => -1`). Séquelle de la
+     suppression du filtrage navigateur : la grille n'est plus filtrée par
+     personne, donc y descendre ne montre pas « ma sélection » mais « tous les
+     modèles ». On route désormais comme le CTA du chat : vers la page de
+     sélection de la pièce, ou vers le contact si aucune pièce n'est connue. */
   function viewSelectionFromS3() {
+    noterValidation(); // validation explicite du projet — cf. noterValidation()
     var project = window.sapiProject ? window.sapiProject.get() : null;
     var needsNewAdvice = !project || !project.advice_text;
     if (needsNewAdvice) {
       showTransitionAndExit({ source: 's3' });
+      return;
+    }
+    // Le conseil est déjà en mémoire : pas d'appel IA, on emmène directement.
+    if (!immersionIsOnPage()) {
+      var piece = projectPiece();
+      if (piece) {
+        /* Même raison qu'au départ de `showTransitionAndExit` : on quitte la
+           page sans passer par `closeModal()`, donc sans rien finaliser.
+           ⚠️ Le conseil est bien dans le projet ici, mais il ne partira PAS
+           forcément : sur ce chemin il vient souvent du localStorage d'une
+           visite précédente, et CONSEIL_DE_CETTE_SESSION le retient alors.
+           C'est voulu — voir la note sur ce drapeau. */
+        SessionTracker.finalize();
+        goToSelectionPage(piece);
+        return;
+      }
+      showContact({
+        message: 'Je n’ai pas encore assez d’éléments pour te proposer une sélection. Laisse-moi ton mail et deux mots sur ton projet, je te réponds moi-même.'
+      });
       return;
     }
     closeModal();
@@ -1281,7 +1835,11 @@
     state.chat.sessionId = null;
     state.chat.status = 'idle';
     if (els.chatMessages) els.chatMessages.innerHTML = '';
-    if (els.chatCta) els.chatCta.hidden = false; // CTA visible direct (advice est déjà en mémoire)
+    /* Le CTA est visible d'emblée (le conseil est déjà en mémoire), mais il
+       DOIT passer par revealChatCta : c'était le seul chemin du fichier qui
+       forçait `hidden = false` à la main, et il ressortait donc avec l'état
+       visuel laissé par la conversation précédente. */
+    revealChatCta();
     if (els.chatInput) {
       els.chatInput.value = '';
       els.chatInput.disabled = false;
@@ -1326,6 +1884,7 @@
     state.answers = {};
     state.labels = {};
     state.questionHistory = [];
+    state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
   }
 
@@ -1339,37 +1898,59 @@
 
   // Lit le label de l'option taille effectivement disponible sur le produit
   // (correspondant à l'index dérivé du projet). Renvoie '' si pas de match.
+  /* ⚠️ MÊME CALCUL QUE LA PRÉSÉLECTION, JAMAIS UN DEUXIÈME.
+     Cette fonction refaisait tout de son côté : sa propre table `taille →
+     index`, son propre `querySelector` sur le seul nom `attribute_pa_taille`,
+     et sa propre règle pour l'escalier. Résultat, sur le MÊME écran : l'encart
+     affichait la taille du milieu pour un escalier ouvert, et la phrase juste
+     en dessous annonçait « cette grande taille ». Le site appliquait une chose
+     et en écrivait une autre.
+
+     ⚠️ POURQUOI ON PARTAGE LE CALCUL ET NON LE RÉSULTAT. Il serait tentant de
+     lire l'étiquette `data-sapi-recommandation` que la présélection pose sur le
+     formulaire. Ça ne marche pas ici : `openModal()` MET EN PAUSE les
+     notifications du projet, donc l'étiquette n'est réécrite qu'à la FERMETURE
+     de la modale — après cet écran. On lirait une étiquette absente (visiteur
+     sans projet préalable, le parcours le plus fréquent) ou périmée, et le
+     conseil de taille juste en dessous, lui calculé sur les réponses
+     courantes, la contredirait. Le défaut d'origine, revenu par une porte de
+     service. Trouvé en relecture, avant livraison. */
   function readTailleLabelFromProductSelect(answers) {
-    var sel = document.querySelector('select[name="attribute_pa_taille"]');
+    var form = document.querySelector('form.variations_form');
+    if (!form) return '';
+    // Le menu de TAILLE : celui des variations qui n'est pas la matière.
+    var sel = null;
+    var sels = form.querySelectorAll('.variations select');
+    for (var i = 0; i < sels.length; i++) {
+      var n = sels[i].name || '';
+      if (n.indexOf('materiau') === -1 && n.indexOf('essence') === -1) { sel = sels[i]; break; }
+    }
     if (!sel) return '';
     var options = [];
-    for (var i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].value) options.push(sel.options[i]);
+    for (var j = 0; j < sel.options.length; j++) {
+      if (sel.options[j].value) options.push(sel.options[j]);
     }
-    if (!options.length) return '';
-    var taille = answers.taille || (answers.piece === 'escalier' && answers.taille_escalier === 'ouvert' ? 'moyenne' : '');
-    if (!(taille in TAILLE_TO_INDEX)) return '';
-    var idx = Math.min(TAILLE_TO_INDEX[taille], options.length - 1);
-    return (options[idx].textContent || options[idx].text || '').trim();
+    if (!options.length || !window.sapiProject || !window.sapiProject.resoudreTaille) return '';
+    var option = window.sapiProject.resoudreTaille(options, window.sapiProject.tailleIntention(answers));
+    return option ? (option.textContent || option.text || '').trim() : '';
   }
 
   // Construit l'intro "Pour <ta/ton pièce>, Robin recommande :" — tutoiement,
   // possessif accordé au genre via une table piece-clé → forme tutoyée
   // (« votre » est neutre, pas « ton/ta » → table explicite pour éviter
   // « ton chambre »). Repli sur « ta pièce » si la clé est inconnue.
-  var PIECE_TUTOIEMENT = {
-    'cuisine': 'ta cuisine',
-    'bureau': 'ton bureau',
-    'salon': 'ton salon',
-    'chambre': 'ta chambre',
-    'chambre-enfant': 'ta chambre d\'enfant',
-    'entree': 'ton entrée',
-    'escalier': 'ta cage d\'escalier'
-  };
-  function buildRecapIntro(answers, labels) {
-    var piece = PIECE_TUTOIEMENT[answers && answers.piece] || 'ta pièce';
-    return 'Pour ' + piece + ', Robin recommande :';
-  }
+  /* `PIECE_TUTOIEMENT` a été retirée le 28/08. Elle n'avait aucun lecteur ici
+     et attendait « le prochain écran qui tutoiera une pièce ». Cet écran est
+     arrivé — le rappel de projet du sélecteur — mais il vit sur des pages où ce
+     fichier n'est pas chargé. La table est donc partie là où tout le monde peut
+     la lire : PHP la transmet dans `SAPI_PROJECT.possessifs`, à partir de
+     `sapi_piece_possessive()`. Une seule table, plus de recopie. */
+  /* `buildRecapIntro` produisait « Pour ton bureau, Robin recommande : ». Elle
+     a été retirée avec la phrase : la pastille « Pièce : Bureau » dit la même
+     chose en moins de place, et le bandeau « Ce que je te recommande sur ce
+     modèle » dit le reste.
+     Pour tutoyer une pièce, lire `SAPI_PROJECT.possessifs` — voir la note
+     juste au-dessus. */
 
   // Affiche l'écran s-product-recap (immédiat, aucun fetch).
   function showProductRecap() {
@@ -1378,19 +1959,50 @@
     var answers = state.answers;
     var labels = state.labels;
     var style = answers.style;
-    var essence = ESSENCE_FROM_STYLE[style] || null;
+    var essence = (window.sapiProject && window.sapiProject.styleToEssence)
+      ? (window.sapiProject.styleToEssence(answers) || null)
+      : null;
     var essenceLabel = essence ? ESSENCE_LABEL[essence] : '';
     var tailleLabel = readTailleLabelFromProductSelect(answers);
 
-    // Intro
-    if (els.productRecapIntro) {
-      els.productRecapIntro.textContent = buildRecapIntro(answers, labels);
+    /* ── TON PROJET ────────────────────────────────────────────────────────
+       On n'affiche QUE les réponses dont sort le conseil : la pièce donne le
+       contexte, la taille de la pièce donne la taille du luminaire, le style
+       donne l'essence. Sortie électrique, hauteur et éclairage servent à
+       choisir QUELS modèles montrer, pas quelle version de celui-ci : les
+       afficher ici promettrait un effet qu'elles n'ont pas sur cet écran.
+       La phrase à se raconter : « on montre les réponses dont sort le conseil,
+       et rien d'autre. »
+       Pastilles CLIQUABLES : un clic corrige la réponse et ramène ICI, sur la
+       fiche produit — pas sur l'écran de la page de sélection, dont le bouton
+       principal ferait quitter le produit qu'on regarde. C'est ce que rend
+       possible `state.retourApresEdition`. */
+    /* ⚠️ MÊME LISTE QUE LES QUESTIONS POSÉES, PAR CONSTRUCTION. Cette liste
+       était recopiée à la main ici, alors qu'elle doit être exactement celle
+       du mode court : on montre les réponses dont sort le conseil, donc celles
+       qu'on a posées. Une copie manuelle reste exacte jusqu'au jour où on
+       ajoute ou retire une question du mode court — et ce jour-là, la fiche
+       produit afficherait une pastille de moins ou de trop, sans rien casser.
+       `SHORT_STEPS` vient de PHP (`shortSteps`), qui est la source. */
+    var chipsProjet = SHORT_STEPS;
+    var MOTS_CLES_PRODUIT = { taille: 'Taille de la pièce' };
+    if (els.productRecapProject) {
+      els.productRecapProject.innerHTML = '';
+      var nbChips = 0;
+      chipsProjet.forEach(function (sid) {
+        var chip = buildProjectChip(sid, { cliquable: true, empile: true, motCle: MOTS_CLES_PRODUIT[sid] });
+        if (chip) { els.productRecapProject.appendChild(chip); nbChips++; }
+      });
+      els.productRecapProject.hidden = !nbChips;
+      if (els.productRecapProjectLabel) els.productRecapProjectLabel.hidden = !nbChips;
     }
 
     // Récap card : Essence + Taille (chacune masquée si non disponible)
     var hasEssence = !!essence;
     var hasTaille = !!tailleLabel;
-    if (els.productRecapCard) els.productRecapCard.hidden = !(hasEssence || hasTaille);
+    var aReco = hasEssence || hasTaille;
+    if (els.productRecapCard) els.productRecapCard.hidden = !aReco;
+    if (els.productRecapRecoLabel) els.productRecapRecoLabel.hidden = !aReco;
     if (els.productRecapEssence) {
       els.productRecapEssence.hidden = !hasEssence;
       if (hasEssence && els.productRecapEssenceValue) {
@@ -1404,21 +2016,33 @@
       }
     }
 
-    // Conseil de style (texte fixe pré-généré)
+    /* Conseil de style — il suit SA ligne, comme celui de la taille.
+       La note vit maintenant DANS la carte, juste sous « Essence / Okoumé » :
+       si cette ligne n'est pas affichée, sa phrase n'a rien à commenter. */
     if (els.productRecapConseil) {
-      var conseil = (style && STYLE_CONSEILS[style]) || '';
+      var conseil = (hasEssence && style && STYLE_CONSEILS[style]) || '';
       els.productRecapConseil.textContent = conseil;
       els.productRecapConseil.hidden = !conseil;
     }
 
-    // Conseil de taille (mirror conseil de style — texte fixe pré-généré).
-    // Slug dérivé : pour escalier, taille_escalier=ouvert→grande, standard→petite.
+    /* Conseil de taille — LE MÊME CALCUL QUE L'ENCART, pas un deuxième.
+       ⚠️ Ce bloc dérivait son slug tout seul : `ouvert → grande`,
+       `standard → petite`. L'encart, lui, affichait la taille du milieu pour
+       un escalier ouvert et rien du tout pour un standard. Les deux étaient sur
+       le même écran, l'un sous l'autre : le site appliquait une taille et en
+       annonçait une autre, et il commentait une taille qu'il n'affichait pas.
+       L'intention vient maintenant de la source unique (`sapi-project.js`), la
+       même qui pilote la présélection.
+
+       Et la phrase suit la LIGNE : si l'encart n'annonce aucune taille, il n'y
+       a rien à commenter. Une phrase orpheline sous une ligne absente. */
     if (els.productRecapConseilTaille) {
-      var tailleSlug = answers.taille || '';
-      if (!tailleSlug && answers.piece === 'escalier' && answers.taille_escalier) {
-        tailleSlug = answers.taille_escalier === 'ouvert' ? 'grande' : 'petite';
-      }
-      var conseilTaille = (tailleSlug && SIZE_CONSEILS[tailleSlug]) || '';
+      var intention = (window.sapiProject && window.sapiProject.tailleIntention)
+        ? window.sapiProject.tailleIntention(answers)
+        : null;
+      // 'max' = la plus grande disponible : c'est bien du grand qu'on parle.
+      var slugConseil = (intention === 'max') ? 'grande' : intention;
+      var conseilTaille = (hasTaille && slugConseil && SIZE_CONSEILS[slugConseil]) || '';
       els.productRecapConseilTaille.textContent = conseilTaille;
       els.productRecapConseilTaille.hidden = !conseilTaille;
     }
@@ -1429,11 +2053,13 @@
   // CTA "Appliquer cette sélection" : ferme la modale, dispatch un event pour
   // que la fiche produit applique la pré-sélection variation.
   function applyProductSelection() {
-    var detail = {
-      productId: PRODUCT_CTX && PRODUCT_CTX.id ? PRODUCT_CTX.id : 0,
-      answers: state.answers,
-      labels: state.labels,
-    };
+    noterValidation(); // validation explicite du projet — cf. noterValidation()
+    /* `answers` seulement : `productId` et `labels` n'étaient lus par personne.
+       Trois clés inutiles ne cassent rien, mais elles racontent une histoire
+       fausse — un lecteur croirait que la modale doit dire à la fiche produit
+       QUEL produit et QUELS libellés, alors qu'elle a juste besoin de dire
+       « vas-y, applique ». */
+    var detail = { answers: state.answers };
     document.dispatchEvent(new CustomEvent('sapi:apply-product-selection', { detail: detail }));
     closeModal();
     // Scroll smooth vers les variations WC pour montrer le résultat
@@ -1453,6 +2079,7 @@
     state.answers = {};
     state.labels = {};
     state.questionHistory = [];
+    state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
   }
 
@@ -1461,15 +2088,33 @@
      Remplace les anciens CTAs externes (formulaire sur-mesure / mailto)
      par un form AJAX direct → endpoint sapi_megafilter_surmesure existant.
      ───────────────────────────────────────────── */
-  // Construit le récap projet (chips ordonnées séparées par " · ").
+  /* Le récap projet de l'écran contact, en texte.
+     ⚠️ DEUX DÉFAUTS CORRIGÉS ICI LE 28/08, ET LE SECOND PART DANS TON MAIL.
+     1. L'ordre des questions était recopié à la main. Il vient maintenant de
+        `clesProjet()`, la même source que l'URL et le reste du parcours : au
+        premier ajout de question, cet écran suivra tout seul.
+     2. Les pastilles ne portaient QUE la valeur : le visiteur lisait « Grand »
+        sans savoir grand quoi, juste avant de laisser son adresse. On y remet
+        le mot de la question avec `S3_KEY_LABELS`, la même table que les
+        pastilles cliquables.
+        ⚠️ Ces lignes ne partent PAS dans le mail à Robin, contrairement à ce
+        que j'avais écrit ici : le mail est construit côté serveur par
+        `sapi_megafilter_format_project_text()`, avec sa propre table de
+        libellés. Ne pas compter sur cette fonction pour corriger le mail.
+     On ne peut pas appeler `buildProjectChip` ici : elle rend un élément HTML,
+     alors que ce récap doit aussi voyager en texte dans le mail. Les deux
+     partagent en revanche leurs deux sources — libellés et mots de question. */
   function buildContactRecap(answers, labels) {
-    var orderedKeys = ['piece', 'taille', 'taille_escalier', 'eclairage', 'sortie', 'hauteur', 'table', 'style'];
+    var cles = (window.sapiProject && window.sapiProject.clesProjet)
+      ? window.sapiProject.clesProjet()
+      : ['piece', 'taille', 'taille_escalier', 'eclairage', 'sortie', 'hauteur', 'style'];
     var lines = [];
-    orderedKeys.forEach(function (k) {
+    cles.forEach(function (k) {
       var slug = answers && answers[k];
       if (!slug) return;
-      var lbl = (labels && labels[k]) || slug;
-      lines.push(lbl);
+      var valeur = (labels && labels[k]) || getChoiceLabel(k, slug) || slug;
+      var motCle = S3_KEY_LABELS[k];
+      lines.push(motCle ? (motCle + ' : ' + valeur) : valeur);
     });
     return lines;
   }
@@ -1545,6 +2190,17 @@
     }
 
     showScreen('s-contact');
+
+    /* ⚠️ `contact_triggered` n'était envoyé QUE dans le payload du submit,
+       à côté de `contact_submitted: 1` — les deux colonnes valaient donc
+       toujours la même chose. Conséquences pour Robin : la pastille
+       « Abandon » du tableau était du code mort, jamais affichée, et le
+       visiteur qui ATTEINT le formulaire sans l'envoyer était indiscernable
+       de celui qui a simplement fermé la modale.
+       C'est exactement la population des pièces hors périmètre — celles qu'on
+       vient d'y router. Sans cette ligne, on les envoie vers un formulaire
+       dont on ne saura jamais combien l'ont vu sans écrire. */
+    SessionTracker.snapshot({ contact_triggered: 1 });
   }
 
   // Submission du form de contact intégré → endpoint sapi_megafilter_surmesure.
@@ -1586,10 +2242,19 @@
 
     // Tracking V3 — snapshot AVANT le submit pour qu'on trace même si le
     // visiteur ferme la modale avant la confirmation serveur.
+    /* ⚠️ PAS de `contact_submitted` ici. On enregistre que le visiteur a
+       TENTÉ (`contact_triggered`) et ce qu'il a écrit — utile même s'il ferme
+       la modale avant la confirmation. Mais l'envoi réel n'est connu que du
+       serveur : les rejets anti-spam répondent « success » en silence, par
+       conception, donc ce code ne peut pas les distinguer d'un vrai envoi.
+       C'est `sapi_megafilter_marquer_contact_envoye()` qui écrit la vérité,
+       après un wp_mail réussi. */
     SessionTracker.snapshot({
       contact_triggered: 1,
-      contact_submitted: 1,
-      contact_email: emailVal,
+      /* ⚠️ `contact_email` N'EST PLUS ENVOYÉ. Le serveur ne le stocke plus
+         (décision Robin du 27/08) : transporter une adresse pour qu'elle
+         soit jetée à l'arrivée serait la promener pour rien. Elle part
+         toujours dans le formulaire lui-même, qui produit le mail. */
       contact_message: msgVal,
       contact_kind: contactKind,
       contact_subject: contactSubject,
@@ -1604,6 +2269,9 @@
     fd.append('description', msgVal);
     fd.append('source', 'conseiller-modal');
     fd.append('source_url', window.location.href);
+    // Voir sapi_megafilter_marquer_contact_envoye() : le serveur écrit lui-même
+    // `contact_submitted` sur cette ligne, après un envoi réussi.
+    try { fd.append('session_id', SessionTracker.getSessionId()); } catch (e) { /* swallow */ }
     if (contactKind)    fd.append('contact_kind', contactKind);
     if (contactSubject) fd.append('contact_subject', contactSubject);
     if (project) fd.append('project', JSON.stringify(project));
@@ -1666,6 +2334,18 @@
     hydrateFromProject();
     state.questionHistory = [];
     state.transition = false;
+    /* ⚠️ CES DEUX-LÀ FUYAIENT D'UNE OUVERTURE À L'AUTRE.
+       `retourApresEdition` (alors booléen `editFromS3`) n'était remis à zéro que dans UNE branche de
+       `answerCurrentQuestion`. Le visiteur qui ouvrait le récap, cliquait une
+       chip pour corriger, puis se ravisait et fermait, laissait le drapeau
+       levé : à la session suivante, arrivé au bout du questionnaire, il
+       retombait sur le récap au lieu d'obtenir le conseil de Robin et sa
+       sélection. Le conseil n'était jamais calculé.
+       `chat.conversation` n'était vidé que sur deux chemins d'entrée : le
+       tracking pouvait donc réémettre la conversation de la session
+       précédente. */
+    state.retourApresEdition = null;
+    state.chat.conversation = [];
 
     state.open = true;
     els.modal.hidden = false;
@@ -1682,7 +2362,10 @@
 
     // Tracking V3 — INSERT row (entry_point + entry_url). Doit être appelé
     // AVANT showScreen() pour que le snapshot suivant soit un UPDATE.
+    // Sans effet si la session a déjà été ouverte à l'arrivée (clic sur un
+    // sélecteur de pièce) : `reprendre()` rouvre alors le flux d'envois.
     SessionTracker.start();
+    SessionTracker.reprendre();
 
     // F2a-quater : state="s0" → détermine dynamiquement le sous-état
     //   (initial / partiel / s3-carrefour) selon le contenu du sapiProject.
@@ -1747,9 +2430,14 @@
     document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
     exitChatMode();
-    if (lastTrigger && lastTrigger.focus) {
+    /* `isConnected` : entre l'ouverture et la fermeture, la page a pu être
+       redessinée (la grille se refiltre, la fiche produit change de variation).
+       Rendre le focus à un élément détaché ne lève pas d'erreur — il part
+       simplement sur `<body>`, c'est-à-dire nulle part. */
+    if (lastTrigger && lastTrigger.isConnected && lastTrigger.focus) {
       try { lastTrigger.focus(); } catch (e) { /* swallow */ }
     }
+    lastTrigger = null;
     // Tracking V3 — snapshot final via sendBeacon (résilient au unload).
     SessionTracker.finalize();
     // Reprendre les notifications sapiProject + flush l'éventuel update
@@ -1757,6 +2445,23 @@
     if (window.sapiProject && typeof window.sapiProject.resumeNotifications === 'function') {
       window.sapiProject.resumeNotifications();
     }
+    dispatchConseillerClosed();
+  }
+
+  // Événement déterministe émis à CHAQUE fermeture de la modale (fin ou
+  // abandon), porteur des réponses finales. Plus fiable que d'écouter le
+  // subscribe sapiProject côté immersion (qui dépend du flush pendingNotify
+  // du resume → « ne se recharge pas tout le temps »).
+  function dispatchConseillerClosed() {
+    var answers = {};
+    try {
+      if (window.sapiProject && typeof window.sapiProject.get === 'function') {
+        answers = window.sapiProject.get().answers || {};
+      }
+    } catch (e) { /* swallow */ }
+    document.dispatchEvent(new CustomEvent('sapi:conseiller-closed', {
+      detail: { answers: answers }
+    }));
   }
 
   /* ─────────────────────────────────────────────
@@ -1765,7 +2470,20 @@
   function bindEvents() {
     // Listener global pour l'événement venant des cards Phase 2
     document.addEventListener('sapi:open-modal', function (e) {
-      lastTrigger = e.target && e.target.closest ? e.target.closest('[data-action="open-modal"]') : null;
+      /* ⚠️ CE CODE CHERCHAIT `closest` SUR `document`, QUI NE L'A PAS.
+         L'événement est envoyé à `document` (`document.dispatchEvent`), donc
+         `e.target` EST `document` : le ternaire retombait sur `null` à chaque
+         ouverture, en silence. Résultat, une personne qui navigue au clavier
+         était renvoyée en haut de la page à chaque fermeture et devait tout
+         retraverser. Trois ans qu'il ne faisait rien.
+         L'élément déclencheur est maintenant transmis par celui qui ouvre la
+         modale — il est le seul à le connaître. À défaut, on retombe sur
+         l'élément qui avait le focus : c'est le bouton cliqué dans la quasi
+         totalité des cas. */
+      lastTrigger = (e.detail && e.detail.trigger)
+        || (document.activeElement && document.activeElement !== document.body
+              ? document.activeElement
+              : null);
       var st = (e.detail && e.detail.state) || 's0';
       // Round 2 — 2.1 : garde-fou. state='product' sans config.product (pas
       // sur fiche produit) déclencherait applyProductSelection avec
@@ -1842,11 +2560,43 @@
           backFromQuestion();
           break;
         case 'apply':
-          // F2a-bis : CTA "Voir la sélection" en S2.chat → écran transition + appel IA
-          // unique (avec la conversation), puis save + close. Plus de S3 récap.
+          /* CTA « Voir la sélection » du chat.
+
+             Garde-fou : sans pièce ni critère, il n'y a rien à montrer. Le
+             bouton est déjà masqué dans ce cas (revealChatCta) — ceci est la
+             ceinture, pas la bretelle. Elle compte quand même : SUR LA PAGE
+             D'IMMERSION, le chemin normal repartait en « moment 2 » et
+             re-servait la sélection de l'ancienne pièce, la page derrière
+             n'ayant jamais changé. C'est exactement ce que Robin a vu — les
+             modèles du projet précédent sous une conversation sur une salle
+             de bain. */
+          if (!projectPiece()) {
+            showContact({
+              message: 'Pour cette pièce, je préfère te répondre moi-même. Laisse-moi ton mail et un mot sur ton projet.'
+            });
+            break;
+          }
+          /* Troisième acte de validation, longtemps oublié ici. Ce bouton
+             n'apparaît que si une pièce est connue — souvent celle d'une
+             visite précédente, relue du localStorage. Sans cette ligne,
+             `aReponduIci` restait faux et l'envoi final partait SANS pièce ni
+             réponses : la session existait, mais hors de « Top pièces » et
+             hors du filtre Pièce. Le visiteur fidèle, exactement celui que
+             `noterValidation()` a été écrit pour rattraper. */
+          noterValidation();
+          // F2a-bis : écran transition + appel IA unique (avec la conversation),
+          // puis save + close.
           showTransitionAndExit({
             source: 's2',
             conversation: (state.chat && state.chat.conversation) || [],
+          });
+          break;
+        case 'chat-contact':
+          // Seconde sortie du chat, celle que l'IA propose elle-même quand
+          // elle sent que le projet mérite un échange direct.
+          if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+          showContact({
+            message: 'Dis-m’en un peu plus et laisse-moi ton mail : je te réponds moi-même.'
           });
           break;
         // F2a-ter : 3 actions du carrefour S3 "Modifier mon projet"
@@ -1892,7 +2642,7 @@
     });
 
     // Round 4 — Click sur une chip de récap S3 → édite ce step.
-    // Bascule sur S1 avec la question correspondante, en mode editFromS3
+    // Bascule sur S1 avec la question correspondante, en mode édition
     // pour qu'à la fin du flow (qui peut être immédiate si aucune réponse
     // n'est invalidée par le changement), on retourne directement au récap.
     els.modal.addEventListener('click', function (e) {
@@ -1900,7 +2650,10 @@
       if (!editChip) return;
       var stepId = editChip.getAttribute('data-step-edit');
       if (!stepId) return;
-      state.editFromS3 = true;
+      /* La destination se déduit de l'écran courant. C'est la seule
+         information qui manquait pour rendre les pastilles du récap produit
+         cliquables sans éjecter le visiteur de sa fiche. */
+      state.retourApresEdition = (state.screen === 's-product-recap') ? 'product' : 's3';
       // Reset questionHistory pour que le retour de S1 ne ramène pas à
       // d'anciennes questions du parcours initial — depuis S3 on est
       // "hors-flow", on permet juste l'édition ponctuelle.
@@ -1969,7 +2722,9 @@
     // S3 carrefour
     els.recapChips    = els.modal.querySelector('[data-recap-chips]');
     // s-product-recap (F2b Phase 2 — récap statique sans IA)
-    els.productRecapIntro        = els.modal.querySelector('[data-product-recap-intro]');
+    els.productRecapProject      = els.modal.querySelector('[data-product-recap-project]');
+    els.productRecapProjectLabel = els.modal.querySelector('[data-product-recap-project-label]');
+    els.productRecapRecoLabel    = els.modal.querySelector('[data-product-recap-reco-label]');
     els.productRecapCard         = els.modal.querySelector('[data-product-recap-card]');
     els.productRecapEssence      = els.modal.querySelector('[data-product-recap-essence]');
     els.productRecapEssenceValue = els.modal.querySelector('[data-product-recap-essence-value]');
@@ -2008,12 +2763,85 @@
         }, 100);
       }
     } catch (e) { /* URLSearchParams indisponible — silencieux */ }
+
+    /* ⚠️ LE CLIC SUR UN SÉLECTEUR DE PIÈCE COMPTE, MÊME SANS OUVRIR LA MODALE.
+       Demande de Robin, recette du 28/08 : « il faut ouvrir la modale pour que
+       ce soit comptabilisé, moi je voudrais que le clic sur le room-picker
+       compte ». C'est un acte volontaire — la personne a choisi sa pièce — et
+       il n'y avait aucune trace de ceux qui s'arrêtaient là.
+       On n'ouvre la session QUE si `from` est présent, donc uniquement pour
+       ces visiteurs-là. Les arrivées directes (Google, lien) continuent de ne
+       compter qu'à l'ouverture de la modale : le sens du mot « session » ne
+       change pas pour tout le monde d'un coup.
+       ⚠️ CONSÉQUENCE À CONNAÎTRE : ces lignes existent sans réponse au
+       questionnaire, sauf la pièce. Le taux de « quiz complet » va donc
+       baisser mécaniquement, sans que personne n'ait changé de comportement.
+       C'est le prix d'un dénominateur plus honnête. */
+    /* ⚠️ LISTE BLANCHE, PAS « SI `from` EXISTE ». Ce paramètre vient de
+       l'adresse. La liste ferme le VOCABULAIRE : `?from=nimportequoi` n'ouvre
+       rien et n'écrit rien. Elle n'empêche pas quelqu'un de recharger dix fois
+       avec `?from=home` — pour ça il faudrait une limite de fréquence sur le
+       point d'entrée, qu'il n'a pas. Conséquence bornée : la table se purge, et
+       ça ne fausserait qu'un compteur.
+       ⚠️ ET PAS SUR UNE FICHE PRODUIT. La modale y est chargée aussi : sans ce
+       garde-fou, une adresse fabriquée ouvrirait une session à l'arrivée sur
+       une fiche, avant même que la pastille soit touchée. */
+    var surFicheProduit = document.body
+      && (document.body.classList.contains('single-product')
+          || (window.location.pathname || '').indexOf('/produit/') !== -1);
+    if (!surFicheProduit
+        && (ORIGINE_ANNONCEE === 'home' || ORIGINE_ANNONCEE === 'conseils'
+            || ORIGINE_ANNONCEE === 'mes_creations')) {
+      var pieceCliquee = '';
+      try {
+        pieceCliquee = new URLSearchParams(window.location.search).get('piece') || '';
+      } catch (e) { /* silencieux */ }
+      /* La pièce part dans le MÊME envoi que la provenance — sinon Robin
+         verrait « quelqu'un est venu de l'accueil » sans savoir quelle pièce.
+         ⚠️ Elle n'est PAS validée ici : elle sort de l'adresse, où n'importe
+         qui peut écrire n'importe quoi. C'est le serveur qui la confronte au
+         questionnaire (`sapi_megafilter_sanitize_project`), parce que c'est lui
+         qui écrit en base et qu'un contrôle côté navigateur se contourne. */
+      SessionTracker.start(pieceCliquee ? { answers: { piece: pieceCliquee } } : null);
+    }
+
+    /* ⚠️ ON RETIRE `from` DE L'ADRESSE, ET HORS DU BLOC CI-DESSUS — donc AUSSI
+       sur une fiche produit, où il n'aura rien ouvert. Sinon il survit à tout :
+       une navigation interne réécrit l'adresse en préservant les paramètres
+       étrangers, `from` réapparaît sur /mes-creations/, et une deuxième session
+       naît pour un seul clic de sélecteur. Il a fait son office au chargement
+       du script, quand `ORIGINE_ANNONCEE` l'a lu ; à partir d'ici il ne sert
+       plus qu'à salir les liens que le visiteur pourrait partager. */
+    try {
+      var adresse = new URL(window.location.href);
+      if (adresse.searchParams.has('from')) {
+        adresse.searchParams.delete('from');
+        window.history.replaceState({}, '', adresse.pathname + adresse.search + adresse.hash);
+      }
+    } catch (e) { /* silencieux : au pire le paramètre reste visible */ }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
+  /* ⚠️ « complete », PAS « loading ». Ce fichier doit démarrer APRÈS
+     `sapi-project.js` : il prépare la modale à partir du projet et pilote tout
+     le parcours — or
+     ce projet n'est complet qu'une fois l'adresse ingérée par `sapi-project`,
+     ce qui arrive à `DOMContentLoaded`.
+     Le test naïf `readyState === 'loading'` ne le garantit pas : **en
+     production, Autoptimize ajoute `defer` à tous les scripts**, et dans un
+     script différé `readyState` vaut déjà « interactive ». On tombait donc
+     dans le `else` et `init()` partait trop tôt.
+     Avec le test sur « complete », on attend `DOMContentLoaded` dans tous les
+     cas sauf si la page est DÉJÀ entièrement chargée — donc en production on
+     démarre à `DOMContentLoaded`, pas immédiatement. C'est bien l'effet
+     recherché : ne pas confondre « le test dit complete » et « on s'exécute
+     tout de suite ».
+     ⚠️ Le site de test n'a PAS Autoptimize : cette classe de bug ne peut pas
+     être montrée en recette. Ne pas « simplifier » ce test parce qu'il a l'air
+     de marcher sur test. Explication complète dans sapi-project.js. */
+  if (document.readyState === 'complete') {
     init();
+  } else {
+    document.addEventListener('DOMContentLoaded', init);
   }
 
   // Exposition pour debug et appels externes (Phase 4 fiche produit)

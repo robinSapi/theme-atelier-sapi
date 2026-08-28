@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup #8 — Pill "Comment choisir ?" sur fiche produit</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-wood: #8B7355;
+    --color-wood-dark: #4A3F35;
+    --color-wood-mid: #6B5A4A;
+    --color-warm: #F5F0E8;
+    --color-orange: #E35B24;
+    --color-orange-dark: #C44A1E;
+    --color-line: rgba(147, 125, 104, 0.18);
+    --color-bg: #FAFAF7;
+    --shadow-card: 0 2px 8px rgba(147,125,104,0.12), 0 6px 28px rgba(147,125,104,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--color-bg);
+    color: var(--color-wood-dark);
+    line-height: 1.55;
+  }
+
+  .variant-label {
+    max-width: 1200px;
+    margin: 48px auto 0;
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    opacity: 0.55;
+  }
+
+  /* ═══════════ Esquisse fiche produit ═══════════ */
+  .product-page {
+    max-width: 1200px;
+    margin: 28px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+  }
+
+  /* Côté gauche : galerie */
+  .product-gallery {
+    background: linear-gradient(135deg, var(--color-warm) 0%, #E5DED3 100%);
+    border-radius: 12px;
+    aspect-ratio: 1/1.1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-wood);
+    opacity: 0.5;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Côté droit : infos produit */
+  .product-info { padding-top: 10px; }
+  .product-info__category {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-wood);
+    margin-bottom: 8px;
+  }
+  .product-info__name {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-wood-dark);
+    margin-bottom: 4px;
+  }
+  .product-info__surname {
+    font-family: 'Square Peg', cursive;
+    font-size: 52px;
+    color: var(--color-wood);
+    line-height: 1;
+    margin-bottom: 18px;
+  }
+  .product-info__price {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+    margin-bottom: 28px;
+  }
+
+  /* ═══════════ Pill "Comment choisir ?" — design Conseiller (dashed) ═══════════ */
+  .help-pill-row {
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: flex-start;
+  }
+  .help-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    background: var(--color-warm);
+    color: var(--color-wood-dark);
+    border: 1.5px dashed rgba(139, 115, 85, 0.5);
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .help-pill:hover {
+    background: #fff;
+    border-color: var(--color-wood-dark);
+    transform: translateY(-1px);
+  }
+  .help-pill svg { width: 13px; height: 13px; color: var(--color-wood); }
+
+  /* Variantes de label */
+  .product-attribute {
+    margin-bottom: 22px;
+  }
+  .product-attribute__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-wood-dark);
+    margin-bottom: 10px;
+  }
+  .product-attribute__swatches {
+    display: flex;
+    gap: 8px;
+  }
+  .swatch {
+    padding: 10px 18px;
+    border: 1.5px solid var(--color-line);
+    border-radius: 50px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--color-wood-dark);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .swatch:hover { border-color: var(--color-wood); }
+  .swatch.is-selected {
+    background: var(--color-wood-dark);
+    color: #fff;
+    border-color: var(--color-wood-dark);
+  }
+
+  /* Bouton ajouter au panier */
+  .cart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 16px 38px;
+    background: var(--color-orange);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    margin-top: 10px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .cart-btn:hover {
+    background: var(--color-orange-dark);
+    transform: translateY(-1px);
+  }
+
+  /* Petite indication si projet pré-sélectionné */
+  .preselected-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-wood);
+    font-style: italic;
+  }
+  .preselected-hint::before {
+    content: "✓";
+    font-size: 12px;
+    color: var(--color-wood-dark);
+    font-style: normal;
+  }
+
+  /* Footer mockup */
+  .mockup-footer {
+    background: var(--color-wood-dark);
+    color: #fff;
+    padding: 16px 20px;
+    margin-top: 40px;
+    text-align: center;
+    font-size: 11px;
+    opacity: 0.9;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .product-page {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .product-info__surname { font-size: 44px; }
+    .product-info__price { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+
+<!-- ══════════════ Cas A — Sans projet ══════════════ -->
+<div class="variant-label">Cas A — Le visiteur n'a pas de projet en cours · pill discrète au-dessus des variations</div>
+<div class="product-page">
+
+  <div class="product-gallery">photo produit</div>
+
+  <div class="product-info">
+    <div class="product-info__category">Suspension</div>
+    <div class="product-info__name">Gaston</div>
+    <div class="product-info__surname">le chardon</div>
+    <div class="product-info__price">329 €</div>
+
+    <!-- Pill "Comment choisir ?" placée juste avant les sélecteurs de variation -->
+    <div class="help-pill-row">
+      <button class="help-pill" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <path d="M12 17h.01"/>
+        </svg>
+        Comment choisir ?
+      </button>
+    </div>
+
+    <div class="product-attribute">
+      <div class="product-attribute__label">Taille</div>
+      <div class="product-attribute__swatches">
+        <button class="swatch" type="button">Ø 300mm</button>
+        <button class="swatch" type="button">Ø 450mm</button>
+        <button class="swatch" type="button">Ø 600mm</button>
+      </div>
+    </div>
+
+    <div class="product-attribute">
+      <div class="product-attribute__label">Essence</div>
+      <div class="product-attribute__swatches">
+        <button class="swatch" type="button">Peuplier</button>
+        <button class="swatch" type="button">Okoumé</button>
+        <button class="swatch" type="button">Noir</button>
+      </div>
+    </div>
+
+    <button class="cart-btn" type="button">Ajouter au panier</button>
+  </div>
+
+</div>
+
+
+<!-- ══════════════ Cas B — Avec projet (variation pré-sélectionnée) ══════════════ -->
+<div class="variant-label">Cas B — Le visiteur a un projet en cours · variation pré-sélectionnée + pill qui ouvre le récap</div>
+<div class="product-page">
+
+  <div class="product-gallery">photo produit</div>
+
+  <div class="product-info">
+    <div class="product-info__category">Suspension</div>
+    <div class="product-info__name">Gaston</div>
+    <div class="product-info__surname">le chardon</div>
+    <div class="product-info__price">329 €</div>
+
+    <!-- Même pill, mais clic = ouvre le récap projet -->
+    <div class="help-pill-row">
+      <button class="help-pill" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <path d="M12 17h.01"/>
+        </svg>
+        Comment choisir ?
+      </button>
+    </div>
+
+    <div class="product-attribute">
+      <div class="product-attribute__label">
+        Taille
+        <span class="preselected-hint">Pré-sélectionné pour votre projet</span>
+      </div>
+      <div class="product-attribute__swatches">
+        <button class="swatch" type="button">Ø 300mm</button>
+        <button class="swatch" type="button">Ø 450mm</button>
+        <button class="swatch is-selected" type="button">Ø 600mm</button>
+      </div>
+    </div>
+
+    <div class="product-attribute">
+      <div class="product-attribute__label">Essence</div>
+      <div class="product-attribute__swatches">
+        <button class="swatch is-selected" type="button">Peuplier</button>
+        <button class="swatch" type="button">Okoumé</button>
+        <button class="swatch" type="button">Noir</button>
+      </div>
+    </div>
+
+    <button class="cart-btn" type="button">Ajouter au panier</button>
+  </div>
+
+</div>
+
+
+<div class="mockup-footer">
+  Mockup #8 — Pill "Comment choisir ?" · placée au-dessus des sélecteurs de variation<br>
+  Sans projet → ouvre la modale mode court · Avec projet → ouvre la modale en mode récap direct<br>
+  Variation pré-sélectionnée visible via swatch <code>.is-selected</code> + hint "Pré-sélectionné pour votre projet"
+</div>
+
+</body>
+</html>

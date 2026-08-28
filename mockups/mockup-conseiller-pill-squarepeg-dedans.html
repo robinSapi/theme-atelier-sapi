@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conseiller — accroche Square Peg DANS la pill (sans « Le conseil de Robin »)</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wood:#8B7355; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24; --cream:#FBF6EA; --ink:#3a322b;
+    --robin:url('https://atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice.jpg');
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Montserrat',sans-serif;color:var(--ink);background:#efe9dc}
+  .devnote{background:var(--wood-dark);color:#f0e7d8;font-size:13px;padding:14px 28px}.devnote b{color:#fff}
+  .band{background:var(--cream);background-image:repeating-linear-gradient(92deg,rgba(139,115,85,.05) 0,rgba(139,115,85,.05) 1px,transparent 1px,transparent 7px);
+    padding:38px 24px 28px;text-align:center;border-top:1px solid #efe6da;margin-bottom:12px;position:relative}
+  .tag{position:absolute;left:22px;top:12px;background:var(--wood);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;border-radius:50px;padding:4px 12px}
+  .h2{font-weight:700;font-size:clamp(1.7rem,3.2vw,2.2rem);color:var(--wood-dark);margin-top:4px}
+
+  .pill{display:inline-flex;align-items:center;gap:12px;background:var(--wood-dark);border-radius:60px;padding:6px 24px 6px 6px;margin-bottom:16px}
+  .pill .av{border-radius:50%;background-image:var(--robin);background-size:cover;background-position:center 22%;flex-shrink:0}
+  .pill .hook{font-family:'Square Peg';color:#fff;line-height:1}
+
+  /* V1 — compact, hook 24px */
+  .v1 .av{width:34px;height:34px}.v1 .hook{font-size:24px}
+  /* V2 — medium, hook 28px */
+  .v2 .av{width:38px;height:38px}.v2 .hook{font-size:28px}
+  /* V3 — plus présent, hook 33px */
+  .v3 .av{width:44px;height:44px}.v3 .hook{font-size:33px;padding-right:2px}
+  /* V4 — photo qui dépasse à gauche */
+  .v4{padding-left:24px;position:relative}
+  .v4 .av{position:absolute;left:-8px;width:46px;height:46px;border:2px solid var(--cream)}
+  .v4 .hook{font-size:28px}
+  /* V5 — sans photo : point orange + hook */
+  .v5 .av{display:none}
+  .v5{padding:8px 24px}
+  .v5 .dot{width:9px;height:9px;border-radius:50%;background:var(--orange);flex-shrink:0;box-shadow:0 0 0 3px rgba(227,91,36,.25)}
+  .v5 .hook{font-size:28px}
+  /* V6 — hook + guillemet orange avant */
+  .v6 .av{width:38px;height:38px}.v6 .hook{font-size:28px}
+  .v6 .q{font-family:'Square Peg';color:#e0a878;font-size:30px;margin-right:-4px}
+</style>
+</head>
+<body>
+<div class="devnote"><b>Accroche Square Peg DANS la pill, sans « Le conseil de Robin »</b> &nbsp;·&nbsp; la pill sombre = photo (sans contour) + l'accroche manuscrite, en plus grand donc lisible. Identité « Robin » portée par la photo. 6 calibrages, au-dessus du vrai titre.</div>
+
+<div class="band"><span class="tag">V1 — compact (24px)</span>
+  <span class="pill v1"><span class="av"></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V2 — medium (28px)</span>
+  <span class="pill v2"><span class="av"></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V3 — plus présent (33px)</span>
+  <span class="pill v3"><span class="av"></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V4 — photo qui dépasse à gauche</span>
+  <span class="pill v4"><span class="av"></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V5 — sans photo, point orange</span>
+  <span class="pill v5"><span class="dot"></span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+<div class="band"><span class="tag">V6 — guillemet orange avant</span>
+  <span class="pill v6"><span class="av"></span><span class="q">&laquo;</span><span class="hook">Mon regard d'artisan sur ton projet</span></span>
+  <div class="h2">Pour quelle pièce cherches-tu un luminaire ?</div></div>
+
+</body>
+</html>
