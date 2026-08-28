@@ -144,8 +144,12 @@
     if (stepId) REPONSES_DE_CETTE_SESSION[stepId] = true;
   }
   /* Le visiteur n'a rien RETAPÉ, mais il a explicitement VALIDÉ son projet —
-     « Voir ma sélection », « Appliquer cette sélection ». C'est un acte
-     d'aujourd'hui, pas un souvenir de localStorage.
+     « Voir ma sélection » depuis le récap, « Appliquer cette sélection » sur
+     une fiche produit, et « Voir la sélection » à la sortie du chat. C'est un
+     acte d'aujourd'hui, pas un souvenir de localStorage.
+     Les trois appellent `noterValidation()` — le troisième ne le faisait pas,
+     et sa session partait sans pièce. Si un quatrième chemin de validation
+     apparaît un jour, il doit l'appeler aussi.
      Sans ça, le visiteur fidèle qui revient, valide et repart disparaissait des
      statistiques : la règle « rien de répondu, rien d'enregistré » supprimait
      bien les lignes en double, mais elle emportait aussi les vrais retours.
@@ -233,7 +237,10 @@
     function buildSnapshotPayload() {
       var payload = {};
       var project = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
-      /* ⚠️ RIEN N'EST ENVOYÉ TANT QUE LE VISITEUR N'A PAS RÉPONDU AUJOURD'HUI.
+      /* ⚠️ LES RÉPONSES NE PARTENT QUE SI LE VISITEUR A RÉPONDU OU VALIDÉ
+         AUJOURD'HUI — ce garde-fou ne porte QUE sur `answers`. Le conseil et
+         les champs de contact ci-dessous partent sans condition : ils sont
+         produits pendant cette visite, pas relus du localStorage.
          Le projet mémorisé vient peut-être d'une visite d'il y a trois
          semaines : l'enregistrer ferait passer une simple ouverture de modale
          pour un questionnaire rempli. Voir REPONSES_DE_CETTE_SESSION.
@@ -659,6 +666,13 @@
         if (advice && window.sapiProject && typeof window.sapiProject.setAdviceText === 'function') {
           window.sapiProject.setAdviceText(advice);
         }
+        /* ⚠️ CE CHEMIN NE FINALISAIT RIEN DU TOUT. Depuis une fiche produit ou
+           la boutique, la modale ne se ferme pas : la page part vers
+           /mes-creations/. `closeModal()` n'est donc jamais appelé, et aucun
+           envoi final ne partait — ni le conseil, ni les dernières réponses.
+           `send()` passe par `sendBeacon`, qui survit à la navigation : l'appel
+           est sûr ici, juste avant de quitter la page. */
+        SessionTracker.finalize();
         goToSelectionPage(piece);
       });
       return;
@@ -700,13 +714,18 @@
       state.open = false;
       exitChatMode();
 
-      // Fix audit — Bug 2 : reprendre les notifications sapiProject (sinon
-      // le notify bufferisé de sapiProject.set() ligne 496 n'est jamais
-      // flushé puisque ce chemin ne passe pas par closeModal()) +
-      // finaliser le tracking V3 (sinon la session n'est pas terminée
-      // dans l'admin). Le resume déclenche un render() des cards qui va
-      // basculer Conseil → Ton projet + repopulate le slot.
-      SessionTracker.finalize();
+      /* ⚠️ LA FINALISATION N'EST PLUS ICI, ET C'EST TOUT L'OBJET DU CORRECTIF.
+         Elle partait à cet instant, c'est-à-dire AVANT l'étape 5 où le conseil
+         de Robin est écrit dans le projet. Le dernier envoi ne le contenait
+         donc jamais — et comme `finalize()` pose `hasStarted = false`, tout
+         envoi ultérieur était refusé en silence. Résultat : `advice_text` vide
+         sur 100 % des sessions, alors que c'est le texte le plus visible de
+         tout le parcours. Elle est maintenant appelée dans `finishAdvice()`,
+         une fois le conseil posé. `fetchAdviceFromIA` résout toujours (son
+         `catch` renvoie `null`), donc `finishAdvice` est toujours atteint :
+         déplacer l'appel ne risque pas de perdre la finalisation.
+         Le `resumeNotifications` ci-dessous, lui, reste ici : il n'a rien à
+         voir avec le tracking, il flushe l'affichage des cartes. */
       if (window.sapiProject && typeof window.sapiProject.resumeNotifications === 'function') {
         window.sapiProject.resumeNotifications();
       }
@@ -801,6 +820,11 @@
     document.dispatchEvent(new CustomEvent('sapi:advice-ready', {
       detail: { advice: (typeof advice === 'string' ? advice : '') }
     }));
+    /* La finalisation se fait ICI, et nulle part ailleurs sur ce chemin :
+       c'est le premier instant où `advice_text` existe dans le projet, donc
+       le premier instant où l'envoi final peut le contenir. Voir la note à
+       l'endroit d'où cet appel a été déplacé. */
+    SessionTracker.finalize();
   }
 
   // Séquence de sortie en 3 phases (~2s) :
@@ -1641,7 +1665,14 @@
     // Le conseil est déjà en mémoire : pas d'appel IA, on emmène directement.
     if (!immersionIsOnPage()) {
       var piece = projectPiece();
-      if (piece) { goToSelectionPage(piece); return; }
+      if (piece) {
+        /* Même raison qu'au départ de `showTransitionAndExit` : on quitte la
+           page sans passer par `closeModal()`, donc sans rien finaliser. Le
+           conseil est déjà dans le projet sur ce chemin — il partira avec. */
+        SessionTracker.finalize();
+        goToSelectionPage(piece);
+        return;
+      }
       showContact({
         message: 'Je n’ai pas encore assez d’éléments pour te proposer une sélection. Laisse-moi ton mail et deux mots sur ton projet, je te réponds moi-même.'
       });
@@ -2361,6 +2392,14 @@
             });
             break;
           }
+          /* Troisième acte de validation, longtemps oublié ici. Ce bouton
+             n'apparaît que si une pièce est connue — souvent celle d'une
+             visite précédente, relue du localStorage. Sans cette ligne,
+             `aReponduIci` restait faux et l'envoi final partait SANS pièce ni
+             réponses : la session existait, mais hors de « Top pièces » et
+             hors du filtre Pièce. Le visiteur fidèle, exactement celui que
+             `noterValidation()` a été écrit pour rattraper. */
+          noterValidation();
           // F2a-bis : écran transition + appel IA unique (avec la conversation),
           // puis save + close.
           showTransitionAndExit({

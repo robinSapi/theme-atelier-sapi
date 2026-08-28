@@ -7071,11 +7071,21 @@ add_action('wp_ajax_nopriv_sapi_megafilter_log_session', 'sapi_megafilter_log_se
  * minutes après la création apparaissait deux heures après, parfois dans le
  * futur.
  *
- * Reste un sujet non tranché, à part : `created_at` vient de l'horloge MySQL
- * (`DEFAULT CURRENT_TIMESTAMP`) et `contact_submitted_at` de celle de
- * WordPress (`current_time('mysql')`). Si les deux serveurs divergent un jour,
- * l'écart réapparaîtra — mais aligner le stockage créerait une frontière entre
- * les lignes d'avant et d'après, ce qui serait pire.
+ * TRANCHÉ LE 28/08, ET LE CONTRAIRE DE CE QU'ON CROIT D'ABORD. `created_at`
+ * vient de l'horloge MySQL (`DEFAULT CURRENT_TIMESTAMP`), `contact_submitted_at`
+ * de celle de WordPress (`current_time('mysql')`). On ne touche à rien, pour
+ * deux raisons :
+ *   1. aligner le STOCKAGE créerait une frontière entre les lignes d'avant et
+ *      d'après, pire qu'un écart qui n'existe pas aujourd'hui ;
+ *   2. aligner la LECTURE serait une erreur. Les fenêtres de période
+ *      interrogent `created_at`, donc elles doivent rester sur `NOW()` :
+ *      comparer une colonne MySQL à une horloge MySQL est juste quoi qu'il
+ *      arrive, tandis qu'une borne calculée par WordPress serait juste
+ *      seulement tant que les deux machines coïncident. J'ai fait ce
+ *      changement puis je l'ai défait — il désalignait ce qu'il prétendait
+ *      unifier.
+ * Ce qui manquait n'était donc pas un correctif mais une alerte : un bandeau
+ * sur la page d'admin prévient si les deux horloges cessent d'être d'accord.
  */
 /**
  * Les libellés du tableau de bord, CONSTRUITS DEPUIS LE QUESTIONNAIRE.
@@ -7329,8 +7339,13 @@ function sapi_megafilter_log_session() {
         'taille_escalier' => 'taille_escalier',
         'eclairage'       => 'eclairage',
         'sortie'          => 'sortie',
+        /* `table` retiré : la question « au-dessus d'un meuble ? » ne fait plus
+           partie du parcours, le navigateur ne l'envoie donc jamais. La colonne
+           `table_reponse` est conservée — d'anciennes lignes en portent encore
+           la réponse, et le détail sait toujours les afficher — mais plus rien
+           ne l'alimente. Ne pas remettre cette entrée sans remettre la
+           question : elle écrirait une colonne que personne ne renseigne. */
         'hauteur'         => 'hauteur',
-        'table'           => 'table_reponse',
         'style'           => 'style',
       ];
       foreach ($answer_map as $payload_key => $column) {
@@ -7351,8 +7366,10 @@ function sapi_megafilter_log_session() {
     $input = sanitize_textarea_field($data['ai_freetext_input']);
     $update_data['ai_freetext_input'] = $input;
     $update_formats[] = '%s';
-    $update_data['ai_freetext_used'] = !empty($input) ? 1 : 0;
-    $update_formats[] = '%d';
+    /* `ai_freetext_used` n'est plus écrit : il ne disait rien de plus que
+       « `ai_freetext_input` n'est pas vide », et deux colonnes qui portent le
+       même fait finissent toujours par se contredire. Aucun filtre ni aucun
+       affichage ne la lisait. Colonne conservée pour ne pas casser l'existant. */
   }
   if (array_key_exists('ai_chat_messages', $data)) {
     $raw_msgs = is_string($data['ai_chat_messages']) ? json_decode($data['ai_chat_messages'], true) : $data['ai_chat_messages'];
@@ -7391,13 +7408,14 @@ function sapi_megafilter_log_session() {
     $update_formats[] = '%s';
   }
 
-  // Catalogue présenté
-  if (array_key_exists('matching_product_ids', $data)) {
-    $ids_raw = is_array($data['matching_product_ids']) ? $data['matching_product_ids'] : explode(',', (string) $data['matching_product_ids']);
-    $ids = array_filter(array_map('intval', $ids_raw));
-    $update_data['matching_product_ids'] = implode(',', $ids);
-    $update_formats[] = '%s';
-  }
+  /* CATALOGUE PRÉSENTÉ — RETIRÉ (décision Robin du 28/08).
+     Ce bloc attendait une liste que le navigateur ne lui a jamais envoyée : le
+     scan du DOM qui devait la produire visait deux sélecteurs absents de ce
+     thème. La colonne est vide sur 100 % des lignes depuis le premier jour, et
+     l'encart du détail ne s'est donc jamais affiché.
+     Le remettre demanderait de rattacher au journal la liste que le serveur
+     calcule déjà dans les deux points d'entrée IA — un chantier à part, pas une
+     réparation de ce bloc. Colonne conservée, plus personne ne l'écrit. */
 
   // Contact
   if (array_key_exists('contact_triggered', $data)) {
@@ -7715,6 +7733,13 @@ function sapi_megafilter_admin_build_where($filters) {
 
   if (!empty($filters['period']) && $filters['period'] !== 'all') {
     $days = ($filters['period'] === '30d') ? 30 : 7;
+    /* ⚠️ `NOW()`, PAS `current_time()`. J'ai voulu calculer cette borne côté
+       PHP pour « unifier les horloges » — c'était l'inverse. `created_at` est
+       posé par MySQL (`DEFAULT CURRENT_TIMESTAMP`) : comparer cette colonne à
+       `NOW()`, c'est comparer une horloge à elle-même, ce qui est juste quoi
+       qu'il arrive. Une borne venue de WordPress serait juste seulement tant
+       que les deux machines coïncident — et fausse en silence sinon.
+       Le désaccord d'horloges, lui, est signalé par un bandeau sur cette page. */
     $where[] = 'created_at >= DATE_SUB(NOW(), INTERVAL %d DAY)';
     $args[] = $days;
   }
@@ -7934,6 +7959,38 @@ function sapi_megafilter_admin_page() {
       <h1>Robin Conseiller — Sessions <span class="count">(<?php echo esc_html($total_filtered); ?>)</span></h1>
       <a href="<?php echo esc_url($export_url); ?>" class="button button-primary">📥 Exporter CSV</a>
     </div>
+
+    <?php
+    /* ⚠️ LE SEUL ENDROIT OÙ UN DÉSACCORD D'HORLOGES SE VOIT.
+       `created_at` est posé par MySQL, `contact_submitted_at` par WordPress.
+       Tant que les deux sont d'accord — c'est le cas aujourd'hui — ce tableau
+       est cohérent. Si elles cessent de l'être, un contact envoyé deux minutes
+       après une session s'afficherait deux heures après, parfois dans le
+       futur : des dates plausibles, simplement fausses, et rien pour le dire.
+       ⚠️ NE PAS ACCUSER L'HÉBERGEUR DANS CE MESSAGE. La cause la plus probable
+       n'est pas une dérive de serveur mais un fuseau WordPress modifié dans
+       Réglages → Général — un écart rond de 60 ou 120 minutes en est la
+       signature. Un avertissement qui désigne le mauvais coupable, et qui
+       reste affiché en permanence, est celui qu'on apprend à ignorer. */
+    $ecart_horloges = 0;
+    $mysql_now = $wpdb->get_var('SELECT NOW()');
+    if ($mysql_now) {
+      $ecart_horloges = abs(strtotime($mysql_now) - strtotime(current_time('mysql')));
+    }
+    if ($ecart_horloges > 300) : ?>
+      <div class="notice notice-warning" style="margin:12px 0;">
+        <p><strong>Les deux horloges du site ne sont plus d'accord</strong> —
+        environ <?php echo esc_html(round($ecart_horloges / 60)); ?> minutes d'écart
+        entre la base de données et WordPress. Sur ce tableau, la date de création
+        d'une session et la date d'envoi d'un contact ne viennent pas de la même
+        horloge : elles sont donc décalées l'une par rapport à l'autre, et un
+        contact peut sembler parti avant la session qui l'a produit.</p>
+        <p>Si l'écart est rond (60 ou 120 minutes), commence par
+        <strong>Réglages → Général → Fuseau horaire</strong> : il doit être sur
+        <em>Paris</em>. Si l'écart est irrégulier, c'est une dérive de serveur,
+        et là c'est pour l'hébergeur.</p>
+      </div>
+    <?php endif; ?>
 
     <!-- ═══════════════ DASHBOARD ═══════════════ -->
     <div class="dashboard">
@@ -8451,26 +8508,11 @@ function sapi_megafilter_render_session_detail($r) {
   </div>
   <?php endif; ?>
 
-  <?php
-  // Produits matchés
-  $product_ids = [];
-  if (!empty($r->matching_product_ids)) {
-    $product_ids = array_filter(array_map('intval', explode(',', $r->matching_product_ids)));
-  }
-  if (!empty($product_ids)) : ?>
-  <div class="drill-section">
-    <h3>Catalogue présenté (<?php echo esc_html(count($product_ids)); ?> produits matchés)</h3>
-    <div class="product-list">
-      <?php foreach ($product_ids as $pid) :
-        $p = wc_get_product($pid);
-        if (!$p) continue;
-        $url = get_permalink($pid);
-      ?>
-        <a href="<?php echo esc_url($url); ?>" class="product-tag" target="_blank"><?php echo esc_html($p->get_name()); ?> (<?php echo (int)$pid; ?>)</a>
-      <?php endforeach; ?>
-    </div>
-  </div>
-  <?php endif; ?>
+  <?php /* L'encart « Catalogue présenté » a été retiré le 28/08 : la colonne
+     `matching_product_ids` n'a jamais été alimentée (voir la note à l'endroit
+     de l'écriture), donc `!empty()` était faux sur chaque ligne et l'encart
+     n'a jamais existé à l'écran. On retire un encart fantôme, pas une
+     fonctionnalité. */ ?>
 
   <!-- Technique -->
   <div class="drill-section">

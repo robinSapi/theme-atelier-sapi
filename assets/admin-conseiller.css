@@ -417,25 +417,8 @@
 }
 .drill .contact-box__val { color: #1d2327; font-weight: 500; }
 
-.drill .product-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.drill .product-tag {
-  display: inline-block;
-  padding: 3px 9px;
-  background: #f6f7f7;
-  border: 1px solid #dcdcde;
-  border-radius: 12px;
-  font-size: 12px;
-  color: #2271b1;
-  text-decoration: none;
-}
-.drill .product-tag:hover {
-  background: #eef0f1;
-  color: #135e96;
-}
+/* .product-list / .product-tag retirés le 28/08 avec l'encart
+   « Catalogue présenté », qui ne s'est jamais affiché. */
 
 .drill .tech-grid {
   display: grid;
