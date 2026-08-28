@@ -22882,12 +22882,23 @@ body.woocommerce-cart div.woocommerce-wrapper {
    Plein écran 100dvh, header fixe + body scrollable + card unique
    ============================================================ */
 
-/* Garde-fou défensif : tout élément `[hidden]` à l'intérieur de la modale
-   ou de la cards-zone doit rester invisible, même si une règle author a
-   forcé display:flex/grid sur lui (le user-agent stylesheet a une
-   spécificité inférieure et peut être écrasé). Nous a déjà piégé 2 fois. */
-.conseiller-modal [hidden],
-
+/* Garde-fou défensif : tout élément `[hidden]` à l'intérieur de la modale doit
+   rester invisible, même si une règle author a forcé display:flex/grid sur lui
+   (la feuille du navigateur a une spécificité inférieure et peut être écrasée).
+   Nous a déjà piégé 3 fois.
+   ⚠️ LA 3e, LE 28/08 : ce sélecteur avait un jumeau, `.conseiller-cards-zone
+   [hidden]`, retiré avec le reste de cette classe morte. Mon script a coupé à
+   partir de la ligne portant l'accolade — donc la SECONDE — et a laissé
+   « .conseiller-modal [hidden], » orphelin, virgule comprise. Cette virgule
+   raccrochait le sélecteur à la règle suivante : chaque écran masqué de la
+   modale devenait un voile sombre plein écran en z-index 10050, empilé
+   par-dessus la carte. La modale s'ouvrait, on la voyait, et on ne pouvait
+   plus rien cliquer dedans.
+   Quand on retire un sélecteur d'une liste, il faut retirer LE SÉLECTEUR, pas
+   la règle. */
+.conseiller-modal [hidden] {
+  display: none !important;
+}
 
 /* Overlay : voile sombre centré qui couvre la page */
 .conseiller-modal {
