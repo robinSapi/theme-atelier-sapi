@@ -6850,9 +6850,22 @@ function sapi_megafilter_log_session() {
         'hauteur'         => 'hauteur',
         'style'           => 'style',
       ];
+      /* ⚠️ ON VALIDE CONTRE LE QUESTIONNAIRE, PAS SEULEMENT ON NETTOIE.
+         `sanitize_text_field` accepte n'importe quel mot. Or une réponse peut
+         arriver ici directement depuis l'adresse — `/mes-creations/?piece=xxx`
+         suffisait à écrire `xxx` dans la colonne `piece`, donc dans le
+         graphique « Top pièces demandées » du tableau de bord. Pas de faille de
+         sécurité (tout est échappé à l'affichage), mais un classement que
+         n'importe qui peut bourrer depuis la barre d'adresse, et « Salon » avec
+         une majuscule qui crée une deuxième entrée à côté de « salon ».
+         `sapi_megafilter_sanitize_project()` ne garde que les slugs qui
+         existent réellement dans le questionnaire. */
+      list($valides, ) = function_exists('sapi_megafilter_sanitize_project')
+        ? sapi_megafilter_sanitize_project($raw_answers)
+        : [[], []];
       foreach ($answer_map as $payload_key => $column) {
-        if (isset($raw_answers[$payload_key])) {
-          $update_data[$column] = sanitize_text_field($raw_answers[$payload_key]);
+        if (isset($valides[$payload_key])) {
+          $update_data[$column] = $valides[$payload_key];
           $update_formats[] = '%s';
         }
       }

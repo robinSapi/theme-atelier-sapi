@@ -186,7 +186,12 @@
   var ENTREE_FREETEXT = '';
   /* Posée par les sélecteurs de pièce (`from=home` / `from=conseils`). Lue au
      chargement du script, comme `freetext` et pour la même raison : l'adresse
-     est réécrite ensuite. */
+     est réécrite ensuite — et depuis le 28/08, `from` en est même retiré
+     explicitement une fois la session ouverte.
+     ⚠️ Le champ libre des sélecteurs produit une adresse qui porte LES DEUX.
+     C'est `detectEntryPoint` qui arbitre, et il donne la priorité à `freetext` :
+     ne pas inverser cet ordre, sous peine de rendre la provenance « texte
+     libre » inatteignable depuis ses deux seules sources. */
   var ORIGINE_ANNONCEE = '';
   try {
     var qs = new URLSearchParams(window.location.search);
@@ -227,6 +232,14 @@
          Google. C'est pour ça que `home_picker` est resté à zéro depuis le
          premier jour — le test sur la classe `home` ci-dessous ne peut jamais
          être vrai, la modale n'étant pas chargée sur l'accueil. */
+      /* ⚠️ LE TEXTE LIBRE PASSE AVANT L'ORIGINE, ET L'ORDRE EST TOUT.
+         Le champ libre des sélecteurs de pièce produit une adresse qui porte
+         `freetext` ET `from` : en testant l'origine d'abord, chaque saisie
+         libre était comptée « Accueil » et la provenance `freetext` devenait
+         inatteignable — un compteur cassé pour en réparer un autre.
+         Le texte libre est l'information la plus précise des deux : elle dit
+         à la fois d'où vient la personne et ce qu'elle a fait. */
+      if (ENTREE_FREETEXT) return 'freetext';
       if (ORIGINE_ANNONCEE === 'home') return 'home_picker';
       if (ORIGINE_ANNONCEE === 'conseils') return 'conseils_picker';
       if (body && body.classList.contains('home')) return 'home_picker';
@@ -357,14 +370,32 @@
       return payload;
     }
 
-    function start() {
-      // Reset compteurs pour la session courante.
+    /* ⚠️ IDEMPOTENT DEPUIS LE 28/08. `start()` peut désormais être appelé à
+       deux moments : à l'arrivée quand le visiteur vient de cliquer un
+       sélecteur de pièce, puis à l'ouverture de la modale. Sans ce garde-fou,
+       le second appel remettrait `aiCallCount` à zéro et renverrait un
+       `entry_point` — ce qui est inoffensif en base (même `session_id`, donc
+       même ligne) mais effacerait le compteur d'appels IA au pire moment. */
+    var demarree = false;
+    function start(extra) {
+      if (demarree) return;
+      demarree = true;
       aiCallCount = 0;
       hasStarted = true;
-      send({
+      var charge = {
         entry_point: detectEntryPoint(),
         entry_url: window.location.pathname + window.location.search,
-      });
+      };
+      /* ⚠️ UN SEUL ENVOI, PAS DEUX. La pièce cliquée partait dans un second
+         `snapshot()` immédiat : deux `sendBeacon` dans le même instant, deux
+         requêtes qui lisent la table avant que l'une n'écrive, et la seconde
+         butait sur l'unicité de `session_id`. L'INSERT échouait, et selon
+         laquelle des deux perdait, on perdait soit la provenance soit la
+         pièce — en silence. On les fusionne. */
+      if (extra && typeof extra === 'object') {
+        Object.keys(extra).forEach(function (k) { charge[k] = extra[k]; });
+      }
+      send(charge);
     }
 
     function snapshot(extra) {
@@ -380,14 +411,26 @@
       if (!hasStarted) return;
       send(buildSnapshotPayload());
       hasStarted = false;
+      /* `demarree` reste vrai : la ligne existe en base, elle ne doit pas être
+         recréée. Une réouverture de la modale repassera par `start()`, qui
+         sortira tout de suite, puis par les `snapshot()` — lesquels exigent
+         `hasStarted`. C'est donc `hasStarted` qu'il faut relever, pas
+         `demarree`. Voir `openModal`. */
     }
 
     function incrementAiCallCount() {
       aiCallCount++;
     }
 
+    /* Rouvre la session pour de nouveaux envois, sans recréer la ligne.
+       Utile quand la modale est refermée puis rouverte dans la même page. */
+    function reprendre() {
+      if (demarree) hasStarted = true;
+    }
+
     return {
       start: start,
+      reprendre: reprendre,
       snapshot: snapshot,
       finalize: finalize,
       incrementAiCallCount: incrementAiCallCount,
@@ -2296,7 +2339,10 @@
 
     // Tracking V3 — INSERT row (entry_point + entry_url). Doit être appelé
     // AVANT showScreen() pour que le snapshot suivant soit un UPDATE.
+    // Sans effet si la session a déjà été ouverte à l'arrivée (clic sur un
+    // sélecteur de pièce) : `reprendre()` rouvre alors le flux d'envois.
     SessionTracker.start();
+    SessionTracker.reprendre();
 
     // F2a-quater : state="s0" → détermine dynamiquement le sous-état
     //   (initial / partiel / s3-carrefour) selon le contenu du sapiProject.
@@ -2694,6 +2740,48 @@
         }, 100);
       }
     } catch (e) { /* URLSearchParams indisponible — silencieux */ }
+
+    /* ⚠️ LE CLIC SUR UN SÉLECTEUR DE PIÈCE COMPTE, MÊME SANS OUVRIR LA MODALE.
+       Demande de Robin, recette du 28/08 : « il faut ouvrir la modale pour que
+       ce soit comptabilisé, moi je voudrais que le clic sur le room-picker
+       compte ». C'est un acte volontaire — la personne a choisi sa pièce — et
+       il n'y avait aucune trace de ceux qui s'arrêtaient là.
+       On n'ouvre la session QUE si `from` est présent, donc uniquement pour
+       ces visiteurs-là. Les arrivées directes (Google, lien) continuent de ne
+       compter qu'à l'ouverture de la modale : le sens du mot « session » ne
+       change pas pour tout le monde d'un coup.
+       ⚠️ CONSÉQUENCE À CONNAÎTRE : ces lignes existent sans réponse au
+       questionnaire, sauf la pièce. Le taux de « quiz complet » va donc
+       baisser mécaniquement, sans que personne n'ait changé de comportement.
+       C'est le prix d'un dénominateur plus honnête. */
+    if (ORIGINE_ANNONCEE === 'home' || ORIGINE_ANNONCEE === 'conseils') {
+      var pieceCliquee = '';
+      try {
+        pieceCliquee = new URLSearchParams(window.location.search).get('piece') || '';
+      } catch (e) { /* silencieux */ }
+      /* La pièce part dans le MÊME envoi que la provenance — sinon Robin
+         verrait « quelqu'un est venu de l'accueil » sans savoir quelle pièce.
+         ⚠️ Elle n'est PAS validée ici : elle sort de l'adresse, où n'importe
+         qui peut écrire n'importe quoi. C'est le serveur qui la confronte au
+         questionnaire (`sapi_megafilter_sanitize_project`), parce que c'est lui
+         qui écrit en base et qu'un contrôle côté navigateur se contourne. */
+      SessionTracker.start(pieceCliquee ? { answers: { piece: pieceCliquee } } : null);
+
+      /* ⚠️ ON RETIRE `from` DE L'ADRESSE, TOUT DE SUITE.
+         Sans ça il survivait à tout : changer de pièce dans la modale, ou
+         suivre un lien interne, réécrit l'adresse en préservant les paramètres
+         étrangers — `from` revenait donc, une deuxième session naissait à
+         l'arrivée, et Robin comptait deux clics de sélecteur pour un seul.
+         Il a fait son office, on l'efface. Ça nettoie aussi le lien que le
+         visiteur pourrait partager. */
+      try {
+        var adresse = new URL(window.location.href);
+        if (adresse.searchParams.has('from')) {
+          adresse.searchParams.delete('from');
+          window.history.replaceState({}, '', adresse.pathname + adresse.search + adresse.hash);
+        }
+      } catch (e) { /* silencieux : au pire le paramètre reste visible */ }
+    }
   }
 
   /* ⚠️ « complete », PAS « loading ». Ce fichier doit démarrer APRÈS
@@ -2705,6 +2793,11 @@
      production, Autoptimize ajoute `defer` à tous les scripts**, et dans un
      script différé `readyState` vaut déjà « interactive ». On tombait donc
      dans le `else` et `init()` partait trop tôt.
+     Avec le test sur « complete », on attend `DOMContentLoaded` dans tous les
+     cas sauf si la page est DÉJÀ entièrement chargée — donc en production on
+     démarre à `DOMContentLoaded`, pas immédiatement. C'est bien l'effet
+     recherché : ne pas confondre « le test dit complete » et « on s'exécute
+     tout de suite ».
      ⚠️ Le site de test n'a PAS Autoptimize : cette classe de bug ne peut pas
      être montrée en recette. Ne pas « simplifier » ce test parce qu'il a l'air
      de marcher sur test. Explication complète dans sapi-project.js. */

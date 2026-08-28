@@ -322,6 +322,11 @@
      production, Autoptimize ajoute `defer` à tous les scripts**, et dans un
      script différé `readyState` vaut déjà « interactive ». On tombait donc
      dans le `else` et `init()` partait trop tôt.
+     Avec le test sur « complete », on attend `DOMContentLoaded` dans tous les
+     cas sauf si la page est DÉJÀ entièrement chargée — donc en production on
+     démarre à `DOMContentLoaded`, pas immédiatement. C'est bien l'effet
+     recherché : ne pas confondre « le test dit complete » et « on s'exécute
+     tout de suite ».
      ⚠️ Le site de test n'a PAS Autoptimize : cette classe de bug ne peut pas
      être montrée en recette. Ne pas « simplifier » ce test parce qu'il a l'air
      de marcher sur test. Explication complète dans sapi-project.js. */
