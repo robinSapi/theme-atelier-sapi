@@ -117,14 +117,15 @@
      ───────────────────────────────────────────── */
   /* ⚠️ LU AU CHARGEMENT DU SCRIPT, AVANT TOUT LE RESTE — ne pas déplacer.
      `init()` retire `?freetext=` de l'URL puis ouvre la modale 100 ms plus
-     tard. `detectEntryPoint()` relisait donc une URL DÉJÀ NETTOYÉE et
-     concluait « mes_creations » : le compteur `freetext` du tableau de bord
-     valait 0 depuis toujours, et `entry_url` — construit lui aussi après le
-     nettoyage — n'en gardait aucune trace non plus.
-     Résultat pour Robin : il ne pouvait pas savoir combien de visiteurs
-     passent par le champ texte libre, c'est-à-dire par le parcours qu'on
-     vient justement de réparer.
-     La capture doit rester ICI, au tout premier instant du script. */
+     tard. Lu plus tard, on relirait une adresse DÉJÀ NETTOYÉE et la phrase
+     serait perdue : c'est la seule occasion de l'attraper.
+     ⚠️ CE QU'ELLE NE SERT PLUS À FAIRE (28/08) : décider de la provenance.
+     `entry_point` répond désormais à « sur quelle PAGE ? » et pas à « par
+     quelle méthode ? » — avoir écrit une phrase n'est pas un endroit. La
+     phrase elle-même part dans `ai_freetext_input`, et c'est là qu'on lit si
+     le visiteur est passé par un champ libre.
+     `entry_url` ne portera donc plus `freetext` non plus : sans importance,
+     puisque la phrase a sa propre colonne. */
   /* ⚠️ CE QUE LE VISITEUR A RÉPONDU AUJOURD'HUI, et rien d'autre.
      Le tableau de bord comptait comme « quiz complété » des réponses données
      lors d'une visite PRÉCÉDENTE : `openModal()` recopie le projet mémorisé
@@ -184,14 +185,17 @@
   }
 
   var ENTREE_FREETEXT = '';
-  /* Posée par les sélecteurs de pièce (`from=home` / `from=conseils`). Lue au
-     chargement du script, comme `freetext` et pour la même raison : l'adresse
-     est réécrite ensuite — et depuis le 28/08, `from` en est même retiré
-     explicitement une fois la session ouverte.
-     ⚠️ Le champ libre des sélecteurs produit une adresse qui porte LES DEUX.
-     C'est `detectEntryPoint` qui arbitre, et il donne la priorité à `freetext` :
-     ne pas inverser cet ordre, sous peine de rendre la provenance « texte
-     libre » inatteignable depuis ses deux seules sources. */
+  /* Posée par les TROIS sélecteurs de pièce : `from=home` (accueil),
+     `from=conseils` (Conseils éclairés), `from=mes_creations` (le sélecteur qui
+     sert de hero à /mes-creations/ tant qu'aucune pièce n'est choisie).
+     Lue au chargement du script, comme `freetext` et pour la même raison :
+     l'adresse est réécrite ensuite — et depuis le 28/08, `from` en est même
+     retiré explicitement une fois la session ouverte.
+     Le champ libre de l'accueil et de Conseils porte les DEUX paramètres : la
+     phrase part dans `ai_freetext_input`, la provenance reste celle de la PAGE.
+     Celui de /mes-creations/ est un formulaire GET natif, sans JavaScript : il
+     ne porte que `freetext`, et sa provenance sort correctement du test de
+     chemin plus bas. */
   var ORIGINE_ANNONCEE = '';
   try {
     var qs = new URLSearchParams(window.location.search);
@@ -232,36 +236,56 @@
          Google. C'est pour ça que `home_picker` est resté à zéro depuis le
          premier jour — le test sur la classe `home` ci-dessous ne peut jamais
          être vrai, la modale n'étant pas chargée sur l'accueil. */
-      /* ⚠️ LE TEXTE LIBRE PASSE AVANT L'ORIGINE, ET L'ORDRE EST TOUT.
-         Le champ libre des sélecteurs de pièce produit une adresse qui porte
-         `freetext` ET `from` : en testant l'origine d'abord, chaque saisie
-         libre était comptée « Accueil » et la provenance `freetext` devenait
-         inatteignable — un compteur cassé pour en réparer un autre.
-         Le texte libre est l'information la plus précise des deux : elle dit
-         à la fois d'où vient la personne et ce qu'elle a fait. */
-      if (ENTREE_FREETEXT) return 'freetext';
-      if (ORIGINE_ANNONCEE === 'home') return 'home_picker';
-      if (ORIGINE_ANNONCEE === 'conseils') return 'conseils_picker';
-      if (body && body.classList.contains('home')) return 'home_picker';
+      /* ⚠️ CETTE COLONNE RÉPOND À « SUR QUELLE PAGE ? », PAS À « COMMENT ? ».
+         Décision Robin du 28/08. Elle contenait aussi `freetext`, qui est une
+         MÉTHODE (avoir écrit une phrase plutôt que cliqué une pièce) et non un
+         endroit : une même page pouvait donc ressortir sous deux provenances,
+         et il fallait arbitrer entre les deux dans un ordre que rien ne rendait
+         évident. C'est ce mélange qui m'a fait casser le compteur du texte
+         libre en réparant celui de l'accueil.
+         Une seule question par colonne. On ne perd rien : la phrase saisie
+         AVANT l'arrivée, sur un des trois sélecteurs, part dans
+         `ai_freetext_input`. (Celles tapées DANS la modale — champ de la
+         première question, messages du chat — vivent dans `ai_chat_messages`,
+         et n'ont jamais eu de rapport avec cette colonne.)
+         `freetext` reste lisible dans le tableau pour les anciennes lignes,
+         mais plus rien ne l'écrit. */
+
       var path = window.location.pathname || '';
-      /* ⚠️ LA FICHE PRODUIT SE TESTE EN PREMIER, ET C'EST INDISPENSABLE ICI.
+
+      /* ⚠️ LA FICHE PRODUIT SE TESTE AVANT TOUT LE RESTE, `from` COMPRIS.
          Les fiches produit de ce site vivent SOUS /mes-creations/ — par exemple
          /mes-creations/olivia-la-gardiena/. Avec le test de la page de
          sélection placé avant, toute fiche produit était étiquetée
          « mes_creations » et `product_pill` ne pouvait structurellement jamais
          être écrit : zéro ligne sur 97 dans l'export du 28/08, alors que la
-         pastille est utilisée tous les jours. Robin ne pouvait pas distinguer
-         « arrivé sur la page de sélection » de « ouvert la pastille sur une
-         fiche ». Deux chemins très différents, un seul nom.
-         Ne pas remettre `/mes-creations/` avant ce bloc. */
+         pastille est utilisée tous les jours.
+         ⚠️ ET `from` NE DOIT PAS PASSER DEVANT NON PLUS. Il valait `mes_creations`
+         au-dessus de ce bloc : une adresse fabriquée à la main
+         (/mes-creations/olivia/?from=mes_creations) rouvrait exactement le trou
+         que cette note interdit de rouvrir — une fiche produit comptée comme la
+         page de sélection. Aucun lien du site ne produit cette adresse, mais
+         c'était structurel, pas accidentel.
+         Ne rien remettre avant ce bloc. */
       if (body && (body.classList.contains('single-product') || path.indexOf('/produit/') !== -1)) {
         return 'product_pill';
       }
+
+      /* Les trois sélecteurs de pièce annoncent leur page dans l'adresse.
+         C'est la seule façon de le savoir : ils REDIRIGENT vers
+         /mes-creations/, et la modale n'est chargée sur aucune des deux autres
+         pages — sans ce marqueur, tous leurs visiteurs se confondraient avec
+         une arrivée directe. */
+      if (ORIGINE_ANNONCEE === 'home') return 'home_picker';
+      if (ORIGINE_ANNONCEE === 'conseils') return 'conseils_picker';
+      if (ORIGINE_ANNONCEE === 'mes_creations') return 'mes_creations';
+
       if (path.indexOf('/mes-creations/') !== -1) {
-        // Capture faite au chargement du script, avant le nettoyage d'URL.
-        if (ENTREE_FREETEXT) return 'freetext';
         return 'mes_creations';
       }
+      /* Repli : la boutique atteinte autrement que par son adresse propre
+         (une recherche `?post_type=product`, par exemple). Ces lignes sortent
+         en « — » dans le tableau et hors du graphe des provenances. */
       return '';
     }
 
@@ -2754,7 +2778,21 @@
        questionnaire, sauf la pièce. Le taux de « quiz complet » va donc
        baisser mécaniquement, sans que personne n'ait changé de comportement.
        C'est le prix d'un dénominateur plus honnête. */
-    if (ORIGINE_ANNONCEE === 'home' || ORIGINE_ANNONCEE === 'conseils') {
+    /* ⚠️ LISTE BLANCHE, PAS « SI `from` EXISTE ». Ce paramètre vient de
+       l'adresse. La liste ferme le VOCABULAIRE : `?from=nimportequoi` n'ouvre
+       rien et n'écrit rien. Elle n'empêche pas quelqu'un de recharger dix fois
+       avec `?from=home` — pour ça il faudrait une limite de fréquence sur le
+       point d'entrée, qu'il n'a pas. Conséquence bornée : la table se purge, et
+       ça ne fausserait qu'un compteur.
+       ⚠️ ET PAS SUR UNE FICHE PRODUIT. La modale y est chargée aussi : sans ce
+       garde-fou, une adresse fabriquée ouvrirait une session à l'arrivée sur
+       une fiche, avant même que la pastille soit touchée. */
+    var surFicheProduit = document.body
+      && (document.body.classList.contains('single-product')
+          || (window.location.pathname || '').indexOf('/produit/') !== -1);
+    if (!surFicheProduit
+        && (ORIGINE_ANNONCEE === 'home' || ORIGINE_ANNONCEE === 'conseils'
+            || ORIGINE_ANNONCEE === 'mes_creations')) {
       var pieceCliquee = '';
       try {
         pieceCliquee = new URLSearchParams(window.location.search).get('piece') || '';

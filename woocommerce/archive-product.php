@@ -346,7 +346,14 @@ $picker_icons = sapi_guide_get_icons();
       <?php foreach (sapi_room_choices() as $room) :
         $icon_svg = isset($picker_icons[$room['icon']]) ? $picker_icons[$room['icon']] : '';
       ?>
-        <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'])); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
+        <?php /* `from=mes_creations` : c'est le troisième sélecteur de pièce du
+                 site, et probablement le plus utilisé — il occupe le haut de la
+                 page vers laquelle mènent les deux autres. Sans ce marqueur, un
+                 clic ici ne laissait aucune trace tant que la modale n'était pas
+                 ouverte, ce qui est rare. La provenance enregistrée reste
+                 « Mes créations » : cette colonne dit sur quelle PAGE la
+                 personne a commencé, pas par quel geste. */ ?>
+        <a class="room-card" href="<?php echo esc_url(home_url('/mes-creations/?piece=' . $room['slug'] . '&from=mes_creations')); ?>" data-piece="<?php echo esc_attr($room['slug']); ?>">
           <span class="room-card-icon"><?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
           <span class="room-card-label"><?php echo esc_html($room['label']); ?></span>
         </a>

@@ -7444,7 +7444,10 @@ function sapi_megafilter_admin_page() {
     'conseils_picker' => 'Conseils éclairés',
     'mes_creations' => 'Mes créations',
     'product_pill'  => 'Fiche produit',
-    'freetext'      => 'Texte libre',
+    /* Plus jamais écrite depuis le 28/08 : c'était une méthode dans une
+       colonne de pages. Conservée pour que les anciennes lignes restent
+       lisibles. */
+    'freetext'      => 'Texte libre (ancien)',
   ];
   $entry_pill_class = [
     'home_picker'   => 'pill--home',
@@ -7678,7 +7681,7 @@ function sapi_megafilter_admin_page() {
         <option value="conseils_picker" <?php selected($filters['entry'], 'conseils_picker'); ?>>Conseils éclairés</option>
         <option value="mes_creations" <?php selected($filters['entry'], 'mes_creations'); ?>>Mes créations</option>
         <option value="product_pill"  <?php selected($filters['entry'], 'product_pill'); ?>>Fiche produit</option>
-        <option value="freetext"      <?php selected($filters['entry'], 'freetext'); ?>>Texte libre</option>
+        <option value="freetext"      <?php selected($filters['entry'], 'freetext'); ?>>Texte libre (ancien)</option>
       </select>
       <span class="filter-sep"></span>
       <span class="filter-label">Pièce :</span>
@@ -7888,7 +7891,7 @@ function sapi_megafilter_render_session_detail($r) {
     'conseils_picker' => 'page Conseils éclairés',
     'mes_creations' => 'page Mes créations',
     'product_pill'  => 'fiche produit',
-    'freetext'      => 'texte libre',
+    'freetext'      => 'texte libre (ancien)',
   ];
   $entry_pill_class = [
     'home_picker'   => 'pill--home',
@@ -7962,7 +7965,7 @@ function sapi_megafilter_render_session_detail($r) {
   if ($r->entry_point === 'conseils_picker') $entry_label = 'Conseils éclairés';
   if ($r->entry_point === 'mes_creations') $entry_label = 'Mes créations';
   if ($r->entry_point === 'product_pill') $entry_label = 'Fiche produit';
-  if ($r->entry_point === 'freetext') $entry_label = 'Texte libre';
+  if ($r->entry_point === 'freetext') $entry_label = 'Texte libre (ancien)';
   ?>
   <div class="drill-section">
     <h3>Provenance</h3>
