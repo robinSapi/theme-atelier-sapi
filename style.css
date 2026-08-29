@@ -25506,7 +25506,32 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      (~790 px de haut) la zone remontait de 55 px et venait chevaucher
      l'emplacement où ce bouton se pose. Ce sélecteur à deux classes reprend la
      main. Ne pas le simplifier. */
-  .mescreations-immersion__layer .mescreations-immersion__selection { order: 1; bottom: auto; }
+  .mescreations-immersion__layer .mescreations-immersion__selection {
+    order: 1;
+    bottom: auto;
+    /* ⇦ L'AIR AUTOUR DU CARROUSEL (demande de Robin, 29/08). Il valait 12/16 px
+       en desktop : le titre venait toucher le bouton blanc, et le bas des
+       cards collait aux points du carrousel et à l'indice.
+       ⚠️ CET AIR EST PRIS SUR LA HAUTEUR DES PHOTOS, pas ajouté à l'écran. La
+       zone occupe toute la place restante (`flex: 1 1 0`) et le carrousel
+       remplit ce qu'il en reste : chaque pixel de rembourrage est un pixel de
+       moins pour la photo — environ 44 px de photo perdus sur une fenêtre de
+       900 px de haut, 36 px sur 800. C'est le seul réglage possible, la
+       hauteur du hero étant celle de l'écran ; si les photos te paraissent
+       tassées, c'est ici qu'il faut redescendre (3svh), pas ailleurs.
+       ⚠️ Et cette règle CESSE au plancher de 80 px de la photo : en dessous
+       c'est la card qui est rognée par le bas, bouton « Découvrir » compris.
+       Le seuil est passé d'environ 630 à 654 px de hauteur de fenêtre — soit
+       tout près d'un 1366×768 sous Windows. À regarder sur un 13 pouces réel.
+       En `svh` pour que les portables courts en reprennent d'eux-mêmes : à
+       800 px de haut on est à 32 px, à 1100 px à 44 px. Repli en dur d'abord,
+       comme pour la hauteur de la couche : sans `svh`, la déclaration entière
+       serait invalide et on retomberait sur les 12/16 px. */
+    padding-top: 32px;
+    padding-top: clamp(20px, 4svh, 52px);
+    padding-bottom: 32px;
+    padding-bottom: clamp(20px, 4svh, 52px);
+  }
   .mescreations-immersion__layer .mescreations-immersion__scrollhint { order: 2; }
 
   .mescreations-immersion .mescreations-immersion__describe {
