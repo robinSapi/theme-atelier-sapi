@@ -25404,14 +25404,20 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   align-items: center;
   gap: 10px;
   max-width: 560px;
-  /* Centré dans la zone sélection, qui est un flex COLONNE (donc `align-self`
-     et non `margin: auto`, sans quoi il s'étirerait sur toute la largeur). */
+  /* Le centrage horizontal vient du `auto` de la marge ci-dessous : sur l'axe
+     transversal, une marge auto absorbe l'espace libre et fait ignorer
+     `align-self`. Celui-ci est donc le filet, pas l'inverse — il reprend la
+     main si la marge est un jour redéclarée sans `auto`. Sans l'un des deux,
+     l'item s'étirerait sur toute la largeur du conteneur. */
   -ms-flex-item-align: center;
   align-self: center;
   -webkit-box-flex: 0;
   -ms-flex: 0 0 auto;
   flex: 0 0 auto;
-  /* L'air est désormais AU-DESSUS : le bouton est passé sous le carrousel. */
+  /* 14 px SOUS LA ZONE SÉLECTION — pas sous les points du carrousel : les
+     16 px de rembourrage bas de la zone s'intercalent, l'écart visible est de
+     30 px. Sur écran court (`max-height: 840px`) cette marge tombe à 2 px, et
+     en desktop elle est remplacée par la remontée négative. */
   margin: 14px auto 0;
   padding: 11px 24px;
   background: rgba(255, 255, 255, .18);
@@ -25428,11 +25434,34 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   line-height: 1.25;
   text-shadow: 0 1px 8px rgba(0, 0, 0, .35);
   cursor: pointer;
-  /* ⚠️ PLUS D'ÉTAT D'ENTRÉE ICI (opacity 0 + .is-in piloté en JS). Depuis
-     qu'il vit dans la zone sélection, c'est l'opacité de cette zone, pilotée
-     par --reveal, qui le fait apparaître avec le carrousel. Le laisser à
-     `opacity: 0` en attendant un `.is-in` que plus personne ne lui donne le
-     rendrait définitivement invisible. */
+  /* ⚠️ SON APPARITION EST ÉCRITE ICI DEPUIS LE 28/08, ET PLUS HÉRITÉE.
+     Il vivait DANS la zone sélection, dont l'opacité pilotée par `--reveal` le
+     révélait sans qu'aucune règle ne le dise. Il en est sorti (voir le gabarit)
+     pour pouvoir remonter sur desktop : il faut donc lui redonner à la main ce
+     qu'il tenait de son parent — la même formule, le même mouvement montant.
+     Ne pas remettre `opacity: 0` en attendant un `.is-in` : plus personne ne
+     le lui donne, il resterait invisible pour toujours. */
+  /* Même formule que la zone sélection, à la lettre — c'est d'elle que le
+     bouton tenait son apparition avant d'en sortir. `--reveal` est déclarée
+     sur la section (défaut 0), donc héritée ici : pas de repli à écrire, et
+     surtout pas une écriture différente de celle de la zone. */
+  opacity: clamp(0, calc((var(--reveal) - .3) / .7), 1);
+  -webkit-transform: translateY(calc((1 - var(--reveal)) * 30px));
+  transform: translateY(calc((1 - var(--reveal)) * 30px));
+  /* ⚠️ LA CLIQUABILITÉ EST PILOTÉE EN JS — même seuil que la zone sélection
+     (0,45), dans sapi-mescreations-immersion.js. Une opacité nulle n'empêche
+     pas le clic : sans ce relais, le bouton serait cliquable en plein sur la
+     phrase de Robin dès le chargement.
+     ⚠️ PAS DE `visibility: hidden` ICI, ET J'AI ESSAYÉ. C'était plus propre au
+     clavier — `visibility` retire vraiment l'élément du parcours de tabulation
+     — mais ça casse deux choses : à la fermeture de la modale, le focus doit
+     revenir sur ce bouton, et `focus()` ne fait rien sur un élément
+     `visibility: hidden` ; et si le JS ne tourne pas, plus rien ne lève l'état
+     caché, le bouton disparaît pour toujours. On reste donc sur l'opacité,
+     comme avant le déplacement. Le focus sur un bouton transparent est un
+     défaut connu et partagé avec le `reveal-btn` : à traiter pour les deux à
+     la fois, pas ici. */
+  pointer-events: none;
   transition: background .2s ease;
 }
 .mescreations-immersion__describe:hover {
@@ -25442,6 +25471,81 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   width: 17px;
   height: 17px;
   flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DESKTOP — le bouton remonte, et passe en blanc plein (décision Robin, 29/08)
+   ──────────────────────────────────────────────────────────────────────────
+   En verre à 18 % sur une photo sombre et floutée, il ne se détachait de rien.
+   ⚠️ LE BLANC PLEIN A DÉJÀ ÉTÉ ÉCARTÉ POUR L'AUTRE BOUTON — « en plein il
+   attirait trop l'œil et volait la vedette à la photo », voir la note du
+   `reveal-btn`. Robin l'a maintenu ici en connaissance de cause : ce bouton
+   n'arrive pas sur une photo nue mais sous trois cartes blanches, où le verre
+   disparaît. Ne pas « harmoniser » les deux sans le lui redemander.
+
+   ⚠️ LA REMONTÉE SE FAIT EN POUSSANT LES AUTRES, PAS EN TIRANT LE BOUTON.
+   J'avais écrit `order: -1` sur lui : ça n'en fait pas le voisin d'avant la
+   sélection, ça en fait le PREMIER de la couche — donc au-dessus de la
+   pastille et de la phrase de Robin, dans la bande du header. Les items sans
+   `order` valent 0 et gardent l'ordre du gabarit : il suffit donc de pousser
+   la sélection et l'indice à 1 et 2, et le bouton reste dans le groupe 0,
+   juste derrière le bloc texte. Rien à écrire sur lui.
+
+   ⚠️ SÉLECTEUR VOLONTAIREMENT PLUS SPÉCIFIQUE (deux classes). Une règle
+   `@media (max-height: 840px)` plus bas dans ce fichier repose la marge du
+   bouton sans borne de largeur : à spécificité égale elle gagnait, et la
+   remontée ne se produisait pas sur les portables 13-14 pouces — c'est-à-dire
+   sur la majorité des écrans desktop. Ne pas retirer la double classe.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+  /* ⚠️ `bottom: auto` N'EST PAS DÉCORATIF ICI. Deux règles plus bas
+     (`@media (max-height: 840px)` et `700px`) reposent un `bottom: calc(7vh…)`
+     hérité du temps où la zone était positionnée à la main. Le `bottom: auto`
+     qui devait les neutraliser est en règle de base, donc PLUS HAUT dans le
+     fichier et à spécificité égale : elles gagnent. Sur un portable 13 pouces
+     (~790 px de haut) la zone remontait de 55 px et venait chevaucher
+     l'emplacement où ce bouton se pose. Ce sélecteur à deux classes reprend la
+     main. Ne pas le simplifier. */
+  .mescreations-immersion__layer .mescreations-immersion__selection { order: 1; bottom: auto; }
+  .mescreations-immersion__layer .mescreations-immersion__scrollhint { order: 2; }
+
+  .mescreations-immersion .mescreations-immersion__describe {
+    /* ⚠️ CE `z-index` N'EST PAS DÉCORATIF, IL EST LA CONDITION DU RESTE.
+       En remontant, le bouton passe sous DEUX choses qui étaient au-dessus de
+       lui : le bloc texte (`__inner`, z-index 2) et le fantôme du bouton
+       « Découvre ta sélection » qui garde sa place dans le flux. Sans ce
+       niveau, le voile sombre de `__inner::before` (qui déborde de 8 %) salit
+       le haut du bouton — un blanc grisé au lieu du blanc franc qu'on
+       cherchait — et le fantôme lui vole ses clics. Le `pointer-events` posé
+       côté JS traite ce qui dépasse ; celui-ci traite la peinture.
+       ⚠️ Le `position: relative` n'est PAS ce qui rend le `z-index` actif — un
+       item de flex accepte `z-index` quelle que soit sa position, et son
+       `transform` lui crée déjà un contexte d'empilement. Il est là par
+       habitude de lecture. Ne pas s'appuyer sur ce raisonnement ailleurs. */
+    z-index: 4;
+    position: relative;
+    background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    color: var(--color-wood-dark);
+    font-weight: 700;
+    text-align: center;
+    text-shadow: none;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, .22);
+    /* Il se pose sous le bouton « Découvrir ma sélection », qui reste dans le
+       flux même invisible (sa note l'explique : le retirer recalculerait la
+       mise en page pendant le défilement). Cette marge négative le remonte À
+       SA PLACE plutôt qu'en dessous.
+       ⚠️ ELLE VAUT LA HAUTEUR DU `reveal-btn`, ET RIEN D'AUTRE. Soit 13+13 de
+       padding, 1+1 de bordure, et ~21 de boîte de ligne (14px de texte hérité
+       du `line-height: 1.5` du corps) = 49 px. Sa marge haute de 8 px n'entre
+       PAS dans le calcul : elle sépare la phrase du bouton, elle doit rester.
+       Si tu changes le padding ou la taille de ce bouton-là, reviens ici. */
+    margin-top: -49px;
+  }
+  .mescreations-immersion .mescreations-immersion__describe:hover {
+    background: var(--color-warm);
+  }
 }
 
 /* Scroll hint = 2 indices pilotés par --reveal. Le conteneur est révélé par la
@@ -25933,10 +26037,14 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .mescreations-immersion__layer {
     /* Header plus bas en mobile. ⇦ à garder en phase avec le `top` de la zone 1. */
     padding-top: 64px;
-    /* Le carrousel et l'indice sont calés EN BAS. L'espace libre tombe donc en
-       haut, là où flotte la zone 1 (hors flux en mobile) — c'est ce qui fait
-       que le carrousel « s'affiche entièrement » quelle que soit la taille
-       d'écran. En desktop la zone 1 reste dans le flux, donc pas de flex-end. */
+    /* ⚠️ INERTE DEPUIS LE 29/08, GARDÉ COMME REPLI. Il calait le carrousel et
+       l'indice en bas, l'espace libre tombant en haut là où flotte la zone 1
+       (hors flux en mobile). Depuis que la zone sélection et le bouton
+       « Décrire » portent chacun une marge auto, ce sont ELLES qui prennent
+       tout l'espace libre — une marge auto sur l'axe principal est servie
+       avant l'alignement, et `justify-content` n'a alors plus rien à
+       distribuer. Si l'une des deux marges auto disparaît, cette ligne
+       reprend la main : c'est pour ça qu'elle reste. */
     -webkit-box-pack: end;
     -ms-flex-pack: end;
     justify-content: flex-end;
@@ -25993,26 +26101,41 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     overflow: hidden;
   }
 
-  /* ── ZONE 3 — le carrousel : IL OCCUPE TOUT, son bloc est CENTRÉ ──────
+  /* ── ZONE 3 — le carrousel : son bloc est CENTRÉ, avec le bouton ──────
      Demande de Robin (recette du 25/08) : « pourquoi c'est la hauteur du
      carrousel qui dépend de la longueur du texte et pas l'inverse ? » puis,
      une fois la zone 1 sortie de l'écran : « il faut centrer le carrousel et
      lui faire occuper l'espace ».
-     La zone 1 étant hors flux, la question ne se pose plus : le carrousel a
-     TOUT l'espace, et son bloc (titre + cards) y est centré. La longueur du
-     conseil n'a plus aucun effet sur la taille des photos. */
+     La zone 1 étant hors flux, la question ne se pose plus : la longueur du
+     conseil n'a aucun effet sur la taille des photos, qui vient de `49svh`
+     (voir `.product-media` plus bas), plafonnée par la largeur d'écran.
+     ⚠️ « occuper l'espace » n'est PLUS littéral depuis le 29/08 : la zone est
+     dimensionnée par son contenu, et c'est le COUPLE zone + bouton qui est
+     centré dans le conteneur. Rien ne bouge à l'œil, l'explication change. */
   .mescreations-immersion__selection {
     position: relative;
     bottom: auto;
-    /* La zone 1 étant hors flux, le carrousel occupe TOUT l'espace libre, et
-       son bloc (titre + cards) y est CENTRÉ. Plus aucune hauteur réglée à la
-       main : `--imm-selection-h` a disparu. C'est désormais le RAPPORT DE
-       FORME de la photo qui décide de la taille des cards (voir plus bas) —
-       un réglage qui se voit à l'œil au lieu d'un pourcentage d'écran. */
-    -webkit-box-flex: 1;
-    -ms-flex: 1 1 auto;
-    flex: 1 1 auto;
+    /* ⚠️ `0 1 auto` ET NON `1 1 auto` DEPUIS LE 29/08, avec les marges auto
+       ci-dessous. Le bouton « Décrire » vivait ICI : il faisait partie du
+       groupe centré, et l'air se répartissait moitié au-dessus du titre,
+       moitié sous le bouton. En sortant (pour pouvoir remonter en desktop),
+       il s'est retrouvé APRÈS une zone qui, en grandissant, gardait tout
+       l'air pour elle : le bouton décrochait d'environ 80 px et se retrouvait
+       orphelin, collé à l'indice du bas.
+       La zone ne grandit donc plus, et l'air est rendu au conteneur, où deux
+       marges auto (ici en haut, sur le bouton en bas) le répartissent à parts
+       égales autour du couple zone+bouton. Résultat identique à avant, à la
+       différence près que le groupe centré est maintenant à cheval sur deux
+       éléments. Sur un écran court il n'y a pas d'air, les marges auto valent
+       0, et on retrouve exactement l'ancien empilement. */
+    -webkit-box-flex: 0;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
     min-height: 0;
+    margin-top: auto;
+    /* ⚠️ INERTE lui aussi depuis le 29/08 : la zone étant dimensionnée par son
+       contenu, il n'y a plus d'espace libre à centrer À L'INTÉRIEUR d'elle.
+       Gardé comme repli, au cas où une hauteur lui serait rendue un jour. */
     -webkit-box-pack: center;
     -ms-flex-pack: center;
     justify-content: center;
@@ -26024,8 +26147,8 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     -ms-flex-direction: column;
     flex-direction: column;
     /* Marge de sécurité en haut. L'aération du bloc ne se règle plus ici :
-       elle vient du centrage (`justify-content: center`) et de la hauteur des
-       cards, elle-même donnée par le rapport de forme de la photo. */
+       elle vient des deux marges auto (voir plus haut) et de la hauteur des
+       cards, elle-même donnée par `49svh` sur la photo. */
     padding-top: clamp(6px, 1.4svh, 14px);
   }
   .mescreations-immersion__selection-head {
@@ -26186,8 +26309,11 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   /* ── Bouton « Décrire mon projet » : moins large, moins imposant ────────
      Il s'étalait d'un bord à l'autre de l'écran. C'est un effet de bord du
      carrousel pleine largeur : la zone sélection a perdu ses marges latérales
-     pour que les cards soient coupées par les bords, et le bouton, qui vit
-     dans cette zone, les a perdues avec.
+     pour que les cards soient coupées par les bords, et le bouton, qui vivait
+     alors dans cette zone, les a perdues avec. ⚠️ Il en est sorti le 29/08
+     (il est désormais son voisin) : il ne les hérite plus, c'est le `max-width`
+     ci-dessous qui les lui redonne. Ne pas le retirer en croyant qu'il fait
+     doublon avec la zone.
      ⇦ `76vw` n'est pas un chiffre au hasard : c'est EXACTEMENT la largeur des
      cards. Le bouton s'aligne donc sur la card active, ce qui se voit à
      l'œil. Garder les deux en phase si l'un des deux change.
@@ -26198,6 +26324,15 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     padding: 9px 18px;
     font-size: 12.5px;
     gap: 8px;
+    /* La moitié basse de l'air (voir la note de la zone sélection). Sans elle,
+       le couple zone+bouton serait calé en bas de l'écran au lieu d'y être
+       centré. Seule celle-ci est `auto` : la marge du haut garde une valeur
+       fixe, c'est l'écart avec la zone, il ne doit pas absorber d'espace.
+       ⚠️ Cette valeur du haut vaut 14 px ici mais 2 px sous 840 px de haut
+       (règle `max-height` plus bas) — donc 2 px sur un iPhone SE et sur tous
+       les téléphones en paysage. Si tu veux la stabiliser, c'est ici qu'il
+       faut reposer un `margin-top`, pas dans la règle de base. */
+    margin-bottom: auto;
   }
   .mescreations-immersion__describe svg { width: 15px; height: 15px; }
 }

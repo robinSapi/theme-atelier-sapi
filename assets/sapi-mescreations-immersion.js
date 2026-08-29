@@ -795,6 +795,33 @@
         var p = clamp((-rect.top) / revealSpan, 0, 1);
         section.style.setProperty('--reveal', p.toFixed(4));
         if (els.selection) els.selection.style.pointerEvents = p > 0.45 ? 'auto' : 'none';
+        /* ⚠️ LE BOUTON « DÉCRIRE » A BESOIN DU MÊME RELAIS, DEPUIS LE 29/08.
+           Il vivait DANS la zone sélection et héritait de sa cliquabilité sans
+           qu'aucune ligne ne le dise. Il en est sorti pour pouvoir remonter sur
+           desktop — sans cette ligne il serait cliquable dès le chargement,
+           invisible, en plein sur la phrase de Robin.
+           Même seuil que la zone (0,45), pour que les deux deviennent
+           cliquables au même instant. */
+        if (els.describe) els.describe.style.pointerEvents = p > 0.45 ? 'auto' : 'none';
+        /* ⚠️ ET IL FAUT COUPER LE FANTÔME DU BOUTON « DÉCOUVRE TA SÉLECTION ».
+           Celui-ci s'efface en opacité mais GARDE SA PLACE dans le flux (voir sa
+           note dans style.css) — et sa règle `.is-in` lui laisse
+           `pointer-events: auto` pour toujours. Depuis que « Décrire » remonte
+           À SON EMPLACEMENT en desktop, les deux boîtes se superposent : sans
+           cette ligne, les clics partent dans un bouton invisible qui rescrolle
+           vers une position déjà atteinte. Rien ne casse, rien ne bouge, et le
+           bouton visible paraît simplement mort.
+           ⚠️ Le `z-index: 4` posé côté CSS protège la partie RECOUVERTE ; ce
+           qui reste à couvrir ici, c'est ce que le fantôme laisse DÉPASSER en
+           bas — 49 px de haut contre 33 à 39 px pour le bouton visible, soit
+           une bande morte de 10 à 16 px juste dessous. Les deux sont
+           nécessaires, chacun pour une zone différente.
+           Seuil 0,4 et non 0,45 : son opacité tombe à zéro dès --reveal ≈ 0,385
+           (clamp(0, 1 - --reveal * 2.6, 1)). On le neutralise dès qu'il est
+           invisible, pas plus tard.
+           La chaîne vide rend la main au CSS : en haut de page il redevient
+           cliquable de lui-même, sans qu'on ait à réécrire 'auto'. */
+        if (els.revealBtn) els.revealBtn.style.pointerEvents = p > 0.4 ? 'none' : '';
         // Indices cliquables seulement quand ils sont visibles (sinon ils
         // capteraient les clics par-dessus l'autre).
         if (hintRevealEl) hintRevealEl.style.pointerEvents = p < 0.4 ? 'auto' : 'none';

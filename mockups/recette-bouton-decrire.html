@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recette — bouton « Décrire mon projet »</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F4EFE7; --white:#fff; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
+    --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --ok:#2F7D53; --ko:#C0392B;
+    --body:'Montserrat',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--wood-dark);font:15px/1.62 var(--body)}
+  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 80px}
+  h1{margin:0 0 6px;font-size:25px;letter-spacing:-.01em}
+  .sub{margin:0 0 18px;color:var(--wood-mid);font-size:14.5px}
+
+  .intro{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:22px}
+  .intro h2{margin:0 0 8px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--wood)}
+  .intro p{margin:7px 0;font-size:14px;color:var(--wood-mid)}
+  .intro b{color:var(--wood-dark)}
+  .intro code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px}
+
+  .test{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px;
+        box-shadow:0 2px 8px rgba(147,125,104,.08)}
+  .test__h{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+  .num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--wood);color:#fff;
+       font:700 12px/26px var(--body);text-align:center}
+  .test__t{margin:0;font-size:16px;font-weight:700}
+  .ctx{display:inline-block;margin:2px 0 10px 36px;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+       text-transform:uppercase;color:var(--wood);background:var(--warm);border:1px solid var(--line);
+       border-radius:20px;padding:3px 11px}
+  .steps{margin:0 0 12px 36px;padding:0;list-style:none;counter-reset:s}
+  .steps li{position:relative;padding-left:22px;margin:6px 0;font-size:14.2px;counter-increment:s}
+  .steps li::before{content:counter(s) ".";position:absolute;left:0;color:var(--wood);font-weight:700;font-size:12.5px}
+  .att{margin:0 0 12px 36px;padding:10px 13px;background:var(--warm);border-left:3px solid var(--wood);
+       border-radius:0 8px 8px 0;font-size:13.8px}
+  .att b{color:var(--wood-dark)}
+  .att--rouge{border-left-color:var(--orange)}
+  .rep{margin-left:36px}
+  .rep label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+             color:var(--wood);margin-bottom:6px}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .btns button{font:700 13px/1 var(--body);padding:9px 16px;border-radius:8px;border:1px solid var(--line);
+               background:#fff;color:var(--wood-dark);cursor:pointer}
+  .btns button.ok.on{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btns button.ko.on{background:var(--ko);border-color:var(--ko);color:#fff}
+  textarea{width:100%;min-height:52px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+           font:14px/1.5 var(--body);color:var(--wood-dark);background:var(--warm);resize:vertical}
+  textarea::placeholder{color:rgba(107,90,74,.55)}
+
+  .fin{margin-top:26px;background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .fin h2{margin:0 0 8px;font-size:16px}
+  .fin p{margin:6px 0;font-size:14px;color:var(--wood-mid)}
+  .copie{margin-top:12px;font:700 14px/1 var(--body);padding:12px 20px;border-radius:9px;border:none;
+         background:var(--wood-dark);color:#fff;cursor:pointer}
+  .copie.done{background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Recette — le bouton « Décrire mon projet »</h1>
+  <p class="sub">Sur <b>test.atelier-sapi.fr</b>, page <code>/mes-creations/</code>. Sept tests, dont trois qui ne se voient que sur une fenêtre courte ou sur téléphone.</p>
+
+  <div class="intro">
+    <h2>Ce qui a changé</h2>
+    <p>Le bouton <b>« Décrire mon projet en détail »</b> est raccourci, passe en <b>blanc plein sur ordinateur</b>, et remonte se placer <b>sous ta phrase</b>, à l'emplacement du bouton « Découvrir ma sélection » devenu invisible. Sur téléphone, il reste où il était : sous le carrousel.</p>
+    <p>⚠️ Trois défauts trouvés en relecture et corrigés avant livraison : le bouton était <b>mort au clic</b> (un bouton invisible lui volait ses clics), son blanc était <b>sali</b> par le voile sombre du texte, et sur les <b>portables de moins de 840 px de haut</b> il ne remontait pas.</p>
+  </div>
+
+  <!-- 1 -->
+  <div class="test" data-t="1">
+    <div class="test__h"><span class="num">1</span><h2 class="test__t">Le bouton remonte, et il est blanc franc</h2></div>
+    <span class="ctx">Ordinateur — grande fenêtre</span>
+    <ol class="steps">
+      <li>Ouvre <code>test.atelier-sapi.fr/mes-creations/?piece=entree</code> en plein écran.</li>
+      <li>Attends que la phrase s'écrive, puis fais défiler jusqu'à ce que ça s'arrête (le carrousel est apparu).</li>
+      <li>Regarde la zone entre ta phrase et le carrousel.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> le bouton « Décrire mon projet en détail » est là, entre la phrase et le carrousel, <b>fond blanc franc</b>. Pas gris, pas grisé sur le bord haut. Le libellé n'a plus le mot « projet » deux fois.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder="Si gris ou mal placé, décris ce que tu vois."></textarea>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="test" data-t="2">
+    <div class="test__h"><span class="num">2</span><h2 class="test__t">Il répond au survol, et il ouvre la modale</h2></div>
+    <span class="ctx">Ordinateur — grande fenêtre</span>
+    <ol class="steps">
+      <li>Sans bouger de là, passe la souris <b>en plein centre</b> du bouton.</li>
+      <li>Clique.</li>
+    </ol>
+    <div class="att att--rouge"><b>Attendu :</b> au survol le fond passe du blanc au crème. Au clic, la modale Conseiller s'ouvre sur sa première question.<br><b>C'est LE test du défaut principal.</b> Si le survol ne réagit pas, ou si le clic ne fait rien, le bouton invisible est toujours devant.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder="Le survol réagit ? Le clic ouvre bien la modale ?"></textarea>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="test" data-t="3">
+    <div class="test__h"><span class="num">3</span><h2 class="test__t">La bande juste sous le bouton n'est pas morte</h2></div>
+    <span class="ctx">Ordinateur — grande fenêtre</span>
+    <ol class="steps">
+      <li>Ferme la modale si elle est ouverte.</li>
+      <li>Clique sur le bouton <b>tout en bas</b>, à un ou deux pixels du bord inférieur.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> la modale s'ouvre aussi. Le bouton invisible dépasse d'une dizaine de pixels par le bas ; c'est cette bande-là qu'on vient de neutraliser.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="test" data-t="4">
+    <div class="test__h"><span class="num">4</span><h2 class="test__t">Le cas du portable : fenêtre de 800 px de haut</h2></div>
+    <span class="ctx">Ordinateur — fenêtre réduite en hauteur</span>
+    <ol class="steps">
+      <li>Réduis la hauteur de ta fenêtre de navigateur jusqu'à ce qu'elle fasse <b>environ 800 px</b> (une fenêtre qui n'occupe pas toute la hauteur de l'écran suffit ; laisse une bonne bande de bureau visible en dessous).</li>
+      <li>Recharge la page, refais défiler jusqu'au carrousel.</li>
+    </ol>
+    <div class="att att--rouge"><b>Attendu :</b> exactement la même chose qu'au test 1 — le bouton est sous la phrase, pas sous le carrousel, et le carrousel ne vient pas le chevaucher.<br>Sans les deux correctifs, sur cette hauteur-là le bouton restait en bas et le carrousel remontait de 55 px par-dessus. <b>C'est la configuration de la plupart des portables 13 et 14 pouces</b> — la mienne ne l'était pas, c'est pour ça que je ne l'avais pas vu.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder="Hauteur approximative de ta fenêtre, et ce que tu vois."></textarea>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="test" data-t="5">
+    <div class="test__h"><span class="num">5</span><h2 class="test__t">Le focus revient bien sur le bouton</h2></div>
+    <span class="ctx">Ordinateur — clavier</span>
+    <ol class="steps">
+      <li>Clique sur le bouton pour ouvrir la modale.</li>
+      <li>Ferme-la avec la touche <b>Échap</b>.</li>
+      <li>Sans toucher la souris, appuie sur <b>Entrée</b>.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> la modale se rouvre. Le focus était bien revenu sur le bouton. (J'avais ajouté une règle qui cassait ça, elle est retirée.)</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="test" data-t="6">
+    <div class="test__h"><span class="num">6</span><h2 class="test__t">Téléphone : le bouton reste collé au carrousel</h2></div>
+    <span class="ctx">iPhone — celui que tu utilises d'habitude</span>
+    <ol class="steps">
+      <li>Ouvre la même page sur ton téléphone, fais défiler jusqu'au carrousel.</li>
+      <li>Regarde l'écart entre les <b>points du carrousel</b> et le bouton.</li>
+    </ol>
+    <div class="att att--rouge"><b>Attendu :</b> le bouton est juste sous les points, comme avant. <b>Il ne doit PAS flotter au milieu de l'écran ni être collé à la flèche du bas.</b><br>C'est l'effet de bord du déménagement : en sortant du carrousel, le bouton perdait le groupe centré dont il faisait partie et décrochait d'environ 80 px. J'ai reconstitué ce centrage autrement — c'est ce point-là qui a le plus besoin de tes yeux.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder="Modèle de téléphone, et l'écart que tu observes."></textarea>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="test" data-t="7">
+    <div class="test__h"><span class="num">7</span><h2 class="test__t">Téléphone : rien ne déborde, et le carrousel ne saute pas</h2></div>
+    <span class="ctx">iPhone</span>
+    <ol class="steps">
+      <li>Toujours sur la même page, vérifie que le carrousel s'affiche <b>en entier</b> (photos non coupées en bas) et que la flèche du bas est visible.</li>
+      <li>Ouvre la modale, réponds à deux ou trois questions jusqu'à ce que la sélection se renouvelle, puis ferme.</li>
+      <li>Regarde le moment où les nouvelles photos apparaissent.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> rien n'est coupé. Au renouvellement, un léger recalage vertical du titre et du bouton est possible si les nouveaux noms de produits sont plus longs — dis-moi si ça saute à l'œil, c'est réglable.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <div class="fin">
+    <h2>Quand tu as fini</h2>
+    <p>Clique ci-dessous : tout est copié dans ton presse-papier, tu n'as qu'à me le coller.</p>
+    <button class="copie" id="cp">Copier mes réponses</button>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.btns').forEach(function(g){
+    g.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        g.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+      });
+    });
+  });
+
+  document.getElementById('cp').addEventListener('click', function(){
+    var out = ['# Recette — bouton « Décrire mon projet »', ''];
+    document.querySelectorAll('.test').forEach(function(t){
+      var n   = t.getAttribute('data-t');
+      var tit = t.querySelector('.test__t').textContent;
+      var on  = t.querySelector('.btns button.on');
+      var com = t.querySelector('textarea').value.trim();
+      out.push('## ' + n + '. ' + tit);
+      out.push('Résultat : ' + (on ? on.textContent : '(non renseigné)'));
+      if (com) out.push('Commentaire : ' + com);
+      out.push('');
+    });
+    var txt = out.join('\n');
+    var fin = function(){
+      var b = document.getElementById('cp');
+      b.textContent = 'Copié ✓'; b.classList.add('done');
+      setTimeout(function(){ b.textContent = 'Copier mes réponses'; b.classList.remove('done'); }, 2200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(fin, function(){ window.prompt('Copie manuelle :', txt); });
+    } else {
+      window.prompt('Copie manuelle :', txt);
+    }
+  });
+</script>
+</body>
+</html>
