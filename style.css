@@ -26548,6 +26548,31 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      supprime. À 640 px de fenêtre ça fait 218 px de photo.
      ⚠️ Préfixe obligatoire : `.product-card-cinetique` est partagé avec
      /nos-creations/ et avec le catalogue qui vit sous ce hero. */
+  /* ⚠️ SANS CES DEUX RÈGLES, LE CARROUSEL DISPARAÎT PUREMENT ET SIMPLEMENT.
+     C'est la contrepartie oubliée du `0 1 auto` ci-dessus, et elle ne pardonne
+     pas. En desktop, `slider-wrap` est en `flex: 1 1 0` : sa base vaut ZÉRO, et
+     il comptait sur une zone à hauteur imposée pour grandir ensuite. Dans une
+     zone dimensionnée par son CONTENU, le raisonnement s'inverse — il ne
+     contribue rien à cette hauteur, la zone se résout à zéro, et il n'y a plus
+     rien à faire grandir. Le carrousel n'a pas « une mauvaise taille » : il
+     n'existe plus à l'écran. Aucune erreur, aucun débordement.
+     Même chose pour le slider, dont le `height: 100%` se rapporte désormais à
+     un parent sans hauteur : il faut le laisser prendre sa hauteur naturelle et
+     le PLAFONNER, pas l'y accrocher.
+     Le bloc mobile pose exactement ces deux règles, pour exactement cette
+     raison — je ne les avais pas reprises. */
+  .mescreations-immersion__layer .mescreations-immersion__slider-wrap {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: 100%;
+  }
+  .mescreations-immersion__layer .mescreations-immersion__slider-wrap .mescreations-immersion__slider {
+    height: auto;
+    max-height: 100%;
+  }
+
   .mescreations-immersion__layer .mescreations-immersion__slider .product-card-cinetique .product-media {
     /* ⚠️ `0 1 auto` ET NON `0 0 auto` : la photo garde 34svh comme BASE, mais
        elle peut céder. C'est ce qui distingue « la card rétrécit » de « la card
