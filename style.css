@@ -25391,8 +25391,15 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 /* Une fois la sélection révélée, il n'a plus d'objet : il s'efface, mais
    GARDE SA PLACE — la retirer du flux recalculerait la mise en page pendant
    le scroll, ce qu'on s'interdit depuis le début de ce chantier. */
+/* ⚠️ COEFFICIENT RÉÉTALÉ LE 29/08 : 2,6 → 2,0. Il disparaissait à 38 % de la
+   course, alors que le carrousel n'entrait qu'à 30 % : les deux écrans ne
+   coexistaient que 80 ms sur les 560 du trajet, d'où l'impression de coupure
+   plutôt que de transition. Il s'efface maintenant à 50 %.
+   ⚠️ Ce chiffre est LU PAR LE JS (seuil de neutralisation du fantôme, dans
+   sapi-mescreations-immersion.js). Changer l'un sans l'autre laisse un bouton
+   invisible qui vole les clics. */
 .mescreations-immersion__reveal-btn.is-in {
-  opacity: clamp(0, calc(1 - var(--reveal) * 2.6), 1);
+  opacity: clamp(0, calc(1 - var(--reveal) * 2), 1);
 }
 .mescreations-immersion__reveal-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 @media (hover: hover) {
@@ -25445,11 +25452,15 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      bouton tenait son apparition avant d'en sortir. `--reveal` est déclarée
      sur la section (défaut 0), donc héritée ici : pas de repli à écrire, et
      surtout pas une écriture différente de celle de la zone. */
-  opacity: clamp(0, calc((var(--reveal) - .3) / .7), 1);
+  opacity: clamp(0, calc((var(--reveal) - .15) / .85), 1);
   -webkit-transform: translateY(calc((1 - var(--reveal)) * 30px));
   transform: translateY(calc((1 - var(--reveal)) * 30px));
   /* ⚠️ LA CLIQUABILITÉ EST PILOTÉE EN JS — même seuil que la zone sélection
-     (0,45), dans sapi-mescreations-immersion.js. Une opacité nulle n'empêche
+     (0,50 depuis le 29/08), dans sapi-mescreations-immersion.js.
+     ⚠️ Écart assumé : le bouton devient VISIBLE dès 0,15 et ne répond au clic
+     qu'à 0,50, où il est à 41 % d'opacité. C'est le prix du réétalement du
+     fondu ; en mode carrousel cet état ne dure que le temps de l'animation.
+     Une opacité nulle n'empêche
      pas le clic : sans ce relais, le bouton serait cliquable en plein sur la
      phrase de Robin dès le chargement.
      ⚠️ PAS DE `visibility: hidden` ICI, ET J'AI ESSAYÉ. C'était plus propre au
@@ -25681,13 +25692,16 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 }
 /* Indice 1 : visible au départ, monte et s'efface à mesure qu'on révèle. */
 .mescreations-immersion__hint--reveal {
-  opacity: calc(1 - var(--reveal) * 2.4);
+  /* 2,4 → 2,0 le 29/08 : réétalé avec le reste (voir la note du reveal-btn). */
+  opacity: calc(1 - var(--reveal) * 2);
   -webkit-transform: translateY(calc(var(--reveal) * -38px));
   transform: translateY(calc(var(--reveal) * -38px));
 }
-/* Indice 2 : apparaît seulement une fois la sélection révélée (≥ 0.85). */
+/* Indice 2 : apparaît seulement une fois la sélection bien engagée (≥ 0,72). */
 .mescreations-immersion__hint--catalogue {
-  opacity: clamp(0, calc((var(--reveal) - 0.85) / 0.15), 1);
+  /* 0,85 → 0,72 le 29/08 : il n'entrait que sur les 15 derniers pour cent de la
+     course, soit après que tout le reste était fini. Réétalé avec le lot. */
+  opacity: clamp(0, calc((var(--reveal) - 0.72) / 0.28), 1);
 }
 .mescreations-immersion__hint svg {
   width: 18px;
@@ -25734,9 +25748,17 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      entre le texte et le titre de la sélection : il n'y a pas d'espace
      résiduel ailleurs. */
   padding: 12px 24px 16px;
-  /* Apparaît un peu plus tard que la remontée du texte (de 0.3 à 1) → les deux
-     zones ne se croisent pas. */
-  opacity: clamp(0, calc((var(--reveal) - 0.3) / 0.7), 1);
+  /* ⚠️ ENTRÉE AVANCÉE DE 0,30 À 0,15 LE 29/08. Le carrousel n'entrait qu'à 30 %
+     de la course pendant que la phrase avait fini de sortir à 59 % : 80 ms de
+     fondu croisé sur les 560 du trajet, le reste du temps on regardait l'un
+     s'effacer seul puis l'autre monter seul. C'est ce creux qui donnait la
+     sensation de coupure, pas la distance (qui fait un écran entier).
+     La note d'origine disait « pour que les deux zones ne se croisent pas » :
+     en desktop haut la phrase reste dans le flux et ne peut pas recouvrir les
+     cards, le risque y est nul. En mobile et desktop court elle traverse en
+     sortant — c'est pour ça que son propre coefficient bouge peu (1,7 → 1,45),
+     là où le carrousel avance franchement. */
+  opacity: clamp(0, calc((var(--reveal) - 0.15) / 0.85), 1);
   -webkit-transform: translateY(calc((1 - var(--reveal)) * 30px));
   transform: translateY(calc((1 - var(--reveal)) * 30px));
 }
@@ -26160,7 +26182,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     overflow: hidden;
     -webkit-transform: translateY(calc(var(--reveal) * -100%));
     transform: translateY(calc(var(--reveal) * -100%));
-    opacity: clamp(0, calc(1 - var(--reveal) * 1.7), 1);
+    opacity: clamp(0, calc(1 - var(--reveal) * 1.45), 1);
     /* Transféré sur la couche : on n'empile pas deux calques promus imbriqués. */
     will-change: auto;
     gap: clamp(8px, 1.8svh, 20px);
@@ -26488,7 +26510,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
        la sortie fait exactement ce qu'il faut, quelle que soit la taille. */
     -webkit-transform: translateY(calc(var(--reveal) * -100%));
     transform: translateY(calc(var(--reveal) * -100%));
-    opacity: clamp(0, calc(1 - var(--reveal) * 1.7), 1);
+    opacity: clamp(0, calc(1 - var(--reveal) * 1.45), 1);
     will-change: auto;
     gap: clamp(8px, 1.8svh, 20px);
   }

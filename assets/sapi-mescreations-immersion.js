@@ -311,11 +311,16 @@
       var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
       // Même distance que celle qui pilote --reveal : l'indice amène donc
       // EXACTEMENT à la fin de la révélation, pas à 90 % ni à 110 %.
+      // Comme tous les sauts que nous déclenchons : on dit à l'ancreur où l'on
+      // arrive, sinon il déduit une direction d'un index périmé.
+      lastStopIndex = 1;
       programmaticScrollTo(trackTop + revealSpan);
     }
     function scrollToCatalogue() {
       var y = catalogueSnapY();
-      if (y != null) programmaticScrollTo(y);
+      if (y == null) return;
+      lastStopIndex = 2;
+      programmaticScrollTo(y);
     }
     if (hintRevealEl) hintRevealEl.addEventListener('click', scrollToReveal);
     if (hintCatalogueEl) hintCatalogueEl.addEventListener('click', scrollToCatalogue);
@@ -619,6 +624,13 @@
         var hPrev = html.style.overflow, bPrev = body.style.overflow;
         html.style.overflow = ''; body.style.overflow = '';
         jumpTo(Math.round(track.getBoundingClientRect().top + window.pageYOffset));
+        /* ⚠️ DIRE À L'ANCREUR OÙ L'ON VIENT D'ATTERRIR. Depuis le 29/08 il
+           mémorise l'étape au lieu de l'oublier en sortie de plage : sans cette
+           ligne, quelqu'un qui ouvre la modale depuis le catalogue garde un
+           index à 2, et l'ancreur conclut « il vient de remonter de deux
+           crans » — il redescendrait la page sur le carrousel juste après ce
+           saut, au moment le plus scénographié. */
+        lastStopIndex = 0;
         html.style.overflow = hPrev; body.style.overflow = bPrev;
       }
     });
@@ -659,6 +671,9 @@
       // Position d'ancrage 1. Passe par le drapeau : sinon l'ancreur se
       // déclencherait à la fin de cette remontée, au moment le plus
       // scénographié de la page.
+      // ⚠️ Et on lui dit où l'on arrive — même raison que pour le saut
+      // invisible plus haut : un index resté à 2 le ferait redescendre.
+      lastStopIndex = 0;
       programmaticScrollTo(top);
     }
     /* On écoute l'événement déterministe émis par la modale à CHAQUE fermeture
@@ -794,15 +809,23 @@
         // épinglée (le track est plus haut) = PAUSE à --reveal 1.
         var p = clamp((-rect.top) / revealSpan, 0, 1);
         section.style.setProperty('--reveal', p.toFixed(4));
-        if (els.selection) els.selection.style.pointerEvents = p > 0.45 ? 'auto' : 'none';
+        /* ⚠️ LES CINQ SEUILS CI-DESSOUS SONT INDEXÉS SUR DES FORMULES CSS.
+           Ils ont tous bougé le 29/08 avec le réétalement du fondu croisé
+           (style.css, notes sur `--reveal`). Les toucher d'un seul côté produit
+           des boutons invisibles mais cliquables, ou visibles mais morts —
+           deux pannes qui ne se voient pas en relisant le code.
+           0,50 : instant où le bouton « Découvrir » devient totalement
+           transparent (1 - --reveal × 2). Le carrousel et « Décrire » prennent
+           la main exactement là où lui la rend : aucun recouvrement. */
+        if (els.selection) els.selection.style.pointerEvents = p > 0.5 ? 'auto' : 'none';
         /* ⚠️ LE BOUTON « DÉCRIRE » A BESOIN DU MÊME RELAIS, DEPUIS LE 29/08.
            Il vivait DANS la zone sélection et héritait de sa cliquabilité sans
            qu'aucune ligne ne le dise. Il en est sorti pour pouvoir remonter sur
            desktop — sans cette ligne il serait cliquable dès le chargement,
            invisible, en plein sur la phrase de Robin.
-           Même seuil que la zone (0,45), pour que les deux deviennent
-           cliquables au même instant. */
-        if (els.describe) els.describe.style.pointerEvents = p > 0.45 ? 'auto' : 'none';
+           Même seuil que la zone, pour que les deux deviennent cliquables au
+           même instant. */
+        if (els.describe) els.describe.style.pointerEvents = p > 0.5 ? 'auto' : 'none';
         /* ⚠️ ET IL FAUT COUPER LE FANTÔME DU BOUTON « DÉCOUVRE TA SÉLECTION ».
            Celui-ci s'efface en opacité mais GARDE SA PLACE dans le flux (voir sa
            note dans style.css) — et sa règle `.is-in` lui laisse
@@ -816,16 +839,18 @@
            bas — 49 px de haut contre 33 à 39 px pour le bouton visible, soit
            une bande morte de 10 à 16 px juste dessous. Les deux sont
            nécessaires, chacun pour une zone différente.
-           Seuil 0,4 et non 0,45 : son opacité tombe à zéro dès --reveal ≈ 0,385
-           (clamp(0, 1 - --reveal * 2.6, 1)). On le neutralise dès qu'il est
-           invisible, pas plus tard.
+           Seuil 0,50 : son opacité tombe à zéro exactement là
+           (clamp(0, 1 - --reveal * 2, 1)). On le neutralise dès qu'il est
+           invisible, pas plus tard. Réglé sur 0,4 jusqu'au 29/08, quand son
+           coefficient valait 2,6.
            La chaîne vide rend la main au CSS : en haut de page il redevient
            cliquable de lui-même, sans qu'on ait à réécrire 'auto'. */
-        if (els.revealBtn) els.revealBtn.style.pointerEvents = p > 0.4 ? 'none' : '';
+        if (els.revealBtn) els.revealBtn.style.pointerEvents = p > 0.5 ? 'none' : '';
         // Indices cliquables seulement quand ils sont visibles (sinon ils
-        // capteraient les clics par-dessus l'autre).
-        if (hintRevealEl) hintRevealEl.style.pointerEvents = p < 0.4 ? 'auto' : 'none';
-        if (hintCatalogueEl) hintCatalogueEl.style.pointerEvents = p >= 0.85 ? 'auto' : 'none';
+        // capteraient les clics par-dessus l'autre). 0,50 et 0,72 suivent leurs
+        // formules CSS respectives, réétalées le 29/08.
+        if (hintRevealEl) hintRevealEl.style.pointerEvents = p < 0.5 ? 'auto' : 'none';
+        if (hintCatalogueEl) hintCatalogueEl.style.pointerEvents = p >= 0.72 ? 'auto' : 'none';
         // Recalage des flèches quand la sélection se dévoile (le layout est sûr
         // à ce moment ; évite une mesure de débordement faussée au tout load).
         if (p > 0.05) updateArrows();
@@ -894,11 +919,17 @@
     var SNAP_IDLE = 150;              // ms d'immobilité avant le recalage de secours
     var GESTE_MINIMUM = 8;            // ⇦ en dessous, il ne s'est rien passé (px)
     var TOLERANCE_ARRIVEE = 4;        // px : on se considère posé sur une étape
-    /* ⇦ Le temps de calme exigé avant d'accepter un nouveau geste à la molette.
-       À MONTER si une seule poussée de pavé tactile franchit deux étapes : le
-       pavé émet son inertie en continu pendant une à deux secondes, et c'est ce
-       silence qui distingue « même poussée » de « nouvelle poussée ». */
-    var REPOS_ENTRE_DEUX_PAS = 140;   // ms
+    /* ⇦ Le silence qui sépare deux gestes de molette. En dessous, c'est encore
+       la même poussée : le pavé tactile émet son inertie en continu pendant une
+       à deux secondes.
+       Monté de 140 à 260 ms le 29/08, en même temps que la correction de
+       l'horloge (voir l'écouteur `wheel`). Les 140 ms suffisaient tant que le
+       compteur n'était pas alimenté pendant l'animation ; maintenant qu'il
+       l'est, la queue d'inertie d'un pavé macOS laisse des trous de 150 à
+       200 ms qui se seraient lus comme un nouveau geste.
+       ⚠️ Conséquence assumée : deux poussées volontaires très rapprochées ne
+       comptent que pour une. C'est le prix d'un geste = une étape. */
+    var REPOS_ENTRE_DEUX_PAS = 260;   // ms
     /* ⇦ LE TEMPS QUE MET LA PAGE POUR PASSER D'UN ÉCRAN AU SUIVANT.
        Avant, on laissait faire `behavior: 'smooth'` : la durée appartenait
        alors au navigateur, et elle GRANDIT AVEC LA DISTANCE. Le trajet
@@ -908,9 +939,11 @@
        soit la distance : c'est ce qui donne une sensation de pas régulier.
        Monter ce chiffre rend le mouvement plus posé, le descendre plus sec.
        Historique du réglage : 420 ms jugé « trop rapide » par Robin, porté à
-       560. La fourchette utile est ~450-700 ; au-delà on retombe dans le
-       « trop lent » qui avait motivé la reprise en main de l'animation. */
-    var DUREE_TRANSITION = 560;  // ms
+       560, puis à 680 le 29/08 EN MÊME TEMPS que le changement d'adoucissement
+       (voir `easeInOut` plus bas). Les deux vont ensemble : allonger seul rend
+       mou, changer l'adoucissement seul ne suffit pas à rendre le mouvement
+       suivable. */
+    var DUREE_TRANSITION = 680;  // ms
     var snapTimer = null;
     var progScroll = false;     // un scroll programmatique est en vol
 
@@ -944,10 +977,19 @@
        Le délai ne subsiste qu'en filet ultime (onglet passé en arrière-plan,
        animation jamais terminée). */
     var progTarget = null, progTimer = null, progRaf = null;
-    var progFrom = 0, progStart = 0, progPrevBehavior = '';
-    // Décélération : départ franc, arrivée qui se pose. C'est ce qui fait
-    // qu'un déplacement court paraît net sans paraître brutal.
-    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+    var progFrom = 0, progStart = 0, progPrevBehavior = '', progPrevCaptured = false;
+    /* ⚠️ CHANGÉ LE 29/08 : `easeOut` → `easeInOut`, et c'est la correction qui
+       se voit le plus.
+       L'ancien profil partait à 4 820 px/s : 45 % du trajet était fait en
+       100 ms, puis les 200 dernières millisecondes ne parcouraient plus que
+       41 px. « Brutal, puis mou » — l'œil n'avait rien à suivre, il constatait
+       juste que l'écran avait changé.
+       Celui-ci démarre doucement, accélère au milieu, se pose à la fin : la
+       moitié du trajet tombe à mi-parcours (340 ms) au lieu de 115 ms. Même
+       durée totale ou presque, mouvement suivable. */
+    function easeInOut(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
 
     function programmaticScrollTo(y) {
       var target = Math.round(y);
@@ -967,7 +1009,12 @@
          jamais arriver. Le symptôme serait « c'est devenu tout mou » — et on
          l'imputerait à la durée, donc à la mauvaise cause. */
       var html = document.documentElement;
-      progPrevBehavior = html.style.scrollBehavior;
+      /* ⚠️ NE PAS RECAPTURER SI UNE ANIMATION EST DÉJÀ EN VOL. On mémoriserait
+         alors le `auto` posé par la précédente, et `endProgrammatic` le
+         réécrirait en style inline : le `scroll-behavior: smooth` global du
+         site serait mort jusqu'au rechargement, pour toute la page. Atteignable
+         en cliquant l'indice flèche pendant l'animation du bouton blanc. */
+      if (!progPrevCaptured) { progPrevBehavior = html.style.scrollBehavior; progPrevCaptured = true; }
       html.style.scrollBehavior = 'auto';
 
       progStart = 0;
@@ -975,7 +1022,7 @@
       progRaf = requestAnimationFrame(function step(ts) {
         if (!progStart) progStart = ts;
         var t = Math.min(1, (ts - progStart) / DUREE_TRANSITION);
-        window.scrollTo(0, Math.round(progFrom + (progTarget - progFrom) * easeOut(t)));
+        window.scrollTo(0, Math.round(progFrom + (progTarget - progFrom) * easeInOut(t)));
         if (t < 1) progRaf = requestAnimationFrame(step);
         else endProgrammatic();
       });
@@ -984,6 +1031,7 @@
       clearTimeout(progTimer);
       if (progRaf) { cancelAnimationFrame(progRaf); progRaf = null; }
       document.documentElement.style.scrollBehavior = progPrevBehavior;
+      progPrevCaptured = false;
       progScroll = false;
       progTarget = null;
     }
@@ -1082,7 +1130,20 @@
       var stops = stopPositions();
       if (!stops) return;
       var y = window.pageYOffset;
-      if (!inHeroRange(y, stops)) { lastStopIndex = null; return; }
+      /* ⚠️ ON MÉMORISE PAR QUELLE EXTRÉMITÉ ON EST SORTI, on ne remet plus à
+         `null`. Avec `null`, la rentrée dans la zone se recalait sur l'étape la
+         PLUS PROCHE géométriquement : en remontant du catalogue, il suffisait de
+         dépasser le carrousel de la moitié d'un écran — ce qu'un geste lancé
+         fait sans effort — pour être ramené à la phrase de Robin. Deuxième
+         cause du symptôme du 29/08, indépendante de celle de l'horloge.
+         En gardant l'extrémité, la rentrée redevient DIRECTIONNELLE : une
+         étape, dans le sens du mouvement. Ça ne retient personne dans le
+         catalogue, la sortie de plage rend la main avant cette ligne. */
+      if (!inHeroRange(y, stops)) {
+        if (y > stops[2]) lastStopIndex = 2;
+        else if (y < stops[0]) lastStopIndex = 0;
+        return;
+      }
 
       var i;
       if (lastStopIndex === null) {
@@ -1133,6 +1194,10 @@
        explicitement — et là `preventDefault` fonctionne. L'écouteur est posé
        sur le hero et non sur `window` : il ne coûte donc rien au reste du site. */
     var lastWheelAt = 0;
+    /* Cumul et verrou d'un même geste à la molette, exactement comme `aFranchi`
+       le fait pour le tactile. Un geste finit quand la molette se tait pendant
+       REPOS_ENTRE_DEUX_PAS. */
+    var wheelCumul = 0, wheelFranchi = false;
     function stepBy(dir) {
       var stops = stopPositions();
       if (!stops) return false;
@@ -1141,7 +1206,15 @@
       var from = nearestStep(y, stops);
       // Pas posé sur une étape (on y est entré par un autre chemin) : on
       // recale d'abord, plutôt que de franchir deux crans d'un coup.
-      if (Math.abs(stops[from] - y) > TOLERANCE_ARRIVEE) { programmaticScrollTo(stops[from]); return true; }
+      if (Math.abs(stops[from] - y) > TOLERANCE_ARRIVEE) {
+        /* ⚠️ POSER L'INDEX ICI AUSSI. Cette branche déplace la page sans le
+           faire, et l'ancreur en tirait ensuite une direction fausse : recalé
+           sur le catalogue avec un index resté à 0, il calculait « il est
+           descendu », et ramenait au carrousel quelqu'un qui descendait. */
+        lastStopIndex = from;
+        programmaticScrollTo(stops[from]);
+        return true;
+      }
       var next = Math.max(0, Math.min(stops.length - 1, from + dir));
       if (next === from) return false; // déjà à une extrémité
       lastStopIndex = next; // le chemin du retour saura d'où l'on vient
@@ -1163,11 +1236,43 @@
         var stops = stopPositions();
         if (!stops || !inHeroRange(window.pageYOffset, stops)) return;
         e.preventDefault();
-        if (carouselBusy()) return;
+
+        /* ⚠️ L'HORLOGE EST MISE À JOUR AVANT TOUTE SORTIE, ET C'EST LE CŒUR DU
+           CORRECTIF DU 29/08. Elle était écrite APRÈS le test `carouselBusy()` :
+           pendant les 560 ms d'animation d'alors, l'inertie du pavé continuait
+           d'arriver, était bien annulée, mais ne comptait pas comme du bruit.
+           À l'instant où l'animation se terminait, le premier événement encore
+           en vol trouvait une horloge vieille de 600 ms, en concluait « la voie
+           est libre », et repartait pour une étape. UN GESTE, DEUX ÉCRANS —
+           « ça passe presque directement au texte de Robin », dans les deux
+           sens. Diagnostic de Robin le 29/08, confirmé par l'audit.
+           Le commentaire de REPOS_ENTRE_DEUX_PAS conseillait de monter la
+           valeur : ça ne pouvait rien faire, puisque le compteur qu'elle
+           consulte n'était plus alimenté. */
         var now = Date.now();
-        var calme = now - lastWheelAt > REPOS_ENTRE_DEUX_PAS;
+        var nouveauGeste = now - lastWheelAt > REPOS_ENTRE_DEUX_PAS;
         lastWheelAt = now;
-        if (calme) stepBy(e.deltaY > 0 ? 1 : -1);
+        if (nouveauGeste) { wheelCumul = 0; wheelFranchi = false; }
+
+        /* ⚠️ `deltaY` N'EST PAS TOUJOURS EN PIXELS, et l'oublier rend le hero
+           impossible à faire défiler. Firefox à la souris envoie des LIGNES
+           (`deltaMode` 1, environ 3 par cran) : le cumul plafonnait alors à 3,
+           n'atteignait jamais le seuil de 8, et comme le défilement natif est
+           déjà annulé plus haut, il ne se passait plus rien du tout. Chrome et
+           Safari (pixels, ~100 par cran) ne montraient rien. */
+        var dy = e.deltaY;
+        if (e.deltaMode === 1) dy *= 16;                                // lignes → px
+        else if (e.deltaMode === 2) dy *= (window.innerHeight || 800);  // pages → px
+        wheelCumul += dy;
+
+        if (carouselBusy() || wheelFranchi) return;
+        /* Même règle que le tactile : on cumule jusqu'à ce que le geste ait une
+           amplitude, puis UNE seule étape par geste. Sans le cumul, un pavé
+           tactile qui démarre à 1 ou 2 px par événement ne franchirait jamais
+           rien ; sans le seuil, une dérive de pouce ferait sauter un écran. */
+        if (Math.abs(wheelCumul) < GESTE_MINIMUM) return;
+        wheelFranchi = true;
+        stepBy(wheelCumul > 0 ? 1 : -1);
       }, { passive: false });
 
       /* Tactile. L'écouteur peut rester PASSIF : c'est `touch-action` qui a
