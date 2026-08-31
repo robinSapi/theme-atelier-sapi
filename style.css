@@ -25462,10 +25462,19 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
      défaut connu et partagé avec le `reveal-btn` : à traiter pour les deux à
      la fois, pas ici. */
   pointer-events: none;
-  transition: background .2s ease;
+  /* ⚠️ PAS DE `transform` DANS CETTE TRANSITION, ET C'EST VOLONTAIRE. Le
+     `translateY` ci-dessus est piloté par le défilement : l'animer le ferait
+     traîner derrière le doigt. Seules les propriétés de survol sont animées. */
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease;
 }
-.mescreations-immersion__describe:hover {
-  background: rgba(255, 255, 255, .3);
+/* ⚠️ `@media (hover: hover)` OBLIGATOIRE — convention du site, respectée
+   partout ailleurs (`.button-outline`, `.hero-cta--wood`, les cards…). Sans
+   elle, un doigt qui touche le bouton sur mobile y LAISSE l'état de survol
+   collé jusqu'au prochain toucher ailleurs. */
+@media (hover: hover) {
+  .mescreations-immersion__describe:hover {
+    background: rgba(255, 255, 255, .3);
+  }
 }
 .mescreations-immersion__describe svg {
   width: 17px;
@@ -25568,8 +25577,36 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
        Si tu changes le padding ou la taille de ce bouton-là, reviens ici. */
     margin-top: -49px;
   }
+}
+/* ══════════════════════════════════════════════════════════════════════════
+   LE SURVOL DU BOUTON BLANC — il se remplit, le texte passe en blanc
+   ──────────────────────────────────────────────────────────────────────────
+   Le crème (`--color-warm`) était le choix d'origine. Sur du blanc pur il ne
+   se voyait pas : retour de recette de Robin, « l'effet existe mais il est
+   presque invisible ».
+   Le site remplit ses boutons clairs de bois au survol, texte en blanc —
+   `.button-outline` (975) et `.add-ampoule-btn` (3258). Ni l'un ni l'autre
+   n'est cependant un bouton BLANC PLEIN posé sur une photo, et c'est là que
+   le motif se heurte à un mur : blanc sur `--color-wood` ne donne que 3,9:1,
+   sous le seuil AA de 4,5 pour du texte de cette taille.
+   ⚠️ ON DESCEND DONC D'UN CRAN, à `--color-wood-dark` : 10,2:1, et c'est le
+   chemin que prend déjà `.hero-cta--wood:hover` (10593), qui va du bois au
+   bois sombre. Le survol reste dans la charte et devient lisible.
+   ⚠️ Le défaut de contraste de `.button-outline` et `.add-ampoule-btn` est
+   RÉEL et antérieur : blanc sur bois y échoue aussi. Ce n'est pas réglé ici.
+   L'ombre se creuse en même temps, comme `.hero-cta--wood`. Pas de
+   `translateY(-2px)` en revanche, malgré la convention des cards : la position
+   verticale de ce bouton est déjà écrite par le défilement, un survol qui la
+   reprendrait à son compte casserait la remontée.
+   ⚠️ Requête COMBINÉE plutôt qu'imbriquée dans le bloc desktop ci-dessus : le
+   fichier n'imbrique nulle part (c'est même sa première requête combinée), et
+   il passe par le minificateur d'Autoptimize en production. On ne lui donne
+   pas une construction qu'il serait seul à devoir digérer. */
+@media (min-width: 769px) and (hover: hover) {
   .mescreations-immersion .mescreations-immersion__describe:hover {
-    background: var(--color-warm);
+    background: var(--color-wood-dark);
+    color: var(--color-white, #fff);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .32);
   }
 }
 
