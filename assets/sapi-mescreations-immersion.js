@@ -307,20 +307,27 @@
        passent par `programmaticScrollTo` : sans ce drapeau, l'ancreur se
        déclencherait à la fin de leur animation et se battrait avec elle. */
     function scrollToReveal() {
-      if (!track) return;
-      var trackTop = track.getBoundingClientRect().top + window.pageYOffset;
-      // Même distance que celle qui pilote --reveal : l'indice amène donc
-      // EXACTEMENT à la fin de la révélation, pas à 90 % ni à 110 %.
-      // Comme tous les sauts que nous déclenchons : on dit à l'ancreur où l'on
-      // arrive, sinon il déduit une direction d'un index périmé.
+      // L'étape 2 est calculée sur la même distance que celle qui pilote
+      // --reveal : l'indice amène EXACTEMENT à la fin de la révélation, pas à
+      // 90 % ni à 110 %.
+      /* ⚠️ ON LIT LES ÉTAPES, ON NE LES RECALCULE PAS. Elles sont en cache
+         depuis le 29/08 : recalculer ici donnerait une cible FRAÎCHE, puis
+         l'ancreur repasserait 150 ms plus tard avec la valeur EN CACHE et
+         pousserait la page de quelques pixels. Un micro-saut juste après
+         l'arrivée, sans cause visible. Passer par la même source garantit
+         l'accord par construction.
+         Et on dit à l'ancreur où l'on arrive, sinon il déduit une direction
+         d'un index périmé. */
+      var stops = stopPositions();
+      if (!stops) return;
       lastStopIndex = 1;
-      programmaticScrollTo(trackTop + revealSpan);
+      programmaticScrollTo(stops[1]);
     }
     function scrollToCatalogue() {
-      var y = catalogueSnapY();
-      if (y == null) return;
+      var stops = stopPositions();
+      if (!stops) return;
       lastStopIndex = 2;
-      programmaticScrollTo(y);
+      programmaticScrollTo(stops[2]);
     }
     if (hintRevealEl) hintRevealEl.addEventListener('click', scrollToReveal);
     if (hintCatalogueEl) hintCatalogueEl.addEventListener('click', scrollToCatalogue);
@@ -464,7 +471,7 @@
     // ce moment que le débordement du slider est mesurable de façon fiable,
     // donc que l'on sait s'il faut des dots.
     setTimeout(function () { buildDots(); updateArrows(); }, 600);
-    window.addEventListener('resize', function () { buildDots(); updateArrows(); }, { passive: true });
+    window.addEventListener('resize', function () { buildDots(); updateArrows(); oublierEtapes(); }, { passive: true });
 
     /* ── Moment 2 (refonte filtrage) : à la FERMETURE de la modale Conseiller,
        window.sapiProject émet UNE notification (resume) avec les réponses
@@ -523,6 +530,10 @@
       sliderEl.scrollLeft = 0;
       buildDots(); // le nombre de cards a pu changer
       updateArrows();
+      /* La hauteur des cards a pu changer (un nom sur deux lignes suffit), donc
+         la position du catalogue aussi : les étapes en cache seraient périmées
+         et l'ancreur viserait à côté. */
+      oublierEtapes();
     }
 
     /* Transition douce : fondu de sortie → swap pendant que le slider est
@@ -864,11 +875,26 @@
       scheduleSnap();
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', function () { measureRevealSpan(); onScroll(); }, { passive: true });
+    window.addEventListener('resize', function () { measureRevealSpan(); oublierEtapes(); onScroll(); }, { passive: true });
     applyScroll();
     // La mise en page n'est fiable qu'après le premier rendu (polices, images) :
     // on remesure une fois, comme pour le débordement du slider.
-    setTimeout(function () { measureRevealSpan(); applyScroll(); }, 600);
+    setTimeout(function () { measureRevealSpan(); oublierEtapes(); applyScroll(); }, 600);
+    /* ⚠️ ET UNE FOIS LES POLICES POSÉES. C'est le SEUL contenu variable qui
+       entre dans la position du catalogue : le bandeau de réassurance est en
+       `flex-wrap`, et des métriques de police différentes le font passer sur
+       deux lignes. Tout le reste des étapes est figé en `vh` par le CSS, donc
+       insensible au contenu comme à la barre d'adresse mobile.
+       Si la police se pose après le recalage de 600 ms ci-dessus, la 3e étape
+       reste calculée sur la mise en page de repli et plus rien ne la corrige :
+       le titre du catalogue arrive à moitié caché par le bandeau, ou la page
+       tire le visiteur au-delà. Silencieux, et non reproductible à volonté
+       puisque ça dépend du moment où la police arrive. */
+    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+      document.fonts.ready.then(function () {
+        measureRevealSpan(); oublierEtapes(); applyScroll();
+      });
+    }
 
     /* ══════════════════════════════════════════════════════════════════════
        ANCRAGE AU DÉFILEMENT — trois positions d'arrêt (demande Robin)
@@ -918,6 +944,10 @@
 
     var SNAP_IDLE = 150;              // ms d'immobilité avant le recalage de secours
     var GESTE_MINIMUM = 8;            // ⇦ en dessous, il ne s'est rien passé (px)
+    /* ⇦ En dessous, c'est la queue d'inertie d'un pavé tactile qui s'éteint, pas
+       une intention. Sert UNIQUEMENT après qu'une étape a été franchie : voir la
+       note dans l'écouteur `wheel`. */
+    var BRUIT_INERTIE = 4;            // px
     var TOLERANCE_ARRIVEE = 4;        // px : on se considère posé sur une étape
     /* ⇦ Le silence qui sépare deux gestes de molette. En dessous, c'est encore
        la même poussée : le pavé tactile émet son inertie en continu pendant une
@@ -947,11 +977,18 @@
     var snapTimer = null;
     var progScroll = false;     // un scroll programmatique est en vol
 
-    /* Le verrou de scroll est posé par `overflow: hidden` sur html — par NOTRE
+    /* Le verrou de scroll est posé par `overflow: hidden` sur html, sur body ou
+       sur les deux selon qui le pose — par NOTRE
        machine à écrire ET par la modale Conseiller. Un seul test couvre donc
        les deux situations où il ne faut pas ancrer. */
     function scrollLocked() {
-      return document.documentElement.style.overflow === 'hidden';
+      /* ⚠️ LES DEUX ÉLÉMENTS, PAS SEULEMENT `html`. Notre machine à écrire pose
+         le verrou sur les deux ; le menu, le panier et la recherche ne le
+         posent que sur `body`. En ne testant que `html`, on ne les voyait pas :
+         un geste de molette derrière un panneau ouvert franchissait une étape
+         invisible et désynchronisait l'ancreur. */
+      return document.documentElement.style.overflow === 'hidden' ||
+             document.body.style.overflow === 'hidden';
     }
 
     /* Saut instantané. `window.scrollTo(x, y)` ne suffit pas : `html` porte un
@@ -1086,14 +1123,32 @@
       var offset = Math.max(cssMargin, stickyOffset()) + marginTop;
       return Math.round(cat.getBoundingClientRect().top + window.pageYOffset - offset);
     }
-    /* Les trois positions de repos, du haut vers le bas. */
+    /* Les trois positions de repos, du haut vers le bas.
+       ⚠️ MISES EN CACHE DEPUIS LE 29/08, et ce n'est pas une micro-optimisation.
+       Chaque appel enchaîne un `getBoundingClientRect` et trois
+       `getComputedStyle` — donc un recalcul de mise en page synchrone. Tant que
+       l'écouteur de molette vivait sur le hero, ça ne coûtait rien ailleurs ;
+       depuis qu'il est sur `window`, il tourne sur TOUTE la page, jusqu'à
+       120 fois par seconde au pavé tactile, catalogue compris.
+       Ces trois valeurs sont des positions dans le DOCUMENT : elles ne bougent
+       pas quand on défile, seulement quand la mise en page change. D'où
+       l'invalidation par `oublierEtapes()`, appelée au redimensionnement, après
+       un remplacement de cards, au recalage de 600 ms — c'est celle-là qui
+       rattrape un cache rempli trop tôt — et une fois les polices posées.
+       ⚠️ Pas de `= null` ici : la déclaration vit plus bas dans le fichier que
+       certains appelants. Une initialisation effacerait un cache déjà rempli
+       si l'un d'eux devenait synchrone. */
+    var stopsCache;
+    function oublierEtapes() { stopsCache = null; }
     function stopPositions() {
+      if (stopsCache) return stopsCache;
       if (!track) return null;
       var top = Math.round(track.getBoundingClientRect().top + window.pageYOffset);
       var pos2 = top + Math.round(revealSpan);
       var pos3 = catalogueSnapY();
       if (pos3 == null || pos3 < pos2) pos3 = pos2;
-      return [top, pos2, pos3];
+      stopsCache = [top, pos2, pos3];
+      return stopsCache;
     }
     function nearestStep(y, stops) {
       var idx = 0, best = Infinity;
@@ -1191,12 +1246,13 @@
        libre), et jamais en mouvement réduit.
 
        Le verrou ne concerne QUE le tactile. À la molette, on annule
-       explicitement — et là `preventDefault` fonctionne. L'écouteur est posé
-       sur le hero et non sur `window` : il ne coûte donc rien au reste du site. */
+       explicitement — et là `preventDefault` fonctionne. */
     var lastWheelAt = 0;
     /* Cumul et verrou d'un même geste à la molette, exactement comme `aFranchi`
        le fait pour le tactile. Un geste finit quand la molette se tait pendant
-       REPOS_ENTRE_DEUX_PAS. */
+       REPOS_ENTRE_DEUX_PAS — et, s'il avait déjà franchi une étape, quand un
+       événement d'INTENTION se présente en plus du silence (voir la note dans
+       l'écouteur : sans ça, l'inertie mourante rouvrait un geste toute seule). */
     var wheelCumul = 0, wheelFranchi = false;
     function stepBy(dir) {
       var stops = stopPositions();
@@ -1206,7 +1262,13 @@
       var from = nearestStep(y, stops);
       // Pas posé sur une étape (on y est entré par un autre chemin) : on
       // recale d'abord, plutôt que de franchir deux crans d'un coup.
-      if (Math.abs(stops[from] - y) > TOLERANCE_ARRIVEE) {
+      /* ⚠️ SEUIL ALIGNÉ SUR `GESTE_MINIMUM` (8) ET NON SUR `TOLERANCE_ARRIVEE`
+         (4). Entre les deux valeurs s'ouvrait une bande de 4 px où un geste
+         partait en recalage invisible au lieu de franchir : sur le chemin du
+         retour depuis le catalogue — celui dont Robin s'est plaint — un geste
+         sur deux se perdait dans un déplacement de 5 px, parfois même à
+         contresens, en avalant les 680 ms d'animation. */
+      if (Math.abs(stops[from] - y) > GESTE_MINIMUM) {
         /* ⚠️ POSER L'INDEX ICI AUSSI. Cette branche déplace la page sans le
            faire, et l'ancreur en tirait ensuite une direction fausse : recalé
            sur le catalogue avec un index resté à 0, il calculait « il est
@@ -1231,10 +1293,48 @@
          franchirait plusieurs étapes. On annule le défilement à CHAQUE
          événement (sinon le hero défilerait librement entre deux pas) mais on
          ne franchit une étape qu'après un silence. */
-      section.addEventListener('wheel', function (e) {
-        if (sliderEl && e.target && sliderEl.contains(e.target) && Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      /* ⚠️ ÉCOUTEUR SUR `window`, PAS SUR LE HERO — CORRECTIF DU 29/08.
+         Il était posé sur la section, au motif qu'il « ne coûterait rien au
+         reste du site ». Sauf qu'un événement de molette est adressé à
+         l'élément SOUS LE CURSEUR, et le header est collant : il recouvre le
+         haut du hero. Curseur dans cette bande, la molette partait au header,
+         notre écouteur ne voyait rien, et le geste était perdu — il fallait
+         bouger la souris plus bas pour que ça reparte. Constaté par Robin.
+         Le même piège vaut pour tout ce qui flotte au-dessus du hero.
+         ⚠️ CE QUE ÇA COÛTE, ET IL FAUT LE SAVOIR : l'écouteur tourne désormais
+         sur toute la page, catalogue compris. D'où le cache des positions
+         d'étape (`stopPositions` mesurait le document à chaque événement, soit
+         jusqu'à 120 fois par seconde) et les sorties anticipées ci-dessous, qui
+         doivent TOUTES rester avant le `preventDefault`. */
+      window.addEventListener('wheel', function (e) {
+        /* ⚠️ SORTIE 0 — GESTE HORIZONTAL. Même règle que `touchmove` plus bas.
+           Elle ne visait d'abord que le slider (`sliderEl.contains(e.target)`),
+           ce qui laissait passer un défilement horizontal pur ailleurs sur le
+           hero : `deltaY` valant 0, aucune sortie ne mordait, on annulait un
+           geste dont on ne ferait rien — et on tuait au passage le « retour en
+           arrière » par glissement du navigateur. */
+        if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+        /* ⚠️ SORTIE 1 — UN PANNEAU FLOTTANT TIENT L'ÉCRAN. Modale Conseiller,
+           panier, recherche, menu mobile : tous verrouillent la page par
+           `overflow: hidden`, et tous ont un contenu qui défile à l'intérieur.
+           Ce geste ne nous appartient pas, et l'annuler tuerait leur propre
+           défilement. Un seul test les couvre tous, sans liste de classes à
+           entretenir. */
+        if (scrollLocked()) return;
         var stops = stopPositions();
-        if (!stops || !inHeroRange(window.pageYOffset, stops)) return;
+        if (!stops) return;
+        var yNow = window.pageYOffset;
+        /* ⚠️ SORTIE 2 — HORS DE LA PLAGE DU HERO, la page est libre. */
+        if (!inHeroRange(yNow, stops)) return;
+        /* ⚠️ SORTIE 3 — AUX DEUX EXTRÉMITÉS, ON N'ANNULE PAS. `stepBy` refuse
+           d'aller au-delà de la dernière étape et retourne `false` : annuler
+           l'événement l'aurait été pour rien, et la page devenait IMPOSSIBLE à
+           faire défiler vers le catalogue à la molette. Ce trou n'existait pas
+           tant que l'écouteur vivait sur le hero (à la dernière étape, le hero
+           est déjà sorti de l'écran et ne recevait plus rien) : c'est le
+           passage sur `window` qui l'a ouvert. */
+        if (e.deltaY > 0 && yNow >= stops[2] - TOLERANCE_ARRIVEE) return;
+        if (e.deltaY < 0 && yNow <= stops[0] + TOLERANCE_ARRIVEE) return;
         e.preventDefault();
 
         /* ⚠️ L'HORLOGE EST MISE À JOUR AVANT TOUTE SORTIE, ET C'EST LE CŒUR DU
@@ -1250,9 +1350,6 @@
            valeur : ça ne pouvait rien faire, puisque le compteur qu'elle
            consulte n'était plus alimenté. */
         var now = Date.now();
-        var nouveauGeste = now - lastWheelAt > REPOS_ENTRE_DEUX_PAS;
-        lastWheelAt = now;
-        if (nouveauGeste) { wheelCumul = 0; wheelFranchi = false; }
 
         /* ⚠️ `deltaY` N'EST PAS TOUJOURS EN PIXELS, et l'oublier rend le hero
            impossible à faire défiler. Firefox à la souris envoie des LIGNES
@@ -1263,6 +1360,34 @@
         var dy = e.deltaY;
         if (e.deltaMode === 1) dy *= 16;                                // lignes → px
         else if (e.deltaMode === 2) dy *= (window.innerHeight || 800);  // pages → px
+        var significatif = Math.abs(dy) >= BRUIT_INERTIE;
+
+        /* ⚠️ LE SILENCE SEUL NE ROUVRE PAS UN GESTE DÉJÀ FRANCHI, et c'est la
+           subtilité qui tient tout l'édifice.
+           La queue d'inertie d'un pavé émet à 60 Hz pendant une seconde et
+           demie, avec des amplitudes qui tombent sous 3 px. Comme ces
+           micro-événements ne rafraîchissent plus l'horloge (ligne du dessous),
+           le silence de 260 ms finissait par être « atteint » EN PLEINE
+           INERTIE : l'inertie passait alors pour un nouveau geste, se
+           rafraîchissait l'horloge elle-même, et trois événements à 3 px
+           suffisaient à refranchir une étape. Le double saut revenait par la
+           porte de derrière.
+           Il faut donc, EN PLUS du silence, un événement d'intention — que
+           l'inertie mourante ne produit plus. Tant qu'aucune étape n'a été
+           franchie, la règle reste permissive : un geste lent démarre à 1 px et
+           doit pouvoir démarrer. */
+        var nouveauGeste = (now - lastWheelAt > REPOS_ENTRE_DEUX_PAS) &&
+                           (!wheelFranchi || significatif);
+        if (nouveauGeste) { wheelCumul = 0; wheelFranchi = false; }
+
+        /* ⚠️ QUI GARDE LE GESTE « VIVANT », ET POURQUOI ÇA DÉPEND DE L'ÉTAT.
+           Tant que l'étape n'est pas franchie, TOUT événement compte : un geste
+           lent démarre à 1 ou 2 px, et l'ignorer empêcherait de démarrer.
+           Une fois l'étape franchie, seuls les événements SIGNIFICATIFS comptent
+           encore : sans cette nuance, il fallait attendre l'extinction complète
+           de l'inertie avant qu'un nouveau geste soit accepté — le hero
+           paraissait sourd. */
+        if (!wheelFranchi || significatif) lastWheelAt = now;
         wheelCumul += dy;
 
         if (carouselBusy() || wheelFranchi) return;
@@ -1355,7 +1480,21 @@
              250 ms suffisent à absorber la fin du geste. Un clic, lui, n'a
              pas d'inertie : il déverrouille immédiatement. */
           if (sautParDefilement) {
-            later(unlockScroll, 250);
+            later(function () {
+              unlockScroll();
+              /* ⚠️ ET ON DÉCLARE LE GESTE DÉJÀ FRANCHI. Les 250 ms n'absorbent
+                 que le début de l'inertie : un pavé en émet une seconde et
+                 demie. Sans cette ligne, le premier événement qui passe après
+                 le déverrouillage trouve une horloge vieille de 250 ms et
+                 franchit une étape — le visiteur voit le texte s'afficher, puis
+                 la page partir seule vers le carrousel, sans avoir rien fait de
+                 plus. Le défaut que ces 250 ms devaient éviter, décalé de
+                 250 ms. La queue du geste qui vient de sauter la frappe n'est
+                 pas une intention : elle ne doit pas consommer une étape. */
+              lastWheelAt = Date.now();
+              wheelCumul = 0;
+              wheelFranchi = true;
+            }, 250);
           } else {
             unlockScroll();
           }
