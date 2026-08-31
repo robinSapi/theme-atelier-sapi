@@ -25543,50 +25543,14 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   }
   .mescreations-immersion__layer .mescreations-immersion__scrollhint { order: 2; }
 }
-/* ══════════════════════════════════════════════════════════════════════════
-   DESKTOP COURT — l'air rendu à la card (retour de recette Robin, 29/08)
-   ──────────────────────────────────────────────────────────────────────────
-   Constat en recette, sur une fenêtre d'environ 640 px de haut : le bas des
-   cards était rogné, prix et « Découvrir → » coupés. La photo était déjà sur
-   son plancher de 80 px, la card dépassait donc de sa zone, et le conteneur
-   est en `overflow: hidden` — ça coupe au lieu de déborder, silencieusement.
-   ⚠️ CE N'EST PAS ENTIÈREMENT UNE RÉGRESSION DE L'AIR AJOUTÉ. Le seuil de
-   rognage existait avant (~630 px de fenêtre) ; l'air l'a remonté à ~654, ce
-   qui a suffi à faire basculer les portables 1366×768. On rend donc les deux :
-   l'air en trop, ET un peu de la marge qui manquait déjà.
-   Deux paliers, dans cet ordre de sacrifice :
-     ≤ 800 px — on rend l'air. Le carrousel retrouve ses 12/14 px d'avant, et
-                ce seul palier suffit sur tout le domaine 630-800. C'est lui
-                qui fait le travail.
-     ≤ 660 px — on resserre AUSSI le bloc texte de la card. Marge de sécurité
-                sous le seuil, pas correctif principal : à 700 px de fenêtre
-                le palier 1 a déjà réglé le problème, et resserrer là serait
-                gratuit. ⚠️ C'est la PREMIÈRE fois qu'on touche à cette
-                densité, ici comme en mobile — le mobile ne resserre que
-                `product-info`, et quand il manque vraiment de place il
-                SUPPRIME le bouton (voir le bloc mobile le plus contraint)
-                plutôt que de grignoter des marges. Si 660 ne suffit pas, la
-                suite est là, pas dans des dixièmes de rem.
-   ⚠️ Tout est préfixé `.mescreations-immersion__slider` : `.product-card-
-   cinetique` est partagé avec /nos-creations/ et avec le catalogue qui vit
-   sous ce hero. Sans le préfixe, on retaille tout le site. */
-@media (min-width: 769px) and (max-height: 800px) {
-  .mescreations-immersion__layer .mescreations-immersion__selection {
-    padding-top: 12px;
-    padding-bottom: 14px;
-  }
-}
-@media (min-width: 769px) and (max-height: 660px) {
-  /* ⚠️ TROIS CLASSES, PAS DEUX. Les mêmes trois règles existent plus bas dans
-     ce fichier, hors media query et à deux classes : à spécificité égale
-     elles gagneraient par leur position, et ce palier ne rendrait pas un
-     pixel. Une media query n'ajoute AUCUNE spécificité — c'est le piège que
-     ce fichier documente déjà deux fois, et dans lequel cette règle était
-     tombée. Ne pas retirer le `__layer`. */
-  .mescreations-immersion__layer .mescreations-immersion__slider .product-info { padding: 0.4rem 0.6rem 0.3rem; }
-  .mescreations-immersion__layer .mescreations-immersion__slider .product-category { margin-bottom: 0.1rem; }
-  .mescreations-immersion__layer .mescreations-immersion__slider .product-actions { margin-bottom: 0.35rem; }
-}
+/* ⚠️ Le rattrapage par les espacements a été ABANDONNÉ le 29/08, après mesure.
+   Je l'avais chiffré à 14 px manquants ; Robin a mesuré le seuil réel de
+   rognage à 720 px de fenêtre, pas 628. Il manquait donc une centaine de
+   pixels, pas quatorze : aucun réglage de rembourrage ne pouvait y suffire, et
+   deux paliers de compaction ont été retirés d'ici. La vraie réponse est en
+   bas de ce fichier — sous 800 px de haut, le desktop emprunte le MÉCANISME du
+   mobile (le bloc texte quitte le flux et sort de l'écran), ce qui libère la
+   zone 1 entière. Voir « DESKTOP COURT » en fin de fichier. */
 @media (min-width: 769px) {
 
   .mescreations-immersion .mescreations-immersion__describe {
@@ -26122,7 +26086,11 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    partagent une hauteur ne peuvent pas se chevaucher — c'est structurel, ce
    n'est plus un réglage.
 
-   ⚠️ CE BLOC DOIT RESTER LE DERNIER DU FICHIER. Les blocs @media
+   ⚠️ CE BLOC DOIT RESTER APRÈS LES BLOCS @media (max-height: 840px / 700px).
+   (Il a longtemps été le dernier du fichier ; le bloc « DESKTOP COURT » du
+   29/08 est désormais après lui. Aucun conflit, les deux sont disjoints en
+   largeur — mais ne remonte pas celui-ci en croyant restaurer un ordre.)
+   Les blocs @media
    (max-height: 840px / 700px) juste au-dessus redéclarent __phrase{font-size},
    __inner{gap} et __selection{bottom} À SPÉCIFICITÉ ÉGALE, et surtout SANS
    borne de largeur : un petit téléphone en paysage les matche ET matche
@@ -26443,4 +26411,159 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     margin-bottom: auto;
   }
   .mescreations-immersion__describe svg { width: 15px; height: 15px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DESKTOP COURT — on emprunte le MÉCANISME du mobile, pas sa mise en page
+   Arbitrage de Robin, 29/08/2026, après recette
+   ──────────────────────────────────────────────────────────────────────────
+   LE CONSTAT. Sur une fenêtre de 640 px de haut, le bas des cards était rogné
+   (le bouton « Découvrir » entamé). J'avais d'abord chiffré le manque à 14 px
+   et tenté de le rendre en resserrant les espacements. Robin a mesuré : le
+   rognage commence à 720 px, pas 628. Il manquait une CENTAINE de pixels. Un
+   réglage de rembourrage ne pouvait pas y suffire, et s'entêter aurait produit
+   une succession de paliers de plus en plus tordus.
+
+   LA CAUSE. En desktop, la zone 1 (pastille + phrase + bouton blanc) reste
+   DANS LE FLUX : elle occupe sa hauteur en permanence, même une fois sortie de
+   l'écran par le défilement — elle ne « sort » que visuellement. Sur un grand
+   écran c'est indolore. Sur 640 px de haut, elle prend le tiers de la page et
+   il ne reste plus rien au carrousel.
+   Le mobile ne connaît pas ce problème depuis le 25/08 : sa zone 1 est HORS
+   FLUX, elle ne prend aucune place, et le carrousel est servi le premier.
+
+   L'ARBITRAGE. Robin, sur trois options : « le mécanisme seulement ». On
+   n'emprunte donc PAS la mise en page téléphone — une seule card à 78 % de la
+   largeur ferait 1070 px sur un portable 1366. On emprunte uniquement ce qui
+   libère la hauteur : la zone 1 quitte le flux. Le carrousel garde ses cards et
+   ses proportions desktop (trois au-dessus de 900 px de large, deux en dessous
+   — règle antérieure, inchangée).
+
+   ⚠️ CE QUE ÇA CHANGE POUR LE VISITEUR, ET QUI N'EST PAS QU'UNE AFFAIRE DE
+   PLACE. Au-dessus de 800 px, la phrase de Robin reste lisible au-dessus du
+   carrousel une fois la sélection révélée. En dessous, elle s'efface
+   complètement en défilant, comme sur téléphone : le conseil est lu, puis il
+   s'en va. C'est le prix du mécanisme — un bloc hors flux qui resterait
+   affiché recouvrirait les cards. Sur téléphone c'était une demande de Robin ;
+   ici c'est une conséquence, à assumer comme telle.
+   Autre écart hérité du mobile : la phrase se dimensionne en `svh` et devient
+   PLUS PETITE qu'en desktop haut (25 px contre 39 sur une fenêtre de 800), et
+   elle perd son léger agrandissement au repos.
+
+   ⚠️ CE BLOC DOIT RESTER LE DERNIER DU FICHIER, pour la même raison que celui
+   du mobile juste au-dessus : les blocs `@media (max-height: 840px / 700px)`
+   redéclarent `__phrase{font-size}`, `__inner{gap}` et `__describe{margin-top,
+   padding, font-size}` à spécificité égale et SANS borne de largeur. Une media
+   query n'ajoute pas de spécificité : c'est le plus bas qui gagne. Remonté, ce
+   bloc serait écrasé exactement là où il sert.
+
+   ⚠️ 800 px ET NON 720. Le rognage commence à 720 ; on bascule 80 px plus tôt
+   pour ne pas basculer pile au moment où ça casse. Conséquence à connaître :
+   en redimensionnant lentement sa fenêtre, on voit la mise en page changer au
+   franchissement des 800 px. C'est voulu, ce n'est pas un défaut. */
+@media (min-width: 769px) and (max-height: 800px) {
+
+  /* ── ZONE 1 — elle quitte le flux, et sort vraiment de l'écran ──────────
+     Copie conforme du mécanisme mobile, à deux valeurs près qui sont des
+     mesures de l'écran et non des choix.
+     `top: 90px` = le `padding-top` de la couche, et NON la hauteur du header
+     (celui-ci fait 74 px : 12 + 50 de logo + 12). Les 16 px d'écart sont l'air
+     voulu sous le header. C'est bien au padding de la couche qu'il faut coller,
+     pas au header.
+     `bottom: 48px` = la bande d'indice, 34 de haut + 14 de marge en desktop
+     (le mobile est à 34 + 18, d'où son 52).
+     ⚠️ Si tu touches à l'un ou à l'autre, ces deux nombres mentent aussitôt et
+     la phrase se met à chevaucher. */
+  .mescreations-immersion__inner {
+    position: absolute;
+    top: 90px;
+    bottom: 48px;
+    left: 0;
+    right: 0;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    overflow: hidden;
+    /* `-100%` se rapporte à la hauteur de l'ÉLÉMENT, pas à celle de l'écran :
+       la sortie fait exactement ce qu'il faut, quelle que soit la taille. */
+    -webkit-transform: translateY(calc(var(--reveal) * -100%));
+    transform: translateY(calc(var(--reveal) * -100%));
+    opacity: clamp(0, calc(1 - var(--reveal) * 1.7), 1);
+    will-change: auto;
+    gap: clamp(8px, 1.8svh, 20px);
+  }
+
+  /* La phrase se dimensionne sur la HAUTEUR, pas sur la largeur : ici c'est la
+     hauteur la ressource rare. Elle peut rester généreuse, elle n'a plus à
+     cohabiter avec le carrousel — elle a l'écran pour elle seule. */
+  .mescreations-immersion__phrase {
+    font-size: clamp(1.05rem, 3.1svh, 1.9rem);
+    line-height: 1.3;
+  }
+
+  /* ── Le bouton « Décrire » redescend sous le carrousel ──────────────────
+     ⚠️ IL NE PEUT PAS RESTER À SA PLACE DESKTOP, ET CE N'EST PAS UN CHOIX DE
+     GOÛT. Sa remontée de -49 px se cale sur le bouton « Découvrir ma
+     sélection », qui vit DANS la zone 1 : celle-ci passant hors flux, ce
+     repère n'occupe plus rien et la marge négative tirerait le bouton par
+     dessus le vide. On reprend donc l'empilement du mobile — carrousel, puis
+     bouton, puis indice — en le disant explicitement plutôt qu'en retirant les
+     `order` du bloc desktop, qui sont plus haut et gagneraient par leur
+     spécificité à deux classes.
+     Il garde en revanche son fond BLANC : c'est une décision de largeur
+     d'écran, pas de hauteur, et elle vient du bloc desktop qui matche encore. */
+  .mescreations-immersion__layer .mescreations-immersion__selection { order: 0; }
+  .mescreations-immersion__layer .mescreations-immersion__describe  { order: 1; }
+  .mescreations-immersion__layer .mescreations-immersion__scrollhint { order: 2; }
+  .mescreations-immersion .mescreations-immersion__describe {
+    margin-top: 14px;
+    /* La moitié basse de l'air : avec le `margin-top: auto` de la zone
+       ci-dessous, le couple carrousel + bouton est centré dans ce qui reste.
+       Même montage qu'en mobile. */
+    margin-bottom: auto;
+  }
+
+  /* ── ZONE 3 — le carrousel prend toute la place libérée ─────────────────
+     `0 1 auto` et non `1 1 0` : la zone se dimensionne sur son contenu, et
+     l'air lui est rendu par les deux marges auto. Sans ça elle avalerait tout
+     l'espace et le bouton décrocherait 80 px plus bas — le défaut déjà corrigé
+     en mobile le 29/08, dont la note est juste au-dessus. */
+  .mescreations-immersion__layer .mescreations-immersion__selection {
+    -webkit-box-flex: 0;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    margin-top: auto;
+    padding-top: 10px;
+    padding-bottom: 12px;
+  }
+
+  /* ⚠️ LA PHOTO REPREND UNE HAUTEUR EXPLICITE, et c'est la contrepartie du
+     `0 1 auto` ci-dessus. Tant que la zone remplissait l'écran, la photo
+     absorbait ce qui restait (`flex: 1 1 auto`) et n'avait besoin d'aucune
+     valeur. Dans une zone dimensionnée par son contenu, ce raisonnement
+     s'inverse : sans hauteur écrite, la photo tomberait sur son plancher de
+     80 px et les cards deviendraient des vignettes.
+     `34svh` est le pendant du `49svh` du mobile — plus bas parce qu'ici la
+     card porte encore son bouton « Découvrir », que le mobile le plus contraint
+     supprime. À 640 px de fenêtre ça fait 218 px de photo.
+     ⚠️ Préfixe obligatoire : `.product-card-cinetique` est partagé avec
+     /nos-creations/ et avec le catalogue qui vit sous ce hero. */
+  .mescreations-immersion__layer .mescreations-immersion__slider .product-card-cinetique .product-media {
+    /* ⚠️ `0 1 auto` ET NON `0 0 auto` : la photo garde 34svh comme BASE, mais
+       elle peut céder. C'est ce qui distingue « la card rétrécit » de « la card
+       est rognée par le bas ». Avec `0 0 auto`, un nom de produit qui passe sur
+       deux lignes ajoute 27 px à la pile, et comme rien ne peut céder, c'est le
+       bouton « Découvrir » qui repasse sous la ligne de coupe — le défaut même
+       qu'on corrige ici. Le `min-height: 80px` de la règle de base devient le
+       vrai plancher. */
+    -webkit-box-flex: 0;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    /* Repli en dur d'abord : sans `svh`, la déclaration entière serait rejetée
+       et la hauteur retomberait sur les `23vh / 17vh` des blocs `max-height`,
+       pourtant documentés comme inertes. En desktop `vh` et `svh` sont égaux,
+       le repli ne change donc rien là où il sert. */
+    height: 34vh;
+    height: 34svh;
+  }
 }
