@@ -25542,6 +25542,52 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     padding-bottom: clamp(20px, 4svh, 52px);
   }
   .mescreations-immersion__layer .mescreations-immersion__scrollhint { order: 2; }
+}
+/* ══════════════════════════════════════════════════════════════════════════
+   DESKTOP COURT — l'air rendu à la card (retour de recette Robin, 29/08)
+   ──────────────────────────────────────────────────────────────────────────
+   Constat en recette, sur une fenêtre d'environ 640 px de haut : le bas des
+   cards était rogné, prix et « Découvrir → » coupés. La photo était déjà sur
+   son plancher de 80 px, la card dépassait donc de sa zone, et le conteneur
+   est en `overflow: hidden` — ça coupe au lieu de déborder, silencieusement.
+   ⚠️ CE N'EST PAS ENTIÈREMENT UNE RÉGRESSION DE L'AIR AJOUTÉ. Le seuil de
+   rognage existait avant (~630 px de fenêtre) ; l'air l'a remonté à ~654, ce
+   qui a suffi à faire basculer les portables 1366×768. On rend donc les deux :
+   l'air en trop, ET un peu de la marge qui manquait déjà.
+   Deux paliers, dans cet ordre de sacrifice :
+     ≤ 800 px — on rend l'air. Le carrousel retrouve ses 12/14 px d'avant, et
+                ce seul palier suffit sur tout le domaine 630-800. C'est lui
+                qui fait le travail.
+     ≤ 660 px — on resserre AUSSI le bloc texte de la card. Marge de sécurité
+                sous le seuil, pas correctif principal : à 700 px de fenêtre
+                le palier 1 a déjà réglé le problème, et resserrer là serait
+                gratuit. ⚠️ C'est la PREMIÈRE fois qu'on touche à cette
+                densité, ici comme en mobile — le mobile ne resserre que
+                `product-info`, et quand il manque vraiment de place il
+                SUPPRIME le bouton (voir le bloc mobile le plus contraint)
+                plutôt que de grignoter des marges. Si 660 ne suffit pas, la
+                suite est là, pas dans des dixièmes de rem.
+   ⚠️ Tout est préfixé `.mescreations-immersion__slider` : `.product-card-
+   cinetique` est partagé avec /nos-creations/ et avec le catalogue qui vit
+   sous ce hero. Sans le préfixe, on retaille tout le site. */
+@media (min-width: 769px) and (max-height: 800px) {
+  .mescreations-immersion__layer .mescreations-immersion__selection {
+    padding-top: 12px;
+    padding-bottom: 14px;
+  }
+}
+@media (min-width: 769px) and (max-height: 660px) {
+  /* ⚠️ TROIS CLASSES, PAS DEUX. Les mêmes trois règles existent plus bas dans
+     ce fichier, hors media query et à deux classes : à spécificité égale
+     elles gagneraient par leur position, et ce palier ne rendrait pas un
+     pixel. Une media query n'ajoute AUCUNE spécificité — c'est le piège que
+     ce fichier documente déjà deux fois, et dans lequel cette règle était
+     tombée. Ne pas retirer le `__layer`. */
+  .mescreations-immersion__layer .mescreations-immersion__slider .product-info { padding: 0.4rem 0.6rem 0.3rem; }
+  .mescreations-immersion__layer .mescreations-immersion__slider .product-category { margin-bottom: 0.1rem; }
+  .mescreations-immersion__layer .mescreations-immersion__slider .product-actions { margin-bottom: 0.35rem; }
+}
+@media (min-width: 769px) {
 
   .mescreations-immersion .mescreations-immersion__describe {
     /* ⚠️ CE `z-index` N'EST PAS DÉCORATIF, IL EST LA CONDITION DU RESTE.

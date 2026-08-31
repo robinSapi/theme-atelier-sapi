@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Recette — bouton « Décrire mon projet »</title>
+<title>Recette — ce qu'il reste à tester</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --page:#F4EFE7; --white:#fff; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
+    --page:#F4EFE7; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
     --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
     --ok:#2F7D53; --ko:#C0392B;
     --body:'Montserrat',system-ui,sans-serif;
@@ -20,11 +20,10 @@
   h1{margin:0 0 6px;font-size:25px;letter-spacing:-.01em}
   .sub{margin:0 0 18px;color:var(--wood-mid);font-size:14.5px}
 
-  .intro{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:15px 17px;margin-bottom:22px}
-  .intro h2{margin:0 0 8px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--wood)}
-  .intro p{margin:7px 0;font-size:14px;color:var(--wood-mid)}
-  .intro b{color:var(--wood-dark)}
-  .intro code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px}
+  .fait{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:14px 17px;margin-bottom:22px}
+  .fait h2{margin:0 0 8px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--wood)}
+  .fait p{margin:6px 0;font-size:13.8px;color:var(--wood-mid)}
+  .fait b{color:var(--wood-dark)}
 
   .test{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px;
         box-shadow:0 2px 8px rgba(147,125,104,.08)}
@@ -48,8 +47,9 @@
   .btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
   .btns button{font:700 13px/1 var(--body);padding:9px 16px;border-radius:8px;border:1px solid var(--line);
                background:#fff;color:var(--wood-dark);cursor:pointer}
-  .btns button.ok.on{background:var(--ok);border-color:var(--ok);color:#fff}
-  .btns button.ko.on{background:var(--ko);border-color:var(--ko);color:#fff}
+  .btns button.on{background:var(--wood);border-color:var(--wood);color:#fff}
+  .btns button.ok.on{background:var(--ok);border-color:var(--ok)}
+  .btns button.ko.on{background:var(--ko);border-color:var(--ko)}
   textarea{width:100%;min-height:52px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
            font:14px/1.5 var(--body);color:var(--wood-dark);background:var(--warm);resize:vertical}
   textarea::placeholder{color:rgba(107,90,74,.55)}
@@ -65,123 +65,73 @@
 <body>
 <div class="wrap">
 
-  <h1>Recette — le bouton « Décrire mon projet »</h1>
-  <p class="sub">Sur <b>test.atelier-sapi.fr</b>, page <code>/mes-creations/</code>. Sept tests, dont trois qui ne se voient que sur une fenêtre courte ou sur téléphone.</p>
+  <h1>Ce qu'il reste à tester</h1>
+  <p class="sub">Sur <b>test.atelier-sapi.fr/mes-creations/</b>. Quatre points, dont deux qui sont des arbitrages : c'est ton œil qui tranche, pas un attendu.</p>
 
-  <div class="intro">
-    <h2>Ce qui a changé</h2>
-    <p>Le bouton <b>« Décrire mon projet en détail »</b> est raccourci, passe en <b>blanc plein sur ordinateur</b>, et remonte se placer <b>sous ta phrase</b>, à l'emplacement du bouton « Découvrir ma sélection » devenu invisible. Sur téléphone, il reste où il était : sous le carrousel.</p>
-    <p>⚠️ Trois défauts trouvés en relecture et corrigés avant livraison : le bouton était <b>mort au clic</b> (un bouton invisible lui volait ses clics), son blanc était <b>sali</b> par le voile sombre du texte, et sur les <b>portables de moins de 840 px de haut</b> il ne remontait pas.</p>
+  <div class="fait">
+    <h2>Déjà validé, ne pas refaire</h2>
+    <p>Le bouton remonte et il est blanc franc · il ouvre la modale · la fenêtre de 800 px de haut · le retour du focus au clavier · la position sur téléphone · rien ne déborde.</p>
+    <p>Le test « la bande sous le bouton » est <b>annulé</b> : ma consigne était mauvaise, et le point qui comptait est couvert par le test du clic.</p>
   </div>
 
   <!-- 1 -->
   <div class="test" data-t="1">
-    <div class="test__h"><span class="num">1</span><h2 class="test__t">Le bouton remonte, et il est blanc franc</h2></div>
-    <span class="ctx">Ordinateur — grande fenêtre</span>
+    <div class="test__h"><span class="num">1</span><h2 class="test__t">Le survol se voit, maintenant</h2></div>
+    <span class="ctx">Ordinateur — souris</span>
     <ol class="steps">
-      <li>Ouvre <code>test.atelier-sapi.fr/mes-creations/?piece=entree</code> en plein écran.</li>
-      <li>Attends que la phrase s'écrive, puis fais défiler jusqu'à ce que ça s'arrête (le carrousel est apparu).</li>
-      <li>Regarde la zone entre ta phrase et le carrousel.</li>
+      <li>Défile jusqu'au carrousel.</li>
+      <li>Passe la souris sur le bouton « Décrire mon projet en détail », puis retire-la. Deux ou trois fois.</li>
     </ol>
-    <div class="att"><b>Attendu :</b> le bouton « Décrire mon projet en détail » est là, entre la phrase et le carrousel, <b>fond blanc franc</b>. Pas gris, pas grisé sur le bord haut. Le libellé n'a plus le mot « projet » deux fois.</div>
+    <div class="att"><b>Attendu :</b> le bouton se remplit de <b>bois sombre</b> avec le texte et la flèche en blanc, l'ombre se creuse, et ça se fait en douceur (deux dixièmes de seconde), sans à-coup ni saut de position.<br>Le crème d'avant ne se voyait pas. Le bois clair, lui, aurait donné du blanc sur beige : trop peu de contraste pour être lisible. D'où le bois sombre.</div>
     <div class="rep">
       <label>Résultat</label>
       <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
-      <textarea placeholder="Si gris ou mal placé, décris ce que tu vois."></textarea>
+      <textarea placeholder="Trop fort, trop discret, ou juste bien ?"></textarea>
     </div>
   </div>
 
   <!-- 2 -->
   <div class="test" data-t="2">
-    <div class="test__h"><span class="num">2</span><h2 class="test__t">Il répond au survol, et il ouvre la modale</h2></div>
-    <span class="ctx">Ordinateur — grande fenêtre</span>
+    <div class="test__h"><span class="num">2</span><h2 class="test__t">L'air autour du carrousel — ton arbitrage</h2></div>
+    <span class="ctx">Ordinateur — arbitrage, pas un attendu</span>
     <ol class="steps">
-      <li>Sans bouger de là, passe la souris <b>en plein centre</b> du bouton.</li>
-      <li>Clique.</li>
+      <li>Regarde l'écart entre le bouton blanc et le titre « Ma sélection pour ta… ».</li>
+      <li>Puis l'écart entre le bas des cartes et la flèche du bas.</li>
     </ol>
-    <div class="att att--rouge"><b>Attendu :</b> au survol le fond passe du blanc au crème. Au clic, la modale Conseiller s'ouvre sur sa première question.<br><b>C'est LE test du défaut principal.</b> Si le survol ne réagit pas, ou si le clic ne fait rien, le bouton invisible est toujours devant.</div>
+    <div class="att att--rouge"><b>Il n'y a pas de bonne réponse, c'est un échange.</b> Le hero fait exactement la hauteur de ton écran : <b>chaque pixel d'air est un pixel de moins pour la photo</b>. J'ai mis 4 % de la hauteur d'écran, soit environ 44 px de photo en moins sur un grand écran.<br>Dis-moi simplement : c'est bien, il en faut plus, ou les photos sont devenues trop petites.</div>
     <div class="rep">
-      <label>Résultat</label>
-      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
-      <textarea placeholder="Le survol réagit ? Le clic ouvre bien la modale ?"></textarea>
+      <label>Ton avis</label>
+      <div class="btns"><button>C'est bien comme ça</button><button>Il en faut plus</button><button>Trop, les photos ont rétréci</button></div>
+      <textarea placeholder=""></textarea>
     </div>
   </div>
 
   <!-- 3 -->
   <div class="test" data-t="3">
-    <div class="test__h"><span class="num">3</span><h2 class="test__t">La bande juste sous le bouton n'est pas morte</h2></div>
-    <span class="ctx">Ordinateur — grande fenêtre</span>
+    <div class="test__h"><span class="num">3</span><h2 class="test__t">Le bas des cartes sur un petit portable</h2></div>
+    <span class="ctx">Écran de 13 pouces, ou fenêtre très basse</span>
     <ol class="steps">
-      <li>Ferme la modale si elle est ouverte.</li>
-      <li>Clique sur le bouton <b>tout en bas</b>, à un ou deux pixels du bord inférieur.</li>
+      <li>Sur un 13 pouces si tu en as un sous la main. Sinon, réduis ta fenêtre à <b>environ 640 px de haut</b> — beaucoup plus bas que le test précédent.</li>
+      <li>Regarde le bas des cartes produit : le prix, et le lien « Découvrir → ».</li>
     </ol>
-    <div class="att"><b>Attendu :</b> la modale s'ouvre aussi. Le bouton invisible dépasse d'une dizaine de pixels par le bas ; c'est cette bande-là qu'on vient de neutraliser.</div>
+    <div class="att att--rouge"><b>Attendu :</b> le prix et le « Découvrir → » sont visibles en entier sur chaque carte.<br>L'air que je viens d'ajouter est pris sur la photo, et en dessous d'une certaine hauteur d'écran c'est la carte elle-même qui commence à être rognée par le bas. Le seuil calculé tombe pile sur un 1366×768 sous Windows, avec une incertitude de 15 px. Autant le voir plutôt que le calculer.</div>
     <div class="rep">
       <label>Résultat</label>
-      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
-      <textarea placeholder=""></textarea>
+      <div class="btns"><button class="ok">Rien n'est coupé</button><button class="ko">Le bas des cartes est rogné</button></div>
+      <textarea placeholder="Taille d'écran ou hauteur de fenêtre, et ce que tu vois."></textarea>
     </div>
   </div>
 
   <!-- 4 -->
   <div class="test" data-t="4">
-    <div class="test__h"><span class="num">4</span><h2 class="test__t">Le cas du portable : fenêtre de 800 px de haut</h2></div>
-    <span class="ctx">Ordinateur — fenêtre réduite en hauteur</span>
-    <ol class="steps">
-      <li>Réduis la hauteur de ta fenêtre de navigateur jusqu'à ce qu'elle fasse <b>environ 800 px</b> (une fenêtre qui n'occupe pas toute la hauteur de l'écran suffit ; laisse une bonne bande de bureau visible en dessous).</li>
-      <li>Recharge la page, refais défiler jusqu'au carrousel.</li>
-    </ol>
-    <div class="att att--rouge"><b>Attendu :</b> exactement la même chose qu'au test 1 — le bouton est sous la phrase, pas sous le carrousel, et le carrousel ne vient pas le chevaucher.<br>Sans les deux correctifs, sur cette hauteur-là le bouton restait en bas et le carrousel remontait de 55 px par-dessus. <b>C'est la configuration de la plupart des portables 13 et 14 pouces</b> — la mienne ne l'était pas, c'est pour ça que je ne l'avais pas vu.</div>
-    <div class="rep">
-      <label>Résultat</label>
-      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
-      <textarea placeholder="Hauteur approximative de ta fenêtre, et ce que tu vois."></textarea>
-    </div>
-  </div>
-
-  <!-- 5 -->
-  <div class="test" data-t="5">
-    <div class="test__h"><span class="num">5</span><h2 class="test__t">Le focus revient bien sur le bouton</h2></div>
-    <span class="ctx">Ordinateur — clavier</span>
-    <ol class="steps">
-      <li>Clique sur le bouton pour ouvrir la modale.</li>
-      <li>Ferme-la avec la touche <b>Échap</b>.</li>
-      <li>Sans toucher la souris, appuie sur <b>Entrée</b>.</li>
-    </ol>
-    <div class="att"><b>Attendu :</b> la modale se rouvre. Le focus était bien revenu sur le bouton. (J'avais ajouté une règle qui cassait ça, elle est retirée.)</div>
-    <div class="rep">
-      <label>Résultat</label>
-      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
-      <textarea placeholder=""></textarea>
-    </div>
-  </div>
-
-  <!-- 6 -->
-  <div class="test" data-t="6">
-    <div class="test__h"><span class="num">6</span><h2 class="test__t">Téléphone : le bouton reste collé au carrousel</h2></div>
-    <span class="ctx">iPhone — celui que tu utilises d'habitude</span>
-    <ol class="steps">
-      <li>Ouvre la même page sur ton téléphone, fais défiler jusqu'au carrousel.</li>
-      <li>Regarde l'écart entre les <b>points du carrousel</b> et le bouton.</li>
-    </ol>
-    <div class="att att--rouge"><b>Attendu :</b> le bouton est juste sous les points, comme avant. <b>Il ne doit PAS flotter au milieu de l'écran ni être collé à la flèche du bas.</b><br>C'est l'effet de bord du déménagement : en sortant du carrousel, le bouton perdait le groupe centré dont il faisait partie et décrochait d'environ 80 px. J'ai reconstitué ce centrage autrement — c'est ce point-là qui a le plus besoin de tes yeux.</div>
-    <div class="rep">
-      <label>Résultat</label>
-      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
-      <textarea placeholder="Modèle de téléphone, et l'écart que tu observes."></textarea>
-    </div>
-  </div>
-
-  <!-- 7 -->
-  <div class="test" data-t="7">
-    <div class="test__h"><span class="num">7</span><h2 class="test__t">Téléphone : rien ne déborde, et le carrousel ne saute pas</h2></div>
+    <div class="test__h"><span class="num">4</span><h2 class="test__t">Sur iPhone, le survol ne reste plus collé</h2></div>
     <span class="ctx">iPhone</span>
     <ol class="steps">
-      <li>Toujours sur la même page, vérifie que le carrousel s'affiche <b>en entier</b> (photos non coupées en bas) et que la flèche du bas est visible.</li>
-      <li>Ouvre la modale, réponds à deux ou trois questions jusqu'à ce que la sélection se renouvelle, puis ferme.</li>
-      <li>Regarde le moment où les nouvelles photos apparaissent.</li>
+      <li>Défile jusqu'au carrousel.</li>
+      <li>Touche le bouton « Décrire mon projet » puis ferme la modale.</li>
+      <li>Regarde le bouton.</li>
     </ol>
-    <div class="att"><b>Attendu :</b> rien n'est coupé. Au renouvellement, un léger recalage vertical du titre et du bouton est possible si les nouveaux noms de produits sont plus longs — dis-moi si ça saute à l'œil, c'est réglable.</div>
+    <div class="att"><b>Attendu :</b> il est revenu à son apparence normale, translucide. Il ne doit pas rester dans son état « survolé » plus clair jusqu'à ce que tu touches ailleurs.</div>
     <div class="rep">
       <label>Résultat</label>
       <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
@@ -208,7 +158,7 @@
   });
 
   document.getElementById('cp').addEventListener('click', function(){
-    var out = ['# Recette — bouton « Décrire mon projet »', ''];
+    var out = ['# Recette — ce qu\'il restait à tester', ''];
     document.querySelectorAll('.test').forEach(function(t){
       var n   = t.getAttribute('data-t');
       var tit = t.querySelector('.test__t').textContent;
