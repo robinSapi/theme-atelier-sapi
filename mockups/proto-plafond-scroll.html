@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototype — le défilement de Mes créations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F4EFE7; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
+    --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --body:'Montserrat',system-ui,sans-serif;
+    --reveal:0;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--page);color:var(--wood-dark);font:16px/1.6 var(--body)}
+
+  /* ── Header collant, comme sur le site ─────────────────── */
+  .hd{position:fixed;top:0;left:0;right:0;z-index:100;height:74px;display:flex;align-items:center;gap:26px;
+      padding:0 26px;background:transparent;transition:background .3s ease, box-shadow .3s ease}
+  .hd.on{background:rgba(255,255,255,.94);backdrop-filter:blur(10px);box-shadow:0 2px 18px rgba(147,125,104,.14)}
+  .hd__l{width:38px;height:38px;border-radius:50%;background:var(--wood-dark);color:#fff;
+         font:700 13px/38px var(--body);text-align:center}
+  .hd a{color:#fff;text-decoration:none;font-size:14px;font-weight:600;text-shadow:0 1px 6px rgba(0,0,0,.4);transition:color .3s ease,text-shadow .3s ease}
+  .hd.on a{color:var(--wood-dark);text-shadow:none}
+
+  /* ── Le rail et la scène punaisée ──────────────────────── */
+  .track{position:relative;height:200vh}
+  .imm{position:sticky;top:0;height:100vh;overflow:hidden}
+  .mark{position:absolute;top:100vh;left:0;width:1px;height:1px}
+
+  .fond{position:absolute;inset:0;
+    background:radial-gradient(120% 90% at 22% 12%, #7b6549 0%, transparent 55%),
+               radial-gradient(90% 80% at 78% 34%, #93795a 0%, transparent 60%),
+               radial-gradient(70% 60% at 40% 78%, #6d5a45 0%, transparent 60%),
+               linear-gradient(160deg,#4a3f35 0%,#2e2721 62%,#3d332a 100%);
+    filter:blur(calc(var(--reveal) * 16px)) brightness(calc(1 - var(--reveal) * .26));
+    transform:scale(calc(1 + var(--reveal) * .08));
+    will-change:filter,transform}
+  .fond::after{content:"";position:absolute;inset:0;background:rgba(30,22,14,.30)}
+
+  .layer{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;padding-top:90px}
+
+  /* Zone 1 */
+  .inner{position:relative;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;
+         padding:0 24px;gap:16px;
+         transform:translateY(calc((1 - var(--reveal)) * 20vh)) scale(calc(1.2 - var(--reveal) * .2));
+         transform-origin:center top}
+  .sig{display:inline-flex;align-items:center;gap:9px;padding:5px 15px 5px 6px;
+       background:rgba(74,63,53,.72);border-radius:50px}
+  .sig__a{width:26px;height:26px;border-radius:50%;background:var(--wood);color:#fff;font:700 11px/26px var(--body);text-align:center}
+  .sig__t{font-family:'Square Peg',cursive;font-size:19px;line-height:1;color:#fff}
+  .phrase{margin:0;max-width:660px;text-align:center;color:#fff;font-style:italic;
+          font-size:clamp(1.4rem,2.6vw,2.05rem);line-height:1.3;text-shadow:0 2px 16px rgba(0,0,0,.45)}
+  .revbtn{display:inline-flex;align-items:center;gap:9px;margin-top:-4px;padding:13px 28px;border-radius:50px;
+          background:rgba(255,255,255,.30);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.38);
+          color:#fff;font:700 14px/1.5 var(--body);cursor:pointer;
+          opacity:clamp(0, calc(1 - var(--reveal) * 2), 1)}
+
+  /* Zone 3 — carrousel */
+  .selection{position:relative;flex:1 1 0;min-height:0;display:flex;flex-direction:column;
+             width:100%;max-width:1180px;margin:0 auto;padding:clamp(20px,4vh,52px) 24px;
+             opacity:clamp(0, calc((var(--reveal) - .15) / .85), 1);
+             transform:translateY(calc((1 - var(--reveal)) * 30px))}
+  .selhead{flex:0 0 auto;text-align:center;margin-bottom:14px}
+  .selhead span{color:#fff;font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+                text-shadow:0 1px 10px rgba(0,0,0,.4)}
+  .slider{flex:1 1 0;min-height:0;display:flex;gap:18px;justify-content:center}
+  .card{flex:0 1 300px;background:#fff;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;
+        box-shadow:0 4px 22px rgba(0,0,0,.22)}
+  .card__i{flex:1 1 auto;min-height:80px;background:linear-gradient(150deg,#cbb99f,#a98f6f)}
+  .card:nth-child(2) .card__i{background:linear-gradient(150deg,#b9c6b0,#8fa080)}
+  .card:nth-child(3) .card__i{background:linear-gradient(150deg,#5f6f92,#3b4767)}
+  .card__t{flex:0 0 auto;padding:12px 10px 14px;text-align:center}
+  .card__n{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+  .card__n em{font-family:'Square Peg',cursive;font-size:19px;font-style:normal;text-transform:none;letter-spacing:0;margin-left:3px}
+  .card__c{font-size:10.5px;color:var(--wood-mid);margin:2px 0 4px}
+  .card__p{font-size:11px}
+  .card__p b{font-size:13px}
+  .card__d{margin-top:7px;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--orange)}
+
+  .describe{flex:0 0 auto;align-self:center;margin:14px auto 0;padding:11px 24px;border-radius:50px;
+            background:#fff;color:var(--wood-dark);font:700 13.5px/1.25 var(--body);cursor:pointer;
+            box-shadow:0 4px 18px rgba(0,0,0,.22);z-index:4;position:relative;
+            opacity:clamp(0, calc((var(--reveal) - .15) / .85), 1);
+            transform:translateY(calc((1 - var(--reveal)) * 30px))}
+  /* Desktop : le bouton remonte à l'emplacement du bouton blanc, comme sur le
+     site. On pousse les AUTRES, on ne tire pas le bouton (les items sans
+     `order` valent 0 et gardent l'ordre du gabarit). */
+  @media (min-width: 769px){
+    .layer .selection{order:1}
+    .layer .scrollhint{order:2}
+    /* La remontée vaut la hauteur du bouton blanc (13+13 de padding, 1+1 de
+       bordure, 21 de boîte de ligne). Desktop SEULEMENT : sous 769 px l'`order`
+       ne s'applique plus, et la marge tirerait le bouton dans les cartes. */
+    .layer .describe{margin-top:-49px}
+  }
+  .scrollhint{flex:0 0 auto;height:34px;margin-bottom:14px;position:relative;z-index:3;text-align:center}
+  .hint{position:absolute;left:0;right:0;bottom:0;color:#fff;font-size:11px;font-weight:700;
+        letter-spacing:.1em;text-transform:uppercase;text-shadow:0 1px 8px rgba(0,0,0,.5);cursor:pointer}
+  .hint--rev{opacity:calc(1 - var(--reveal) * 2);
+             transform:translateY(calc(var(--reveal) * -38px))}
+  .hint--rev b{display:block;font-size:22px;line-height:1;letter-spacing:0}
+  .hint--cat{opacity:clamp(0, calc((var(--reveal) - .72) / .28), 1)}
+
+  /* ── Le catalogue ──────────────────────────────────────── */
+  .cat{background:var(--page);padding:44px 26px 90px;scroll-margin-top:74px}
+  .cat h2{margin:0 0 22px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--wood);text-align:center}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:20px;max-width:1180px;margin:0 auto}
+  .gc{height:250px;border-radius:12px;background:#fff;border:1px solid var(--line);
+      box-shadow:0 2px 8px rgba(147,125,104,.12), 0 6px 28px rgba(147,125,104,.14)}
+
+  /* ── Le panneau de réglage ─────────────────────────────── */
+  .pan{position:fixed;right:16px;bottom:16px;z-index:200;width:246px;background:#fff;border:1px solid var(--line);
+       border-radius:12px;padding:13px 14px;box-shadow:0 8px 34px rgba(74,63,53,.22);font-size:13px}
+  .pan h3{margin:0 0 9px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--wood)}
+  .pan .sw{display:flex;gap:6px;margin-bottom:10px}
+  .pan .sw button{flex:1;font:700 12px/1 var(--body);padding:9px 6px;border-radius:7px;border:1px solid var(--line);
+                  background:var(--warm);color:var(--wood-dark);cursor:pointer}
+  .pan .sw button.on{background:var(--wood);border-color:var(--wood);color:#fff}
+  .pan dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:12px}
+  .pan dt{color:var(--wood-mid)}
+  .pan dd{margin:0;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+  .pan .msg{margin-top:9px;padding:7px 9px;border-radius:7px;background:var(--warm);font-size:12px;
+            color:var(--wood-mid);min-height:34px}
+  .pan .msg.bloq{background:rgba(227,91,36,.10);color:var(--orange);font-weight:600}
+  .pan .rst{width:100%;margin-top:9px;font:700 12px/1 var(--body);padding:9px;border-radius:7px;
+            border:1px dashed var(--line);background:transparent;color:var(--wood-mid);cursor:pointer}
+</style>
+</head>
+<body>
+
+<header class="hd" id="hd">
+  <span class="hd__l">S</span>
+  <a href="#">Mes créations</a><a href="#">Sur mesure</a><a href="#">Galerie</a><a href="#">L'artisan</a><a href="#">Conseils</a>
+</header>
+
+<div class="track" id="track">
+  <span class="mark" id="mark"></span>
+  <section class="imm" id="imm">
+    <div class="fond"></div>
+    <div class="layer">
+
+      <div class="inner">
+        <div class="sig"><span class="sig__a">R</span><span class="sig__t">Mon conseil pour ton salon</span></div>
+        <p class="phrase" id="phrase" data-texte="Pour un salon, je te propose des modèles à lumière enveloppante. Une lumière douce et diffuse, qui invite au calme et révèle les jeux du bois."></p>
+        <button class="revbtn" id="revbtn">Découvrir ma sélection ⌄</button>
+      </div>
+
+      <div class="selection" id="selection">
+        <div class="selhead"><span>Ma sélection pour ton salon</span></div>
+        <div class="slider">
+          <article class="card"><div class="card__i"></div><div class="card__t">
+            <div class="card__n">OLIVIA <em>La Gardienne</em></div><div class="card__c">Suspension</div>
+            <div class="card__p">À partir de <b>75,00 €</b></div><div class="card__d">Découvrir →</div></div></article>
+          <article class="card"><div class="card__i"></div><div class="card__t">
+            <div class="card__n">ALBAN <em>Le Lotus</em></div><div class="card__c">Suspension</div>
+            <div class="card__p">À partir de <b>60,00 €</b></div><div class="card__d">Découvrir →</div></div></article>
+          <article class="card"><div class="card__i"></div><div class="card__t">
+            <div class="card__n">ODETTE <em>La Planète</em></div><div class="card__c">Suspension</div>
+            <div class="card__p">À partir de <b>75,00 €</b></div><div class="card__d">Découvrir →</div></div></article>
+        </div>
+      </div>
+
+      <button class="describe" id="describe">Décrire mon projet en détail →</button>
+
+      <div class="scrollhint">
+        <span class="hint hint--rev" id="hintRev"><b>⌄</b></span>
+        <span class="hint hint--cat" id="hintCat">Voir le catalogue complet ⌄</span>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<section class="cat" id="cat">
+  <h2>Toutes mes créations</h2>
+  <div class="grid">
+    <i class="gc"></i><i class="gc"></i><i class="gc"></i><i class="gc"></i>
+    <i class="gc"></i><i class="gc"></i><i class="gc"></i><i class="gc"></i>
+    <i class="gc"></i><i class="gc"></i><i class="gc"></i><i class="gc"></i>
+  </div>
+</section>
+
+<div class="pan">
+  <h3>Prototype — défilement</h3>
+  <div class="sw">
+    <button id="pOn">Plafond activé</button>
+    <button id="pOff" class="on">Sans plafond</button>
+  </div>
+  <dl>
+    <dt>Révélation</dt><dd id="vRev">0 %</dd>
+    <dt>Arrêt courant</dt><dd id="vStop">Écran 1</dd>
+    <dt>Écran 1</dt><dd id="vCeil">ouvert</dd>
+    <dt>Hauteur fenêtre</dt><dd id="vH">–</dd>
+  </dl>
+  <div class="msg" id="vMsg">Fais défiler à la molette ou au trackpad.</div>
+  <p style="margin:9px 0 0;font-size:11.5px;line-height:1.45;color:var(--wood-mid)">
+    Reproduit la mécanique du site au réglage près : arrivée avec la phrase qui
+    s'écrit, un geste = un arrêt, fin de geste au silence complet, second geste
+    perdu pendant l'animation.
+    <b style="color:var(--wood-dark)">Le plafond est une proposition, pas le
+    comportement actuel</b> — d'où « Sans plafond » par défaut.
+    <br><b style="color:var(--wood-dark)">Non reproduit :</b> la bascule du site
+    sous 800 px de haut, où le bloc texte quitte le flux et où le bouton
+    redescend sous le carrousel. Juge en plein écran.</p>
+  <button class="rst" id="pReset">Recharger la page</button>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var track = document.getElementById('track');
+  var mark  = document.getElementById('mark');
+  var imm   = document.getElementById('imm');
+  var hd    = document.getElementById('hd');
+  var cat   = document.getElementById('cat');
+
+  /* Les réglages réels du site, à l'identique. */
+  var DUREE = 680, REPOS = 260, GESTE_MIN = 8, TOL = 4, SNAP_IDLE = 150;
+
+  /* ⚠️ PLAFOND DÉSACTIVÉ PAR DÉFAUT : le prototype doit d'abord montrer ce que
+     fait le SITE. Le plafond est une proposition de Robin, pas le comportement
+     en place ; l'activer d'office le ferait juger autre chose. */
+  var revealSpan = 1, plafondActif = false, plafondPose = false;
+  /* Comme en production : si le système demande moins d'animation, tout le
+     mécanisme se désactive et la page redevient un défilement ordinaire. */
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function easeInOut(t){ return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
+  function clamp(v,a,b){ return v < a ? a : (v > b ? b : v); }
+
+  /* ── Mesures ───────────────────────────────────────────── */
+  function mesurer(){
+    revealSpan = Math.max(1, Math.round(mark.getBoundingClientRect().top - track.getBoundingClientRect().top));
+    stopsCache = null;
+  }
+  var stopsCache;
+  function oublier(){ stopsCache = null; }
+  function stops(){
+    if (stopsCache) return stopsCache;
+    var top = Math.round(track.getBoundingClientRect().top + window.pageYOffset);
+    var s2  = top + revealSpan;
+    var s3  = Math.round(cat.getBoundingClientRect().top + window.pageYOffset - hd.getBoundingClientRect().height);
+    if (s3 < s2) s3 = s2;
+    stopsCache = [top, s2, s3];
+    return stopsCache;
+  }
+  /* ⚠️ PLANCHER POSITIONNEL, PAS HISTORIQUE. S'il ne regardait que « l'écran 1
+     a été quitté », activer le plafond alors qu'on est REVENU en haut ferait
+     partir la page toute seule vers le carrousel au premier micro-défilement. */
+  function plancher(){
+    return (plafondActif && plafondPose && window.pageYOffset > stops()[0] + TOL) ? 1 : 0;
+  }
+
+  /* ── Défilement programmatique ─────────────────────────── */
+  var progScroll = false, progRaf = null, progFrom = 0, progTo = 0, progStart = 0, progPrev = '', progCap = false, progTimer = null;
+  /* ⚠️ LE FILET DE 2500 ms N'EST PAS DÉCORATIF. Si l'onglet passe en
+     arrière-plan pendant les 680 ms, `requestAnimationFrame` s'arrête net :
+     sans lui, `progScroll` resterait vrai pour toujours et la page deviendrait
+     DÉFINITIVEMENT sourde — molette, tactile, clavier et clics sortent tous sur
+     ce drapeau. On croirait le prototype cassé alors que la mécanique va bien. */
+  function finProg(){
+    clearTimeout(progTimer);
+    if (progRaf) { cancelAnimationFrame(progRaf); progRaf = null; }
+    document.documentElement.style.scrollBehavior = progPrev;
+    progCap = false; progScroll = false;
+  }
+  function allerA(y){
+    var to = Math.round(y), from = window.pageYOffset;
+    if (Math.abs(to - from) < TOL) return;
+    progTo = to; progFrom = from; progScroll = true;
+    clearTimeout(progTimer);
+    progTimer = setTimeout(finProg, 2500);
+    var html = document.documentElement;
+    if (!progCap) { progPrev = html.style.scrollBehavior; progCap = true; }
+    html.style.scrollBehavior = 'auto';
+    progStart = 0;
+    if (reduceMotion){ window.scrollTo(0, to); finProg(); return; }
+    if (progRaf) cancelAnimationFrame(progRaf);
+    progRaf = requestAnimationFrame(function step(ts){
+      if (!progStart) progStart = ts;
+      var t = Math.min(1, (ts - progStart) / DUREE);
+      window.scrollTo(0, Math.round(progFrom + (progTo - progFrom) * easeInOut(t)));
+      if (t < 1) progRaf = requestAnimationFrame(step);
+      else finProg();
+    });
+  }
+
+  /* ── --reveal ──────────────────────────────────────────── */
+  var raf = false;
+  function appliquer(){
+    raf = false;
+    var r = track.getBoundingClientRect();
+    var p = clamp((-r.top) / revealSpan, 0, 1);
+    imm.style.setProperty('--reveal', p.toFixed(4));
+    document.getElementById('selection').style.pointerEvents = p > .5 ? 'auto' : 'none';
+    document.getElementById('describe').style.pointerEvents  = p > .5 ? 'auto' : 'none';
+    document.getElementById('revbtn').style.pointerEvents    = p > .5 ? 'none' : '';
+    document.getElementById('hintRev').style.pointerEvents   = p < .5 ? 'auto' : 'none';
+    document.getElementById('hintCat').style.pointerEvents   = p >= .72 ? 'auto' : 'none';
+    hd.classList.toggle('on', imm.getBoundingClientRect().bottom < 50);
+    tableau(p);
+  }
+  function onScroll(){ if (!raf) { raf = true; requestAnimationFrame(appliquer); } programmerSnap(); }
+  window.addEventListener('scroll', onScroll, { passive:true });
+  window.addEventListener('resize', function(){ mesurer(); oublier(); appliquer(); }, { passive:true });
+
+  /* ── Les étapes ────────────────────────────────────────── */
+  function etapeLaPlusProche(y, s){
+    var idx = 0, best = Infinity;
+    s.forEach(function(v,i){ var d = Math.abs(v-y); if (d < best) { best = d; idx = i; } });
+    return idx;
+  }
+  function dansLaPlage(y, s){ return y >= s[0] - 8 && y <= s[2] + 8; }
+
+  var dernierIndex = null;
+  function pas(dir){
+    var s = stops(), y = window.pageYOffset;
+    if (!dansLaPlage(y, s)) return false;
+    var de = etapeLaPlusProche(y, s);
+    if (Math.abs(s[de] - y) > GESTE_MIN) { dernierIndex = de; allerA(s[de]); return true; }
+
+    var vers = clamp(de + dir, plancher(), 2);
+    if (vers === de){
+      if (dir < 0 && de === 1 && plancher() === 1){
+        message('Rien ne se passe : le carrousel est le plafond.', true);
+      }
+      return false;
+    }
+    dernierIndex = vers;
+    if (de === 0 && vers === 1) { plafondPose = true; }
+    allerA(s[vers]);
+    message('Un geste, un écran : ' + ['Écran 1','Carrousel','Catalogue'][vers] + '.');
+    return true;
+  }
+
+  /* ── Recalage de secours ───────────────────────────────── */
+  var snapTimer = null;
+  function programmerSnap(){ clearTimeout(snapTimer); snapTimer = setTimeout(recaler, SNAP_IDLE); }
+  function recaler(){
+    if (reduceMotion || progScroll) return;
+    var s = stops(), y = window.pageYOffset;
+    if (!dansLaPlage(y, s)) { dernierIndex = (y > s[2]) ? 2 : 0; return; }
+    var i;
+    if (dernierIndex === null) i = etapeLaPlusProche(y, s);
+    else {
+      var bouge = y - s[dernierIndex];
+      i = dernierIndex;
+      if (Math.abs(bouge) > GESTE_MIN){
+        var suiv = dernierIndex + (bouge > 0 ? 1 : -1);
+        if (suiv < plancher() || suiv > 2) { return; }
+        i = suiv;
+      }
+    }
+    i = clamp(i, plancher(), 2);
+    dernierIndex = i;
+    if (Math.abs(s[i] - y) < TOL) return;
+    allerA(s[i]);
+  }
+
+  /* ── La molette ────────────────────────────────────────── */
+  var derniereMolette = 0, cumul = 0, franchi = false;
+  window.addEventListener('wheel', function(e){
+    if (reduceMotion) return;
+    // Pendant la frappe, la page est verrouillée : le geste appartient au saut.
+    if (document.documentElement.style.overflow === 'hidden') return;
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    var s = stops(), y = window.pageYOffset;
+    if (!dansLaPlage(y, s)) return;
+
+    /* Aux extrémités on n'annule pas… SAUF sous le plafond, où « il ne se
+       passe rien » est justement le comportement voulu. */
+    if (e.deltaY > 0 && y >= s[2] - TOL) return;
+    if (e.deltaY < 0 && y <= s[0] + TOL && plancher() === 0) return;
+    e.preventDefault();
+
+    var now = Date.now();
+    var dy = e.deltaY;
+    if (e.deltaMode === 1) dy *= 16; else if (e.deltaMode === 2) dy *= (window.innerHeight || 800);
+    /* Règle arbitrée par Robin le 29/08 : un geste finit quand le mouvement
+       s'est VRAIMENT tu, sans exception d'amplitude. Et un geste donné pendant
+       une animation est CONSOMMÉ, pas mis en attente. */
+    var nouveau = now - derniereMolette > REPOS;
+    if (nouveau) { cumul = 0; franchi = false; }
+    derniereMolette = now;
+    cumul += dy;
+
+    if (progScroll) { franchi = true; return; }
+    if (franchi) return;
+    if (Math.abs(cumul) < GESTE_MIN) return;
+    franchi = true;
+    pas(cumul > 0 ? 1 : -1);
+  }, { passive:false });
+
+  /* ── Tactile ───────────────────────────────────────────── */
+  if (!reduceMotion) imm.style.touchAction = 'pan-x pinch-zoom';
+  var tY = 0, tX = 0, tFranchi = false;
+  imm.addEventListener('touchstart', function(e){
+    tY = e.touches[0].clientY; tX = e.touches[0].clientX; tFranchi = false;
+  }, { passive:true });
+  imm.addEventListener('touchmove', function(e){
+    if (reduceMotion) return;
+    if (progScroll) { tFranchi = true; return; }
+    if (tFranchi) return;
+    var dy = tY - e.touches[0].clientY;
+    var dx = tX - e.touches[0].clientX;
+    // Geste horizontal = le slider, on ne s'en mêle pas (comme en production).
+    if (Math.abs(dy) < GESTE_MIN || Math.abs(dx) > Math.abs(dy)) return;
+    tFranchi = true; pas(dy > 0 ? 1 : -1);
+  }, { passive:true });
+
+  /* ── Clavier ───────────────────────────────────────────── */
+  window.addEventListener('keydown', function(e){
+    if (reduceMotion) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    var k = e.key;
+    if (k !== 'ArrowDown' && k !== 'ArrowUp' && k !== 'PageDown' && k !== 'PageUp' && k !== ' ') return;
+    var s = stops();
+    if (!dansLaPlage(window.pageYOffset, s)) return;
+    /* On annule d'abord : une touche maintenue rendue au navigateur
+       traverserait le hero en défilement natif. */
+    e.preventDefault();
+    if (e.repeat || progScroll) return;
+    pas((k === 'ArrowUp' || k === 'PageUp') ? -1 : 1);
+  });
+
+  /* ── Les boutons ───────────────────────────────────────── */
+  document.getElementById('revbtn').addEventListener('click', function(){
+    if (progScroll) return;   // « l'animation va au bout » vaut aussi pour les clics
+    var s = stops(); plafondPose = true; dernierIndex = 1; allerA(s[1]);
+    message('Un geste, un écran : Carrousel.');
+  });
+  document.getElementById('hintRev').addEventListener('click', function(){
+    if (progScroll) return;
+    var s = stops(); plafondPose = true; dernierIndex = 1; allerA(s[1]);
+  });
+  document.getElementById('hintCat').addEventListener('click', function(){
+    if (progScroll) return;
+    var s = stops(); dernierIndex = 2; allerA(s[2]);
+  });
+  document.getElementById('describe').addEventListener('click', function(){
+    message('(Dans le vrai site, la modale Conseiller s\'ouvre ici.)');
+  });
+
+  /* ── Panneau ───────────────────────────────────────────── */
+  var vRev = document.getElementById('vRev'), vStop = document.getElementById('vStop'),
+      vCeil = document.getElementById('vCeil'), vH = document.getElementById('vH'),
+      vMsg = document.getElementById('vMsg');
+  var msgTimer = null;
+  function message(txt, bloq){
+    vMsg.textContent = txt;
+    vMsg.classList.toggle('bloq', !!bloq);
+    clearTimeout(msgTimer);
+    msgTimer = setTimeout(function(){ vMsg.textContent = 'Fais défiler à la molette ou au trackpad.'; vMsg.classList.remove('bloq'); }, 2600);
+  }
+  function tableau(p){
+    vRev.textContent = Math.round(p * 100) + ' %';
+    var s = stops(), y = window.pageYOffset;
+    var i = etapeLaPlusProche(y, s);
+    vStop.textContent = (y > s[2] + 8) ? 'Catalogue (libre)' : ['Écran 1','Carrousel','Catalogue'][i];
+    vCeil.textContent = (plafondActif && plafondPose) ? 'fermé' : 'ouvert';
+    vCeil.style.color = (plafondActif && plafondPose) ? 'var(--orange)' : '';
+    vH.textContent = window.innerHeight + ' px';
+  }
+  document.getElementById('pOn').addEventListener('click', function(){
+    plafondActif = true; this.classList.add('on'); document.getElementById('pOff').classList.remove('on');
+    message('Plafond activé.'); tableau(0);
+  });
+  document.getElementById('pOff').addEventListener('click', function(){
+    plafondActif = false; this.classList.add('on'); document.getElementById('pOn').classList.remove('on');
+    message('Plafond désactivé : on peut revenir à l\'écran 1.'); tableau(0);
+  });
+  /* Un vrai rechargement : la remise à zéro à la main laissait derrière elle
+     l'animation en vol et la moitié des drapeaux de geste. */
+  document.getElementById('pReset').addEventListener('click', function(){ location.reload(); });
+
+  /* ══════════════════════════════════════════════════════════════════════
+     LA SÉQUENCE D'ARRIVÉE — c'est la première chose que le visiteur ressent,
+     et sans elle le prototype mentirait sur le premier geste.
+     Sur le site : la page est verrouillée, la phrase s'écrit lettre par lettre,
+     et un geste pendant la frappe l'affiche D'UN COUP au lieu de faire défiler.
+     Puis le déverrouillage est différé de 250 ms et le geste est marqué
+     consommé, pour que la queue d'inertie n'emporte pas un arrêt au passage.
+     ══════════════════════════════════════════════════════════════════════ */
+  var phraseEl = document.getElementById('phrase');
+  var texte = phraseEl.getAttribute('data-texte');
+  var frappeTimer = null, frappeFinie = false, sauteur = null, sautParGeste = false;
+
+  function verrouiller(){ document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden'; }
+  function deverrouiller(){ document.documentElement.style.overflow = ''; document.body.style.overflow = ''; }
+
+  function finirFrappe(instantane){
+    if (frappeFinie) return;
+    frappeFinie = true;
+    clearInterval(frappeTimer);
+    phraseEl.textContent = texte;
+    desarmerSaut();
+    if (sautParGeste){
+      /* 250 ms pour laisser retomber le geste, puis on le déclare consommé :
+         sans ça, la fin de l'élan partirait toute seule vers le carrousel. */
+      setTimeout(function(){
+        deverrouiller();
+        derniereMolette = Date.now(); cumul = 0; franchi = true;
+        message('Le texte s\'affiche d\'un coup. Le geste ne compte pas comme un défilement.');
+      }, 250);
+    } else {
+      deverrouiller();
+    }
+  }
+  function armerSaut(){
+    sauteur = function(e){
+      if (e.type !== 'pointerdown') sautParGeste = true;
+      finirFrappe(true);
+    };
+    ['pointerdown','wheel','touchmove','keydown'].forEach(function(t){
+      window.addEventListener(t, sauteur, { passive: true });
+    });
+  }
+  function desarmerSaut(){
+    if (!sauteur) return;
+    ['pointerdown','wheel','touchmove','keydown'].forEach(function(t){
+      window.removeEventListener(t, sauteur, { passive: true });
+    });
+    sauteur = null;
+  }
+  function jouerSequence(){
+    if (reduceMotion){ phraseEl.textContent = texte; frappeFinie = true; return; }
+    verrouiller();
+    armerSaut();
+    setTimeout(function(){
+      var i = 0;
+      frappeTimer = setInterval(function(){
+        if (frappeFinie) { clearInterval(frappeTimer); return; }
+        i++;
+        phraseEl.textContent = texte.slice(0, i);
+        if (i >= texte.length) finirFrappe(false);
+      }, 34);
+    }, 900);
+  }
+  jouerSequence();
+
+  mesurer(); appliquer();
+  setTimeout(function(){ mesurer(); oublier(); appliquer(); }, 600);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ mesurer(); oublier(); appliquer(); });
+})();
+</script>
+
+</body>
+</html>

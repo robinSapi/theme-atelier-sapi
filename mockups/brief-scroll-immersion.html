@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brief — le défilement de /mes-creations/</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F4EFE7; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
+    --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --body:'Montserrat',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--wood-dark);font:15.5px/1.68 var(--body)}
+  .wrap{max-width:760px;margin:0 auto;padding:34px 20px 90px}
+
+  .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--wood);margin:0 0 8px}
+  h1{margin:0 0 10px;font-size:29px;line-height:1.18;letter-spacing:-.02em}
+  .lede{margin:0 0 8px;font-size:16.5px;color:var(--wood-mid)}
+  h2{margin:38px 0 14px;font-size:19px;letter-spacing:-.01em;padding-top:20px;border-top:1px solid var(--line)}
+  h3{margin:22px 0 6px;font-size:15.5px}
+  p{margin:11px 0}
+  b{color:var(--wood-dark)}
+
+  .regle{background:var(--wood-dark);color:#fff;border-radius:14px;padding:20px 22px;margin:20px 0 8px}
+  .regle .eyebrow{color:rgba(255,255,255,.6)}
+  .regle p{margin:8px 0;font-size:16px;line-height:1.62;color:rgba(255,255,255,.95)}
+  .regle b{color:#F0C9A8}
+
+  ol.pts{margin:16px 0;padding:0;list-style:none;counter-reset:n}
+  ol.pts>li{position:relative;padding-left:42px;margin-bottom:14px;counter-increment:n}
+  ol.pts>li::before{content:counter(n);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;
+    background:var(--wood);color:#fff;font:700 13px/28px var(--body);text-align:center}
+
+  .arrets{margin:16px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+  .ar{display:flex;gap:14px;padding:15px 17px;border-bottom:1px solid var(--line)}
+  .ar:last-child{border-bottom:0}
+  .ar__n{flex:0 0 30px;height:30px;border-radius:50%;background:var(--warm);border:1px solid var(--line);
+         color:var(--wood);font:700 13px/28px var(--body);text-align:center}
+  .ar__c h3{margin:0 0 3px;font-size:15px}
+  .ar__c p{margin:0;font-size:14px;color:var(--wood-mid)}
+
+  .jamais{background:#fff;border:1px solid var(--line);border-left:4px solid var(--orange);
+          border-radius:0 12px 12px 0;padding:15px 18px;margin:18px 0}
+  .jamais h3{margin:0 0 8px}
+  .jamais ul{margin:0;padding-left:18px;font-size:14.5px;color:var(--wood-mid)}
+  .jamais li{margin:6px 0}
+
+  .prix{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin:18px 0}
+  .prix h3{margin:0 0 6px}
+  .prix p{margin:6px 0;font-size:14.5px;color:var(--wood-mid)}
+
+  .ouvert{border:1px dashed var(--line);border-radius:12px;padding:15px 18px;margin:18px 0}
+  .ouvert h3{margin:0 0 6px;color:var(--wood)}
+  .ouvert p{margin:6px 0;font-size:14.5px;color:var(--wood-mid)}
+
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--wood-mid)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Brief · arrêté avec Robin le 29 août 2026</p>
+  <h1>Le défilement de la page Mes créations</h1>
+  <p class="lede">La mécanique, telle qu'elle doit fonctionner. C'est ce document qui fait foi — le code doit s'y conformer, pas l'inverse.</p>
+
+  <div class="regle">
+    <p class="eyebrow">La règle, en une phrase</p>
+    <p>Un déclencheur — un geste de défilement ou un clic — lance une animation vers l'arrêt suivant. L'animation va au bout, <b>rapide, belle, fluide</b>. À l'arrivée la page s'immobilise et n'écoute plus rien tant qu'un nouveau geste n'a pas commencé. <b>Un geste, aussi long soit-il, ne vaut qu'un arrêt.</b></p>
+  </div>
+
+  <h2>Les trois arrêts</h2>
+  <div class="arrets">
+    <div class="ar"><span class="ar__n">1</span><div class="ar__c">
+      <h3>Ton conseil</h3>
+      <p>La photo de la pièce, nette. La pastille, ta phrase, et le bouton blanc « Découvrir ma sélection ».</p></div></div>
+    <div class="ar"><span class="ar__n">2</span><div class="ar__c">
+      <h3>La sélection</h3>
+      <p>La photo se floute et s'assombrit, le carrousel apparaît par-dessus. Le bouton blanc a disparu, remplacé par « Décrire mon projet en détail ». Sur grand écran ta phrase reste lisible au-dessus des cartes ; sur écran bas et sur téléphone, elle s'en va.</p></div></div>
+    <div class="ar"><span class="ar__n">3</span><div class="ar__c">
+      <h3>Le catalogue</h3>
+      <p>Le hero remonte et sort, « Toutes mes créations » prend l'écran. À partir de là on ne retient plus personne : la page défile normalement.</p></div></div>
+  </div>
+
+  <h2>Ce qui définit un geste</h2>
+  <ol class="pts">
+    <li><b>Un geste finit quand le mouvement s'est vraiment tu.</b> Le trackpad continue d'envoyer du mouvement une à deux secondes après que les doigts l'ont quitté : tant que ça coule, c'est encore le même geste.</li>
+    <li><b>Un second geste donné pendant l'animation est perdu</b>, pas mis en attente. Il faut attendre l'arrivée pour en refaire un.</li>
+    <li><b>Souris, trackpad, doigt et clavier donnent le même résultat.</b> Un cran, un glissé, une pression de touche : un arrêt. Une touche maintenue ne vaut qu'une pression.</li>
+    <li><b>Les boutons font la même chose que les gestes.</b> « Découvrir ma sélection » et la flèche du bas mènent à l'arrêt 2, « Voir le catalogue complet » à l'arrêt 3. Cliqués pendant une animation, ils sont perdus eux aussi.</li>
+    <li><b>Le passage doit se voir.</b> Pas une coupure : un écran devient l'autre, et l'œil suit le mouvement.</li>
+    <li><b>Ça marche dans les deux sens.</b> Remonter depuis le catalogue ramène à la sélection, jamais directement au conseil.</li>
+  </ol>
+
+  <div class="prix">
+    <h3>Le prix, accepté en connaissance de cause</h3>
+    <p>Après une poussée franche, <b>le hero reste sourd jusqu'à deux secondes</b>, le temps que l'élan du trackpad s'éteigne. Et deux gestes volontaires rapprochés ne comptent que pour un.</p>
+    <p>C'est la contrepartie directe de « un geste ne vaut qu'un arrêt ». Toute tentative de rendre la main plus vite rouvre la porte au double saut : ça a été essayé, le défaut est revenu par-derrière.</p>
+  </div>
+
+  <div class="jamais">
+    <h3>Ce qui ne doit jamais arriver</h3>
+    <ul>
+      <li>Un geste qui franchit deux arrêts.</li>
+      <li>Un geste qui ne produit rien alors que la page pouvait bouger.</li>
+      <li>S'immobiliser entre deux arrêts.</li>
+      <li>Que la page bouge sans qu'on ait rien demandé.</li>
+    </ul>
+  </div>
+
+  <h2>Deux points encore ouverts</h2>
+
+  <div class="ouvert">
+    <h3>Le plafond</h3>
+    <p>Idée de Robin : sur grand écran, une fois l'arrêt 1 quitté, on n'y revient plus — le carrousel devient le haut du parcours. Se défend, puisque la phrase reste lisible à l'arrêt 2 et qu'y revenir ne montre rien de neuf.</p>
+    <p><b>Conséquence à trancher :</b> le haut de la page deviendrait inatteignable, menu compris, et ce serait le seul endroit du site où un geste ne produit rien.</p>
+  </div>
+
+  <div class="ouvert">
+    <h3>Le retour depuis le catalogue</h3>
+    <p>Aujourd'hui il ramène à la sélection, ce qui est cohérent avec « la zone retient un peu ». C'est aussi le chemin qui a le plus agacé Robin. À reconfirmer une fois la mécanique corrigée.</p>
+  </div>
+
+  <footer>
+    Écrit à partir des arbitrages du 29/08 : trois arrêts, bascule franche, la zone retient un peu, fin de geste au silence complet, second geste perdu. Prototype jouable : <b>proto-plafond-scroll.html</b>. Audit chiffré du comportement d'origine : <b>audit-scroll-immersion.html</b>.
+  </footer>
+
+</div>
+</body>
+</html>

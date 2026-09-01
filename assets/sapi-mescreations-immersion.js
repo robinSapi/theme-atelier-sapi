@@ -318,12 +318,19 @@
          l'accord par construction.
          Et on dit à l'ancreur où l'on arrive, sinon il déduit une direction
          d'un index périmé. */
+      /* ⚠️ `progScroll` ET NON `carouselBusy()` : celui-ci inclut le verrou de
+         page, ce qui rendrait ces boutons morts derrière n'importe quel panneau
+         ouvert. Ici on ne veut qu'une chose — respecter « l'animation va au
+         bout » : un clic pendant un mouvement en cours est perdu, comme un
+         geste. */
+      if (progScroll) return;
       var stops = stopPositions();
       if (!stops) return;
       lastStopIndex = 1;
       programmaticScrollTo(stops[1]);
     }
     function scrollToCatalogue() {
+      if (progScroll) return;
       var stops = stopPositions();
       if (!stops) return;
       lastStopIndex = 2;
@@ -904,22 +911,21 @@
        3. le catalogue      → la section « tous les modèles », calée sous le header
 
        POURQUOI EN JS ET NON EN CSS. `scroll-snap-type` ferait ça en une ligne,
-       mais il ne sait pas S'ABSTENIR — or il le faut dans quatre situations
-       (verrou de la machine à écrire, modale ouverte, remontée du moment 2,
-       geste qui a fait défiler le carrousel). Et il ne doit surtout pas viser
+       mais il ne sait pas S'ABSTENIR — or il le faut dans plusieurs situations
+       (verrou de la machine à écrire, panneau ou modale ouverts, remontée du
+       moment 2, déplacement que nous avons nous-mêmes lancé). Et il ne doit surtout pas viser
        la scène épinglée : un `sticky` est perpétuellement « déjà aligné » pour
        le moteur d'ancrage, ce qui donne blocage ou tremblement selon le
        navigateur. Ici les cibles sont des positions calculées, jamais un
        élément épinglé.
 
-       ⚠️ LA RÈGLE D'ACCROCHE N'EST PAS LA MÊME PARTOUT, et c'est le cœur du
-       réglage : DANS la zone de révélation, on accroche TOUJOURS vers l'une
-       des deux extrémités — un état à moitié révélé n'est jamais un état
-       voulu. AU-DELÀ, on laisse libre : le visiteur qui descend vers le
-       catalogue ne doit jamais se sentir retenu, et le plateau après la
-       révélation est de toute façon identique au pixel près, donc il n'y a
-       rien à corriger. C'est cette asymétrie qui évite l'effet « page
-       collante ».
+       ⚠️ LA RÈGLE, DEPUIS L'ARBITRAGE DE ROBIN DU 29/08 : dans la plage des
+       trois arrêts, un geste amène à l'arrêt SUIVANT, dans le sens du geste et
+       à partir de celui où l'on était (`lastStopIndex`) — jamais « le plus
+       proche », qui faisait remonter deux crans d'un coup depuis le catalogue.
+       Un état à moitié révélé n'est jamais un état voulu.
+       AU-DELÀ de la plage, on laisse libre : le visiteur qui lit le catalogue
+       ne doit jamais se sentir retenu.
 
        Mouvement réduit demandé par le système → aucun ancrage : déplacer la
        page sous quelqu'un qui a demandé moins d'animation serait à contresens.
@@ -944,10 +950,6 @@
 
     var SNAP_IDLE = 150;              // ms d'immobilité avant le recalage de secours
     var GESTE_MINIMUM = 8;            // ⇦ en dessous, il ne s'est rien passé (px)
-    /* ⇦ En dessous, c'est la queue d'inertie d'un pavé tactile qui s'éteint, pas
-       une intention. Sert UNIQUEMENT après qu'une étape a été franchie : voir la
-       note dans l'écouteur `wheel`. */
-    var BRUIT_INERTIE = 4;            // px
     var TOLERANCE_ARRIVEE = 4;        // px : on se considère posé sur une étape
     /* ⇦ Le silence qui sépare deux gestes de molette. En dessous, c'est encore
        la même poussée : le pavé tactile émet son inertie en continu pendant une
@@ -957,8 +959,12 @@
        compteur n'était pas alimenté pendant l'animation ; maintenant qu'il
        l'est, la queue d'inertie d'un pavé macOS laisse des trous de 150 à
        200 ms qui se seraient lus comme un nouveau geste.
-       ⚠️ Conséquence assumée : deux poussées volontaires très rapprochées ne
-       comptent que pour une. C'est le prix d'un geste = une étape. */
+       ⚠️ DEUX CONSÉQUENCES ASSUMÉES, arbitrées par Robin le 29/08 :
+       · deux poussées volontaires rapprochées ne comptent que pour une ;
+       · après une poussée franche, le hero reste sourd jusqu'à ce que
+         l'inertie se soit éteinte, soit jusqu'à deux secondes.
+       C'est le prix d'« un geste = un arrêt », et il a été choisi en le
+       sachant. Ne pas « améliorer la réactivité » sans le lui redemander. */
     var REPOS_ENTRE_DEUX_PAS = 260;   // ms
     /* ⇦ LE TEMPS QUE MET LA PAGE POUR PASSER D'UN ÉCRAN AU SUIVANT.
        Avant, on laissait faire `behavior: 'smooth'` : la durée appartenait
@@ -993,8 +999,11 @@
 
     /* Saut instantané. `window.scrollTo(x, y)` ne suffit pas : `html` porte un
        `scroll-behavior: smooth` global (style.css l. 128) qui animerait même
-       ce saut. On le neutralise le temps de l'appel. Sert à ANNULER une
-       animation d'ancrage dès que le visiteur reprend la main. */
+       ce saut. On le neutralise le temps de l'appel.
+       ⚠️ IL N'ANNULE PAS une animation en vol (ni `progRaf`, ni `progScroll`) :
+       lancé pendant l'une d'elles, il serait écrasé à l'image suivante. Ses
+       deux appelants sont le saut invisible derrière la modale et le mode
+       « mouvement réduit », jamais un geste du visiteur. */
     function jumpTo(y) {
       var html = document.documentElement, prev = html.style.scrollBehavior;
       html.style.scrollBehavior = 'auto';
@@ -1157,7 +1166,8 @@
     }
     /* Hors de cette plage, la page est LIBRE : au-dessus du hero, et dès qu'on
        est descendu sous la dernière étape. On ne retient jamais quelqu'un qui
-       lit le catalogue. Bornes STRICTES : une marge de tolérance sous la
+       lit le catalogue. Bornes SERRÉES (8 px, la tolérance d'arrivée) : une
+       marge plus large sous la
        dernière étape retiendrait le visiteur dans les premiers écrans du
        catalogue, ce qui est exactement l'inverse du but. */
     function inHeroRange(y, stops) {
@@ -1228,8 +1238,11 @@
        LE CARROUSEL : un geste amorcé = une étape, automatiquement.
        ──────────────────────────────────────────────────────────────────────
        Le clic sur « Découvrir ma sélection » et le début d'un geste vers le
-       bas font exactement la même chose. Aucun état intermédiaire n'est
-       atteignable.
+       bas mènent au même arrêt — par deux chemins différents : le clic vise une
+       position absolue, le geste passe par `stepBy`. Aucun état intermédiaire
+       n'est VISÉ. Deux dépassements restent possibles et sont assumés : la
+       queue d'inertie au-delà du dernier arrêt (voir la sortie « extrémités »),
+       et le défilement natif si le JS ne tourne pas.
 
        ⚠️ LE VERROU EST EN CSS, ET IL DOIT L'ÊTRE. Le navigateur décide au TOUT
        PREMIER `touchmove` si un geste est un défilement, et ignore ensuite
@@ -1250,9 +1263,7 @@
     var lastWheelAt = 0;
     /* Cumul et verrou d'un même geste à la molette, exactement comme `aFranchi`
        le fait pour le tactile. Un geste finit quand la molette se tait pendant
-       REPOS_ENTRE_DEUX_PAS — et, s'il avait déjà franchi une étape, quand un
-       événement d'INTENTION se présente en plus du silence (voir la note dans
-       l'écouteur : sans ça, l'inertie mourante rouvrait un geste toute seule). */
+       REPOS_ENTRE_DEUX_PAS — le silence seul, sans exception d'amplitude. */
     var wheelCumul = 0, wheelFranchi = false;
     function stepBy(dir) {
       var stops = stopPositions();
@@ -1292,7 +1303,11 @@
          pendant une à deux secondes : sans temps de calme, une seule poussée
          franchirait plusieurs étapes. On annule le défilement à CHAQUE
          événement (sinon le hero défilerait librement entre deux pas) mais on
-         ne franchit une étape qu'après un silence. */
+         ne franchit une étape qu'une fois par geste.
+         ⚠️ L'ÉTAPE EST FRANCHIE AU DÉBUT DU GESTE, pas à sa fin. Le silence ne
+         déclenche rien : il RÉARME. Une note disait « on ne franchit une étape
+         qu'après un silence » — c'était la mécanique d'une première version, et
+         elle contredit le contrat arbitré par Robin. */
       /* ⚠️ ÉCOUTEUR SUR `window`, PAS SUR LE HERO — CORRECTIF DU 29/08.
          Il était posé sur la section, au motif qu'il « ne coûterait rien au
          reste du site ». Sauf qu'un événement de molette est adressé à
@@ -1337,8 +1352,15 @@
         if (e.deltaY < 0 && yNow <= stops[0] + TOLERANCE_ARRIVEE) return;
         e.preventDefault();
 
-        /* ⚠️ L'HORLOGE EST MISE À JOUR AVANT TOUTE SORTIE, ET C'EST LE CŒUR DU
-           CORRECTIF DU 29/08. Elle était écrite APRÈS le test `carouselBusy()` :
+        /* ⚠️ L'HORLOGE EST MISE À JOUR AVANT LES SORTIES QUI COMPTENT (occupé,
+           geste déjà franchi, seuil non atteint), ET C'EST LE CŒUR DU CORRECTIF
+           DU 29/08. Elle reste APRÈS les sorties d'aiguillage plus haut, qui
+           écartent des gestes qui ne nous appartiennent pas.
+           ⚠️ Conséquence connue de la sortie « aux extrémités » : arrivé au
+           catalogue, l'inertie du geste qui vous y a amené repasse en
+           défilement natif et vous fait dépasser un peu l'arrêt. C'est le prix
+           de cette sortie, sans laquelle la page serait bloquée là.
+           Elle était écrite APRÈS le test `carouselBusy()` :
            pendant les 560 ms d'animation d'alors, l'inertie du pavé continuait
            d'arriver, était bien annulée, mais ne comptait pas comme du bruit.
            À l'instant où l'animation se terminait, le premier événement encore
@@ -1360,37 +1382,34 @@
         var dy = e.deltaY;
         if (e.deltaMode === 1) dy *= 16;                                // lignes → px
         else if (e.deltaMode === 2) dy *= (window.innerHeight || 800);  // pages → px
-        var significatif = Math.abs(dy) >= BRUIT_INERTIE;
-
-        /* ⚠️ LE SILENCE SEUL NE ROUVRE PAS UN GESTE DÉJÀ FRANCHI, et c'est la
-           subtilité qui tient tout l'édifice.
-           La queue d'inertie d'un pavé émet à 60 Hz pendant une seconde et
-           demie, avec des amplitudes qui tombent sous 3 px. Comme ces
-           micro-événements ne rafraîchissent plus l'horloge (ligne du dessous),
-           le silence de 260 ms finissait par être « atteint » EN PLEINE
-           INERTIE : l'inertie passait alors pour un nouveau geste, se
-           rafraîchissait l'horloge elle-même, et trois événements à 3 px
-           suffisaient à refranchir une étape. Le double saut revenait par la
-           porte de derrière.
-           Il faut donc, EN PLUS du silence, un événement d'intention — que
-           l'inertie mourante ne produit plus. Tant qu'aucune étape n'a été
-           franchie, la règle reste permissive : un geste lent démarre à 1 px et
-           doit pouvoir démarrer. */
-        var nouveauGeste = (now - lastWheelAt > REPOS_ENTRE_DEUX_PAS) &&
-                           (!wheelFranchi || significatif);
+        /* ⚠️ TOUT ÉVÉNEMENT GARDE LE GESTE VIVANT, MÊME LE PLUS FAIBLE, ET
+           C'EST UNE DÉCISION DE ROBIN (29/08), PRISE EN CONNAISSANT SON PRIX.
+           Sa règle : « un long geste, qui déclenche le premier mouvement, ne
+           doit pas passer plusieurs arrêts », et un geste finit quand le
+           mouvement s'est VRAIMENT tu. La queue d'inertie d'un pavé émet
+           pendant une seconde et demie : tant qu'elle coule, on est encore dans
+           le même geste, et rien ne peut franchir un second arrêt.
+           Le prix, assumé après lui avoir été présenté : après une poussée
+           franche, le hero reste sourd jusqu'à deux secondes.
+           ⚠️ NE PAS RÉINTRODUIRE D'EXCEPTION POUR LES PETITES AMPLITUDES. Elle a
+           existé une demi-journée, pour rendre la main plus vite : elle
+           permettait au silence d'être atteint EN PLEINE INERTIE, celle-ci
+           passait alors pour un nouveau geste, et le double saut revenait par
+           la porte de derrière. La règle simple est la bonne. */
+        var nouveauGeste = now - lastWheelAt > REPOS_ENTRE_DEUX_PAS;
         if (nouveauGeste) { wheelCumul = 0; wheelFranchi = false; }
-
-        /* ⚠️ QUI GARDE LE GESTE « VIVANT », ET POURQUOI ÇA DÉPEND DE L'ÉTAT.
-           Tant que l'étape n'est pas franchie, TOUT événement compte : un geste
-           lent démarre à 1 ou 2 px, et l'ignorer empêcherait de démarrer.
-           Une fois l'étape franchie, seuls les événements SIGNIFICATIFS comptent
-           encore : sans cette nuance, il fallait attendre l'extinction complète
-           de l'inertie avant qu'un nouveau geste soit accepté — le hero
-           paraissait sourd. */
-        if (!wheelFranchi || significatif) lastWheelAt = now;
+        lastWheelAt = now;
         wheelCumul += dy;
 
-        if (carouselBusy() || wheelFranchi) return;
+        /* ⚠️ ON MARQUE LE GESTE CONSOMMÉ, ON NE SE CONTENTE PAS DE SORTIR.
+           Sinon un geste donné PENDANT une animation lancée autrement (clic sur
+           « Découvrir ma sélection », sur un indice, retour de modale) n'est pas
+           perdu mais MIS EN ATTENTE : il cumule dans le vide, et il part tout
+           seul à l'arrivée. Un clic plus une poussée = deux arrêts, le second
+           sans que personne n'ait rien demandé. Robin a tranché « le second
+           geste est perdu », pas « différé ». */
+        if (carouselBusy()) { wheelFranchi = true; return; }
+        if (wheelFranchi) return;
         /* Même règle que le tactile : on cumule jusqu'à ce que le geste ait une
            amplitude, puis UNE seule étape par geste. Sans le cumul, un pavé
            tactile qui démarre à 1 ou 2 px par événement ne franchirait jamais
@@ -1410,7 +1429,10 @@
         aFranchi = false;
       }, { passive: true });
       section.addEventListener('touchmove', function (e) {
-        if (aFranchi || carouselBusy()) return;
+        // Même règle qu'à la molette : un geste donné pendant une animation est
+        // consommé, pas mis en attente.
+        if (carouselBusy()) { aFranchi = true; return; }
+        if (aFranchi) return;
         var dy = tY - e.touches[0].clientY;
         var dx = tX - e.touches[0].clientX;
         // Geste horizontal → c'est le slider, on ne s'en mêle pas.
@@ -1423,7 +1445,11 @@
          doivent franchir des étapes elles aussi — sinon elles traversent le
          hero en défilement natif et atterrissent entre deux états. */
       document.addEventListener('keydown', function (e) {
-        if (carouselBusy() || e.metaKey || e.ctrlKey || e.altKey) return;
+        /* ⚠️ `e.repeat` : une touche MAINTENUE émet en rafale, et le clavier
+           était le seul déclencheur sans verrou de geste — il enchaînait les
+           arrêts au rythme de l'animation. Une pression = un arrêt, comme un
+           geste = un arrêt. */
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
         var t = e.target;
         if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
         var dir = 0;
@@ -1432,7 +1458,15 @@
         if (!dir) return;
         var stops = stopPositions();
         if (!stops || !inHeroRange(window.pageYOffset, stops)) return;
-        if (stepBy(dir)) e.preventDefault();
+        /* ⚠️ ON ANNULE D'ABORD, ON DÉCIDE ENSUITE. Une touche maintenue émet en
+           rafale : la refuser en sortant sans `preventDefault` rendait la main
+           au défilement natif, qui traversait alors le hero et ses états
+           intermédiaires — exactement ce que ce gestionnaire existe pour
+           empêcher. Une pression = un arrêt ; les répétitions et les pressions
+           pendant l'animation sont AVALÉES, pas rendues au navigateur. */
+        e.preventDefault();
+        if (e.repeat || carouselBusy()) return;
+        stepBy(dir);
       });
     }
 
