@@ -364,7 +364,10 @@
   }
 
   /* ── La molette ────────────────────────────────────────── */
-  var derniereMolette = 0, cumul = 0, franchi = false;
+  var derniereMolette = 0, cumul = 0, franchi = false, ampl = 0;
+  /* Relance : l'élan d'un pavé ne fait que décroître, une amplitude qui DOUBLE
+     est un nouveau coup de doigt. Mêmes valeurs qu'en production. */
+  var RELANCE_FACTEUR = 2.0, RELANCE_PLANCHER = 14;
   window.addEventListener('wheel', function(e){
     if (reduceMotion) return;
     // Pendant la frappe, la page est verrouillée : le geste appartient au saut.
@@ -383,12 +386,20 @@
     var dy = e.deltaY;
     if (e.deltaMode === 1) dy *= 16; else if (e.deltaMode === 2) dy *= (window.innerHeight || 800);
     /* Règle arbitrée par Robin le 29/08 : un geste finit quand le mouvement
-       s'est VRAIMENT tu, sans exception d'amplitude. Et un geste donné pendant
-       une animation est CONSOMMÉ, pas mis en attente. */
-    var nouveau = now - derniereMolette > REPOS;
+       s'est vraiment tu OU qu'une RELANCE se présente — une amplitude qui
+       double d'un coup, que l'élan mourant ne produit jamais. Et un geste donné
+       pendant une animation est CONSOMMÉ, pas mis en attente. */
+    var a = Math.abs(dy);
+    // L'élan doit être RETOMBÉ, pas seulement plus faible : sinon deux trames
+    // fusionnées (une image sautée) franchissent un arrêt toutes seules.
+    var relance = franchi && a >= RELANCE_PLANCHER &&
+                  ampl < RELANCE_PLANCHER && a > ampl * RELANCE_FACTEUR;
+    var nouveau = (now - derniereMolette > REPOS) || relance;
     if (nouveau) { cumul = 0; franchi = false; }
     derniereMolette = now;
+    ampl = a;
     cumul += dy;
+    if (relance) message('Relance détectée : nouveau geste, sans attendre la fin de l\'élan.');
 
     if (progScroll) { franchi = true; return; }
     if (franchi) return;
@@ -507,7 +518,7 @@
          sans ça, la fin de l'élan partirait toute seule vers le carrousel. */
       setTimeout(function(){
         deverrouiller();
-        derniereMolette = Date.now(); cumul = 0; franchi = true;
+        derniereMolette = Date.now(); cumul = 0; franchi = true; ampl = Infinity;
         message('Le texte s\'affiche d\'un coup. Le geste ne compte pas comme un défilement.');
       }, 250);
     } else {

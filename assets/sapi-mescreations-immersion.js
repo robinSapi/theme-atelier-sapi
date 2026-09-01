@@ -961,8 +961,10 @@
        200 ms qui se seraient lus comme un nouveau geste.
        ⚠️ DEUX CONSÉQUENCES ASSUMÉES, arbitrées par Robin le 29/08 :
        · deux poussées volontaires rapprochées ne comptent que pour une ;
-       · après une poussée franche, le hero reste sourd jusqu'à ce que
-         l'inertie se soit éteinte, soit jusqu'à deux secondes.
+       · après une poussée franche, le hero resterait sourd jusqu'à ce que
+         l'inertie se soit éteinte, soit jusqu'à deux secondes — c'est ce qui a
+         rendu nécessaire la RELANCE (voir l'écouteur `wheel`), seule
+         échappatoire à cette surdité.
        C'est le prix d'« un geste = un arrêt », et il a été choisi en le
        sachant. Ne pas « améliorer la réactivité » sans le lui redemander. */
     var REPOS_ENTRE_DEUX_PAS = 260;   // ms
@@ -1263,8 +1265,22 @@
     var lastWheelAt = 0;
     /* Cumul et verrou d'un même geste à la molette, exactement comme `aFranchi`
        le fait pour le tactile. Un geste finit quand la molette se tait pendant
-       REPOS_ENTRE_DEUX_PAS — le silence seul, sans exception d'amplitude. */
+       REPOS_ENTRE_DEUX_PAS, OU quand une RELANCE se présente — voir l'écouteur
+       `wheel`. */
     var wheelCumul = 0, wheelFranchi = false;
+    /* Amplitude du dernier événement de molette, pour reconnaître une RELANCE :
+       l'élan d'un pavé tactile ne fait que décroître, donc une amplitude qui
+       repart franchement à la hausse est un nouveau coup de doigt. */
+    var wheelAmpl = 0;
+    /* ⚠️ LES DEUX CONDITIONS D'UNE RELANCE, arbitrées par Robin le 29/08.
+       Il faut que l'amplitude DOUBLE (facteur) et qu'elle soit franche en
+       valeur absolue (plancher) : une accélération progressive du doigt sur un
+       geste long ne doit rien déclencher, un vrai nouveau coup si.
+       Monter le facteur ou le plancher = plus sûr contre le double saut, mais
+       il faut à nouveau attendre l'extinction de l'élan. Les descendre =
+       l'inverse. C'est le seul curseur de ce réglage. */
+    var RELANCE_FACTEUR = 2.0;
+    var RELANCE_PLANCHER = 14;   // px
     function stepBy(dir) {
       var stops = stopPositions();
       if (!stops) return false;
@@ -1396,9 +1412,38 @@
            permettait au silence d'être atteint EN PLEINE INERTIE, celle-ci
            passait alors pour un nouveau geste, et le double saut revenait par
            la porte de derrière. La règle simple est la bonne. */
-        var nouveauGeste = now - lastWheelAt > REPOS_ENTRE_DEUX_PAS;
+        /* ⚠️ DEUX FAÇONS DE COMMENCER UN NOUVEAU GESTE, ET LA SECONDE EST UN
+           COMPROMIS ASSUMÉ.
+           1. LE SILENCE. La règle sûre : tant que le pavé émet, c'est le même
+              geste. Elle seule garantit qu'un geste ne vaut qu'un arrêt.
+           2. LA RELANCE. Le silence seul coûtait trop cher à l'usage : l'élan
+              coule une à deux secondes, pendant lesquelles la page reste sourde.
+              Robin : « si la souris ne bouge pas entre deux mouvements, le
+              deuxième n'est jamais pris en compte » — et pour cause, bouger le
+              curseur revient à poser les doigts sur le pavé, ce qui annule
+              l'élan et crée le silence.
+              On reconnaît donc une intention à ceci : l'élan DÉCROÎT toujours,
+              une amplitude qui double d'un coup est un nouveau coup de doigt.
+           ⚠️ CE N'EST PAS UNE CERTITUDE, ET LE NAVIGATEUR NE PEUT PAS FAIRE
+           MIEUX : il ne dit pas si un mouvement vient des doigts ou de l'élan.
+           Un doigt encore posé qui accélère brutalement produit le même signal
+           et peut franchir deux arrêts. C'est le prix, arbitré en connaissance
+           de cause contre la surdité de deux secondes. */
+        var ampl = Math.abs(dy);
+        var relance = wheelFranchi &&
+                      ampl >= RELANCE_PLANCHER &&
+                      /* ⚠️ L'ÉLAN DOIT ÊTRE RETOMBÉ, pas seulement plus faible.
+                         C'est l'équivalent en amplitude de la règle du silence.
+                         Sans cette ligne, deux trames fusionnées — ce qui arrive
+                         dès qu'une image saute, et le flou plein écran est un
+                         bon candidat — arrivent en un seul événement de somme
+                         double, et franchissent un arrêt sans aucun geste. */
+                      wheelAmpl < RELANCE_PLANCHER &&
+                      ampl > wheelAmpl * RELANCE_FACTEUR;
+        var nouveauGeste = (now - lastWheelAt > REPOS_ENTRE_DEUX_PAS) || relance;
         if (nouveauGeste) { wheelCumul = 0; wheelFranchi = false; }
         lastWheelAt = now;
+        wheelAmpl = ampl;
         wheelCumul += dy;
 
         /* ⚠️ ON MARQUE LE GESTE CONSOMMÉ, ON NE SE CONTENTE PAS DE SORTIR.
@@ -1528,6 +1573,13 @@
               lastWheelAt = Date.now();
               wheelCumul = 0;
               wheelFranchi = true;
+              /* ⚠️ ET UNE AMPLITUDE INATTEIGNABLE. Sans elle, `wheelAmpl` vaut
+                 encore 0 — pendant la frappe le verrou sort avant sa mise à
+                 jour — et le premier événement d'inertie (~73 px) passe le test
+                 de relance contre 0 : le geste se réarme et consomme un arrêt.
+                 C'est exactement le défaut que les 250 ms ci-dessus évitent,
+                 par une autre porte, et il touche TOUTE arrivée sur la page. */
+              wheelAmpl = Infinity;
             }, 250);
           } else {
             unlockScroll();
