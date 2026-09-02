@@ -106,6 +106,62 @@
   .hint--rev b{display:block;font-size:22px;line-height:1;letter-spacing:0}
   .hint--cat{opacity:clamp(0, calc((var(--reveal) - .72) / .28), 1)}
 
+  /* ── L'indicateur d'étapes (idée de Robin, 29/08, v2) ───────
+     Une pastille sombre au bord droit, contenant trois repères empilés :
+     DEUX POINTS pour les deux états du hero, et UN TIRET pour le catalogue —
+     sa forme dit qu'il est long, les points disent qu'ils sont des instants.
+     Un halo orange GLISSE DERRIÈRE le repère courant, plus grand que lui, et
+     se déforme en tiret quand il atterrit sur le troisième.
+     ⚠️ Le contenant sombre est ce qui rend l'ensemble lisible SUR LES DEUX
+     FONDS — la photo puis le catalogue crème — sans changer de couleur en
+     route. C'est ce qui a fait abandonner la version sans pastille, où les
+     repères blancs disparaissaient sur le crème pendant tout l'arrêt 3. */
+  .steps{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:210;
+         display:flex;flex-direction:column;align-items:center;gap:12px;
+         padding:11px 9px;border-radius:50px;
+         background:rgba(74,63,53,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+         opacity:0;transition:opacity .5s ease .2s;pointer-events:none}
+  .steps.on{opacity:1;pointer-events:auto}
+
+  .step{appearance:none;-webkit-appearance:none;border:0;background:none;padding:0;
+        cursor:pointer;line-height:0;display:block;position:relative;z-index:2}
+  .step__m{display:block;width:6px;height:6px;border-radius:999px;
+           background:rgba(255,255,255,.45);transition:background .3s ease}
+  /* Le troisième n'est pas un point : c'est un TIRET. Le catalogue n'est pas
+     un instant du parcours, c'est une étendue. */
+  .step--long .step__m{height:20px}
+  .step[disabled]{cursor:default}
+  .step[disabled] .step__m{background:rgba(255,255,255,.16)}
+  @media (hover: hover){
+    .step:not([disabled]):not(.is-active):hover .step__m{background:rgba(255,255,255,.85)}
+  }
+
+  /* La coloration orange, en un seul élément qui se déplace. Elle change de
+     hauteur en même temps que de position : point sur les deux premiers,
+     tiret sur le troisième. */
+  /* ⚠️ DERRIÈRE LES REPÈRES (z-index 1 contre 2) et PLUS GRANDE QU'EUX : elle
+     déborde de 4 px sur tout le pourtour, comme un halo. Le repère blanc reste
+     donc lisible par-dessus, et c'est le halo qui signale l'étape courante.
+     ⚠️ Le débordement de 4 px est écrit DEUX FOIS — ici en largeur, en JS en
+     hauteur (`GLOW_DEBORD`). Les deux doivent rester d'accord, sinon le halo
+     n'est plus concentrique.
+     ⚠️ ET C'EST UNE DIFFÉRENCE DE TAILLE, pas seulement de couleur. L'orange et
+     le blanc translucide ont presque la même luminance : en vision des couleurs
+     déficiente, une simple bascule de teinte ne se verrait pas du tout. */
+  .steps__glow{position:absolute;left:5px;width:14px;border-radius:999px;
+               background:var(--orange);z-index:1;
+               transition:top .42s cubic-bezier(.4,0,.2,1),
+                          height .42s cubic-bezier(.4,0,.2,1)}
+  .steps__glow.muet{opacity:0;transition:none}
+
+  @media (max-width: 768px){
+    .steps{right:8px;gap:10px;padding:10px 8px;touch-action:none}
+    .steps__glow{left:4px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .steps__glow{transition:none}
+  }
+
   /* ── Le catalogue ──────────────────────────────────────── */
   .cat{background:var(--page);padding:44px 26px 90px;scroll-margin-top:74px}
   .cat h2{margin:0 0 22px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--wood);text-align:center}
@@ -175,6 +231,13 @@
     </div>
   </section>
 </div>
+
+<nav class="steps" id="steps" aria-label="Progression dans la page">
+  <i class="steps__glow muet" id="stepsGlow" aria-hidden="true"></i>
+  <button type="button" class="step" data-step="0" aria-label="Mon conseil"><i class="step__m"></i></button>
+  <button type="button" class="step" data-step="1" aria-label="Ma sélection"><i class="step__m"></i></button>
+  <button type="button" class="step step--long" data-step="2" aria-label="Toutes mes créations"><i class="step__m"></i></button>
+</nav>
 
 <section class="cat" id="cat">
   <h2>Toutes mes créations</h2>
@@ -303,12 +366,107 @@
     document.getElementById('revbtn').style.pointerEvents    = p > .5 ? 'none' : '';
     document.getElementById('hintRev').style.pointerEvents   = p < .5 ? 'auto' : 'none';
     document.getElementById('hintCat').style.pointerEvents   = p >= .72 ? 'auto' : 'none';
-    hd.classList.toggle('on', imm.getBoundingClientRect().bottom < 50);
+    var immBas = imm.getBoundingClientRect().bottom;
+    /* L'indicateur ne change plus de couleur : sa pastille sombre le rend
+       lisible sur les deux fonds. Seul le header a besoin de ce seuil. */
+    hd.classList.toggle('on', immBas < 50);
+    majEtapes();
     tableau(p);
   }
   function onScroll(){ if (!raf) { raf = true; requestAnimationFrame(appliquer); } programmerSnap(); }
   window.addEventListener('scroll', onScroll, { passive:true });
-  window.addEventListener('resize', function(){ mesurer(); oublier(); appliquer(); }, { passive:true });
+  window.addEventListener('resize', function(){
+    mesurer(); appliquer();
+    /* ⚠️ REPLACER LA COLORATION MÊME SI L'ÉTAPE N'A PAS CHANGÉ. Son placement
+       est conditionné au changement d'étape ; or la pastille change de
+       géométrie sous 768 px (gap et rembourrage), et le zoom du navigateur
+       passe par ici aussi. Sans cette ligne, la coloration reste calée sur
+       l'ancienne géométrie et se décale de quelques pixels. */
+    if (actifCourant >= 0) placerGlow(actifCourant);
+  }, { passive:true });
+
+  /* ── L'indicateur d'étapes ─────────────────────────────── */
+  var stepsEl = document.getElementById('steps');
+  var stepsGlow = document.getElementById('stepsGlow');
+  var stepBtns = [].slice.call(stepsEl.querySelectorAll('.step'));
+  var actifCourant = -1;
+
+  /* La coloration orange se déplace en LISANT la position réelle du repère,
+     jamais en la recalculant : les hauteurs diffèrent (6 px pour un point,
+     20 px pour le tiret) et une valeur en dur divergerait au premier réglage
+     de gabarit. */
+  /* Débordement du halo orange autour du repère, sur les quatre côtés. ⇦ à
+     garder en phase avec le `left` et le `width` de `.steps__glow`. */
+  var GLOW_DEBORD = 4;
+  function placerGlow(i){
+    var b = stepBtns[i];
+    var m = b && b.querySelector('.step__m');
+    if (!m) return;
+    /* ⚠️ ON ADDITIONNE LES DEUX DÉCALAGES. `.step` est en `position: relative`,
+       il devient donc le parent de référence de son propre repère :
+       `m.offsetTop` vaut 0 aujourd'hui, et la coloration resterait collée en
+       haut de la pastille si on ne lisait que lui. On additionne pour rester
+       juste le jour où `.step` gagnera un rembourrage. */
+    stepsGlow.style.top = (b.offsetTop + m.offsetTop - GLOW_DEBORD) + 'px';
+    stepsGlow.style.height = (m.offsetHeight + GLOW_DEBORD * 2) + 'px';
+  }
+
+  function majEtapes(){
+    /* Il n'apparaît qu'une fois la phrase écrite : pendant la frappe, la page
+       est verrouillée, montrer un parcours n'aurait aucun sens. */
+    stepsEl.classList.toggle('on', frappeFinie);
+    /* `inert` retire focus ET pointeur d'un coup : `opacity: 0` seul laisse les
+       repères dans le parcours de tabulation, piège déjà payé sur ce projet. */
+    stepsEl.toggleAttribute('inert', !frappeFinie);
+    var s = stops(), y = window.pageYOffset;
+    /* Sous la dernière étape on est dans le catalogue, en défilement libre :
+       le dernier repère reste actif, c'est bien là qu'on est. */
+    var bas = plancher();
+    var actif = Math.max(bas, (y > s[2] - TOL) ? 2 : etapeLaPlusProche(y, s));
+    stepBtns.forEach(function(b, i){
+      /* Sous plafond, l'écran 1 n'est plus atteignable : le repère le dit au
+         lieu de mentir en restant cliquable. */
+      if (i < bas) b.setAttribute('disabled', ''); else b.removeAttribute('disabled');
+    });
+    /* ⚠️ TOUT LE RESTE SEULEMENT QUAND L'ÉTAPE CHANGE. Cette fonction tourne à
+       chaque image de défilement : réécrire `aria-current` à l'identique
+       soixante fois par seconde fait re-annoncer l'élément par certains
+       lecteurs d'écran. */
+    if (actif !== actifCourant){
+      stepBtns.forEach(function(b, i){
+        b.classList.toggle('is-active', i === actif);
+        if (i === actif) b.setAttribute('aria-current', 'step');
+        else b.removeAttribute('aria-current');
+      });
+      /* Au tout premier placement, pas de glissement : la coloration doit
+         apparaître à sa place, pas voyager depuis le haut de la pastille. */
+      if (actifCourant === -1){
+        placerGlow(actif);
+        /* Deux images pour que la position soit peinte avant qu'on rallume la
+           transition, sinon le navigateur fusionne les deux et anime quand
+           même. */
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){ stepsGlow.classList.remove('muet'); });
+        });
+      } else {
+        placerGlow(actif);
+      }
+      actifCourant = actif;
+    }
+  }
+
+  stepBtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      if (progScroll) return;           // « l'animation va au bout »
+      var i = parseInt(b.getAttribute('data-step'), 10);
+      if (i < plancher()) return;
+      var s = stops();
+      dernierIndex = i;
+      if (i > 0) plafondPose = true;    // on a quitté l'écran 1
+      allerA(s[i]);
+      message('Repère ' + (i + 1) + ' : ' + ['Ton conseil','La sélection','Le catalogue'][i] + '.');
+    });
+  });
 
   /* ── Les étapes ────────────────────────────────────────── */
   function etapeLaPlusProche(y, s){
@@ -433,6 +591,9 @@
     if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
     var k = e.key;
     if (k !== 'ArrowDown' && k !== 'ArrowUp' && k !== 'PageDown' && k !== 'PageUp' && k !== ' ') return;
+    // Espace sur un bouton appartient au bouton : l'annuler ici empêcherait le
+    // navigateur d'émettre le clic, et ferait défiler à la place.
+    if (k === ' ' && t && t.tagName === 'BUTTON') return;
     var s = stops();
     if (!dansLaPlage(window.pageYOffset, s)) return;
     /* On annule d'abord : une touche maintenue rendue au navigateur
@@ -482,11 +643,11 @@
   }
   document.getElementById('pOn').addEventListener('click', function(){
     plafondActif = true; this.classList.add('on'); document.getElementById('pOff').classList.remove('on');
-    message('Plafond activé.'); tableau(0);
+    message('Plafond activé.'); appliquer();
   });
   document.getElementById('pOff').addEventListener('click', function(){
     plafondActif = false; this.classList.add('on'); document.getElementById('pOn').classList.remove('on');
-    message('Plafond désactivé : on peut revenir à l\'écran 1.'); tableau(0);
+    message('Plafond désactivé : on peut revenir à l\'écran 1.'); appliquer();
   });
   /* Un vrai rechargement : la remise à zéro à la main laissait derrière elle
      l'animation en vol et la moitié des drapeaux de geste. */
@@ -513,6 +674,7 @@
     clearInterval(frappeTimer);
     phraseEl.textContent = texte;
     desarmerSaut();
+    appliquer();   // l'indicateur d'étapes n'apparaît qu'ici
     if (sautParGeste){
       /* 250 ms pour laisser retomber le geste, puis on le déclare consommé :
          sans ça, la fin de l'élan partirait toute seule vers le carrousel. */

@@ -699,6 +699,17 @@
        subscribe sapiProject dont le notify dépend du flush pendingNotify du
        resume (cause du « ne se recharge pas tout le temps »). */
     document.addEventListener('sapi:conseiller-closed', function (e) {
+      /* ⚠️ LE VERROU DE DÉFILEMENT EST PARTAGÉ, DONC L'INDICATEUR AUSSI, et
+         c'est le seul endroit où le rallumer.
+         Sa visibilité se lit sur `overflow: hidden`, que la modale pose comme
+         notre machine à écrire. Le saut invisible du moment 2 lève le verrou,
+         saute, et le REPOSE dans le même souffle ; le `scroll` qu'il provoque,
+         lui, arrive après — `majEtapes` le voit donc verrouillé et éteint
+         l'indicateur. Ses deux autres appelants étant le défilement et la fin
+         de la frappe, plus rien ne le rallumait : il restait absent pendant
+         toute la scène d'après-questionnaire, précisément quand le visiteur
+         lit son conseil tout frais et cherche quoi faire. */
+      majEtapes();
       var answers = (e && e.detail && e.detail.answers) ? e.detail.answers : {};
       if (!answers.piece) return; // jamais sans pièce
       // Changement de pièce (le projet recommence sur une autre pièce) : on
@@ -872,6 +883,7 @@
         // Recalage des flèches quand la sélection se dévoile (le layout est sûr
         // à ce moment ; évite une mesure de débordement faussée au tout load).
         if (p > 0.05) updateArrows();
+        majEtapes();
       }
       if (header) {
         header.classList.toggle('is-scrolled', section.getBoundingClientRect().bottom < 50);
@@ -882,7 +894,13 @@
       scheduleSnap();
     }
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', function () { measureRevealSpan(); oublierEtapes(); onScroll(); }, { passive: true });
+    window.addEventListener('resize', function () {
+      measureRevealSpan(); oublierEtapes(); onScroll();
+      /* ⚠️ REPLACER LE HALO MÊME SI L'ÉTAPE N'A PAS CHANGÉ : son placement est
+         conditionné au changement d'étape, or la pastille change de géométrie
+         sous 768 px, et le zoom du navigateur passe aussi par ici. */
+      if (stepCourant >= 0) placerGlow(stepCourant);
+    }, { passive: true });
     applyScroll();
     // La mise en page n'est fiable qu'après le premier rendu (polices, images) :
     // on remesure une fois, comme pour le débordement du slider.
@@ -1134,6 +1152,87 @@
       var offset = Math.max(cssMargin, stickyOffset()) + marginTop;
       return Math.round(cat.getBoundingClientRect().top + window.pageYOffset - offset);
     }
+    /* ══════════════════════════════════════════════════════════════════════
+       L'INDICATEUR D'ÉTAPES — idée de Robin, 29/08/2026
+       ──────────────────────────────────────────────────────────────────────
+       Trois repères au bord droit : deux points pour les états du hero, un
+       tiret pour le catalogue, et un halo orange qui glisse derrière celui où
+       l'on est. Cliquables : chaque repère mène à son arrêt.
+       ⚠️ Le gabarit ne le rend qu'en état B : tout ce bloc doit donc survivre à
+       son absence, d'où les tests sur `stepsEl`.
+       ══════════════════════════════════════════════════════════════════════ */
+    var stepsEl    = document.querySelector('[data-immersion-steps]');
+    var stepsGlow  = stepsEl ? stepsEl.querySelector('[data-immersion-steps-glow]') : null;
+    var stepBtns   = stepsEl ? [].slice.call(stepsEl.querySelectorAll('[data-immersion-step]')) : [];
+    var stepCourant = -1;
+    /* Débordement du halo autour du repère, sur les quatre côtés. ⇦ à garder en
+       phase avec le `left` et le `width` de `.mescreations-steps__glow`. */
+    var GLOW_DEBORD = 4;
+
+    function placerGlow(i) {
+      var b = stepBtns[i];
+      var m = b && b.querySelector('.mescreations-steps__mark');
+      if (!m || !stepsGlow) return;
+      /* ⚠️ ON ADDITIONNE LES DEUX DÉCALAGES. Le repère est en `position:
+         relative` : il devient le parent de référence de sa propre pastille, et
+         `m.offsetTop` vaut 0. On additionne pour rester juste le jour où le
+         bouton gagnera un rembourrage. */
+      stepsGlow.style.top = (b.offsetTop + m.offsetTop - GLOW_DEBORD) + 'px';
+      stepsGlow.style.height = (m.offsetHeight + GLOW_DEBORD * 2) + 'px';
+    }
+
+    function majEtapes() {
+      if (!stepsEl) return;
+      var stops = stopPositions();
+      if (!stops) return;
+      /* Il n'apparaît qu'une fois la phrase écrite : pendant la frappe la page
+         est verrouillée, annoncer un parcours n'aurait aucun sens.
+         `inert` retire focus ET pointeur d'un coup — `opacity: 0` seul laisse
+         les repères dans le parcours de tabulation, piège déjà payé ici. */
+      var pret = document.documentElement.style.overflow !== 'hidden';
+      stepsEl.classList.toggle('is-in', pret);
+      stepsEl.toggleAttribute('inert', !pret);
+
+      var y = window.pageYOffset;
+      /* Sous la dernière étape on lit le catalogue en défilement libre : le
+         dernier repère reste actif, c'est bien là qu'on est. */
+      var actif = (y > stops[2] - TOLERANCE_ARRIVEE) ? 2 : nearestStep(y, stops);
+      /* ⚠️ TOUT CE QUI SUIT SEULEMENT QUAND L'ÉTAPE CHANGE. Cette fonction
+         tourne à chaque image de défilement : réécrire `aria-current` à
+         l'identique soixante fois par seconde fait re-annoncer l'élément par
+         certains lecteurs d'écran. */
+      if (actif === stepCourant) return;
+      stepBtns.forEach(function (b, i) {
+        b.classList.toggle('is-active', i === actif);
+        if (i === actif) b.setAttribute('aria-current', 'step');
+        else b.removeAttribute('aria-current');
+      });
+      placerGlow(actif);
+      if (stepCourant === -1 && stepsGlow) {
+        /* Deux images pour que la position soit peinte avant qu'on rallume la
+           transition, sinon le navigateur fusionne les deux et anime quand
+           même — le halo descendrait du haut de la pastille à l'arrivée. */
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { stepsGlow.classList.remove('is-muet'); });
+        });
+      }
+      stepCourant = actif;
+    }
+
+    stepBtns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        /* « L'animation va au bout » vaut aussi pour les clics : un clic donné
+           pendant un mouvement en cours est perdu, comme un geste. */
+        if (progScroll) return;
+        var stops = stopPositions();
+        if (!stops) return;
+        var i = parseInt(b.getAttribute('data-immersion-step'), 10);
+        if (isNaN(i) || i < 0 || i > 2) return;
+        lastStopIndex = i;
+        programmaticScrollTo(stops[i]);
+      });
+    });
+
     /* Les trois positions de repos, du haut vers le bas.
        ⚠️ MISES EN CACHE DEPUIS LE 29/08, et ce n'est pas une micro-optimisation.
        Chaque appel enchaîne un `getBoundingClientRect` et trois
@@ -1524,6 +1623,11 @@
     function unlockScroll() {
       document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
+      /* ⚠️ L'INDICATEUR APPARAÎT ICI, PAS AU PREMIER DÉFILEMENT. Il se règle
+         dans `applyScroll`, qui ne tourne qu'au défilement : sans cet appel, il
+         resterait invisible tant que le visiteur ne bouge pas — c'est-à-dire
+         précisément pendant qu'il lit la phrase et se demande quoi faire. */
+      majEtapes();
     }
 
     /* ── Séquence d'entrée (au load) : pill → phrase qui s'écrit → question →

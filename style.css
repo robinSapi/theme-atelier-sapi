@@ -25631,6 +25631,121 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   INDICATEUR D'ÉTAPES — idée de Robin, 29/08/2026
+   ──────────────────────────────────────────────────────────────────────────
+   Une pastille sombre au bord droit, contenant trois repères empilés : DEUX
+   POINTS pour les deux états du hero, UN TIRET pour le catalogue — sa forme
+   dit qu'il est une étendue, les points disent qu'ils sont des instants.
+   Un halo orange glisse DERRIÈRE le repère courant, plus grand que lui.
+
+   ⚠️ LE CONTENANT SOMBRE N'EST PAS DÉCORATIF. Sans lui, les repères vivaient à
+   nu : blancs sur la photo, ils disparaissaient sur le crème du catalogue,
+   exactement là où ils devaient dire « tu es à la dernière étape ». La pastille
+   porte son fond, donc un seul look du début à la fin, sans bascule de couleur
+   à régler.
+
+   ⚠️ L'ÉTAT COURANT SE SIGNALE PAR UNE TAILLE, PAS PAR UNE TEINTE. L'orange et
+   le blanc translucide ont presque la même luminance : en vision des couleurs
+   déficiente, une simple bascule de couleur ne se verrait pas. Le halo déborde
+   donc de 4 px sur tout le pourtour. Ne pas « simplifier » en le ramenant à la
+   taille du repère.
+   ══════════════════════════════════════════════════════════════════════════ */
+.mescreations-steps {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+  z-index: 9000;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 9px;
+  border-radius: 50px;
+  background: rgba(74, 63, 53, .72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity .5s ease .2s;
+  pointer-events: none;
+}
+.mescreations-steps.is-in { opacity: 1; pointer-events: auto; }
+/* ⚠️ ON NEUTRALISE L'ONDE D'APPUI GLOBALE. Le site pose un `button::after` qui
+   grandit à 300 px au clic ; sur un repère de 6 px, l'`overflow: hidden` hérité
+   le clippe en un aplat blanc — le point disparaît sous un flash pendant tout
+   l'appui. */
+.mescreations-steps__item::after { display: none; }
+
+.mescreations-steps__item {
+  -webkit-appearance: none;
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+  display: block;
+  position: relative;
+  z-index: 2;
+}
+.mescreations-steps__mark {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .45);
+  transition: background .3s ease;
+}
+/* Le troisième n'est pas un point : c'est un TIRET. */
+.mescreations-steps__item--long .mescreations-steps__mark { height: 20px; }
+@media (hover: hover) {
+  .mescreations-steps__item:not(.is-active):hover .mescreations-steps__mark {
+    background: rgba(255, 255, 255, .85);
+  }
+}
+/* ⚠️ PAS DE STYLE `[disabled]` ICI, ET C'EST VOLONTAIRE. Le prototype en a un :
+   il sert à son option « plafond », où l'écran 1 devient inatteignable. Cette
+   option n'existe pas en production. Un style pour un état que rien ne pose
+   laisse croire qu'il existe. */
+
+/* ⚠️ LE DÉBORDEMENT DE 4 px EST ÉCRIT QUATRE FOIS : ici en largeur
+   (14 = 6 + 4 + 4), dans les deux `left` (le rembourrage de la pastille moins
+   4 : 5 en desktop, 4 en mobile), et en JS en hauteur (`GLOW_DEBORD`). Changer
+   le rembourrage de la pastille sans reprendre les `left` décentre le halo,
+   sans la moindre erreur. */
+.mescreations-steps__glow {
+  position: absolute;
+  left: 5px;
+  width: 14px;
+  border-radius: 999px;
+  background: var(--color-orange);
+  z-index: 1;
+  transition: top .42s cubic-bezier(.4, 0, .2, 1),
+              height .42s cubic-bezier(.4, 0, .2, 1);
+}
+/* Premier placement : il doit apparaître à sa place, pas voyager depuis le
+   haut de la pastille. */
+.mescreations-steps__glow.is-muet { opacity: 0; transition: none; }
+
+@media (max-width: 768px) {
+  /* `touch-action: none` : sans lui, un glissement démarré sur cette bande
+     n'atteint pas l'écouteur du hero et part en défilement natif libre. */
+  .mescreations-steps { right: 8px; gap: 10px; padding: 10px 8px; touch-action: none; }
+  .mescreations-steps__glow { left: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mescreations-steps__glow { transition: none; }
+}
+
 /* Scroll hint = 2 indices pilotés par --reveal. Le conteneur est révélé par la
    séquence de chargement (.is-in) ; à l'intérieur, l'indice « Découvre ta
    sélection » monte+disparaît au scroll, puis « Voir le catalogue complet »

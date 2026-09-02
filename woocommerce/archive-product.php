@@ -337,6 +337,32 @@ if ($imm_piece) {
      ════════════════════════════════════════════════════════════════════════ -->
 <div class="mescreations-immersion__mark" data-immersion-mark aria-hidden="true"></div>
 </div><!-- /.mescreations-immersion-track -->
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     INDICATEUR D'ÉTAPES (idée de Robin, 29/08/2026)
+     ────────────────────────────────────────────────────────────────────────
+     Trois repères empilés au bord droit : DEUX POINTS pour les deux états du
+     hero, UN TIRET pour le catalogue. Un halo orange glisse derrière le repère
+     courant. Cliquables : chaque repère mène à son arrêt.
+     Ce qu'il apporte : rien n'indiquait jusqu'ici qu'on est dans un parcours à
+     étapes plutôt que sur une page qui défile normalement.
+
+     ⚠️ HORS DE LA SECTION IMMERSION, ET C'EST OBLIGATOIRE. Il est en
+     `position: fixed` et doit rester visible sur le catalogue. Or la couche de
+     contenu du hero porte un `transform` ET un `will-change: transform` : un
+     élément fixe déposé dedans cesse d'être positionné par rapport à l'écran et
+     se cale sur cette couche — qui translate au défilement. La section, elle,
+     est en `overflow: hidden`. Le sortir du hero est la seule façon sûre.
+
+     ⚠️ Il n'existe qu'en état B. En état A il n'y a pas de parcours à trois
+     arrêts, donc rien à indiquer : il est à l'intérieur du même `if`.
+     ════════════════════════════════════════════════════════════════════════ -->
+<nav class="mescreations-steps" data-immersion-steps aria-label="<?php esc_attr_e('Progression dans la page', 'theme-sapi-maison'); ?>">
+  <i class="mescreations-steps__glow is-muet" data-immersion-steps-glow aria-hidden="true"></i>
+  <button type="button" class="mescreations-steps__item" data-immersion-step="0" aria-label="<?php esc_attr_e('Mon conseil', 'theme-sapi-maison'); ?>"><i class="mescreations-steps__mark"></i></button>
+  <button type="button" class="mescreations-steps__item" data-immersion-step="1" aria-label="<?php esc_attr_e('Ma sélection', 'theme-sapi-maison'); ?>"><i class="mescreations-steps__mark"></i></button>
+  <button type="button" class="mescreations-steps__item mescreations-steps__item--long" data-immersion-step="2" aria-label="<?php esc_attr_e('Toutes mes créations', 'theme-sapi-maison'); ?>"><i class="mescreations-steps__mark"></i></button>
+</nav>
 <?php } // end état B immersion ?>
 
 <?php if ($imm_piece) : // ── ÉTAT B : hero artisan (h1, caché en CSS sous l'immersion). Zone cards conseiller retirée (Tâche 7, plus de sapi-cards-conseiller.js). ── ?>
