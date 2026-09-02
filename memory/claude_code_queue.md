@@ -2623,3 +2623,278 @@ sur test reste la preuve, et elle vaut mieux qu'un linter.
 2. La même page sur un écran court (13 pouces) → les cards ne doivent pas être rognées.
 3. Le carrousel sur téléphone → le swipe horizontal des cards doit encore fonctionner
    (`touch-action: pan-x pinch-zoom`).
+
+---
+
+## [TÂCHE] Préparer la fusion test → master — lot immersion (Robin pousse lui-même)
+**Date :** 2026-09-02
+**Priorité :** haute
+**Branches :** `test-theme-sapi-maison` → `master`.
+
+### ⚠️ Ce que tu NE fais PAS
+
+**Tu ne pousses pas sur `master`.** Robin l'a redit le 02/09 : c'est lui qui pousse, depuis GitHub Desktop, comme le 28/08. Ta règle « push auto sur test, jamais master » reste en vigueur.
+
+### Contexte
+
+L'audit est fait et le verdict est « poussable » (rapport plus haut). Depuis, Cowork a livré deux corrections issues de tes remarques, que Robin a poussées sur test :
+- `sapi-mescreations-immersion.js` — un commentaire qui confondait `TOLERANCE_ARRIVEE` (4) et `GESTE_MINIMUM` (8), corrigé ;
+- le même fichier — l'indicateur d'étapes lisait le verrou de défilement à la main sur `html` seul ; il passe désormais par `scrollLocked()`, qui regarde `html` **et** `body`.
+
+**Revérifie que ces deux commits sont bien sur test avant de préparer quoi que ce soit**, et que le diff test ↔ master n'a pas bougé autrement depuis ton audit.
+
+### À faire
+
+1. **Confirmer que la fusion est toujours propre** : simulation en mémoire, zéro conflit attendu, résultat identique à test.
+2. **Écrire la procédure numérotée pour Robin**, dans ce fichier, sous cette tâche. Il n'est pas développeur : chaque étape doit dire où cliquer et ce qu'il doit voir. Elle doit couvrir, dans l'ordre :
+   - la sauvegarde UpdraftPlus **avant** toute chose (⚠️ la dernière a pris près de 40 minutes, le prévenir) ;
+   - la fusion dans GitHub Desktop et le push ;
+   - la vérification que le déploiement GitHub Actions est bien passé ;
+   - la purge des caches, **dans le bon ordre** (WP Super Cache puis Autoptimize), plus le cache de page o2switch sur `/mes-creations/` ;
+   - la vérification post-déploiement.
+3. **La liste de ce qu'il doit regarder en prod, et qui n'a pas pu l'être sur test.** Le site de test n'a ni Autoptimize ni cache de page. En particulier :
+   - le `defer` qu'Autoptimize ajoute à tous les scripts en production ;
+   - **la popup cookies**, seul angle mort que tu n'as pas pu lever : c'est une extension, hors du thème. À tester en navigation privée sur `/mes-creations/?piece=salon` — vérifier qu'elle ne bloque pas le défilement du hero et qu'elle ne passe pas sous l'indicateur d'étapes.
+4. **Le plan de repli**, en deux lignes : quoi faire si quelque chose casse en ligne, et sur quel commit revenir.
+
+### Critères de succès
+
+Robin lit la procédure, l'exécute seul, et sait à chaque étape ce qu'il doit voir. Aucun push de ta part sur `master`.
+
+### ✅ FAIT (2026-09-02, Claude Code) — rien poussé, `master` intact à `69ec45d`
+
+## Contrôles préalables — les trois sont bons
+
+**1. Les deux corrections sont sur test.** Commit `a37b914` du 02/09 à 19h14, un seul commit
+pour les deux :
+- `imm.js` l. 1305 — le commentaire dit maintenant « 8 px, soit `GESTE_MINIMUM` et NON
+  `TOLERANCE_ARRIVEE` qui vaut 4 ». Exact.
+- `imm.js` l. 1227 — `var pret = !scrollLocked();` remplace le test à la main. J'ai vérifié
+  que `scrollLocked()` est bien dans la même portée (les deux sont dans `init()`, une
+  déclaration de fonction est hissée, donc l'ordre ne pose pas de problème) et qu'il ne
+  reste **plus aucune lecture manuelle du verrou** dans le fichier.
+
+**2. Le diff n'a pas bougé autrement.** Toujours les mêmes 14 fichiers, plus
+`memory/claude_code_queue.md` (le rapport d'audit — exclu du déploiement). Aucun fichier
+supprimé, aucun fichier nouveau hors `mockups/`.
+
+**3. La fusion est propre.** Re-simulée en mémoire après `a37b914` : **zéro conflit**, et le
+résultat est **identique à test au bit près**. Master n'a rien que test n'ait déjà.
+
+**Et surtout — ce déploiement ne touche PAS la base de données.** J'ai vérifié : aucun
+`dbDelta`, aucun `CREATE`/`ALTER TABLE`, aucun `update_option`, `SAPI_SESSIONS_DB_VERSION`
+identique des deux côtés. **C'est du code seul.** Ça change tout pour le repli : si quelque
+chose casse, il suffit de remettre le code d'avant. Aucune donnée n'est en jeu.
+
+---
+
+## ⚠️ Une correction sur la consigne : l'ordre des caches est l'inverse
+
+La tâche demande « WP Super Cache **puis** Autoptimize ». **C'est l'ordre qui casse.** Voici
+pourquoi, et je pars sur l'ordre inverse dans la procédure ci-dessous :
+
+Autoptimize fabrique un gros fichier CSS unique dont le **nom contient une empreinte du
+contenu**. Chaque page mise en cache par WP Super Cache pointe vers ce nom précis.
+
+- **Super Cache d'abord, Autoptimize ensuite** : les pages se régénèrent et pointent vers le
+  fichier tout neuf d'Autoptimize… qu'on efface juste après. **Les pages fraîchement mises en
+  cache réclament un fichier qui n'existe plus → site sans style** jusqu'à ce qu'elles
+  expirent d'elles-mêmes.
+- **Autoptimize d'abord, Super Cache ensuite** : on efface les vieux fichiers, puis on efface
+  les pages qui les réclamaient. La première visite reconstruit les deux, cohérents.
+
+C'est d'ailleurs pour ça qu'Autoptimize affiche « pensez à vider aussi votre cache de page »
+après sa propre purge, et jamais l'inverse.
+
+**Note historique** : le journal du 14 avril garde la trace d'un bug de home en prod (panier
+et recherche visibles au chargement) **résolu en vidant WP Super Cache + Autoptimize + Redis**.
+Redis n'est pas dans la consigne. S'il est toujours actif sur le site, il faut le purger aussi
+— il est dans la procédure, à sauter s'il n'y est plus.
+
+---
+
+# 📋 PROCÉDURE — mise en prod du lot immersion
+
+Compter **1 h à 1 h 15** en tout, dont ~40 min de sauvegarde pendant lesquelles il n'y a rien
+à faire. À faire de préférence en heure creuse.
+
+---
+
+### Étape 1 — La sauvegarde UpdraftPlus ⏱️ ~40 min
+
+**⚠️ Prends ton temps sur celle-là : la dernière a mis près de 40 minutes.** Lance-la et va
+faire autre chose. Ne passe à l'étape 2 que quand elle est vraiment finie.
+
+1. `atelier-sapi.fr/wp-admin/` → menu **Réglages** → **Sauvegardes UpdraftPlus**
+2. Bouton bleu **« Sauvegarder maintenant »**
+3. Laisse les trois cases cochées (base de données, fichiers, envoi vers le stockage distant)
+4. Confirme
+
+**Ce que tu dois voir :** une barre de progression, puis la sauvegarde qui apparaît dans la
+liste **« Sauvegardes existantes »** avec la date du jour et les boutons *Base de données*,
+*Plugins*, *Thèmes*, *Uploads*.
+
+> **Pourquoi on la fait quand même alors qu'il n'y a pas de base à sauver :** ce lot ne touche
+> pas la base, donc elle ne servira probablement à rien. Mais elle coûte 40 minutes d'attente
+> et elle couvre le cas où tu toucherais autre chose sans y penser. On ne saute pas le filet.
+
+---
+
+### Étape 2 — La fusion dans GitHub Desktop ⏱️ 2 min
+
+1. Ouvre **GitHub Desktop**
+2. En haut, le sélecteur **Current branch** → choisis **`master`**
+3. Si un bouton **« Pull origin »** apparaît, clique-le d'abord (et attends qu'il disparaisse)
+4. Menu **Branch** (barre du haut) → **« Merge into current branch… »**
+5. Dans la liste, choisis **`test-theme-sapi-maison`**
+6. Clique le bouton bleu **« Create a merge commit »**
+
+**Ce que tu dois voir :** *« Successfully merged test-theme-sapi-maison into master »*, et
+**aucun message rouge parlant de conflit**. Je l'ai simulée : il ne doit pas y en avoir. S'il
+y en a un, **arrête-toi et appelle-moi** — ça voudrait dire que quelque chose a changé entre
+mon contrôle et ton clic.
+
+7. Clique **« Push origin »** en haut à droite
+
+**Ce que tu dois voir :** le bouton « Push origin » redevient gris / disparaît, et l'onglet
+**History** montre en haut un commit **`Merge branch 'test-theme-sapi-maison'`**.
+
+> À ce stade **rien n'est en ligne.** Le code est sur GitHub, le site n'a pas bougé. Tu peux
+> encore t'arrêter ici sans conséquence.
+
+---
+
+### Étape 3 — Lancer le déploiement ⏱️ 3-4 min
+
+1. Va sur **github.com/robinSapi/theme-atelier-sapi**
+2. Onglet **Actions** (en haut)
+3. Colonne de gauche → clique **« Deploy to Production »**
+4. À droite, bouton gris **« Run workflow »** → dans le menu qui s'ouvre, vérifie que la
+   branche est bien **`master`** (⚠️ pas `test-theme-sapi-maison`) → bouton vert
+   **« Run workflow »**
+5. Recharge la page au bout de quelques secondes : une ligne jaune apparaît. Clique dessus.
+
+**Ce que tu dois voir :** quatre étapes qui passent au vert l'une après l'autre —
+**Checkout code**, **Setup PHP**, **Install PHP dependencies (mPDF)**, **Deploy to O2Switch
+via FTP**. La troisième est la plus lente (elle télécharge la bibliothèque des PDF du
+catalogue), c'est normal.
+
+**Une pastille verte ✅ en haut = c'est en ligne.** Une croix rouge ❌ = **ne touche à rien et
+appelle-moi**, le site est encore dans son état d'avant.
+
+---
+
+### Étape 4 — Vider les caches, DANS CET ORDRE ⏱️ 2 min
+
+**L'ordre compte** (voir l'explication plus haut). Ne l'inverse pas.
+
+1. **Autoptimize d'abord.** `wp-admin` → **Réglages** → **Autoptimize** → bouton
+   **« Vider le cache »** (*Delete Cache*) en haut à droite.
+   *Ce que tu dois voir :* le compteur « taille du cache » retombe à 0 Ko / « Aucun fichier ».
+2. **WP Super Cache ensuite.** **Réglages** → **WP Super Cache** → onglet **Contenu** →
+   **« Supprimer le cache »** (*Delete Cache*).
+   *Ce que tu dois voir :* le nombre de pages en cache retombe à 0.
+3. **Redis, s'il est encore là.** Cherche **Redis** dans le menu de gauche ou dans
+   **Réglages**. S'il existe : **« Vider le cache »** / *Flush Cache*. **S'il n'y est plus,
+   passe.** (Il était en place en avril, je ne peux pas vérifier d'ici.)
+4. **Le cache de page o2switch (LiteSpeed).** Si tu as le plugin **LiteSpeed Cache** :
+   **LiteSpeed Cache** → **Boîte à outils** → **Purger tout**. Sinon, dans **cPanel o2switch**,
+   cherche **LiteSpeed Web Cache Manager** → **Flush All**.
+5. **Ton navigateur.** Ferme l'onglet `atelier-sapi.fr` s'il était ouvert, puis rouvre-le en
+   **navigation privée** — c'est le seul moyen d'être sûr de voir le vrai site et pas ta
+   propre copie.
+
+---
+
+### Étape 5 — Vérification, dans cet ordre ⏱️ 10 min
+
+**D'abord que le site est debout** (30 secondes, avant tout le reste) :
+
+1. `atelier-sapi.fr` s'affiche normalement, avec ses styles
+2. Une fiche produit s'ouvre
+3. Le panier s'ouvre et se ferme
+
+Si l'un des trois échoue → **Étape 6, plan de repli.**
+
+**Ensuite le lot lui-même**, sur `atelier-sapi.fr/mes-creations/?piece=salon` :
+
+| # | Quoi | Ce que tu dois voir |
+|---|---|---|
+| 1 | La phrase de Robin | Elle s'écrit **plus vite qu'avant** (le rythme a été accéléré) |
+| 2 | Un cran de molette vers le bas | **Un geste = un arrêt.** La photo se floute, le carrousel apparaît. Pas de tremblement, pas de double saut |
+| 3 | Le bouton **« Décrire mon projet »** | Fond **blanc plein**, à droite du carrousel. **Il doit réagir au clic** (c'est le défaut qu'on a corrigé : un bouton invisible lui volait ses clics) |
+| 4 | Survol du bouton blanc | Il se remplit, le texte reste lisible |
+| 5 | Bord droit de l'écran | **Trois repères** empilés, avec un **halo orange** derrière celui où tu es. Clique le troisième → il descend au catalogue |
+| 6 | La carte **« Sur-mesure »** en fin de carrousel | Elle **ouvre la modale** sur l'écran « contacter Robin », **déjà rempli** avec « pour mon salon ». Elle ne quitte plus la page |
+| 7 | Survol de cette carte | L'orange fonce. **Le texte ne doit PAS virer au bleu marine** (c'était le défaut) |
+| 8 | Depuis le catalogue, remonte | Un geste = une étape, dans l'autre sens |
+
+**Puis sur téléphone**, même adresse :
+- le **glissement horizontal** du carrousel fonctionne toujours ;
+- le défilement vertical du hero fait bien **un arrêt par geste**.
+
+---
+
+### Étape 6 — Plan de repli
+
+**Si le site casse :** GitHub Desktop → onglet **History** → clic droit sur le commit
+**`Merge branch 'test-theme-sapi-maison'`** (le plus récent) → **« Revert changes in
+commit »** → **Push origin** → refais l'**Étape 3** (relancer le workflow) puis l'**Étape 4**
+(vider les caches, même ordre).
+
+**Le commit sur lequel on revient est `69ec45d`** — exactement ce qui tourne en prod
+aujourd'hui, le déploiement du 28/08. **Aucune donnée n'est concernée** : ce lot ne touche pas
+la base, donc pas besoin de restaurer UpdraftPlus. Le repli, c'est du code et rien d'autre.
+
+Si le revert ne suffit pas ou si tu préfères ne pas y toucher : **appelle-moi, ne bricole pas.**
+
+---
+
+## 🔍 Ce qui n'a pas pu être testé sur test, et pourquoi
+
+Le site de test n'a **ni Autoptimize ni cache de page**. Deux classes de bug y sont donc
+invisibles par construction. Aucune n'est une raison d'attendre — mais ce sont les trois
+choses à regarder en priorité une fois en ligne.
+
+**1. Le `defer` d'Autoptimize** — traité d'avance, mais à confirmer.
+En production, Autoptimize ajoute `defer` à tous les scripts, ce qui change le moment où ils
+démarrent. Les cinq fichiers concernés ont un test spécial pour ça (`readyState === 'complete'`
+au lieu du réflexe habituel), documenté dans `sapi-project.js`. **Symptôme si c'était raté :**
+tu arrives sur `/mes-creations/?piece=salon` et la sélection ne correspond pas à la pièce
+demandée, ou le hero ne démarre pas sa séquence. Test : ouvre l'adresse en navigation privée
+et regarde si la bonne pièce est annoncée.
+
+**2. La popup cookies — le seul angle mort de tout l'audit.**
+C'est une extension, hors du thème : je n'ai pas pu la lire, donc je ne peux rien affirmer.
+Le hero capte la molette pour avancer d'un cran à la fois, et il rend la main dès qu'un
+panneau du site verrouille le défilement — j'ai vérifié que ça marche pour le menu, le panier,
+la recherche et la modale. **La popup cookies, non.**
+
+**Test, en navigation privée** (sinon elle ne s'affiche pas), sur
+`atelier-sapi.fr/mes-creations/?piece=salon` :
+- la bannière est là → **essaie de faire défiler la page à la molette.** Elle doit se
+  comporter normalement ;
+- **regarde le bord droit** : les trois repères ne doivent pas passer par-dessus la bannière
+  ni être coupés par elle ;
+- **accepte les cookies** → le hero doit redevenir normal, un geste = un arrêt.
+
+Si la molette est bloquée tant que la bannière est là, **ce n'est pas grave et c'est
+réparable en une ligne** — dis-le-moi, je regarde comment cette extension verrouille la page.
+
+**3. Le cache de page et l'adresse `?piece=`.**
+Chaque pièce a sa propre adresse (`?piece=salon`, `?piece=cuisine`…). Si le cache o2switch
+servait la même page pour deux pièces différentes, un visiteur verrait la sélection d'une
+autre pièce. **Test :** ouvre `?piece=salon`, puis `?piece=cuisine` dans un autre onglet — les
+deux doivent annoncer leur propre pièce et montrer des produits différents. Ça tourne déjà
+depuis le 28/08 sans incident, mais ce lot ajoute l'indicateur d'étapes, qui est fabriqué côté
+serveur et sera donc mis en cache avec la page.
+
+**4. Un écran court** (portable 13 pouces, 1366×768).
+C'est le cas que vise la bascule « desktop court ». Une note du code signale que le plancher
+de hauteur des photos tombe tout près de cette résolution. **Test :** les cards du carrousel
+ne doivent pas être rognées en bas, et le bouton « Découvrir » doit rester entier.
+
+---
+
+**Rappel : je n'ai rien poussé.** `master` est toujours à `69ec45d`. Tout ce qui précède
+attend tes clics.
