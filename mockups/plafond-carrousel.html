@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le carrousel comme plafond — simulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F4EFE7; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
+    --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --ok:#2F7D53; --ko:#C0392B;
+    --body:'Montserrat',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--wood-dark);font:15px/1.6 var(--body)}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 18px 80px}
+
+  .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--wood);margin:0 0 8px}
+  h1{margin:0 0 8px;font-size:26px;line-height:1.2;letter-spacing:-.015em}
+  .lede{margin:0 0 22px;font-size:15.5px;color:var(--wood-mid);max-width:760px}
+
+  /* ── Barre de contrôle ─────────────────────── */
+  .ctrl{position:sticky;top:0;z-index:30;background:rgba(244,239,231,.96);backdrop-filter:blur(8px);
+        border-bottom:1px solid var(--line);margin:0 -18px 20px;padding:12px 18px;
+        display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .grp{display:flex;gap:7px;align-items:center}
+  .grp>span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--wood);margin-right:2px}
+  .ctrl button{font:700 13px/1 var(--body);padding:10px 15px;border-radius:8px;border:1px solid var(--line);
+               background:#fff;color:var(--wood-dark);cursor:pointer}
+  .ctrl button.on{background:var(--wood);border-color:var(--wood);color:#fff}
+  .ctrl button.geste{background:var(--wood-dark);border-color:var(--wood-dark);color:#fff;min-width:118px}
+  .ctrl button.reset{background:transparent;border-style:dashed}
+
+  /* ── Les deux couloirs ─────────────────────── */
+  .duo{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media (max-width:820px){ .duo{grid-template-columns:1fr} }
+  .col__t{margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--wood)}
+  .col__s{margin:0 0 10px;font-size:12.5px;color:var(--wood-mid);min-height:32px}
+  .col--new .col__t{color:var(--orange)}
+
+  /* L'écran simulé */
+  .ecran{position:relative;height:330px;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+         box-shadow:0 2px 8px rgba(147,125,104,.12), 0 8px 30px rgba(147,125,104,.14);background:#3a3128}
+  .fond{position:absolute;inset:0;transition:filter .5s ease, transform .5s ease;
+        background:radial-gradient(120% 90% at 22% 12%, #7b6549 0%, transparent 55%),
+                   radial-gradient(90% 80% at 78% 34%, #93795a 0%, transparent 60%),
+                   linear-gradient(160deg,#4a3f35 0%,#2e2721 62%,#3d332a 100%)}
+  .ecran.rev .fond{filter:blur(5px) brightness(.78);transform:scale(1.06)}
+  .voile{position:absolute;inset:0;background:rgba(30,22,14,.28)}
+
+  .barre{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:14px;
+         padding:8px 14px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);
+         font-size:10.5px;font-weight:600;color:var(--wood-dark)}
+  .barre .logo{width:20px;height:20px;border-radius:50%;background:var(--wood-dark);color:#fff;
+               font:700 8px/20px var(--body);text-align:center}
+  .barre span{opacity:.65}
+
+  .zone{position:absolute;left:0;right:0;z-index:3;display:flex;flex-direction:column;align-items:center;
+        transition:transform .5s ease, opacity .5s ease}
+  /* Zone texte */
+  .z1{top:38px;padding:0 16px}
+  .sig{display:inline-flex;align-items:center;gap:7px;padding:4px 12px 4px 5px;
+       background:rgba(74,63,53,.72);border-radius:50px;margin-bottom:9px}
+  .sig__a{width:19px;height:19px;border-radius:50%;background:var(--wood);color:#fff;font:700 9px/19px var(--body);text-align:center}
+  .sig__t{font-family:'Square Peg',cursive;font-size:14px;line-height:1;color:#fff}
+  .phrase{margin:0;max-width:420px;text-align:center;color:#fff;font-style:italic;font-size:15px;
+          line-height:1.32;text-shadow:0 2px 14px rgba(0,0,0,.45)}
+  .btnw{display:inline-flex;align-items:center;gap:7px;margin-top:11px;padding:9px 18px;border-radius:50px;
+        background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.38);color:#fff;
+        font-size:10.5px;font-weight:700;transition:opacity .4s ease}
+  .ecran.rev .btnw{opacity:0}
+
+  /* Zone carrousel */
+  .z3{bottom:34px;opacity:0;transform:translateY(26px)}
+  .ecran.rev .z3{opacity:1;transform:none}
+  .lab{font-size:8.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#fff;opacity:.9;margin-bottom:8px}
+  .cartes{display:flex;gap:8px;justify-content:center;width:100%;padding:0 12px}
+  .carte{flex:0 1 108px;background:#fff;border-radius:9px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+  .carte__i{height:60px;background:linear-gradient(150deg,#cbb99f,#a98f6f)}
+  .carte:nth-child(2) .carte__i{background:linear-gradient(150deg,#b9c6b0,#8fa080)}
+  .carte:nth-child(3) .carte__i{background:linear-gradient(150deg,#5f6f92,#3b4767)}
+  .carte__t{padding:6px 5px 8px;text-align:center}
+  .carte__n{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+  .carte__n em{font-family:'Square Peg',cursive;font-size:13px;font-style:normal;text-transform:none;letter-spacing:0;margin-left:2px}
+  .carte__p{font-size:8px;color:var(--wood-dark);margin-top:2px}
+  .btnb{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:8px 16px;border-radius:50px;
+        background:#fff;color:var(--wood-dark);font-size:10px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+
+  /* Indice bas */
+  .hint{position:absolute;left:0;right:0;bottom:9px;z-index:4;text-align:center;color:#fff;opacity:.72;
+        font-size:8.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+  .hint b{font-weight:700;font-size:15px;letter-spacing:0;display:block;line-height:1}
+
+  /* Catalogue */
+  .cat{position:absolute;inset:0;z-index:6;background:var(--page);padding:38px 16px 0;
+       transform:translateY(100%);transition:transform .5s ease}
+  .ecran.cat .cat{transform:none}
+  .cat h4{margin:0 0 12px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--wood)}
+  .grille{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .gc{height:76px;border-radius:8px;background:#fff;border:1px solid var(--line);
+      box-shadow:0 2px 8px rgba(147,125,104,.12)}
+
+  /* ── Le rail d'états ─────────────────────── */
+  .rail{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .rail__t{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--wood);margin:0 0 10px}
+  .etapes{display:flex;align-items:center;gap:0}
+  .et{flex:1;text-align:center;position:relative}
+  .et__p{width:13px;height:13px;border-radius:50%;background:var(--page);border:2px solid var(--line);
+         margin:0 auto 6px;transition:all .3s ease}
+  .et.on .et__p{background:var(--wood);border-color:var(--wood);transform:scale(1.25)}
+  .et.off .et__p{background:transparent;border-style:dashed;border-color:rgba(192,57,43,.45)}
+  .et__l{font-size:10.5px;color:var(--wood-mid);line-height:1.3}
+  .et.on .et__l{color:var(--wood-dark);font-weight:700}
+  .et.off .et__l{color:rgba(192,57,43,.7);text-decoration:line-through}
+  .lien{position:absolute;top:5px;left:50%;width:100%;height:2px;background:var(--line)}
+  .lien.mort{background:repeating-linear-gradient(90deg,rgba(192,57,43,.4) 0 4px,transparent 4px 8px)}
+
+  .journal{margin-top:10px;min-height:44px;padding:9px 12px;border-radius:8px;font-size:13px;
+           background:var(--warm);border:1px solid var(--line);color:var(--wood-mid)}
+  .journal b{color:var(--wood-dark)}
+  .journal.bloque{background:rgba(192,57,43,.07);border-color:rgba(192,57,43,.28)}
+  .journal.bloque b{color:var(--ko)}
+
+  /* ── Notes ─────────────────────── */
+  h2{margin:36px 0 12px;font-size:19px;padding-top:18px;border-top:1px solid var(--line)}
+  .note{background:#fff;border:1px solid var(--line);border-left:4px solid var(--wood);
+        border-radius:0 12px 12px 0;padding:14px 17px;margin:14px 0}
+  .note--rouge{border-left-color:var(--orange)}
+  .note h3{margin:0 0 6px;font-size:15px}
+  .note p{margin:6px 0;font-size:14px;color:var(--wood-mid)}
+  .note b{color:var(--wood-dark)}
+  .note ul{margin:8px 0;padding-left:18px;font-size:14px;color:var(--wood-mid)}
+  .note li{margin:5px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Simulation · 29 août 2026 · ton idée du plafond</p>
+  <h1>Le carrousel devient le haut du parcours</h1>
+  <p class="lede">Deux couloirs, un même geste appliqué aux deux. À gauche ce que fait le site aujourd'hui, à droite ta proposition. Actionne les gestes et compare.</p>
+
+  <div class="ctrl">
+    <div class="grp">
+      <span>Écran</span>
+      <button id="bHaut" class="on">Desktop haut</button>
+      <button id="bCourt">Desktop court</button>
+    </div>
+    <div class="grp">
+      <span>Geste</span>
+      <button class="geste" id="gUp">↑ Vers le haut</button>
+      <button class="geste" id="gDown">↓ Vers le bas</button>
+    </div>
+    <div class="grp">
+      <button class="reset" id="bReset">Recharger la page</button>
+    </div>
+  </div>
+
+  <div class="duo">
+    <!-- AUJOURD'HUI -->
+    <div class="col" data-col="old">
+      <p class="col__t">Aujourd'hui</p>
+      <p class="col__s">Trois arrêts. On peut toujours remonter à l'écran 1.</p>
+      <div class="ecran" id="ecOld">
+        <div class="fond"></div><div class="voile"></div>
+        <div class="barre"><span class="logo">S</span><span>Mes créations</span><span>Sur mesure</span><span>Conseils</span></div>
+        <div class="zone z1">
+          <div class="sig"><span class="sig__a">R</span><span class="sig__t">Mon conseil pour ton salon</span></div>
+          <p class="phrase">Pour un salon, je te propose des modèles à lumière enveloppante, qui invitent au calme.</p>
+          <span class="btnw">Découvrir ma sélection ⌄</span>
+        </div>
+        <div class="zone z3">
+          <span class="lab">Ma sélection pour ton salon</span>
+          <div class="cartes">
+            <div class="carte"><div class="carte__i"></div><div class="carte__t"><div class="carte__n">OLIVIA <em>La Gardienne</em></div><div class="carte__p">75,00 €</div></div></div>
+            <div class="carte"><div class="carte__i"></div><div class="carte__t"><div class="carte__n">ALBAN <em>Le Lotus</em></div><div class="carte__p">60,00 €</div></div></div>
+            <div class="carte"><div class="carte__i"></div><div class="carte__t"><div class="carte__n">ODETTE <em>La Planète</em></div><div class="carte__p">75,00 €</div></div></div>
+          </div>
+          <span class="btnb">Décrire mon projet en détail →</span>
+        </div>
+        <div class="hint"><b>⌄</b></div>
+        <div class="cat"><h4>Toutes mes créations</h4><div class="grille"><i class="gc"></i><i class="gc"></i><i class="gc"></i><i class="gc"></i><i class="gc"></i><i class="gc"></i></div></div>
+      </div>
+      <div class="rail">
+        <p class="rail__t">Les arrêts</p>
+        <div class="etapes" id="railOld"></div>
+      </div>
+      <div class="journal" id="jOld">Prêt.</div>
+    </div>
+
+    <!-- PROPOSÉ -->
+    <div class="col col--new" data-col="new">
+      <p class="col__t">Ta proposition</p>
+      <p class="col__s">Une fois l'écran 1 quitté, il ne revient plus. Le carrousel est le plafond.</p>
+      <div class="ecran" id="ecNew">
+        <div class="fond"></div><div class="voile"></div>
+        <div class="barre"><span class="logo">S</span><span>Mes créations</span><span>Sur mesure</span><span>Conseils</span></div>
+        <div class="zone z1">
+          <div class="sig"><span class="sig__a">R</span><span class="sig__t">Mon conseil pour ton salon</span></div>
+          <p class="phrase">Pour un salon, je te propose des modèles à lumière enveloppante, qui invitent au calme.</p>
+          <span class="btnw">Découvrir ma sélection ⌄</span>
+        </div>
+        <div class="zone z3">
+          <span class="lab">Ma sélection pour ton salon</span>
+          <div class="cartes">
+            <div class="carte"><div class="carte__i"></div><div class="carte__t"><div class="carte__n">OLIVIA <em>La Gardienne</em></div><div class="carte__p">75,00 €</div></div></div>
+            <div class="carte"><div class="carte__i"></div><div class="carte__t"><div class="carte__n">ALBAN <em>Le Lotus</em></div><div class="carte__p">60,00 €</div></div></div>
+            <div class="carte"><div class="carte__i"></div><div class="carte__t"><div class="carte__n">ODETTE <em>La Planète</em></div><div class="carte__p">75,00 €</div></div></div>
+          </div>
+          <span class="btnb">Décrire mon projet en détail →</span>
+        </div>
+        <div class="hint"><b>⌄</b></div>
+        <div class="cat"><h4>Toutes mes créations</h4><div class="grille"><i class="gc"></i><i class="gc"></i><i class="gc"></i><i class="gc"></i><i class="gc"></i><i class="gc"></i></div></div>
+      </div>
+      <div class="rail">
+        <p class="rail__t">Les arrêts</p>
+        <div class="etapes" id="railNew"></div>
+      </div>
+      <div class="journal" id="jNew">Prêt.</div>
+    </div>
+  </div>
+
+  <h2>Ce que ça change, et ce que ça coûte</h2>
+
+  <div class="note">
+    <h3>Pourquoi ça se tient sur desktop haut</h3>
+    <p>Ta phrase et la pastille <b>restent affichées au-dessus du carrousel</b>. L'écran 1 n'a donc rien d'unique à montrer : y revenir ne fait que rejouer une animation. Le chemin de retour ne servait à rien, et c'est précisément là que tout ce qui t'agaçait se produisait.</p>
+    <p>Bénéfice réel : <b>un arrêt de moins, et un chemin de retour supprimé.</b> Moins de choses à régler, donc moins de choses à casser.</p>
+  </div>
+
+  <div class="note note--rouge">
+    <h3>Le point à trancher : une page qui ne répond pas</h3>
+    <p>Tu as choisi « rien ne se passe ». C'est le plus simple à écrire, mais c'est aussi <b>le seul endroit du site où un geste ne produit aucun effet</b>. Le risque est qu'un visiteur le lise comme un plantage plutôt que comme une limite.</p>
+    <p>Deux façons de le rendre lisible sans revenir en arrière : un <b>léger rebond</b> du carrousel (une dizaine de pixels, puis retour), ou <b>rien du tout mais le header qui réapparaît</b>, ce qui donne une sortie visible vers le reste du site. À voir une fois que tu l'auras essayé pour de vrai.</p>
+  </div>
+
+  <div class="note">
+    <h3>Ce qui ne change pas</h3>
+    <ul>
+      <li><b>Sous 800 px de haut</b>, rien du tout. Là, ta phrase s'efface vraiment en défilant : revenir à l'écran 1 est le seul moyen de relire ton conseil, l'arrêt garde son sens.</li>
+      <li><b>Le retour depuis le catalogue</b> ramène toujours au carrousel.</li>
+      <li><b>Au rechargement de la page</b>, l'écran 1 revient. Le plafond ne dure que la visite.</li>
+      <li>Le bouton « Découvrir ma sélection » et la flèche du bas font toujours descendre.</li>
+    </ul>
+  </div>
+
+<script>
+(function(){
+  var STATES = ['ecran1','carrousel','catalogue'];
+  var LABELS = ['Écran 1 — ta phrase', 'Carrousel', 'Catalogue'];
+
+  var etat = { old: 0, new: 0 };
+  var plafond = { old: false, new: false }; // l'écran 1 a-t-il été quitté ?
+  var court = false;
+
+  var els = {
+    old: { ec: document.getElementById('ecOld'), rail: document.getElementById('railOld'), j: document.getElementById('jOld') },
+    new: { ec: document.getElementById('ecNew'), rail: document.getElementById('railNew'), j: document.getElementById('jNew') }
+  };
+
+  function construireRail(hote){
+    hote.innerHTML = '';
+    for (var i = 0; i < 3; i++){
+      var d = document.createElement('div');
+      d.className = 'et';
+      d.innerHTML = '<span class="et__p"></span><span class="et__l">' + LABELS[i] + '</span>';
+      if (i > 0) { var l = document.createElement('i'); l.className = 'lien'; d.appendChild(l); }
+      hote.appendChild(d);
+    }
+  }
+  construireRail(els.old.rail); construireRail(els.new.rail);
+
+  function rendre(k){
+    var e = els[k], i = etat[k];
+    e.ec.classList.toggle('rev', i >= 1);
+    e.ec.classList.toggle('cat', i === 2);
+    // en desktop court, la phrase sort de l'écran une fois révélée
+    var z1 = e.ec.querySelector('.z1');
+    if (court && i >= 1) { z1.style.transform = 'translateY(-130%)'; z1.style.opacity = '0'; }
+    else { z1.style.transform = ''; z1.style.opacity = ''; }
+
+    var bloque = (k === 'new') && plafond.new && !court;
+    var cases = e.rail.querySelectorAll('.et');
+    for (var n = 0; n < cases.length; n++){
+      cases[n].classList.toggle('on', n === i);
+      cases[n].classList.toggle('off', bloque && n === 0);
+    }
+    var lien = e.rail.querySelectorAll('.lien')[0];
+    if (lien) lien.classList.toggle('mort', bloque);
+  }
+
+  function journal(k, texte, bloque){
+    els[k].j.innerHTML = texte;
+    els[k].j.classList.toggle('bloque', !!bloque);
+  }
+
+  function geste(dir){
+    ['old','new'].forEach(function(k){
+      var avant = etat[k];
+      var plafonne = (k === 'new') && plafond[k] && !court;
+
+      if (dir < 0 && avant === 1 && plafonne){
+        journal(k, '<b>Rien ne se passe.</b> Le carrousel est le plafond : l\'écran 1 a été quitté, il ne revient plus.', true);
+        rendre(k);
+        return;
+      }
+      var apres = Math.max(0, Math.min(2, avant + dir));
+      if (apres === avant){
+        journal(k, apres === 0
+          ? 'On est déjà en haut, rien au-dessus.'
+          : 'On est au catalogue, la page défile normalement à partir d\'ici.');
+        rendre(k);
+        return;
+      }
+      etat[k] = apres;
+      if (avant === 0 && apres === 1) plafond[k] = true;
+      journal(k, 'Un geste, un écran : <b>' + LABELS[apres] + '</b>.'
+        + ((k === 'new' && apres === 1 && !court) ? ' L\'écran 1 est désormais fermé.' : ''));
+      rendre(k);
+    });
+  }
+
+  function reset(){
+    etat.old = 0; etat.new = 0; plafond.old = false; plafond.new = false;
+    journal('old','Prêt.'); journal('new','Prêt.');
+    rendre('old'); rendre('new');
+  }
+
+  document.getElementById('gUp').addEventListener('click', function(){ geste(-1); });
+  document.getElementById('gDown').addEventListener('click', function(){ geste(1); });
+  document.getElementById('bReset').addEventListener('click', reset);
+
+  var bh = document.getElementById('bHaut'), bc = document.getElementById('bCourt');
+  function mode(estCourt){
+    court = estCourt;
+    bh.classList.toggle('on', !estCourt);
+    bc.classList.toggle('on', estCourt);
+    document.querySelector('[data-col="new"] .col__s').textContent = estCourt
+      ? 'Sous 800 px de haut, la règle ne s\'applique pas : ta phrase s\'en va vraiment, l\'arrêt garde son sens.'
+      : 'Une fois l\'écran 1 quitté, il ne revient plus. Le carrousel est le plafond.';
+    reset();
+  }
+  bh.addEventListener('click', function(){ mode(false); });
+  bc.addEventListener('click', function(){ mode(true); });
+
+  rendre('old'); rendre('new');
+})();
+</script>
+
+</div>
+</body>
+</html>

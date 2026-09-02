@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recette — l'indicateur d'étapes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F4EFE7; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
+    --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --ok:#2F7D53; --ko:#C0392B;
+    --body:'Montserrat',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--wood-dark);font:15px/1.62 var(--body)}
+  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 80px}
+  h1{margin:0 0 6px;font-size:25px;letter-spacing:-.01em}
+  .sub{margin:0 0 18px;color:var(--wood-mid);font-size:14.5px}
+
+  .bloc{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:14px 17px;margin-bottom:20px}
+  .bloc h2{margin:0 0 8px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--wood)}
+  .bloc p{margin:6px 0;font-size:13.8px;color:var(--wood-mid)}
+  .bloc b{color:var(--wood-dark)}
+  .bloc code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px}
+
+  .test{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px;
+        box-shadow:0 2px 8px rgba(147,125,104,.08)}
+  .test--cle{border-left:4px solid var(--orange)}
+  .test__h{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+  .num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--wood);color:#fff;
+       font:700 12px/26px var(--body);text-align:center}
+  .test--cle .num{background:var(--orange)}
+  .test__t{margin:0;font-size:16px;font-weight:700}
+  .ctx{display:inline-block;margin:2px 0 10px 36px;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+       text-transform:uppercase;color:var(--wood);background:var(--warm);border:1px solid var(--line);
+       border-radius:20px;padding:3px 11px}
+  .steps{margin:6px 0 12px 36px;padding:0;list-style:none;counter-reset:s}
+  .steps li{position:relative;padding-left:22px;margin:6px 0;font-size:14.2px;counter-increment:s}
+  .steps li::before{content:counter(s) ".";position:absolute;left:0;color:var(--wood);font-weight:700;font-size:12.5px}
+  .att{margin:0 0 12px 36px;padding:10px 13px;background:var(--warm);border-left:3px solid var(--wood);
+       border-radius:0 8px 8px 0;font-size:13.8px}
+  .att b{color:var(--wood-dark)}
+  .att--rouge{border-left-color:var(--orange)}
+  .rep{margin-left:36px}
+  .rep label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+             color:var(--wood);margin:10px 0 6px}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .btns button{font:700 13px/1 var(--body);padding:9px 16px;border-radius:8px;border:1px solid var(--line);
+               background:#fff;color:var(--wood-dark);cursor:pointer}
+  .btns button.on{background:var(--wood);border-color:var(--wood);color:#fff}
+  .btns button.ok.on{background:var(--ok);border-color:var(--ok)}
+  .btns button.ko.on{background:var(--ko);border-color:var(--ko)}
+  textarea{width:100%;min-height:50px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+           font:14px/1.5 var(--body);color:var(--wood-dark);background:var(--warm);resize:vertical}
+  textarea::placeholder{color:rgba(107,90,74,.55)}
+
+  .fin{margin-top:26px;background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .fin h2{margin:0 0 8px;font-size:16px}
+  .fin p{margin:6px 0;font-size:14px;color:var(--wood-mid)}
+  .copie{margin-top:12px;font:700 14px/1 var(--body);padding:12px 20px;border-radius:9px;border:none;
+         background:var(--wood-dark);color:#fff;cursor:pointer}
+  .copie.done{background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>L'indicateur d'étapes, sur le site</h1>
+  <p class="sub">Sur <b>test.atelier-sapi.fr/mes-creations/?piece=salon</b>. Huit tests. Les deux encadrés d'orange sont ceux que le prototype ne pouvait pas montrer.</p>
+
+  <div class="bloc">
+    <h2>Ce qui est en place</h2>
+    <p>Trois repères dans une pastille sombre, au bord droit, centrés en hauteur : <b>deux points</b> pour les deux états du hero, <b>un tiret</b> pour le catalogue. Un <b>halo orange</b> plus grand glisse derrière le repère courant et s'étire en tiret sur le troisième. Chaque repère est cliquable.</p>
+    <p>Le prototype reste disponible pour comparer la sensation : <code>proto-plafond-scroll.html</code>.</p>
+  </div>
+
+  <div class="test" data-t="1">
+    <div class="test__h"><span class="num">1</span><h2 class="test__t">Il arrive avec la phrase, pas avec le premier geste</h2></div>
+    <span class="ctx">Ordinateur, plein écran</span>
+    <ol class="steps">
+      <li>Charge la page et regarde le bord droit <b>pendant</b> que la phrase s'écrit.</li>
+      <li>À la dernière lettre, regarde à nouveau, sans toucher au trackpad.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> rien pendant la frappe. Puis la pastille apparaît toute seule, le halo <b>déjà posé</b> sur le repère du haut — il ne doit pas descendre depuis le sommet de la pastille.</div>
+    <div class="rep"><label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder=""></textarea></div>
+  </div>
+
+  <div class="test" data-t="2">
+    <div class="test__h"><span class="num">2</span><h2 class="test__t">Le halo suit, et se déforme</h2></div>
+    <ol class="steps">
+      <li>Un geste vers le bas : le halo glisse sur le repère du milieu.</li>
+      <li>Un autre : il s'étire en <b>tiret</b> sur le troisième.</li>
+      <li>Deux gestes vers le haut : il redevient un point et remonte.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> un geste, un repère. Jamais deux d'un coup. Le point blanc reste visible <b>par-dessus</b> le halo, il n'est pas recouvert.</div>
+    <div class="rep"><label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder=""></textarea></div>
+  </div>
+
+  <div class="test" data-t="3">
+    <div class="test__h"><span class="num">3</span><h2 class="test__t">Il reste lisible sur le catalogue</h2></div>
+    <ol class="steps">
+      <li>Descends franchement dans « Toutes mes créations », très bas.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> la pastille reste visible sur le fond crème, et le <b>tiret reste actif</b> — c'est bien là qu'on est. C'est ce point qui avait fait abandonner la première version, où les repères disparaissaient ici.</div>
+    <div class="rep"><label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder=""></textarea></div>
+  </div>
+
+  <div class="test" data-t="4">
+    <div class="test__h"><span class="num">4</span><h2 class="test__t">Les clics</h2></div>
+    <ol class="steps">
+      <li>Depuis le catalogue, clique le repère du <b>haut</b> : retour à ta phrase.</li>
+      <li>De là, clique directement le <b>troisième</b> : la page va au catalogue d'une traite.</li>
+      <li>Relance un clic, et <b>pendant l'animation</b>, clique un autre repère.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> les deux premiers marchent. Le troisième ne fait <b>rien</b> — l'animation en cours va jusqu'au bout, comme pour un geste.</div>
+    <div class="rep"><label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder=""></textarea></div>
+  </div>
+
+  <div class="test test--cle" data-t="5">
+    <div class="test__h"><span class="num">5</span><h2 class="test__t">Après le questionnaire</h2></div>
+    <span class="ctx">Le cas que le prototype ne pouvait pas montrer</span>
+    <ol class="steps">
+      <li>Descends au carrousel, clique « Décrire mon projet en détail ».</li>
+      <li><b>Va au bout</b> du questionnaire.</li>
+      <li>À la fermeture, pendant que Robin rédige puis que le conseil s'écrit : regarde le bord droit, <b>sans toucher à rien</b>.</li>
+    </ol>
+    <div class="att att--rouge"><b>Attendu :</b> la pastille est là, halo sur le repère du haut.<br>Le prototype n'a pas de modale, il ne pouvait pas révéler ce chemin. La relecture l'a trouvé : l'indicateur s'éteignait et ne revenait qu'au geste suivant — précisément pendant que tu lis ton conseil tout frais.</div>
+    <div class="rep"><label>Résultat</label>
+      <div class="btns"><button class="ok">Elle est visible</button><button class="ko">Elle a disparu</button></div>
+      <textarea placeholder=""></textarea></div>
+  </div>
+
+  <div class="test" data-t="6">
+    <div class="test__h"><span class="num">6</span><h2 class="test__t">Abandon du questionnaire</h2></div>
+    <ol class="steps">
+      <li>Rouvre la modale, réponds à deux questions, ferme à la croix.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> même chose — pastille visible tout de suite, sans geste.</div>
+    <div class="rep"><label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder=""></textarea></div>
+  </div>
+
+  <div class="test test--cle" data-t="7">
+    <div class="test__h"><span class="num">7</span><h2 class="test__t">La flèche du carrousel, sur écran étroit</h2></div>
+    <span class="ctx">C'est ce test qui décide d'un correctif</span>
+    <ol class="steps">
+      <li>Redimensionne à environ <b>1024 × 700</b> (moins de 1180 de large, moins de 800 de haut).</li>
+      <li>Descends à l'arrêt du carrousel.</li>
+      <li>Regarde si la pastille est posée <b>sur la flèche droite</b>. Puis essaie de cliquer cette flèche.</li>
+      <li>Refais en <b>1280 × 720</b> : la flèche doit être dégagée.</li>
+    </ol>
+    <div class="att att--rouge">La flèche se cale sur le bord de la zone carrousel, la pastille sur le bord de l'écran. En dessous d'environ 1220 px de large, il n'y a plus de place entre les deux — et comme la pastille est au-dessus, c'est elle qui prendrait les clics.<br><b>Si la flèche ne répond plus</b>, j'élargis les marges du carrousel sur cette plage de tailles.</div>
+    <div class="rep"><label>Résultat</label>
+      <div class="btns"><button class="ok">La flèche répond</button><button class="ko">La pastille est dessus</button></div>
+      <label>Taille de fenêtre testée</label>
+      <textarea placeholder="ex. 1024 × 700, et ce que tu observes"></textarea></div>
+  </div>
+
+  <div class="test" data-t="8">
+    <div class="test__h"><span class="num">8</span><h2 class="test__t">Téléphone, et page sans projet</h2></div>
+    <ol class="steps">
+      <li>Sur iPhone, même adresse : les points restent-ils lisibles sur la photo <b>et</b> sur le crème ?</li>
+      <li>Fais glisser le carrousel horizontalement, en partant d'un doigt posé <b>loin</b> de la pastille.</li>
+      <li>Ouvre <b>/mes-creations/ sans</b> <code>?piece=</code> : il ne doit y avoir aucune pastille.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> lisible partout, le glissement du carrousel fonctionne, et rien du tout sur la page sans projet.</div>
+    <div class="rep"><label>Résultat</label>
+      <div class="btns"><button class="ok">Conforme</button><button class="ko">Pas conforme</button></div>
+      <textarea placeholder=""></textarea></div>
+  </div>
+
+  <div class="fin">
+    <h2>Quand tu as fini</h2>
+    <p>Clique ci-dessous : tout est copié dans ton presse-papier, tu n'as qu'à me le coller.</p>
+    <button class="copie" id="cp">Copier mes réponses</button>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.btns').forEach(function(g){
+    g.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        g.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+      });
+    });
+  });
+  document.getElementById('cp').addEventListener('click', function(){
+    var out = ['# Recette — indicateur d\'étapes', ''];
+    document.querySelectorAll('.test').forEach(function(t){
+      var n = t.getAttribute('data-t');
+      out.push('## ' + n + '. ' + t.querySelector('.test__t').textContent);
+      t.querySelectorAll('.rep > label').forEach(function(lab){
+        var champ = lab.nextElementSibling;
+        if (!champ) return;
+        var val = champ.classList.contains('btns')
+          ? (champ.querySelector('button.on') ? champ.querySelector('button.on').textContent : '')
+          : (champ.value || '').trim();
+        if (val) out.push(lab.textContent.replace(/\s+/g,' ').trim() + ' : ' + val);
+      });
+      out.push('');
+    });
+    var txt = out.join('\n');
+    var fin = function(){
+      var b = document.getElementById('cp');
+      b.textContent = 'Copié ✓'; b.classList.add('done');
+      setTimeout(function(){ b.textContent = 'Copier mes réponses'; b.classList.remove('done'); }, 2200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(fin, function(){ window.prompt('Copie manuelle :', txt); });
+    } else { window.prompt('Copie manuelle :', txt); }
+  });
+</script>
+</body>
+</html>

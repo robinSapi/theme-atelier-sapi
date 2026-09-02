@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audit — le défilement du hero /mes-creations/</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F4EFE7; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
+    --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --ok:#2F7D53; --ko:#C0392B;
+    --body:'Montserrat',system-ui,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--wood-dark);font:15px/1.65 var(--body)}
+  .wrap{max-width:880px;margin:0 auto;padding:32px 18px 90px}
+
+  .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--wood);margin:0 0 8px}
+  h1{margin:0 0 8px;font-size:28px;line-height:1.2;letter-spacing:-.015em}
+  .lede{margin:0 0 26px;font-size:16px;color:var(--wood-mid)}
+
+  h2{margin:38px 0 12px;font-size:19px;letter-spacing:-.01em;padding-top:18px;border-top:1px solid var(--line)}
+  h3{margin:24px 0 8px;font-size:15.5px}
+  p{margin:10px 0}
+  b{color:var(--wood-dark)}
+  em{font-style:italic}
+  code{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--line);
+       border-radius:5px;padding:1px 6px}
+
+  .verdict{background:var(--wood-dark);color:#fff;border-radius:14px;padding:20px 22px;margin:0 0 8px}
+  .verdict .eyebrow{color:rgba(255,255,255,.62);margin-bottom:10px}
+  .verdict p{margin:8px 0;font-size:15.5px;line-height:1.6;color:rgba(255,255,255,.94)}
+  .verdict b{color:#fff}
+  .verdict .chiffre{color:#F0C9A8}
+
+  .cle{background:#fff;border:1px solid var(--line);border-left:4px solid var(--orange);
+       border-radius:0 12px 12px 0;padding:15px 18px;margin:18px 0;
+       box-shadow:0 2px 8px rgba(147,125,104,.08)}
+  .cle h3{margin-top:0}
+
+  .calme{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin:18px 0}
+  .calme h3{margin-top:0}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--wood);
+     border-bottom:1px solid var(--wood)}
+  td.n{font-family:var(--mono);font-size:12.5px;white-space:nowrap}
+  tr.fort td{background:rgba(227,91,36,.07)}
+  .scroll{overflow-x:auto}
+
+  /* ── La frise de la transition ───────────────────────── */
+  .frise{margin:18px 0 6px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 18px 14px}
+  .frise__t{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--wood);margin:0 0 14px}
+  .piste{position:relative;height:26px;margin-bottom:5px}
+  .piste__lab{position:absolute;left:0;top:5px;width:150px;font-size:11.5px;color:var(--wood-mid);line-height:1.3}
+  .piste__rail{position:absolute;left:158px;right:0;top:8px;height:10px;background:var(--page);
+               border-radius:5px;overflow:hidden}
+  .piste__bar{position:absolute;top:0;bottom:0;border-radius:5px}
+  .b-sort{background:linear-gradient(90deg,var(--wood-dark),rgba(74,63,53,.15))}
+  .b-entre{background:linear-gradient(90deg,rgba(227,91,36,.15),var(--orange))}
+  .b-cont{background:linear-gradient(90deg,var(--wood),rgba(147,125,104,.25))}
+  .creux{position:absolute;left:158px;right:0;top:0;bottom:26px;pointer-events:none}
+  .creux__z{position:absolute;top:0;bottom:0;background:rgba(227,91,36,.09);
+            border-left:1px dashed rgba(227,91,36,.5);border-right:1px dashed rgba(227,91,36,.5)}
+  .frise__ech{position:relative;margin:10px 0 0 158px;height:16px;border-top:1px solid var(--line)}
+  .frise__ech span{position:absolute;top:3px;transform:translateX(-50%);font-size:10.5px;color:var(--wood)}
+  .frise__leg{margin:12px 0 0;font-size:12.5px;color:var(--wood-mid)}
+
+  ol.pistes{margin:14px 0;padding:0;list-style:none;counter-reset:p}
+  ol.pistes>li{position:relative;padding-left:42px;margin-bottom:18px;counter-increment:p}
+  ol.pistes>li::before{content:counter(p);position:absolute;left:0;top:1px;width:28px;height:28px;
+    border-radius:50%;background:var(--wood);color:#fff;font:700 13px/28px var(--body);text-align:center}
+  ol.pistes h3{margin:2px 0 4px}
+  .tag{display:inline-block;margin-left:8px;font-size:10px;font-weight:700;letter-spacing:.07em;
+       text-transform:uppercase;padding:3px 9px;border-radius:20px;vertical-align:2px}
+  .tag--faible{background:rgba(47,125,83,.12);color:var(--ok)}
+  .tag--moyen{background:rgba(227,91,36,.12);color:var(--orange)}
+  .tag--gros{background:rgba(192,57,43,.12);color:var(--ko)}
+
+  .menteurs li{margin:9px 0;font-size:14px}
+
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+         font-size:12.5px;color:var(--wood-mid)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Audit · 29 août 2026 · hero de /mes-creations/</p>
+  <h1>Pourquoi le défilement saute</h1>
+  <p class="lede">Tu dis : « quand on veut remonter à la proposition, ça passe presque directement au texte de Robin ». C'est vrai, c'est mesurable, et ce n'est pas un problème de réglage.</p>
+
+  <div class="verdict">
+    <p class="eyebrow">Le diagnostic en trois phrases</p>
+    <p>La transition <b>fait bien un écran entier</b>, soit <b class="chiffre">900 px</b> ou huit crans de molette. C'est confortable. Sauf que <b>cette distance n'est jamais parcourue par ton geste.</b></p>
+    <p>Depuis le 25/08, la molette est <b>purement annulée</b> et remplacée par une animation figée de <b class="chiffre">560 ms</b>, dont le fondu entre les deux écrans ne dure que <b class="chiffre">80 ms</b>.</p>
+    <p>Et un défaut de compteur laisse <b>la fin d'un même glissé de trackpad déclencher un second saut</b> dès que le premier est arrivé. Un geste, deux écrans franchis. Dans les deux sens.</p>
+  </div>
+
+  <h2>1. Comment ça marche, sans jargon</h2>
+
+  <p>Le hero n'est pas une image qui défile. C'est une <b>scène punaisée dans un rail</b>. Le rail fait deux écrans de haut ; la scène en fait un et reste collée en haut tant que le rail défile derrière elle.</p>
+
+  <p>Pendant tout le premier écran de défilement, <b>rien ne bouge à l'image</b> — mais la page, elle, avance. Le script mesure ce décalage et le transforme en un curseur de 0 à 1. Ce curseur pilote tout : le flou de la photo, son assombrissement, son zoom, la remontée de ta phrase, l'apparition du carrousel, du bouton, des indices, et jusqu'à ce qui est cliquable.</p>
+
+  <p>Le point d'arrivée n'est pas deviné : un repère invisible est posé dans le rail, le script mesure la distance jusqu'à lui. C'est propre, et ça évite que le code et la mise en page soient en désaccord sur iOS, où la barre d'adresse fausse les hauteurs.</p>
+
+  <div class="calme">
+    <h3>Le chiffre qui invalide l'hypothèse la plus évidente</h3>
+    <p>J'aurais parié sur « la transition est trop courte ». C'est faux : elle fait <b>900 px sur une fenêtre de 900</b>, <b>640 px sur une fenêtre de 640</b>. Soit six à huit crans de molette. <b>Allonger la transition ne corrigerait rien</b>, puisque personne ne la parcourt.</p>
+  </div>
+
+  <h2>2. Ce que fait vraiment ton geste</h2>
+
+  <p>Dans la zone du hero, <b>aucun mouvement de molette n'atteint la page</b>. Il est intercepté et converti en un « pas » : le script parcourt lui-même les 900 px, en 560 ms, avec sa propre animation.</p>
+
+  <p>Le rapport est donc brutal au sens littéral : <b>un événement de molette, quelle que soit son amplitude, égale 100 % de la transition.</b> Il n'y a même pas de seuil minimum — une dérive de pouce de 3 px sur le trackpad déclenche le saut entier.</p>
+
+  <h3>Le profil de l'animation</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Temps écoulé</th><th>Part de la transition faite</th><th>Pixels parcourus</th></tr></thead>
+    <tbody>
+      <tr><td class="n">17 ms</td><td class="n">8,7 %</td><td class="n">78 px</td></tr>
+      <tr class="fort"><td class="n">100 ms</td><td class="n">44,6 %</td><td class="n">401 px</td></tr>
+      <tr><td class="n">200 ms</td><td class="n">73,4 %</td><td class="n">661 px</td></tr>
+      <tr><td class="n">360 ms</td><td class="n">95,5 %</td><td class="n">859 px</td></tr>
+      <tr><td class="n">560 ms</td><td class="n">100 %</td><td class="n">900 px</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><b>La moitié du trajet est jouée en 115 millisecondes</b>, à 4 820 px par seconde. Les 200 dernières millisecondes ne parcourent plus que 41 px, c'est-à-dire rien. C'est la définition exacte de « brutal, puis mou ».</p>
+
+  <h2>3. Le milieu de la transition est vide</h2>
+
+  <p>Chaque élément a son propre moment d'entrée et de sortie. Voici où ils tombent sur la course, et à quel instant de l'animation de 560 ms ça correspond.</p>
+
+  <div class="frise">
+    <p class="frise__t">Qui est à l'écran, et quand</p>
+
+    <div style="position:relative">
+      <div class="creux"><div class="creux__z" style="left:30%;right:41.2%"></div></div>
+
+      <div class="piste">
+        <div class="piste__lab">Bouton « Découvrir&nbsp;»</div>
+        <div class="piste__rail"><div class="piste__bar b-sort" style="left:0;width:38.5%"></div></div>
+      </div>
+      <div class="piste">
+        <div class="piste__lab">Indice flèche du bas</div>
+        <div class="piste__rail"><div class="piste__bar b-sort" style="left:0;width:41.7%"></div></div>
+      </div>
+      <div class="piste">
+        <div class="piste__lab">Ta phrase<br><span style="font-size:10.5px">(mobile + desktop court)</span></div>
+        <div class="piste__rail"><div class="piste__bar b-sort" style="left:0;width:58.8%"></div></div>
+      </div>
+      <div class="piste">
+        <div class="piste__lab">Carrousel</div>
+        <div class="piste__rail"><div class="piste__bar b-entre" style="left:30%;right:0"></div></div>
+      </div>
+      <div class="piste">
+        <div class="piste__lab">Bouton « Décrire&nbsp;»</div>
+        <div class="piste__rail"><div class="piste__bar b-entre" style="left:30%;right:0"></div></div>
+      </div>
+      <div class="piste">
+        <div class="piste__lab">Indice « catalogue&nbsp;»</div>
+        <div class="piste__rail"><div class="piste__bar b-entre" style="left:85%;right:0"></div></div>
+      </div>
+      <div class="piste">
+        <div class="piste__lab">Photo (flou, zoom)</div>
+        <div class="piste__rail"><div class="piste__bar b-cont" style="left:0;right:0"></div></div>
+      </div>
+    </div>
+
+    <div class="frise__ech">
+      <span style="left:0">début</span>
+      <span style="left:30%">0,30</span>
+      <span style="left:58.8%">0,59</span>
+      <span style="left:85%">0,85</span>
+      <span style="left:100%">fin</span>
+    </div>
+    <p class="frise__leg">La bande orange pâle est la <b>seule fenêtre où les deux écrans coexistent</b> : de 0,30 à 0,59, soit <b>80 millisecondes</b> sur les 560 du trajet. Avant, ta phrase s'efface seule. Après, le carrousel monte seul.</p>
+  </div>
+
+  <p><b>Tout ce qui doit partir est parti avant 59 % de la course.</b> Le bouton principal meurt à 38 %, l'indice à 42 %, ta phrase à 59 %. Passé là, l'écran 1 n'existe plus alors qu'il reste 41 % du trajet — pendant lesquels il ne se passe presque rien.</p>
+
+  <p>Ces seuils ont chacun une bonne raison, écrite dans le code. Ils ont été réglés quand la course se parcourait au doigt sur 900 px. Ils sont aujourd'hui rejoués en accéléré, et 80 ms suffisent à tout dire.</p>
+
+  <h2>4. Le vrai bug : un geste, deux sauts</h2>
+
+  <div class="cle">
+    <h3>C'est mot pour mot ce que tu décris</h3>
+    <p>Pendant les 560 ms d'animation, les événements de molette continuent d'arriver — l'inertie d'un trackpad dure une à deux secondes. Ils sont bien ignorés, <b>mais le compteur « à quand remonte le dernier geste ? » n'est pas mis à jour pendant ce temps.</b></p>
+    <p>Alors à l'instant où l'animation se termine, le premier événement d'inertie encore en vol trouve un compteur vieux de 560 ms, en conclut « la voie est libre », et <b>déclenche un second saut immédiatement.</b></p>
+    <p>Vers le bas : phrase → carrousel → <b>catalogue</b>. Vers le haut : catalogue → carrousel → <b>ta phrase</b>. Et comme les deux s'enchaînent sans pause perceptible, ça se voit comme un saut unique de deux écrans.</p>
+  </div>
+
+  <p>Deuxième chemin, plus rare : en remontant depuis le catalogue, un rattrapage automatique vise <b>l'étape la plus proche</b> plutôt qu'une étape dans le sens du geste. Il suffit de dépasser le carrousel de 450 px — ce qu'un glissé lancé fait sans effort — pour être ramené sur ta phrase.</p>
+
+  <p>Troisième chemin, au tout premier contact : si tu scrolles pendant que la phrase s'écrit, le texte s'affiche d'un coup (voulu), puis rien pendant 250 ms, puis <b>la page part d'un écran</b>. Un geste, deux réponses, dont la seconde n'est pas celle que tu as demandée.</p>
+
+  <h3>Où le problème est le plus probable</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th></th><th>Desktop haut</th><th>Desktop court</th><th>Mobile</th></tr></thead>
+    <tbody>
+      <tr><td>Ta phrase au défilement</td><td>remonte, reste lisible</td><td>s'efface en 80 ms</td><td>s'efface en 80 ms</td></tr>
+      <tr class="fort"><td>Deux sauts d'un seul geste</td><td>oui (trackpad)</td><td>oui (trackpad)</td><td>non (protégé)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Le tactile est protégé : un doigt ne peut franchir qu'une étape par geste. <b>Le défaut est spécifique à la molette et au trackpad</b>, donc à ton Mac. Et si ta fenêtre fait moins de 800 px de haut, tu cumules les deux facteurs — c'est probablement là que tu l'as vu.</p>
+
+  <h2>5. À faire avant toute décision — 30 secondes, gratuit</h2>
+
+  <div class="calme">
+    <p>Quand le système demande moins d'animations, <b>tout ce mécanisme se désactive</b> : plus d'interception de la molette, plus de saut, plus de machine à écrire. Le défilement pilote alors la révélation au doigt, sur les 900 px. C'est exactement l'alternative décrite en piste 5.</p>
+    <p><b>Réglages système → Accessibilité → Affichage → cocher « Réduire les animations »</b>, puis recharge <code>test.atelier-sapi.fr/mes-creations/?piece=salon</code> et fais défiler doucement. Décoche ensuite.</p>
+    <p>Tu verras en direct la différence entre « mon geste pilote la révélation » et « mon geste déclenche une animation ». C'est ce qui doit trancher entre réparer le système actuel et le remplacer.</p>
+  </div>
+
+  <h2>6. Les pistes, classées</h2>
+
+  <ol class="pistes">
+    <li>
+      <h3>Réparer le compteur<span class="tag tag--faible">une ligne</span></h3>
+      <p>Le compteur doit être alimenté même pendant l'animation, pour que l'inertie compte comme du bruit et non comme du silence. <b>Supprime à lui seul le « ça passe directement au texte de Robin ».</b> À faire quoi qu'il arrive, y compris si on garde tout le reste.</p>
+    </li>
+    <li>
+      <h3>Corriger le retour depuis le catalogue<span class="tag tag--faible">faible</span></h3>
+      <p>En remontant, viser une étape dans le sens du geste plutôt que la plus proche géométriquement. On arrive sur le carrousel, jamais directement sur la phrase.</p>
+    </li>
+    <li>
+      <h3>Réétaler les moments d'apparition<span class="tag tag--moyen">6 valeurs + recette</span></h3>
+      <p>Le fondu croisé passerait de 80 à environ 250 ms. La transition se remplit au lieu d'être un flash suivi d'un plateau. <b>Un arbitrage à connaître :</b> en mobile et desktop court, ta phrase traverse la zone du carrousel en sortant — la faire durer plus longtemps la rend visible par-dessus les cartes.</p>
+    </li>
+    <li>
+      <h3>Adoucir l'animation<span class="tag tag--faible">deux valeurs</span></h3>
+      <p>Aujourd'hui 45 % du trajet se fait dans les 100 premières millisecondes. En répartissant le mouvement au lieu de le concentrer au départ, la moitié du trajet tomberait à mi-parcours. <b>C'est l'adoucissement qui compte, plus que la durée</b> — tu avais déjà trouvé 420 ms trop rapide, on est passé à 560, mais le profil n'a jamais été changé.</p>
+    </li>
+    <li>
+      <h3>Rendre la révélation continue<span class="tag tag--gros">chantier</span></h3>
+      <p>La réponse littérale à « revoir complètement le scroll » : entre ta phrase et le carrousel, la révélation suit le doigt sur 900 px, on s'arrête où on veut. Le passage au catalogue reste en un geste.</p>
+      <p><b>Le risque est documenté :</b> la pause a été supprimée le 25/08 <em>parce que</em> ce système la rendait inutile. Le rail a été raccourci en conséquence. Retirer l'un sans rallonger l'autre ramène le défaut que tu avais vu tout de suite à l'époque — « tu as retiré le stop ». Les deux vont ensemble.</p>
+    </li>
+    <li>
+      <h3>Ignorer les micro-gestes<span class="tag tag--faible">une ligne</span></h3>
+      <p>Une valeur seuil existe déjà et sert au tactile, mais pas à la molette. Une dérive de pouce ne déclencherait plus un saut d'écran entier.</p>
+    </li>
+  </ol>
+
+  <h2>7. Quatre commentaires du code qui mentent</h2>
+  <ul class="menteurs">
+    <li>« À monter si une seule poussée de trackpad franchit deux étapes » — <b>monter cette valeur ne peut pas corriger ce cas</b>, puisque le compteur qu'elle consulte n'est plus alimenté. Le bon symptôme, le mauvais remède.</li>
+    <li>« 250 vh, révélation sur 100 vh puis pause de 50 vh » — le rail fait 200 vh et la pause est nulle. Le commentaire décrit une page qui n'existe plus.</li>
+    <li>« C'est cette asymétrie qui évite l'effet page collante » — dans les faits, on ne peut jamais s'arrêter dans la zone, ce qui est la définition de l'effet décrit.</li>
+    <li>L'en-tête du fichier se décrit encore comme « réversible, lié à la position de scroll ». <b>Depuis le 25/08 c'est devenu un diaporama</b>, et le fichier ne le sait pas.</li>
+  </ul>
+
+  <footer>
+    Audit lu dans le code, sans ouvrir la page dans un navigateur. Les formules, seuils et distances sont vérifiés ligne à ligne. Les scénarios de geste sont <b>déduits</b> : ils se confirmeraient en dix secondes en descendant d'un seul glissé et en regardant si l'on s'arrête sur le carrousel ou si l'on file au catalogue.
+  </footer>
+
+</div>
+</body>
+</html>

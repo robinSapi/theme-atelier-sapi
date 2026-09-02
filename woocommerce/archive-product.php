@@ -227,8 +227,19 @@ if ($imm_piece) {
       }
       ?>
 
-      <!-- Carte sur-mesure en fin de slider -->
-      <a class="mescreations-immersion__pcard mescreations-immersion__pcard--sur" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
+      <!-- ══════════════════════════════════════════════════════════════
+           Carte sur-mesure en fin de slider.
+           ⚠️ ELLE RESTE UN `<a>` AVEC UNE VRAIE ADRESSE, ET C'EST VOLONTAIRE.
+           Depuis le 29/08 elle ouvre la modale sur l'écran « contacter Robin »
+           au lieu de quitter la page — mais c'est le JS qui intercepte le clic.
+           Si le script ne tourne pas, le lien fonctionne encore et mène à
+           /sur-mesure/ : on ne remplace pas une destination par rien.
+           C'est aussi ce qui garde le clic milieu, le « ouvrir dans un nouvel
+           onglet » et l'annonce correcte aux lecteurs d'écran.
+           ══════════════════════════════════════════════════════════════ -->
+      <a class="mescreations-immersion__pcard mescreations-immersion__pcard--sur"
+         href="<?php echo esc_url(home_url('/sur-mesure/')); ?>"
+         data-immersion-surmesure>
         <span class="mescreations-immersion__sur-eyebrow"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></span>
         <span class="mescreations-immersion__sur-title"><?php esc_html_e('Créons ensemble', 'theme-sapi-maison'); ?></span>
         <?php /* ⚠️ Formulation POSITIVE, décidée par Robin. L'ancienne version
@@ -257,21 +268,44 @@ if ($imm_piece) {
          Rendus ici plutôt qu'en PHP pour n'avoir qu'UNE source de vérité. -->
     <div class="mescreations-immersion__dots" data-immersion-dots aria-hidden="true"></div>
 
-    <!-- Ouvre la modale Conseiller (questionnaire complet → sélection plus
-         fine). Placé SOUS le carrousel : on ne propose d'affiner qu'après
-         avoir montré, et le carrousel remonte d'autant.
-         ⚠️ Il vivait sous la phrase de Robin. En le déplaçant dans la zone
-         sélection, Robin a refermé un défaut connu : depuis que le bloc texte
-         sort de l'écran en mobile, l'entrée du questionnaire disparaissait en
-         écran B — un chemin de vente perdu au moment précis où le visiteur
-         juge la sélection. -->
-    <?php /* `data-modal-state` retiré : lu par personne. Le clic passe par
-             l'écouteur de sapi-mescreations-immersion.js, qui code l'état en dur. */ ?>
-    <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal">
-      <?php esc_html_e('Décrire mon projet en détail pour un luminaire plus adapté', 'theme-sapi-maison'); ?>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-    </button>
   </div>
+
+  <!-- Ouvre la modale Conseiller (questionnaire complet → sélection plus fine).
+       ⚠️ FRÈRE DE LA ZONE SÉLECTION, PLUS SON ENFANT (29/08). Il y a vécu deux
+       vies : d'abord sous la phrase de Robin, puis DANS la zone sélection —
+       ce déplacement corrigeait un défaut mobile réel, le bloc texte sortant
+       de l'écran au défilement emportait le bouton avec lui.
+       Il en sort aujourd'hui pour pouvoir remonter SUR DESKTOP à l'emplacement
+       du bouton « Découvrir ma sélection », devenu invisible une fois la
+       sélection révélée. Une feuille de style ne sait pas déplacer un élément
+       d'un conteneur à un autre : il fallait qu'il devienne voisin des deux.
+       ⚠️ SA POSITION DANS LE DOM EST CELLE DU MOBILE — après la sélection.
+       C'est desktop qui le remonte, par `order`. Écrit dans ce sens pour que
+       l'ordre de tabulation reste juste là où l'écran est le plus contraint,
+       et pour ne rien changer au parcours clavier existant.
+       Ce qu'il perd en sortant de la zone sélection, et qui lui est redonné
+       explicitement, ligne par ligne — aucun de ces trois points n'est
+       facultatif, et aucun ne se voit avant d'être en écran :
+         1. l'opacité au défilement (CSS, `--reveal`, comme la zone) ;
+         2. la cliquabilité (sapi-mescreations-immersion.js, même seuil) ;
+         3. un `z-index`, DESKTOP SEULEMENT. Il ne passait pas devant le bloc
+            texte par son ancien parent (les deux zones sont à 2) mais par
+            l'ordre du DOM. En remontant il se glisse sous ce bloc : sans le
+            `z-index: 4`, le voile sombre de la phrase salit son fond blanc et
+            le fantôme du bouton « Découvrir ma sélection » lui vole ses clics.
+            ⚠️ EN MOBILE IL RESTE SOUS LE BLOC TEXTE, et ça ne se voit que
+            parce que ce bloc est translaté hors écran au défilement. Le jour
+            où ce `-100%` est adouci, le bouton meurt sans un mot. Si ça
+            arrive : `pointer-events: none` sur `__inner` en mobile, plus rien
+            n'y est cliquable une fois le bouton blanc sorti de l'écran.
+       Et ce qu'il fallait rendre au mobile : le groupe centré dont il faisait
+       partie, reconstitué par deux marges auto (voir style.css). -->
+  <?php /* `data-modal-state` retiré : lu par personne. Le clic passe par
+           l'écouteur de sapi-mescreations-immersion.js, qui code l'état en dur. */ ?>
+  <button type="button" class="mescreations-immersion__describe" data-immersion-describe data-action="open-modal">
+    <?php esc_html_e('Décrire mon projet en détail', 'theme-sapi-maison'); ?>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+  </button>
 
   <div class="mescreations-immersion__scrollhint" data-immersion-scrollhint aria-hidden="true">
     <!-- Indice 1 : la FLÈCHE SEULE (décision Robin). Le texte « Découvre ta
@@ -314,6 +348,32 @@ if ($imm_piece) {
      ════════════════════════════════════════════════════════════════════════ -->
 <div class="mescreations-immersion__mark" data-immersion-mark aria-hidden="true"></div>
 </div><!-- /.mescreations-immersion-track -->
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     INDICATEUR D'ÉTAPES (idée de Robin, 29/08/2026)
+     ────────────────────────────────────────────────────────────────────────
+     Trois repères empilés au bord droit : DEUX POINTS pour les deux états du
+     hero, UN TIRET pour le catalogue. Un halo orange glisse derrière le repère
+     courant. Cliquables : chaque repère mène à son arrêt.
+     Ce qu'il apporte : rien n'indiquait jusqu'ici qu'on est dans un parcours à
+     étapes plutôt que sur une page qui défile normalement.
+
+     ⚠️ HORS DE LA SECTION IMMERSION, ET C'EST OBLIGATOIRE. Il est en
+     `position: fixed` et doit rester visible sur le catalogue. Or la couche de
+     contenu du hero porte un `transform` ET un `will-change: transform` : un
+     élément fixe déposé dedans cesse d'être positionné par rapport à l'écran et
+     se cale sur cette couche — qui translate au défilement. La section, elle,
+     est en `overflow: hidden`. Le sortir du hero est la seule façon sûre.
+
+     ⚠️ Il n'existe qu'en état B. En état A il n'y a pas de parcours à trois
+     arrêts, donc rien à indiquer : il est à l'intérieur du même `if`.
+     ════════════════════════════════════════════════════════════════════════ -->
+<nav class="mescreations-steps" data-immersion-steps aria-label="<?php esc_attr_e('Progression dans la page', 'theme-sapi-maison'); ?>">
+  <i class="mescreations-steps__glow is-muet" data-immersion-steps-glow aria-hidden="true"></i>
+  <button type="button" class="mescreations-steps__item" data-immersion-step="0" aria-label="<?php esc_attr_e('Mon conseil', 'theme-sapi-maison'); ?>"><i class="mescreations-steps__mark"></i></button>
+  <button type="button" class="mescreations-steps__item" data-immersion-step="1" aria-label="<?php esc_attr_e('Ma sélection', 'theme-sapi-maison'); ?>"><i class="mescreations-steps__mark"></i></button>
+  <button type="button" class="mescreations-steps__item mescreations-steps__item--long" data-immersion-step="2" aria-label="<?php esc_attr_e('Toutes mes créations', 'theme-sapi-maison'); ?>"><i class="mescreations-steps__mark"></i></button>
+</nav>
 <?php } // end état B immersion ?>
 
 <?php if ($imm_piece) : // ── ÉTAT B : hero artisan (h1, caché en CSS sous l'immersion). Zone cards conseiller retirée (Tâche 7, plus de sapi-cards-conseiller.js). ── ?>

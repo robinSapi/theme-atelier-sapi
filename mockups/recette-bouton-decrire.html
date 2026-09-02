@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recette — desktop court</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F4EFE7; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
+    --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --ok:#2F7D53; --ko:#C0392B;
+    --body:'Montserrat',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--wood-dark);font:15px/1.62 var(--body)}
+  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 80px}
+  h1{margin:0 0 6px;font-size:25px;letter-spacing:-.01em}
+  .sub{margin:0 0 18px;color:var(--wood-mid);font-size:14.5px}
+
+  .bloc{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:14px 17px;margin-bottom:16px}
+  .bloc h2{margin:0 0 8px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--wood)}
+  .bloc p{margin:6px 0;font-size:13.8px;color:var(--wood-mid)}
+  .bloc b{color:var(--wood-dark)}
+  .bloc code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.5px}
+  .bloc .big{display:block;margin-top:8px;padding:9px 11px;background:#fff;border:1px solid var(--line);
+             border-radius:8px;font:600 13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+             color:var(--wood-dark);word-break:break-all}
+
+  .test{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px;
+        box-shadow:0 2px 8px rgba(147,125,104,.08)}
+  .test--cle{border-left:4px solid var(--orange)}
+  .test__h{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+  .num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--wood);color:#fff;
+       font:700 12px/26px var(--body);text-align:center}
+  .test--cle .num{background:var(--orange)}
+  .test__t{margin:0;font-size:16px;font-weight:700}
+  .ctx{display:inline-block;margin:2px 0 10px 36px;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+       text-transform:uppercase;color:var(--wood);background:var(--warm);border:1px solid var(--line);
+       border-radius:20px;padding:3px 11px}
+  .steps{margin:6px 0 12px 36px;padding:0;list-style:none;counter-reset:s}
+  .steps li{position:relative;padding-left:22px;margin:6px 0;font-size:14.2px;counter-increment:s}
+  .steps li::before{content:counter(s) ".";position:absolute;left:0;color:var(--wood);font-weight:700;font-size:12.5px}
+  .att{margin:0 0 12px 36px;padding:10px 13px;background:var(--warm);border-left:3px solid var(--wood);
+       border-radius:0 8px 8px 0;font-size:13.8px}
+  .att b{color:var(--wood-dark)}
+  .att--rouge{border-left-color:var(--orange)}
+  .rep{margin-left:36px}
+  .rep label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+             color:var(--wood);margin:10px 0 6px}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .btns button{font:700 13px/1 var(--body);padding:9px 16px;border-radius:8px;border:1px solid var(--line);
+               background:#fff;color:var(--wood-dark);cursor:pointer}
+  .btns button.on{background:var(--wood);border-color:var(--wood);color:#fff}
+  .btns button.ok.on{background:var(--ok);border-color:var(--ok)}
+  .btns button.ko.on{background:var(--ko);border-color:var(--ko)}
+  input[type=text]{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+                   font:14px/1.5 var(--body);color:var(--wood-dark);background:var(--warm)}
+  textarea{width:100%;min-height:52px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+           font:14px/1.5 var(--body);color:var(--wood-dark);background:var(--warm);resize:vertical}
+  input::placeholder,textarea::placeholder{color:rgba(107,90,74,.55)}
+
+  .fin{margin-top:26px;background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .fin h2{margin:0 0 8px;font-size:16px}
+  .fin p{margin:6px 0;font-size:14px;color:var(--wood-mid)}
+  .copie{margin-top:12px;font:700 14px/1 var(--body);padding:12px 20px;border-radius:9px;border:none;
+         background:var(--wood-dark);color:#fff;cursor:pointer}
+  .copie.done{background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Desktop court — la nouvelle mise en page</h1>
+  <p class="sub">Sur <b>test.atelier-sapi.fr/mes-creations/</b>. Six points. Les deux premiers sont les vrais tests, les quatre suivants sont des choses qui ont changé et que tu dois valider à l'œil.</p>
+
+  <div class="bloc">
+    <h2>Ce que j'ai fait, et pourquoi</h2>
+    <p>Ta mesure a invalidé mon calcul : je disais 628, tu as mesuré 720. Il manquait <b>une centaine de pixels</b>, pas quatorze. Aucun réglage d'espacement ne pouvait suffire, j'ai retiré ceux que j'avais posés.</p>
+    <p>En dessous de <b>800 px de haut</b>, le desktop emprunte donc le mécanisme du téléphone, comme tu l'as arbitré : <b>le bloc de texte quitte le flux</b> et sort vraiment de l'écran au défilement, au lieu de garder sa place. C'est ça qui libère la hauteur. Le carrousel garde ses trois cartes et ses proportions desktop.</p>
+  </div>
+
+  <div class="bloc">
+    <h2>Lire la hauteur exacte de ta fenêtre</h2>
+    <p>Inspecteur (<code>⌥⌘I</code>), onglet <b>Console</b>, colle ceci. La hauteur s'affiche dans l'onglet du navigateur et se met à jour au redimensionnement. Pour arrêter : recharge.</p>
+    <span class="big">setInterval(()=&gt;document.title=innerHeight+' px',300)</span>
+  </div>
+
+  <!-- 1 -->
+  <div class="test test--cle" data-t="1">
+    <div class="test__h"><span class="num">1</span><h2 class="test__t">À 640 px, plus rien n'est rogné</h2></div>
+    <span class="ctx">Le test principal</span>
+    <ol class="steps">
+      <li>Fenêtre à <b>640 px de haut</b> environ, recharge.</li>
+      <li>Descends jusqu'au carrousel.</li>
+      <li>Vérifie le bas de chaque carte : prix, puis « Découvrir → ».</li>
+    </ol>
+    <div class="att att--rouge"><b>Attendu :</b> tout est entier sur les trois cartes.<br>Mon calcul donne environ 3 px de marge à 640 px, ce qui est trop peu pour que je te dise que c'est gagné. J'ai donc laissé la photo capable de rétrécir : si ça manque, elle cède, et c'est le nom et le prix qui restent visibles plutôt que la carte qui se fait couper.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Tout est entier</button><button class="ko">Encore coupé</button></div>
+      <label>Hauteur affichée</label>
+      <input type="text" placeholder="ex. 641 px">
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="test test--cle" data-t="2">
+    <div class="test__h"><span class="num">2</span><h2 class="test__t">Le nouveau seuil de rognage</h2></div>
+    <span class="ctx">Le chiffre qui m'intéresse</span>
+    <ol class="steps">
+      <li>Réduis la hauteur lentement en surveillant le bas des cartes.</li>
+      <li>Arrête-toi quand le « Découvrir → » commence à être entamé.</li>
+    </ol>
+    <div class="att"><b>Avant : 720 px.</b> J'attends quelque chose autour de 620-640. Si tu es encore à 700, c'est que le mécanisme n'a pas pris et il faut que je regarde ailleurs.</div>
+    <div class="rep">
+      <label>Le rognage commence vers</label>
+      <input type="text" placeholder="ex. 625 px — ou « je n'arrive pas à le déclencher »">
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="test" data-t="3">
+    <div class="test__h"><span class="num">3</span><h2 class="test__t">Ton conseil disparaît en défilant — à valider</h2></div>
+    <span class="ctx">Conséquence du mécanisme</span>
+    <ol class="steps">
+      <li>Fenêtre à environ 700 px de haut. Défile jusqu'au carrousel.</li>
+      <li>Regarde la pastille et ta phrase pendant la descente.</li>
+    </ol>
+    <div class="att att--rouge"><b>C'est le prix du mécanisme, et il faut que tu le valides.</b> Au-dessus de 800 px de haut, ta phrase reste lisible au-dessus des cartes. En dessous, elle s'efface complètement, comme sur téléphone.<br>Ce n'est pas évitable : un bloc hors flux qui resterait affiché recouvrirait les cartes. Sur téléphone c'était ton choix ; ici c'est une conséquence.</div>
+    <div class="rep">
+      <label>Ça te va ?</label>
+      <div class="btns"><button class="ok">Oui, comme sur téléphone</button><button class="ko">Non, je veux qu'elle reste</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="test" data-t="4">
+    <div class="test__h"><span class="num">4</span><h2 class="test__t">Le voile sombre derrière ta phrase</h2></div>
+    <span class="ctx">À regarder, pas à mesurer</span>
+    <ol class="steps">
+      <li>Même fenêtre, tout en haut de la page, avant de défiler.</li>
+      <li>Regarde la photo de fond, au centre.</li>
+    </ol>
+    <div class="att"><b>Ce qui m'inquiète :</b> le voile qui rend ta phrase lisible se calcule sur la taille de son bloc. Ce bloc occupe maintenant tout l'écran au lieu de deux cents pixels — le voile passe donc d'une tache derrière le texte à un assombrissement de toute la photo.<br>Dis-moi simplement si la photo te paraît plus terne qu'avant.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">La photo est normale</button><button class="ko">Elle est nettement plus sombre</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="test" data-t="5">
+    <div class="test__h"><span class="num">5</span><h2 class="test__t">La taille de ta phrase a baissé</h2></div>
+    <span class="ctx">À regarder</span>
+    <ol class="steps">
+      <li>Fenêtre à 810 px de haut, note la taille du texte.</li>
+      <li>Descends à 790 px, recharge, compare.</li>
+    </ol>
+    <div class="att">La phrase se dimensionne maintenant sur la hauteur d'écran : elle passe d'environ <b>39 px à 25 px</b> au franchissement des 800 px, et elle perd son léger agrandissement au repos. C'est ce qui lui permet de tenir sur un écran bas — mais l'écart est net.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Acceptable</button><button class="ko">Trop petite</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="test" data-t="6">
+    <div class="test__h"><span class="num">6</span><h2 class="test__t">Rien n'a bougé sur grand écran</h2></div>
+    <span class="ctx">Contrôle de non-régression</span>
+    <ol class="steps">
+      <li>Remets ta fenêtre en plein écran (plus de 800 px de haut).</li>
+      <li>Refais le parcours : phrase, bouton blanc sous la phrase, survol, carrousel.</li>
+    </ol>
+    <div class="att"><b>Attendu :</b> exactement ce que tu as validé hier. Le bouton « Décrire » sous ta phrase, blanc, qui passe en bois sombre au survol. Rien de ce lot ne doit se voir ici.<br>Un détail à ne pas prendre pour un bug : en redimensionnant lentement, la mise en page bascule d'un coup au passage des 800 px — le bouton change de place, la photo grandit. C'est la frontière.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Rien n'a changé</button><button class="ko">Quelque chose a bougé</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <div class="fin">
+    <h2>Quand tu as fini</h2>
+    <p>Clique ci-dessous : tout est copié dans ton presse-papier, tu n'as qu'à me le coller.</p>
+    <button class="copie" id="cp">Copier mes réponses</button>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.btns').forEach(function(g){
+    g.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        g.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+      });
+    });
+  });
+
+  document.getElementById('cp').addEventListener('click', function(){
+    var out = ['# Recette — desktop court', ''];
+    document.querySelectorAll('.test').forEach(function(t){
+      var n   = t.getAttribute('data-t');
+      var tit = t.querySelector('.test__t').textContent;
+      out.push('## ' + n + '. ' + tit);
+      t.querySelectorAll('.rep > label').forEach(function(lab){
+        var champ = lab.nextElementSibling;
+        if (!champ) return;
+        var val = '';
+        if (champ.classList.contains('btns')) {
+          var on = champ.querySelector('button.on');
+          val = on ? on.textContent : '';
+        } else {
+          val = (champ.value || '').trim();
+        }
+        if (val) out.push(lab.textContent.replace(/\s+/g, ' ').trim() + ' : ' + val);
+      });
+      out.push('');
+    });
+    var txt = out.join('\n');
+    var fin = function(){
+      var b = document.getElementById('cp');
+      b.textContent = 'Copié ✓'; b.classList.add('done');
+      setTimeout(function(){ b.textContent = 'Copier mes réponses'; b.classList.remove('done'); }, 2200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(fin, function(){ window.prompt('Copie manuelle :', txt); });
+    } else {
+      window.prompt('Copie manuelle :', txt);
+    }
+  });
+</script>
+</body>
+</html>

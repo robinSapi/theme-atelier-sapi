@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modale sur-mesure — trois textes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F4EFE7; --cream:#FBF6EA; --line:rgba(147,125,104,.20);
+    --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A;
+    --orange:#E35B24; --ok:#2F7D53;
+    --body:'Montserrat',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--wood-dark);font:15px/1.62 var(--body)}
+  .wrap{max-width:1060px;margin:0 auto;padding:28px 18px 90px}
+
+  .eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--wood);margin:0 0 8px}
+  h1{margin:0 0 8px;font-size:26px;line-height:1.2;letter-spacing:-.015em}
+  .lede{margin:0 0 20px;font-size:15.5px;color:var(--wood-mid);max-width:760px}
+
+  .ctrl{position:sticky;top:0;z-index:30;background:rgba(244,239,231,.96);backdrop-filter:blur(8px);
+        border-bottom:1px solid var(--line);margin:0 -18px 22px;padding:12px 18px;
+        display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .grp>span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--wood);margin-right:2px}
+  .ctrl button{font:700 12.5px/1 var(--body);padding:9px 13px;border-radius:8px;border:1px solid var(--line);
+               background:#fff;color:var(--wood-dark);cursor:pointer}
+  .ctrl button.on{background:var(--wood);border-color:var(--wood);color:#fff}
+
+  .duo{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:26px;align-items:start}
+  @media (max-width:920px){ .duo{grid-template-columns:1fr} }
+
+  /* ── La modale ─────────────────────── */
+  .scene{background:#3a3128;border-radius:14px;padding:26px 20px;display:flex;justify-content:center}
+  .modale{width:100%;max-width:380px;border-radius:18px;padding:22px 20px 26px;position:relative;
+          background:
+            repeating-linear-gradient(90deg, rgba(147,125,104,.055) 0 1px, transparent 1px 7px),
+            var(--cream);
+          box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .modale__x{position:absolute;top:14px;right:16px;font-size:19px;color:var(--wood-mid);opacity:.75;line-height:1}
+
+  .sig{display:flex;align-items:center;gap:9px;padding:5px 16px 5px 5px;margin:6px auto 26px;
+       background:var(--wood-dark);border-radius:50px;width:fit-content;max-width:100%}
+  .sig__a{width:30px;height:30px;border-radius:50%;flex:0 0 30px;
+          background:radial-gradient(circle at 40% 32%, #b08d6a 0%, #6b4f38 70%);
+          color:#fff;font:700 11px/30px var(--body);text-align:center}
+  .sig__t{font-family:'Square Peg',cursive;font-size:19px;line-height:1.1;color:#fff}
+
+  .quote{margin:0 0 22px;text-align:center;font-style:italic;font-size:15.5px;line-height:1.5;color:var(--wood-dark)}
+  .quote .ajout{color:var(--orange)}
+
+  .chips-zone{margin:0 0 22px;text-align:center}
+  .chips-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--wood)}
+  .chips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:7px}
+  .chip{font-size:11px;font-weight:600;padding:4px 10px;border-radius:50px;
+        background:#fff;border:1px solid var(--line);color:var(--wood-mid)}
+
+  .champ{width:100%;background:#fff;border:1px solid rgba(147,125,104,.28);border-radius:12px;
+         padding:13px 15px;font:15px/1.5 var(--body);color:var(--wood-dark);margin-bottom:11px;
+         box-shadow:0 1px 3px rgba(147,125,104,.08)}
+  .champ--vide{color:rgba(107,90,74,.55)}
+  .champ--zone{min-height:96px;white-space:pre-wrap}
+  .champ--zone .suite{color:rgba(107,90,74,.42)}
+
+  .envoyer{width:100%;border:0;border-radius:50px;background:var(--orange);color:#fff;
+           font:700 13px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;
+           padding:16px 20px;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:9px}
+  .reassure{margin:12px 0 0;text-align:center;font-size:12.5px;color:var(--wood-mid)}
+  .disclaimer{margin:14px 0 0;text-align:center;font-size:11px;line-height:1.45;color:rgba(107,90,74,.62)}
+  .foot{margin:26px 0 0;text-align:center;font-size:12px;font-weight:700;letter-spacing:.08em;
+        text-transform:uppercase;color:var(--wood-dark);text-decoration:underline;text-underline-offset:4px}
+
+  /* ── Les textes ─────────────────────── */
+  .panneau h2{margin:0 0 4px;font-size:17px}
+  .panneau .sous{margin:0 0 14px;font-size:13.5px;color:var(--wood-mid)}
+  .bloc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px;
+        box-shadow:0 2px 8px rgba(147,125,104,.08)}
+  .bloc h3{margin:0 0 3px;font-size:13.5px}
+  .bloc .qui{margin:0 0 9px;font-size:11.5px;color:var(--wood-mid)}
+  .bloc .qui b{color:var(--wood-dark)}
+  .bloc textarea{width:100%;min-height:74px;border:1px solid var(--line);border-radius:9px;padding:10px 12px;
+                 font:14px/1.55 var(--body);color:var(--wood-dark);background:var(--cream);resize:vertical}
+  .bloc .actions{display:flex;gap:8px;align-items:center;margin-top:9px}
+  .bloc button{font:700 12px/1 var(--body);padding:9px 14px;border-radius:8px;border:1px solid var(--line);
+               background:var(--cream);color:var(--wood-dark);cursor:pointer}
+  .bloc button.done{background:var(--ok);border-color:var(--ok);color:#fff}
+  .bloc .compte{font-size:11.5px;color:var(--wood-mid)}
+  .bloc--eteint{opacity:.45}
+  .jeton{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--cream);
+         border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+
+  .note{background:#fff;border:1px solid var(--line);border-left:4px solid var(--orange);
+        border-radius:0 12px 12px 0;padding:14px 17px;margin:20px 0}
+  .note h3{margin:0 0 6px;font-size:15px}
+  .note p{margin:7px 0;font-size:14px;color:var(--wood-mid)}
+  .note b{color:var(--wood-dark)}
+  .note table{width:100%;border-collapse:collapse;margin:10px 0 4px;font-size:13.5px}
+  .note td{padding:5px 8px;border-bottom:1px solid var(--line);color:var(--wood-mid)}
+  .note td:first-child{color:var(--wood-dark);font-weight:600;width:42%}
+  .note tr:last-child td{border-bottom:0}
+
+  .tout{margin-top:26px;background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .tout h2{margin:0 0 6px;font-size:16px}
+  .tout p{margin:6px 0;font-size:13.8px;color:var(--wood-mid)}
+  .tout button{margin-top:10px;font:700 13px/1 var(--body);padding:12px 20px;border-radius:9px;border:none;
+               background:var(--wood-dark);color:#fff;cursor:pointer}
+  .tout button.done{background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Mockup · 29 août 2026 · carte « Créons ensemble »</p>
+  <h1>La modale sur-mesure — trois textes en tout</h1>
+  <p class="lede">Un modèle de phrase pour le message, une phrase d'accueil, et une phrase d'appoint quand le visiteur a déjà répondu. La pièce se glisse dedans toute seule.</p>
+
+  <div class="ctrl">
+    <div class="grp">
+      <span>Pièce</span>
+      <button data-p="salon" class="on">Salon</button>
+      <button data-p="cuisine">Cuisine</button>
+      <button data-p="chambre">Chambre</button>
+      <button data-p="chambre-enfant">Chambre enfant</button>
+      <button data-p="bureau">Bureau</button>
+      <button data-p="entree">Entrée</button>
+    </div>
+    <div class="grp">
+      <span>Son projet</span>
+      <button id="eVide" class="on">La pièce seule</button>
+      <button id="ePlein">Questionnaire fait</button>
+    </div>
+  </div>
+
+  <div class="duo">
+    <div class="scene">
+      <div class="modale">
+        <span class="modale__x">✕</span>
+        <div class="sig"><span class="sig__a">R</span><span class="sig__t">Échangeons ensemble</span></div>
+        <p class="quote" id="mQuote"></p>
+        <div class="chips-zone">
+          <div class="chips-label">Ton projet</div>
+          <div class="chips" id="mChips"></div>
+        </div>
+        <div class="champ champ--vide">Ton email</div>
+        <div class="champ champ--zone" id="mMsg"></div>
+        <button class="envoyer">Envoyer ma demande →</button>
+        <p class="reassure">Réponse de Robin sous 48h · Aucun engagement</p>
+        <p class="disclaimer">En envoyant ta demande, tu acceptes de recevoir occasionnellement des nouvelles de l'Atelier Sâpi. Désinscription possible à tout moment.</p>
+        <p class="foot">← Reprendre la discussion</p>
+      </div>
+    </div>
+
+    <div class="panneau">
+      <h2>Les trois textes</h2>
+      <p class="sous">Modifie-les ici, la modale suit.</p>
+
+      <div class="bloc">
+        <h3>1 · La phrase d'accueil</h3>
+        <p class="qui">C'est <b>toi</b> qui parles. Toujours affichée, quelle que soit la pièce.</p>
+        <textarea id="tQuote"></textarea>
+        <div class="actions"><button data-copy="tQuote">Copier</button><span class="compte" data-count="tQuote"></span></div>
+      </div>
+
+      <div class="bloc" id="blocAjout">
+        <h3>2 · La phrase d'appoint</h3>
+        <p class="qui">Ajoutée à la précédente <b>seulement si</b> le visiteur a déjà répondu à des questions. Elle le rassure : il n'a pas à tout retaper.</p>
+        <textarea id="tAjout"></textarea>
+        <div class="actions"><button data-copy="tAjout">Copier</button><span class="compte" data-count="tAjout"></span></div>
+      </div>
+
+      <div class="bloc">
+        <h3>3 · Le message pré-rédigé</h3>
+        <p class="qui">C'est <b>le visiteur</b> qui parle. Un seul modèle : <span class="jeton">%s</span> est remplacé par la pièce, avec le bon possessif.</p>
+        <textarea id="tMsg"></textarea>
+        <div class="actions"><button data-copy="tMsg">Copier</button><span class="compte" data-count="tMsg"></span></div>
+      </div>
+
+      <div class="note">
+        <h3>Le possessif n'est pas mécanique</h3>
+        <p>« Mon salon », « ma cuisine »… mais <b>pas</b> « ma chambre enfant ». Il faut une petite table, comme celle qui existe déjà pour ta voix (« ton salon », « ta cuisine »). Celle-ci est à la première personne, puisque c'est le visiteur qui écrit.</p>
+        <table>
+          <tr><td>Salon</td><td>mon salon</td></tr>
+          <tr><td>Cuisine</td><td>ma cuisine</td></tr>
+          <tr><td>Chambre</td><td>ma chambre</td></tr>
+          <tr><td>Chambre enfant</td><td>la chambre de mon enfant</td></tr>
+          <tr><td>Bureau</td><td>mon bureau</td></tr>
+          <tr><td>Entrée</td><td>mon entrée</td></tr>
+        </table>
+      </div>
+
+      <div class="note">
+        <h3>Ce que tu n'as pas à écrire</h3>
+        <p>Les pastilles « Ton projet » se remplissent seules avec ce qu'il a répondu, et elles voyagent avec le mail. Tu reçois son projet complet sans qu'une ligne soit rédigée pour ça — c'est exactement ce que la phrase d'appoint lui annonce.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tout">
+    <h2>Quand tu es content</h2>
+    <p>Copie les trois textes et colle-les moi. Je les pose dans le code avec la table des possessifs.</p>
+    <button id="cpTout">Copier les trois textes</button>
+  </div>
+
+<script>
+(function(){
+  var LABELS = {
+    'salon':'Salon', 'cuisine':'Cuisine', 'chambre':'Chambre',
+    'chambre-enfant':'Chambre enfant', 'bureau':'Bureau', 'entree':'Entrée'
+  };
+  var ORDRE = ['salon','cuisine','chambre','chambre-enfant','bureau','entree'];
+
+  /* À la PREMIÈRE personne : c'est le visiteur qui écrit. */
+  var MIEN = {
+    'salon':'mon salon', 'cuisine':'ma cuisine', 'chambre':'ma chambre',
+    'chambre-enfant':"la chambre de mon enfant", 'bureau':'mon bureau', 'entree':'mon entrée'
+  };
+
+  var REPONSES = {
+    'salon':          ['Salon', 'Grande pièce', 'Plafond haut', 'Ambiance douce'],
+    'cuisine':        ['Cuisine', 'Pièce moyenne', 'Plafond standard', 'Lumière directe'],
+    'chambre':        ['Chambre', 'Pièce moyenne', 'Plafond standard', 'Ambiance douce'],
+    'chambre-enfant': ['Chambre enfant', 'Petite pièce', 'Plafond standard', 'Ambiance douce'],
+    'bureau':         ['Bureau', 'Petite pièce', 'Plafond standard', 'Lumière directe'],
+    'entree':         ['Entrée', 'Petite pièce', 'Plafond haut', 'Ambiance douce']
+  };
+
+  var DEF = {
+    quote: "Pour ce projet, un modèle sur-mesure est sans doute une très bonne idée. Dis-moi ce que tu as en tête, je te réponds sous 48h.",
+    ajout: "Les détails de ton projet me seront envoyés avec ton message.",
+    msg:   "Bonjour Robin, je cherche un luminaire sur-mesure pour %s.\n\n"
+  };
+
+  var piece = 'salon', plein = false;
+  var val = { quote: DEF.quote, ajout: DEF.ajout, msg: DEF.msg };
+
+  var mQuote = document.getElementById('mQuote');
+  var mMsg   = document.getElementById('mMsg');
+  var mChips = document.getElementById('mChips');
+  var tQuote = document.getElementById('tQuote');
+  var tAjout = document.getElementById('tAjout');
+  var tMsg   = document.getElementById('tMsg');
+
+  function rendre(){
+    mQuote.textContent = val.quote;
+    if (plein && val.ajout.trim()) {
+      var sp = document.createElement('span');
+      sp.className = 'ajout';
+      sp.textContent = ' ' + val.ajout;
+      mQuote.appendChild(sp);
+    }
+
+    mChips.innerHTML = '';
+    (plein ? REPONSES[piece] : [LABELS[piece]]).forEach(function(t){
+      var c = document.createElement('span');
+      c.className = 'chip';
+      c.textContent = t;
+      mChips.appendChild(c);
+    });
+
+    mMsg.textContent = val.msg.split('%s').join(MIEN[piece]);
+    var suite = document.createElement('span');
+    suite.className = 'suite';
+    suite.textContent = '|';
+    mMsg.appendChild(suite);
+
+    document.getElementById('blocAjout').classList.toggle('bloc--eteint', !plein);
+
+    tQuote.value = val.quote;
+    tAjout.value = val.ajout;
+    tMsg.value   = val.msg;
+    majComptes();
+  }
+  function majComptes(){
+    document.querySelectorAll('[data-count]').forEach(function(el){
+      var src = document.getElementById(el.getAttribute('data-count'));
+      el.textContent = src.value.length + ' caractères';
+    });
+  }
+
+  document.querySelectorAll('.ctrl button[data-p]').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.ctrl button[data-p]').forEach(function(x){ x.classList.remove('on'); });
+      b.classList.add('on');
+      piece = b.getAttribute('data-p');
+      rendre();
+    });
+  });
+  function setEtat(p){
+    plein = p;
+    document.getElementById('eVide').classList.toggle('on', !p);
+    document.getElementById('ePlein').classList.toggle('on', p);
+    rendre();
+  }
+  document.getElementById('eVide').addEventListener('click', function(){ setEtat(false); });
+  document.getElementById('ePlein').addEventListener('click', function(){ setEtat(true); });
+
+  tQuote.addEventListener('input', function(){ val.quote = tQuote.value; rendre(); });
+  tAjout.addEventListener('input', function(){ val.ajout = tAjout.value; rendre(); });
+  tMsg.addEventListener('input',   function(){ val.msg   = tMsg.value;   rendre(); });
+
+  function copier(texte, bouton, libelle){
+    var fin = function(){
+      bouton.textContent = 'Copié ✓'; bouton.classList.add('done');
+      setTimeout(function(){ bouton.textContent = libelle; bouton.classList.remove('done'); }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texte).then(fin, function(){ window.prompt('Copie manuelle :', texte); });
+    } else { window.prompt('Copie manuelle :', texte); }
+  }
+  document.querySelectorAll('[data-copy]').forEach(function(b){
+    b.addEventListener('click', function(){
+      copier(document.getElementById(b.getAttribute('data-copy')).value, b, 'Copier');
+    });
+  });
+  document.getElementById('cpTout').addEventListener('click', function(){
+    var out = ['# Modale sur-mesure — les trois textes', '',
+               '## 1. Phrase d\'accueil', val.quote, '',
+               '## 2. Phrase d\'appoint (projet déjà renseigné)', val.ajout, '',
+               '## 3. Message pré-rédigé (%s = la pièce)', val.msg, '',
+               '## Rendu par pièce', ''];
+    ORDRE.forEach(function(p){
+      out.push('- ' + LABELS[p] + ' : ' + val.msg.split('%s').join(MIEN[p]).trim());
+    });
+    copier(out.join('\n'), this, 'Copier les trois textes');
+  });
+
+  rendre();
+})();
+</script>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recette — le défilement du hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#F4EFE7; --warm:#FBF6EA; --line:rgba(147,125,104,.20);
+    --wood:#937D68; --wood-dark:#4A3F35; --wood-mid:#6B5A4A; --orange:#E35B24;
+    --ok:#2F7D53; --ko:#C0392B;
+    --body:'Montserrat',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--wood-dark);font:15px/1.62 var(--body)}
+  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 80px}
+  h1{margin:0 0 6px;font-size:25px;letter-spacing:-.01em}
+  .sub{margin:0 0 18px;color:var(--wood-mid);font-size:14.5px}
+
+  .bloc{background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:14px 17px;margin-bottom:20px}
+  .bloc h2{margin:0 0 8px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--wood)}
+  .bloc p{margin:6px 0;font-size:13.8px;color:var(--wood-mid)}
+  .bloc b{color:var(--wood-dark)}
+  .bloc ul{margin:8px 0;padding-left:18px;font-size:13.8px;color:var(--wood-mid)}
+  .bloc li{margin:4px 0}
+
+  .test{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px;
+        box-shadow:0 2px 8px rgba(147,125,104,.08)}
+  .test--cle{border-left:4px solid var(--orange)}
+  .test__h{display:flex;align-items:baseline;gap:10px;margin-bottom:4px}
+  .num{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--wood);color:#fff;
+       font:700 12px/26px var(--body);text-align:center}
+  .test--cle .num{background:var(--orange)}
+  .test__t{margin:0;font-size:16px;font-weight:700}
+  .ctx{display:inline-block;margin:2px 0 10px 36px;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+       text-transform:uppercase;color:var(--wood);background:var(--warm);border:1px solid var(--line);
+       border-radius:20px;padding:3px 11px}
+  .steps{margin:6px 0 12px 36px;padding:0;list-style:none;counter-reset:s}
+  .steps li{position:relative;padding-left:22px;margin:6px 0;font-size:14.2px;counter-increment:s}
+  .steps li::before{content:counter(s) ".";position:absolute;left:0;color:var(--wood);font-weight:700;font-size:12.5px}
+  .att{margin:0 0 12px 36px;padding:10px 13px;background:var(--warm);border-left:3px solid var(--wood);
+       border-radius:0 8px 8px 0;font-size:13.8px}
+  .att b{color:var(--wood-dark)}
+  .att--rouge{border-left-color:var(--orange)}
+  .rep{margin-left:36px}
+  .rep label{display:block;font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+             color:var(--wood);margin:10px 0 6px}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .btns button{font:700 13px/1 var(--body);padding:9px 16px;border-radius:8px;border:1px solid var(--line);
+               background:#fff;color:var(--wood-dark);cursor:pointer}
+  .btns button.on{background:var(--wood);border-color:var(--wood);color:#fff}
+  .btns button.ok.on{background:var(--ok);border-color:var(--ok)}
+  .btns button.ko.on{background:var(--ko);border-color:var(--ko)}
+  textarea{width:100%;min-height:52px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+           font:14px/1.5 var(--body);color:var(--wood-dark);background:var(--warm);resize:vertical}
+  textarea::placeholder{color:rgba(107,90,74,.55)}
+
+  .fin{margin-top:26px;background:var(--warm);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .fin h2{margin:0 0 8px;font-size:16px}
+  .fin p{margin:6px 0;font-size:14px;color:var(--wood-mid)}
+  .copie{margin-top:12px;font:700 14px/1 var(--body);padding:12px 20px;border-radius:9px;border:none;
+         background:var(--wood-dark);color:#fff;cursor:pointer}
+  .copie.done{background:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Le défilement du hero</h1>
+  <p class="sub">Sur <b>test.atelier-sapi.fr/mes-creations/</b>, au trackpad. Six tests. Vérifie d'abord que « Réduire les animations » est bien <b>décoché</b> dans les réglages du Mac.</p>
+
+  <div class="bloc">
+    <h2>Ce que j'ai changé, et pourquoi</h2>
+    <p>Tes réponses ont redessiné exactement le modèle actuel : bascule franche, trois arrêts, la zone qui retient un peu. <b>L'architecture est la bonne.</b> Ce sont trois défauts d'exécution qui la rendaient désagréable.</p>
+    <ul>
+      <li><b>Un geste faisait deux sauts.</b> Pendant l'animation, l'inertie de ton trackpad n'était plus comptée comme du bruit : à la fin, le premier événement encore en vol relançait un saut. C'est ça, « ça passe directement au texte de Robin ».</li>
+      <li><b>En remontant du catalogue</b>, un rattrapage visait l'étape la plus proche plutôt qu'une étape dans le sens du geste.</li>
+      <li><b>Le mouvement était brutal puis mou</b> : 45 % du trajet en 100 ms, puis rien. Et le fondu où les deux écrans coexistent ne durait que 80 ms sur 560.</li>
+    </ul>
+  </div>
+
+  <div class="test test--cle" data-t="1">
+    <div class="test__h"><span class="num">1</span><h2 class="test__t">Un geste = un écran, en descendant</h2></div>
+    <span class="ctx">Le test principal</span>
+    <ol class="steps">
+      <li>Recharge la page, laisse la phrase s'écrire.</li>
+      <li>Fais <b>un seul glissé vers le bas</b> sur le trackpad, franc, puis lâche.</li>
+    </ol>
+    <div class="att att--rouge"><b>Attendu :</b> tu t'arrêtes <b>sur le carrousel</b>. Pas au catalogue.<br>Refais-le trois ou quatre fois, avec des gestes d'amplitudes différentes — c'est en variant la force qu'on déclenchait le double saut.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Je m'arrête sur le carrousel</button><button class="ko">Ça file au catalogue</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <div class="test test--cle" data-t="2">
+    <div class="test__h"><span class="num">2</span><h2 class="test__t">Un geste = un écran, en remontant</h2></div>
+    <span class="ctx">Le test principal</span>
+    <ol class="steps">
+      <li>Descends jusque dans le catalogue « Toutes mes créations ».</li>
+      <li>Fais <b>un seul glissé vers le haut</b>, franc, puis lâche.</li>
+    </ol>
+    <div class="att att--rouge"><b>Attendu :</b> tu arrives <b>sur le carrousel</b>, pas sur ta phrase.<br>C'est le sens exact de ta plainte. Deux causes différentes agissaient ici, j'ai corrigé les deux.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">J'arrive sur le carrousel</button><button class="ko">Ça remonte jusqu'à ma phrase</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <div class="test" data-t="3">
+    <div class="test__h"><span class="num">3</span><h2 class="test__t">Le mouvement est suivable</h2></div>
+    <ol class="steps">
+      <li>Fais l'aller-retour phrase ↔ carrousel plusieurs fois.</li>
+      <li>Regarde le <b>départ</b> du mouvement, pas l'arrivée.</li>
+    </ol>
+    <div class="att">Avant, il démarrait à pleine vitesse puis rampait. Maintenant il démarre doucement, accélère, se pose. Un peu plus long aussi : 680 ms au lieu de 560.<br><b>Dis-moi si c'est devenu trop lent</b> — c'est le risque de ce réglage, et tu avais déjà tranché dans ce sens par le passé.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">C'est agréable</button><button class="ko">Trop lent</button><button class="ko">Encore trop sec</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <div class="test" data-t="4">
+    <div class="test__h"><span class="num">4</span><h2 class="test__t">On voit un écran devenir l'autre</h2></div>
+    <ol class="steps">
+      <li>Même aller-retour, mais regarde cette fois <b>le milieu</b> du mouvement.</li>
+    </ol>
+    <div class="att">J'ai avancé l'entrée du carrousel et retardé la sortie de ta phrase. Ils doivent maintenant se croiser franchement, au lieu que l'un s'efface puis que l'autre monte.<br>Le risque à surveiller : <b>ta phrase qui traîne par-dessus les cartes</b> en sortant. C'est surtout visible si ta fenêtre fait moins de 800 px de haut.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Le croisement se voit bien</button><button class="ko">Ma phrase traîne sur les cartes</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <div class="test" data-t="5">
+    <div class="test__h"><span class="num">5</span><h2 class="test__t">Rien n'est mort au clic</h2></div>
+    <ol class="steps">
+      <li>Depuis le haut, clique le bouton blanc <b>« Découvrir ma sélection »</b> : la page doit descendre au carrousel.</li>
+      <li>Une fois en bas, clique <b>« Décrire mon projet en détail »</b> : la modale doit s'ouvrir.</li>
+      <li>Clique une carte produit : elle doit s'ouvrir.</li>
+      <li>Clique la flèche du bas : elle doit descendre.</li>
+    </ol>
+    <div class="att">J'ai déplacé tous les moments où les choses deviennent cliquables, pour les recaler sur les nouvelles apparitions. Une erreur ici produirait un bouton visible qui ne répond pas, ou un bouton invisible qui vole les clics.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Les quatre répondent</button><button class="ko">Quelque chose ne répond pas</button></div>
+      <textarea placeholder="Lequel ?"></textarea>
+    </div>
+  </div>
+
+  <div class="test" data-t="6">
+    <div class="test__h"><span class="num">6</span><h2 class="test__t">La modale ne fait pas redescendre la page</h2></div>
+    <span class="ctx">Non-régression</span>
+    <ol class="steps">
+      <li>Descends dans le catalogue.</li>
+      <li>Ouvre le Conseiller depuis le bandeau « Mon projet », réponds à deux questions, puis <b>ferme sans terminer</b>.</li>
+      <li>Regarde où tu atterris, et attends deux secondes sans rien toucher.</li>
+    </ol>
+    <div class="att">Tu dois arriver <b>en haut</b>, sur les trois points de chargement, et <b>y rester</b>. Le fait de mémoriser d'où l'on vient pouvait faire redescendre la page toute seule juste après — la relecture l'a attrapé avant toi.</div>
+    <div class="rep">
+      <label>Résultat</label>
+      <div class="btns"><button class="ok">Je reste en haut</button><button class="ko">Ça redescend tout seul</button></div>
+      <textarea placeholder=""></textarea>
+    </div>
+  </div>
+
+  <div class="fin">
+    <h2>Quand tu as fini</h2>
+    <p>Clique ci-dessous : tout est copié dans ton presse-papier, tu n'as qu'à me le coller.</p>
+    <button class="copie" id="cp">Copier mes réponses</button>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.btns').forEach(function(g){
+    g.querySelectorAll('button').forEach(function(b){
+      b.addEventListener('click', function(){
+        g.querySelectorAll('button').forEach(function(x){ x.classList.remove('on'); });
+        b.classList.add('on');
+      });
+    });
+  });
+
+  document.getElementById('cp').addEventListener('click', function(){
+    var out = ['# Recette — le défilement du hero', ''];
+    document.querySelectorAll('.test').forEach(function(t){
+      var n = t.getAttribute('data-t');
+      var tit = t.querySelector('.test__t').textContent;
+      var on = t.querySelector('.btns button.on');
+      var com = t.querySelector('textarea').value.trim();
+      out.push('## ' + n + '. ' + tit);
+      out.push('Résultat : ' + (on ? on.textContent : '(non renseigné)'));
+      if (com) out.push('Commentaire : ' + com);
+      out.push('');
+    });
+    var txt = out.join('\n');
+    var fin = function(){
+      var b = document.getElementById('cp');
+      b.textContent = 'Copié ✓'; b.classList.add('done');
+      setTimeout(function(){ b.textContent = 'Copier mes réponses'; b.classList.remove('done'); }, 2200);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(fin, function(){ window.prompt('Copie manuelle :', txt); });
+    } else {
+      window.prompt('Copie manuelle :', txt);
+    }
+  });
+</script>
+</body>
+</html>

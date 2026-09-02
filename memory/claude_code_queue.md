@@ -2334,3 +2334,567 @@ Sur 5 fiches produit (Olivia ×2, Charlie, Claudine, Vincent), une ancienne vale
 
 ⚠️ **Si le sujet revient : ne pas supprimer cette donnée sans faire corriger le code d'abord.** C'est elle qui fait exister la ligne « Poids » sur ces 5 fiches ; la supprimer seule ferait disparaître le poids dynamique au lieu de le réparer. Le détail technique est consigné plus haut dans ce fichier.
 
+
+---
+
+## [TÂCHE] Audit test ↔ master avant mise en prod — lot immersion /mes-creations/
+**Date :** 2026-09-02
+**Priorité :** haute
+**Branches :** comparer `test-theme-sapi-maison` (à jour, tout est recetté par Robin) avec `master` (en ligne). **Ne rien fusionner, ne rien pousser.** Robin décide après lecture.
+
+### Contexte
+
+Dernière mise en prod : 28/08 (262 commits, réussie). Depuis, un gros lot a été livré et recetté sur test, presque entièrement sur le hero immersif de `/mes-creations/` en état B. Cowork a écrit le code, un agent a relu chaque livraison, Robin a validé par recette numérotée. **Ce qu'on cherche ici, c'est le regard qui manque : la cohérence de l'ensemble, et ce qui échappe à une relecture livraison par livraison.**
+
+### Ce qui a changé depuis le 28/08, par sujet
+
+1. **Bouton « Décrire mon projet »** — sorti de la zone sélection pour en devenir le frère suivant ; remonte en desktop par `order` à l'emplacement du bouton « Découvrir ma sélection » ; fond blanc plein ; survol en `--color-wood-dark`. Trois défauts trouvés en relecture : le bouton « Découvrir » gardait `pointer-events: auto` pour toujours et volait les clics ; le voile de `__inner::before` salissait le blanc ; deux `@media (max-height: …)` sans borne de largeur reposaient un `bottom: calc(7vh…)`.
+
+2. **Bascule « desktop court »** (`@media (min-width: 769px) and (max-height: 800px)`, en fin de `style.css`) — sous 800 px de haut, le desktop emprunte le mécanisme du mobile : la zone 1 quitte le flux. Corrige un rognage des cards mesuré par Robin à 720 px ; seuil descendu à ~500 px.
+
+3. **Défilement du hero** — le plus sensible. `sapi-mescreations-immersion.js` : écouteur `wheel` déplacé de la section vers `window` (le header collant mangeait le geste) ; sortie sur `!e.cancelable` (on ne lutte plus contre un élan natif déjà en vol) ; horloge du geste alimentée avant toute sortie ; cumul et verrou par geste ; détection de « relance » ; `easeInOut` et 680 ms ; seuils `--reveal` réétalés côté CSS **et** leur miroir côté JS ; cache des positions d'arrêt.
+
+4. **Indicateur d'étapes** — nouveau `<nav class="mescreations-steps">` dans `archive-product.php`, **hors** de la section immersion (la couche de contenu porte un `transform` + `will-change`). Trois repères, halo orange qui glisse, cliquables.
+
+5. **Card sur-mesure du carrousel** — n'emmène plus vers `/sur-mesure/` : ouvre la modale sur l'écran `s-contact` pré-rempli, sans questionnaire ni IA. Nouveaux textes PHP (`sapi_surmesure_contact_texts`) et table de possessifs à la 1re personne. Le lien garde son `href` en repli.
+
+6. **Divers** — accélération de la machine à écrire (34→22 ms, attente 900→550 ms) ; survol de la card sur-mesure repris en main (la règle globale `a:hover` repeignait son texte en bleu marine).
+
+### À faire
+
+Un rapport écrit dans ce fichier, sous cette tâche. Pas de correction de code sans accord de Robin.
+
+1. **Le diff complet test ↔ master**, par fichier, avec le volume. Signale tout fichier modifié qui n'appartient à aucun des six sujets ci-dessus : c'est là que se cachent les surprises.
+2. **Les régressions possibles hors `/mes-creations/`.** `style.css` et `functions.php` sont partagés par tout le site. L'écouteur `wheel` vit désormais sur `window` : vérifie qu'il ne peut rien bloquer ailleurs (panier, recherche, menu, modale, popup cookies). La règle `a:hover` et le bloc `button::after` ont été touchés localement — vérifie qu'aucune de ces retouches ne déborde.
+3. **La cohérence de l'ensemble.** Chaque livraison a été relue seule. Les six sujets se recouvrent (le même bouton, la même zone, les mêmes seuils) : cherche les contradictions entre eux, les valeurs qui devraient être en phase et ne le sont plus, les commentaires qui décrivent un état antérieur.
+4. **Les seuils dédoublés.** Plusieurs valeurs existent en double, CSS et JS : les opacités de `--reveal` et leurs miroirs de cliquabilité (0,50 et 0,72), le débordement du halo (4 px, écrit quatre fois), la remontée de `-49px` calée sur la hauteur du bouton blanc. Vérifie qu'ils sont d'accord.
+5. **Ce qui n'a jamais été testé en conditions réelles.** La production a Autoptimize (`defer` sur les scripts, minification CSS) et un cache de page o2switch, le site de test n'a ni l'un ni l'autre. Signale tout ce qui pourrait se comporter différemment là-bas — c'est une classe de bug que la recette ne peut pas montrer.
+6. **Les exclusions de déploiement.** Les deux workflows doivent rester identiques et ne jamais exclure `assets/*.txt` (les prompts de l'IA sont lus à l'exécution). Vérifie aussi que les nouveaux fichiers de `mockups/` sont bien exclus.
+7. **Ton avis, franchement.** Est-ce que ce lot est poussable en l'état ? Qu'est-ce que tu ferais autrement ? Qu'est-ce qui te paraît fragile ?
+
+### Critères de succès
+
+Un rapport lisible par Robin (artisan, pas développeur) : ce qui est sûr, ce qui l'est moins, et ce qu'il faut regarder avant de fusionner. Les numéros de ligne et les noms de fichiers pour Cowork. **Un verdict net : poussable ou non.**
+
+### ✅ AUDIT FAIT (2026-09-02, Claude Code) — lecture seule, rien fusionné, rien poussé
+
+## VERDICT : POUSSABLE.
+
+Rien de bloquant. Deux remarques mineures plus bas, aucune n'empêche la fusion. Ce lot n'a
+rien à voir avec celui du 28/08 : **14 fichiers au lieu de 113, dont 5 de code et 9 maquettes.**
+Petit, ciblé, entièrement sur `/mes-creations/`.
+
+**Point de divergence** : `f3b44d7` du 28/08 (le déploiement précédent). 18 commits sur test
+depuis, du 28/08 au 02/09.
+
+**Sécurité de la fusion — vérifiée, pas supposée.** Fusion simulée en mémoire
+(`git merge-tree`, aucun fichier touché) : **zéro conflit**, et le résultat de la fusion est
+**identique à test au bit près**. Autrement dit, master n'a rien que test n'ait déjà : aucun
+correctif de prod ne serait écrasé. Les 18 commits de master hors de test sont sa propre
+ligne d'historique (blindage WC, anti-spam, catalogue) plus le commit de fusion du 28/08 —
+tout est déjà dans test par la fusion.
+
+---
+
+## 1. Le diff, fichier par fichier
+
+Total : **14 fichiers, +4 393 / −139.**
+
+| Fichier | Δ | Sujet |
+|---|---|---|
+| `assets/sapi-mescreations-immersion.js` | +821 | 3 (défilement) + 4 (indicateur) + 5 (card sur-mesure) + 6 |
+| `style.css` | +638 | 1, 2, 4, 5, 6 |
+| `assets/sapi-modal-conseiller.js` | +112 | 5 (écran contact pré-rempli) |
+| `woocommerce/archive-product.php` | +92 | 4 (le `<nav>`) + 5 (la card en `<a>` intercepté) |
+| `functions.php` | +65 | 5 uniquement |
+| `mockups/*.html` (9 nouveaux) | +2 804 | maquettes, prototype, 3 recettes |
+
+**Aucun fichier orphelin.** Les 14 se rattachent aux six sujets. Aucun fichier supprimé.
+Les 9 maquettes sont toutes sous `mockups/`, donc exclues du déploiement (voir §6).
+
+`functions.php` (+65) est strictement le sujet 5 : `sapi_piece_possessive_mienne_map()`
+(l. 3710), `sapi_surmesure_contact_texts()` (l. 3746) et leur transmission au JS (l. 588).
+Additif, rien de touché ailleurs. Sorties échappées (`esc_url`, `esc_attr_e`).
+
+Hygiène : **0 `console.log` ajouté** (les 2 `console.warn` du modal sont d'avant et sur des
+chemins d'erreur), **0 `!important` ajouté**, aucun résidu de débogage, aucun `TODO`.
+
+---
+
+## 2. Régressions hors `/mes-creations/` → AUCUNE. Vérifié un par un.
+
+**`style.css` : les 14 hunks vivent tous entre les lignes 25 391 et la fin du fichier**,
+c'est-à-dire dans le bloc immersion. Tous les sélecteurs ajoutés sont préfixés
+`.mescreations-*`. Un seul sélecteur supprimé, et il est réécrit juste après.
+
+- **La règle globale `a:hover`** (l. 516) est **identique au bit près** entre master et test.
+  Le sujet 6 ne l'a pas touchée : il a écrit un survol VOULU sur `.mescreations-immersion__pcard--sur`
+  (l. 26 117), qui reprend la main localement. C'est la bonne façon.
+- **Le `button::after` global** (l. 243) est lui aussi **identique**. La neutralisation est
+  locale : `.mescreations-steps__item::after { display: none }` (l. 25 686). Ne déborde pas.
+
+**L'écouteur `wheel` sur `window`** — le point le plus sensible, et il tient :
+
+1. **Il n'existe pas ailleurs.** `init()` sort immédiatement si `[data-immersion]` est absent
+   (`imm.js` l. 42-43), et ce marqueur n'est rendu QUE par `archive-product.php` en état B.
+   Le script est chargé sur `is_shop() || is_product()` mais ne s'arme jamais ailleurs.
+   Panier, recherche, menu, fiche produit, accueil : **l'écouteur n'y est même pas posé.**
+2. **Sur la page elle-même**, six sorties précèdent le `preventDefault` (l. 1514) : geste
+   horizontal, `!e.cancelable` (l. 1491), `scrollLocked()` (l. 1499), pas de positions d'arrêt,
+   hors plage du hero, et les deux extrémités.
+3. **`scrollLocked()` (l. 1039) couvre bien tous les panneaux du site.** J'ai vérifié :
+   `menu.js`, `catalogue.js`, `admin-conseiller.js` et `sapi-modal-conseiller.js` verrouillent
+   TOUS par `style.overflow` en ligne, sur `body` ou sur les deux. Aucun ne passe par une
+   classe CSS — j'ai cherché, `style.css` n'en contient aucune. Le test à deux branches
+   (`html` OU `body`) les attrape tous.
+4. **Popup cookies** : c'est une extension, hors du thème, je ne peux pas la lire d'ici. Elle
+   n'apparaît que sur la première visite. Si elle verrouille le défilement autrement qu'en
+   ligne, la molette resterait captée derrière — **à regarder une fois en prod, en navigation
+   privée, sur `/mes-creations/?piece=salon`.** C'est le seul angle mort de ce point.
+
+**Coût sur le catalogue** : l'écouteur tourne sur toute la page, mais chaque événement ne
+coûte que deux lectures de style en ligne et un tableau en cache (`stopsCache`, `imm.js`
+l. 1280). L'invalidation du cache est complète : redimensionnement, remplacement de cards,
+recalage à 600 ms, et `document.fonts.ready`. Rien qui déclenche un recalcul de mise en page.
+
+---
+
+## 3. Cohérence de l'ensemble — deux remarques, aucune bloquante
+
+**⚠️ A. Un commentaire faux, introduit par ce lot.** `imm.js` l. 1299 :
+« Bornes SERRÉES (8 px, la tolérance d'arrivée) ». **La tolérance d'arrivée vaut 4**
+(`TOLERANCE_ARRIVEE`, l. 1000) ; 8, c'est `GESTE_MINIMUM` (l. 999). Master disait « Bornes
+STRICTES » sans chiffre — la réécriture a inventé une équivalence qui n'existe pas. Le code
+est juste (le `8` en dur de `inHeroRange` fait son travail), **seul le commentaire ment** —
+et il ment sur les deux constantes que le même fichier met en garde de ne pas confondre
+(l. 1417). À corriger quand Cowork repassera dessus : soit dire « 8 px, le geste minimum »,
+soit remplacer le `8` en dur par `GESTE_MINIMUM`.
+
+**⚠️ B. Deux tests de verrouillage différents dans le même fichier.** `scrollLocked()`
+(l. 1039) teste `html` **ou** `body`, après un bug documenté. `majEtapes()` (l. 1221) teste
+`html` **seul** pour décider si l'indicateur d'étapes s'affiche. Conséquence : menu, panier
+ou recherche ouverts (ils ne verrouillent que `body`), la pastille reste affichée et
+cliquable. **Aujourd'hui ça ne se voit pas** : j'ai relevé les z-index, tous ces panneaux
+passent au-dessus (mini-panier 9998/9999, menu 9999, recherche 10000/10001, modale 10050)
+contre 9000 pour la pastille. Elle est couverte, donc invisible et inatteignable. Mais le
+jour où un panneau passera sous 9000, ou ne couvrira pas le bord droit, le défaut sortira.
+Aligner l. 1221 sur `scrollLocked()` coûte une ligne.
+
+**Le reste des recouvrements entre sujets est propre**, et c'est le point important :
+
+- Le `-49px` du bouton « Décrire » (sujet 1, `style.css` l. 25 599) est **annulé** par le bloc
+  desktop court (sujet 2, l. 26 680, `margin-top: 14px`) — même sélecteur, plus bas dans le
+  fichier, donc il gagne. C'est écrit noir sur blanc dans le commentaire, et c'est exact.
+- Les deux `@media (max-height:)` sans borne de largeur (l. 26 225 et 26 232) sont
+  **inchangés** par rapport à master. Ils sont neutralisés sur desktop par un sélecteur à
+  deux classes (l. 25 529, `bottom: auto`), qui gagne par spécificité quel que soit l'ordre.
+  Le défaut du sujet 1 est bien traité, et il l'est structurellement.
+- Le `<nav>` de l'indicateur est bien **hors** de la section immersion
+  (`archive-product.php` l. 371, après la fermeture du track) et en `position: fixed` : il ne
+  décale pas le catalogue, donc il ne fausse pas la 3ᵉ position d'arrêt.
+- La card sur-mesure reste un vrai `<a href>` : sans JS, le lien mène encore à `/sur-mesure/`.
+  Clic milieu, ⌘/Ctrl/Maj/Alt : tous laissés passer (l. 360).
+- Le message pré-rempli va dans `prefill`, **pas** dans `contact_message` : un visiteur qui
+  clique puis referme ne laisse pas au tableau de bord une phrase qu'il n'a jamais écrite.
+  Bien vu, c'est le genre de piège qui ne se voit qu'en production, trois semaines plus tard.
+
+---
+
+## 4. Les seuils dédoublés → tous d'accord. Vérifiés au calcul.
+
+**Le débordement du halo, 4 px, écrit quatre fois — les quatre concordent :**
+`GLOW_DEBORD = 4` (`imm.js` l. 1199) · largeur `14px` = 6 (le repère) + 4 + 4 · `left: 5px`
+en desktop = 9 (rembourrage) − 4 · `left: 4px` en mobile = 8 (rembourrage) − 4. ✔
+
+**Les opacités `--reveal` et leurs miroirs de cliquabilité :**
+
+| Élément | CSS | JS | Accord |
+|---|---|---|---|
+| `__reveal-btn.is-in` | s'éteint à 0,50 (`1 − reveal × 2`, l. 25 402) | neutralisé si `p > 0.5` (l. 906) | ✔ exact |
+| `__hint--reveal` | s'éteint à 0,50 (l. 25 811) | cliquable si `p < 0.5` (l. 910) | ✔ exact |
+| `__hint--catalogue` | s'allume à 0,72 (l. 25 819) | cliquable si `p >= 0.72` (l. 911) | ✔ exact |
+| `__selection` / `__describe` | s'allument à 0,15 | cliquables à 0,50 (l. 878, 886) | ✔ **volontaire** |
+
+Le dernier n'est pas un miroir d'opacité mais un **relais** : le carrousel et « Décrire »
+prennent la main exactement là où le fantôme de « Découvrir » la rend, pour qu'aucune zone
+de clic ne se superpose. C'est documenté et cohérent. Conséquence assumée : entre 15 % et
+50 % de la course, les cards sont visibles (jusqu'à 40 % d'opacité) mais inertes. En pratique
+le visiteur est en train de faire son geste, pas de viser une card.
+
+**Le `-49px`, calé sur la hauteur du bouton blanc :** 13 + 13 de rembourrage, 1 + 1 de
+bordure, 21 de boîte de ligne (14 px × 1,5) = **49**. ✔ Et l'icône du bouton fait 16 px
+(l. 25 404), donc elle ne fait pas grandir la ligne. J'ai aussi vérifié que les blocs
+`max-height` ne redimensionnent PAS `__reveal-btn` : le 49 tient aussi sur écran court.
+
+**Point de lecture, pas de bug** : `.mescreations-immersion__reveal-btn.is-in` est déclaré
+**deux fois** (l. 25 385 et 25 401), séparé par un pavé de commentaire. Le second l'emporte
+pour l'opacité, ce qui est l'effet voulu — mais deux règles au même sélecteur à seize lignes
+d'écart, c'est une invitation à en modifier une seule.
+
+---
+
+## 5. Ce qui n'a jamais tourné en conditions réelles
+
+**Le `defer` d'Autoptimize est déjà traité, et bien.** Les cinq scripts qui lisent le projet
+au démarrage — `sapi-project.js`, `sapi-mescreations-immersion.js` (l. 1790),
+`sapi-product-preselect.js`, `sapi-photo-swap.js`, `sapi-modal-conseiller.js` — testent
+`readyState === 'complete'` au lieu du naïf `=== 'loading'`, précisément parce qu'un script
+différé voit déjà « interactive ». La règle est expliquée en toutes lettres dans
+`sapi-project.js` (l. 527-552), avec la mention que le site de test ne peut pas montrer ce
+bug. C'est le meilleur signe de tout ce lot : quelqu'un a pensé à la production sans pouvoir
+la tester. Détail : ce commentaire annonce « QUATRE AUTRES FICHIERS » mais
+`sapi-room-picker.js` suit la même règle — cinq, donc. Antérieur à ce lot.
+
+**La minification CSS** : les formules `clamp(0, calc(1 - var(--reveal) * 2), 1)` sont le
+genre d'expression qu'un minifieur maladroit casse (les espaces autour du `−` sont
+obligatoires dans un `calc`). **Mais master en contient déjà cinq**, en ligne depuis le 28/08
+et sans incident : la question est déjà tranchée en production. Ce lot n'ajoute pas de forme
+nouvelle, seulement des coefficients différents.
+
+**Ce qui reste à vérifier en prod, et nulle part ailleurs :**
+1. **La popup cookies**, première visite, sur `/mes-creations/?piece=salon` : la molette
+   doit rester à elle. C'est le seul acteur que je n'ai pas pu lire.
+2. **Le cache de page o2switch et la chaîne de requête.** L'état B se joue sur `?piece=`.
+   Si le cache sert la même page pour deux pièces différentes, la sélection serait fausse.
+   Déjà en ligne depuis le 28/08, donc probablement déjà éprouvé — mais ce lot ajoute
+   l'indicateur d'étapes, rendu côté serveur, qui sera mis en cache avec la page.
+3. **Un écran court réel** (13 pouces, 1366×768) : c'est le cas que le bloc « desktop court »
+   vise, et une note du code signale que le plancher de 80 px de photo tombe « tout près »
+   de cette résolution.
+
+---
+
+## 6. Les exclusions de déploiement → correctes
+
+Les deux workflows sont **identiques entre eux ET identiques à master** (`git diff` sur
+`.github/` : vide). Ce lot n'y touche pas.
+
+**`assets/*.txt` n'est PAS exclu, et c'est vérifiable.** La liste contient `*.txt`, mais un
+`*` simple ne traverse pas les `/` : il ne prend que la racine. La preuve est dans la liste
+elle-même — `assets/*.html` a dû être ajouté **en plus** de `*.html` pour attraper les deux
+fichiers de `assets/`. Donc `*.txt` ne touche que la racine (où le seul `.txt`,
+`guide-luminaire-v2-regles.txt`, n'est lu par aucun code). Les quatre prompts
+(`assets/guide-prompt-{ton,savoir,regles,exemples}.txt`, lus par `functions.php` l. 2915-2922)
+partent bien en ligne. Et ces exclusions tournent en prod depuis le 28/08 : si les prompts
+avaient sauté, le Conseiller écrirait n'importe quoi depuis cinq jours.
+
+**`mockups/**` est bien exclu** → les 9 nouvelles maquettes ne partiront pas.
+
+---
+
+## 7. Mon avis, franchement
+
+**Poussez-le.** Ce lot est d'une autre nature que celui du 28/08 : petit, borné à une page,
+et le seul mécanisme qui sort de cette page (l'écouteur de molette) ne s'arme nulle part
+ailleurs — je l'ai vérifié plutôt que supposé.
+
+**Ce qui me plaît** : les pièges de production sont traités AVANT d'y arriver. Le `defer`
+d'Autoptimize, le lien qui survit à l'absence de JS, le `touch-action` posé par le JS pour
+qu'un script mort ne bloque pas la page, le `prefill` qui ne pollue pas le tableau de bord.
+Ce sont des décisions qu'on ne prend d'habitude qu'après s'être fait mal.
+
+**Ce que je trouve fragile**, et ce n'est pas dans le code de ce lot :
+
+1. **Le nombre de valeurs qui doivent rester d'accord à la main.** Quatre pour le halo, cinq
+   seuils JS indexés sur des formules CSS, le −49 px calculé de tête. Elles sont toutes
+   justes aujourd'hui, et chacune est accompagnée d'un avertissement — mais un avertissement
+   n'est pas un garde-fou. Le remarque A ci-dessus le montre : **le premier à céder n'a pas
+   été un chiffre, c'est un commentaire.** Il a suffi d'une réécriture pour qu'une note
+   affirme que 8 est la tolérance d'arrivée. Le prochain qui lit ça et « corrige » le code
+   pour le faire coller au commentaire casse le défilement.
+   Ce que je ferais : sortir ces seuils en variables CSS lues par le JS
+   (`getComputedStyle().getPropertyValue('--seuil-x')`), pour qu'il n'y ait plus qu'un
+   endroit. Un chantier à part, à froid, pas maintenant.
+2. **La densité des commentaires.** Ils sont excellents — mais dans `imm.js` ils dépassent
+   le code en volume, et ils portent des faits (« 2,6 → 2,0 le 29/08 », « constaté par
+   Robin »). Un fait vieillit ; du code, non. C'est déjà arrivé deux fois dans ce fichier.
+
+Aucun des deux ne justifie de retarder la mise en ligne.
+
+**Réserve honnête** : ni PHP ni Node sur cette machine, donc pas de `php -l` ni de contrôle
+de syntaxe JS. J'ai vérifié `style.css` par analyse structurelle : **0 sélecteur orphelin,
+accolades équilibrées, exactement le même nombre de blocs vides que master (12)** — donc le
+retrait de règles de ce lot n'a rien laissé de cassé. Pour PHP et JS, la recette de Robin
+sur test reste la preuve, et elle vaut mieux qu'un linter.
+
+**Après la mise en ligne, trois choses à regarder** (dans cet ordre) :
+1. `/mes-creations/?piece=salon` en navigation privée → la popup cookies doit laisser la
+   molette au hero.
+2. La même page sur un écran court (13 pouces) → les cards ne doivent pas être rognées.
+3. Le carrousel sur téléphone → le swipe horizontal des cards doit encore fonctionner
+   (`touch-action: pan-x pinch-zoom`).
+
+---
+
+## [TÂCHE] Préparer la fusion test → master — lot immersion (Robin pousse lui-même)
+**Date :** 2026-09-02
+**Priorité :** haute
+**Branches :** `test-theme-sapi-maison` → `master`.
+
+### ⚠️ Ce que tu NE fais PAS
+
+**Tu ne pousses pas sur `master`.** Robin l'a redit le 02/09 : c'est lui qui pousse, depuis GitHub Desktop, comme le 28/08. Ta règle « push auto sur test, jamais master » reste en vigueur.
+
+### Contexte
+
+L'audit est fait et le verdict est « poussable » (rapport plus haut). Depuis, Cowork a livré deux corrections issues de tes remarques, que Robin a poussées sur test :
+- `sapi-mescreations-immersion.js` — un commentaire qui confondait `TOLERANCE_ARRIVEE` (4) et `GESTE_MINIMUM` (8), corrigé ;
+- le même fichier — l'indicateur d'étapes lisait le verrou de défilement à la main sur `html` seul ; il passe désormais par `scrollLocked()`, qui regarde `html` **et** `body`.
+
+**Revérifie que ces deux commits sont bien sur test avant de préparer quoi que ce soit**, et que le diff test ↔ master n'a pas bougé autrement depuis ton audit.
+
+### À faire
+
+1. **Confirmer que la fusion est toujours propre** : simulation en mémoire, zéro conflit attendu, résultat identique à test.
+2. **Écrire la procédure numérotée pour Robin**, dans ce fichier, sous cette tâche. Il n'est pas développeur : chaque étape doit dire où cliquer et ce qu'il doit voir. Elle doit couvrir, dans l'ordre :
+   - la sauvegarde UpdraftPlus **avant** toute chose (⚠️ la dernière a pris près de 40 minutes, le prévenir) ;
+   - la fusion dans GitHub Desktop et le push ;
+   - la vérification que le déploiement GitHub Actions est bien passé ;
+   - la purge des caches, **dans le bon ordre** (WP Super Cache puis Autoptimize), plus le cache de page o2switch sur `/mes-creations/` ;
+   - la vérification post-déploiement.
+3. **La liste de ce qu'il doit regarder en prod, et qui n'a pas pu l'être sur test.** Le site de test n'a ni Autoptimize ni cache de page. En particulier :
+   - le `defer` qu'Autoptimize ajoute à tous les scripts en production ;
+   - **la popup cookies**, seul angle mort que tu n'as pas pu lever : c'est une extension, hors du thème. À tester en navigation privée sur `/mes-creations/?piece=salon` — vérifier qu'elle ne bloque pas le défilement du hero et qu'elle ne passe pas sous l'indicateur d'étapes.
+4. **Le plan de repli**, en deux lignes : quoi faire si quelque chose casse en ligne, et sur quel commit revenir.
+
+### Critères de succès
+
+Robin lit la procédure, l'exécute seul, et sait à chaque étape ce qu'il doit voir. Aucun push de ta part sur `master`.
+
+### ✅ FAIT (2026-09-02, Claude Code) — rien poussé, `master` intact à `69ec45d`
+
+## Contrôles préalables — les trois sont bons
+
+**1. Les deux corrections sont sur test.** Commit `a37b914` du 02/09 à 19h14, un seul commit
+pour les deux :
+- `imm.js` l. 1305 — le commentaire dit maintenant « 8 px, soit `GESTE_MINIMUM` et NON
+  `TOLERANCE_ARRIVEE` qui vaut 4 ». Exact.
+- `imm.js` l. 1227 — `var pret = !scrollLocked();` remplace le test à la main. J'ai vérifié
+  que `scrollLocked()` est bien dans la même portée (les deux sont dans `init()`, une
+  déclaration de fonction est hissée, donc l'ordre ne pose pas de problème) et qu'il ne
+  reste **plus aucune lecture manuelle du verrou** dans le fichier.
+
+**2. Le diff n'a pas bougé autrement.** Toujours les mêmes 14 fichiers, plus
+`memory/claude_code_queue.md` (le rapport d'audit — exclu du déploiement). Aucun fichier
+supprimé, aucun fichier nouveau hors `mockups/`.
+
+**3. La fusion est propre.** Re-simulée en mémoire après `a37b914` : **zéro conflit**, et le
+résultat est **identique à test au bit près**. Master n'a rien que test n'ait déjà.
+
+**Et surtout — ce déploiement ne touche PAS la base de données.** J'ai vérifié : aucun
+`dbDelta`, aucun `CREATE`/`ALTER TABLE`, aucun `update_option`, `SAPI_SESSIONS_DB_VERSION`
+identique des deux côtés. **C'est du code seul.** Ça change tout pour le repli : si quelque
+chose casse, il suffit de remettre le code d'avant. Aucune donnée n'est en jeu.
+
+---
+
+## ⚠️ Une correction sur la consigne : l'ordre des caches est l'inverse
+
+La tâche demande « WP Super Cache **puis** Autoptimize ». **C'est l'ordre qui casse.** Voici
+pourquoi, et je pars sur l'ordre inverse dans la procédure ci-dessous :
+
+Autoptimize fabrique un gros fichier CSS unique dont le **nom contient une empreinte du
+contenu**. Chaque page mise en cache par WP Super Cache pointe vers ce nom précis.
+
+- **Super Cache d'abord, Autoptimize ensuite** : les pages se régénèrent et pointent vers le
+  fichier tout neuf d'Autoptimize… qu'on efface juste après. **Les pages fraîchement mises en
+  cache réclament un fichier qui n'existe plus → site sans style** jusqu'à ce qu'elles
+  expirent d'elles-mêmes.
+- **Autoptimize d'abord, Super Cache ensuite** : on efface les vieux fichiers, puis on efface
+  les pages qui les réclamaient. La première visite reconstruit les deux, cohérents.
+
+C'est d'ailleurs pour ça qu'Autoptimize affiche « pensez à vider aussi votre cache de page »
+après sa propre purge, et jamais l'inverse.
+
+**Note historique** : le journal du 14 avril garde la trace d'un bug de home en prod (panier
+et recherche visibles au chargement) **résolu en vidant WP Super Cache + Autoptimize + Redis**.
+Redis n'est pas dans la consigne. S'il est toujours actif sur le site, il faut le purger aussi
+— il est dans la procédure, à sauter s'il n'y est plus.
+
+---
+
+# 📋 PROCÉDURE — mise en prod du lot immersion
+
+Compter **1 h à 1 h 15** en tout, dont ~40 min de sauvegarde pendant lesquelles il n'y a rien
+à faire. À faire de préférence en heure creuse.
+
+---
+
+### Étape 1 — La sauvegarde UpdraftPlus ⏱️ ~40 min
+
+**⚠️ Prends ton temps sur celle-là : la dernière a mis près de 40 minutes.** Lance-la et va
+faire autre chose. Ne passe à l'étape 2 que quand elle est vraiment finie.
+
+1. `atelier-sapi.fr/wp-admin/` → menu **Réglages** → **Sauvegardes UpdraftPlus**
+2. Bouton bleu **« Sauvegarder maintenant »**
+3. Laisse les trois cases cochées (base de données, fichiers, envoi vers le stockage distant)
+4. Confirme
+
+**Ce que tu dois voir :** une barre de progression, puis la sauvegarde qui apparaît dans la
+liste **« Sauvegardes existantes »** avec la date du jour et les boutons *Base de données*,
+*Plugins*, *Thèmes*, *Uploads*.
+
+> **Pourquoi on la fait quand même alors qu'il n'y a pas de base à sauver :** ce lot ne touche
+> pas la base, donc elle ne servira probablement à rien. Mais elle coûte 40 minutes d'attente
+> et elle couvre le cas où tu toucherais autre chose sans y penser. On ne saute pas le filet.
+
+---
+
+### Étape 2 — La fusion dans GitHub Desktop ⏱️ 2 min
+
+1. Ouvre **GitHub Desktop**
+2. En haut, le sélecteur **Current branch** → choisis **`master`**
+3. Si un bouton **« Pull origin »** apparaît, clique-le d'abord (et attends qu'il disparaisse)
+4. Menu **Branch** (barre du haut) → **« Merge into current branch… »**
+5. Dans la liste, choisis **`test-theme-sapi-maison`**
+6. Clique le bouton bleu **« Create a merge commit »**
+
+**Ce que tu dois voir :** *« Successfully merged test-theme-sapi-maison into master »*, et
+**aucun message rouge parlant de conflit**. Je l'ai simulée : il ne doit pas y en avoir. S'il
+y en a un, **arrête-toi et appelle-moi** — ça voudrait dire que quelque chose a changé entre
+mon contrôle et ton clic.
+
+7. Clique **« Push origin »** en haut à droite
+
+**Ce que tu dois voir :** le bouton « Push origin » redevient gris / disparaît, et l'onglet
+**History** montre en haut un commit **`Merge branch 'test-theme-sapi-maison'`**.
+
+> À ce stade **rien n'est en ligne.** Le code est sur GitHub, le site n'a pas bougé. Tu peux
+> encore t'arrêter ici sans conséquence.
+
+---
+
+### Étape 3 — Lancer le déploiement ⏱️ 3-4 min
+
+1. Va sur **github.com/robinSapi/theme-atelier-sapi**
+2. Onglet **Actions** (en haut)
+3. Colonne de gauche → clique **« Deploy to Production »**
+4. À droite, bouton gris **« Run workflow »** → dans le menu qui s'ouvre, vérifie que la
+   branche est bien **`master`** (⚠️ pas `test-theme-sapi-maison`) → bouton vert
+   **« Run workflow »**
+5. Recharge la page au bout de quelques secondes : une ligne jaune apparaît. Clique dessus.
+
+**Ce que tu dois voir :** quatre étapes qui passent au vert l'une après l'autre —
+**Checkout code**, **Setup PHP**, **Install PHP dependencies (mPDF)**, **Deploy to O2Switch
+via FTP**. La troisième est la plus lente (elle télécharge la bibliothèque des PDF du
+catalogue), c'est normal.
+
+**Une pastille verte ✅ en haut = c'est en ligne.** Une croix rouge ❌ = **ne touche à rien et
+appelle-moi**, le site est encore dans son état d'avant.
+
+---
+
+### Étape 4 — Vider les caches, DANS CET ORDRE ⏱️ 2 min
+
+**L'ordre compte** (voir l'explication plus haut). Ne l'inverse pas.
+
+1. **Autoptimize d'abord.** `wp-admin` → **Réglages** → **Autoptimize** → bouton
+   **« Vider le cache »** (*Delete Cache*) en haut à droite.
+   *Ce que tu dois voir :* le compteur « taille du cache » retombe à 0 Ko / « Aucun fichier ».
+2. **WP Super Cache ensuite.** **Réglages** → **WP Super Cache** → onglet **Contenu** →
+   **« Supprimer le cache »** (*Delete Cache*).
+   *Ce que tu dois voir :* le nombre de pages en cache retombe à 0.
+3. **Redis, s'il est encore là.** Cherche **Redis** dans le menu de gauche ou dans
+   **Réglages**. S'il existe : **« Vider le cache »** / *Flush Cache*. **S'il n'y est plus,
+   passe.** (Il était en place en avril, je ne peux pas vérifier d'ici.)
+4. **Le cache de page o2switch (LiteSpeed).** Si tu as le plugin **LiteSpeed Cache** :
+   **LiteSpeed Cache** → **Boîte à outils** → **Purger tout**. Sinon, dans **cPanel o2switch**,
+   cherche **LiteSpeed Web Cache Manager** → **Flush All**.
+5. **Ton navigateur.** Ferme l'onglet `atelier-sapi.fr` s'il était ouvert, puis rouvre-le en
+   **navigation privée** — c'est le seul moyen d'être sûr de voir le vrai site et pas ta
+   propre copie.
+
+---
+
+### Étape 5 — Vérification, dans cet ordre ⏱️ 10 min
+
+**D'abord que le site est debout** (30 secondes, avant tout le reste) :
+
+1. `atelier-sapi.fr` s'affiche normalement, avec ses styles
+2. Une fiche produit s'ouvre
+3. Le panier s'ouvre et se ferme
+
+Si l'un des trois échoue → **Étape 6, plan de repli.**
+
+**Ensuite le lot lui-même**, sur `atelier-sapi.fr/mes-creations/?piece=salon` :
+
+| # | Quoi | Ce que tu dois voir |
+|---|---|---|
+| 1 | La phrase de Robin | Elle s'écrit **plus vite qu'avant** (le rythme a été accéléré) |
+| 2 | Un cran de molette vers le bas | **Un geste = un arrêt.** La photo se floute, le carrousel apparaît. Pas de tremblement, pas de double saut |
+| 3 | Le bouton **« Décrire mon projet »** | Fond **blanc plein**, à droite du carrousel. **Il doit réagir au clic** (c'est le défaut qu'on a corrigé : un bouton invisible lui volait ses clics) |
+| 4 | Survol du bouton blanc | Il se remplit, le texte reste lisible |
+| 5 | Bord droit de l'écran | **Trois repères** empilés, avec un **halo orange** derrière celui où tu es. Clique le troisième → il descend au catalogue |
+| 6 | La carte **« Sur-mesure »** en fin de carrousel | Elle **ouvre la modale** sur l'écran « contacter Robin », **déjà rempli** avec « pour mon salon ». Elle ne quitte plus la page |
+| 7 | Survol de cette carte | L'orange fonce. **Le texte ne doit PAS virer au bleu marine** (c'était le défaut) |
+| 8 | Depuis le catalogue, remonte | Un geste = une étape, dans l'autre sens |
+
+**Puis sur téléphone**, même adresse :
+- le **glissement horizontal** du carrousel fonctionne toujours ;
+- le défilement vertical du hero fait bien **un arrêt par geste**.
+
+---
+
+### Étape 6 — Plan de repli
+
+**Si le site casse :** GitHub Desktop → onglet **History** → clic droit sur le commit
+**`Merge branch 'test-theme-sapi-maison'`** (le plus récent) → **« Revert changes in
+commit »** → **Push origin** → refais l'**Étape 3** (relancer le workflow) puis l'**Étape 4**
+(vider les caches, même ordre).
+
+**Le commit sur lequel on revient est `69ec45d`** — exactement ce qui tourne en prod
+aujourd'hui, le déploiement du 28/08. **Aucune donnée n'est concernée** : ce lot ne touche pas
+la base, donc pas besoin de restaurer UpdraftPlus. Le repli, c'est du code et rien d'autre.
+
+Si le revert ne suffit pas ou si tu préfères ne pas y toucher : **appelle-moi, ne bricole pas.**
+
+---
+
+## 🔍 Ce qui n'a pas pu être testé sur test, et pourquoi
+
+Le site de test n'a **ni Autoptimize ni cache de page**. Deux classes de bug y sont donc
+invisibles par construction. Aucune n'est une raison d'attendre — mais ce sont les trois
+choses à regarder en priorité une fois en ligne.
+
+**1. Le `defer` d'Autoptimize** — traité d'avance, mais à confirmer.
+En production, Autoptimize ajoute `defer` à tous les scripts, ce qui change le moment où ils
+démarrent. Les cinq fichiers concernés ont un test spécial pour ça (`readyState === 'complete'`
+au lieu du réflexe habituel), documenté dans `sapi-project.js`. **Symptôme si c'était raté :**
+tu arrives sur `/mes-creations/?piece=salon` et la sélection ne correspond pas à la pièce
+demandée, ou le hero ne démarre pas sa séquence. Test : ouvre l'adresse en navigation privée
+et regarde si la bonne pièce est annoncée.
+
+**2. La popup cookies — le seul angle mort de tout l'audit.**
+C'est une extension, hors du thème : je n'ai pas pu la lire, donc je ne peux rien affirmer.
+Le hero capte la molette pour avancer d'un cran à la fois, et il rend la main dès qu'un
+panneau du site verrouille le défilement — j'ai vérifié que ça marche pour le menu, le panier,
+la recherche et la modale. **La popup cookies, non.**
+
+**Test, en navigation privée** (sinon elle ne s'affiche pas), sur
+`atelier-sapi.fr/mes-creations/?piece=salon` :
+- la bannière est là → **essaie de faire défiler la page à la molette.** Elle doit se
+  comporter normalement ;
+- **regarde le bord droit** : les trois repères ne doivent pas passer par-dessus la bannière
+  ni être coupés par elle ;
+- **accepte les cookies** → le hero doit redevenir normal, un geste = un arrêt.
+
+Si la molette est bloquée tant que la bannière est là, **ce n'est pas grave et c'est
+réparable en une ligne** — dis-le-moi, je regarde comment cette extension verrouille la page.
+
+**3. Le cache de page et l'adresse `?piece=`.**
+Chaque pièce a sa propre adresse (`?piece=salon`, `?piece=cuisine`…). Si le cache o2switch
+servait la même page pour deux pièces différentes, un visiteur verrait la sélection d'une
+autre pièce. **Test :** ouvre `?piece=salon`, puis `?piece=cuisine` dans un autre onglet — les
+deux doivent annoncer leur propre pièce et montrer des produits différents. Ça tourne déjà
+depuis le 28/08 sans incident, mais ce lot ajoute l'indicateur d'étapes, qui est fabriqué côté
+serveur et sera donc mis en cache avec la page.
+
+**4. Un écran court** (portable 13 pouces, 1366×768).
+C'est le cas que vise la bascule « desktop court ». Une note du code signale que le plancher
+de hauteur des photos tombe tout près de cette résolution. **Test :** les cards du carrousel
+ne doivent pas être rognées en bas, et le bouton « Découvrir » doit rester entier.
+
+---
+
+**Rappel : je n'ai rien poussé.** `master` est toujours à `69ec45d`. Tout ce qui précède
+attend tes clics.
