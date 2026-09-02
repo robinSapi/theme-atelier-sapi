@@ -96,9 +96,11 @@
   </ol>
 
   <div class="prix">
-    <h3>Le prix, accepté en connaissance de cause</h3>
-    <p>Après une poussée franche, <b>le hero reste sourd jusqu'à deux secondes</b>, le temps que l'élan du trackpad s'éteigne. Et deux gestes volontaires rapprochés ne comptent que pour un.</p>
-    <p>C'est la contrepartie directe de « un geste ne vaut qu'un arrêt ». Toute tentative de rendre la main plus vite rouvre la porte au double saut : ça a été essayé, le défaut est revenu par-derrière.</p>
+    <h3>Le prix, accepté deux fois en connaissance de cause</h3>
+    <p>Après une poussée franche, <b>le hero reste sourd jusqu'à ce que l'élan du trackpad s'éteigne</b> — jusqu'à deux secondes. Deux gestes volontaires rapprochés ne comptent que pour un.</p>
+    <p><b>Pourquoi bouger le curseur débloque la situation :</b> le déplacer, c'est poser les doigts sur le trackpad, et ce contact éteint l'élan. Il y a alors un vrai silence, et le geste suivant est pris. Ce n'est pas un contournement d'un bug, c'est la règle qui fait son travail.</p>
+    <p><b>Et ce n'est pas réparable, c'est un choix.</b> Le navigateur envoie exactement le même signal pour un mouvement de doigt et pour l'élan qui continue seul : rien ne permet de les distinguer. Soit on attend le silence et un geste ne franchit jamais deux arrêts, soit on réagit plus tôt et une image sautée finira par être prise pour un geste. Robin a tranché <b>deux fois</b> pour la fiabilité, le 29/08.</p>
+    <p>Une échappatoire existe quand même et fonctionne souvent : une amplitude qui repart brusquement à la hausse est reconnue comme un nouveau coup de doigt. Elle est volontairement prudente. <b>Ne pas la desserrer sans redemander à Robin.</b></p>
   </div>
 
   <div class="jamais">
