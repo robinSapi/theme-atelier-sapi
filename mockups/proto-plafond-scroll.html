@@ -528,9 +528,16 @@
   var RELANCE_FACTEUR = 2.0, RELANCE_PLANCHER = 14;
   window.addEventListener('wheel', function(e){
     if (reduceMotion) return;
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    /* ⚠️ L'élan déjà en vol n'est plus annulable : le navigateur émet alors des
+       événements `cancelable: false`, et `preventDefault` n'y fait rien (Chrome
+       le signale en console). Tenter quand même faisait vibrer la page sur
+       l'arrêt du catalogue — notre animation contre l'élan natif. On laisse
+       passer, l'ancreur rattrape après le silence.
+       ⇦ Même ordre de sorties qu'en production, pour rester jugeable. */
+    if (!e.cancelable) return;
     // Pendant la frappe, la page est verrouillée : le geste appartient au saut.
     if (document.documentElement.style.overflow === 'hidden') return;
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
     var s = stops(), y = window.pageYOffset;
     if (!dansLaPlage(y, s)) return;
 

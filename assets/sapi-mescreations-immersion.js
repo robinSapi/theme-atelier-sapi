@@ -1444,6 +1444,23 @@
            geste dont on ne ferait rien — et on tuait au passage le « retour en
            arrière » par glissement du navigateur. */
         if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+        /* ⚠️ SORTIE 0 bis — L'ÉLAN EST DÉJÀ EN VOL, ON NE PEUT PLUS L'ARRÊTER.
+           Quand un geste a commencé à faire défiler la page NATIVEMENT — c'est
+           le cas quand on arrive du catalogue, où on ne retient personne — le
+           navigateur passe la main au compositeur et émet la suite des
+           événements en `cancelable: false`. `preventDefault()` n'y fait plus
+           rien (Chrome le signale en console, mais l'événement n'est pas annulé
+           pour autant : chercher un échec silencieux ferait perdre du temps).
+           Sans ce test on tentait quand même : on lançait notre animation vers
+           l'arrêt, pendant que l'élan natif continuait de pousser dans l'autre
+           sens. Deux forces sur le même axe = la page CLIGNOTE ET VIBRE sur
+           l'arrêt du haut du catalogue, jusqu'à ce que l'élan s'éteigne.
+           Constaté par Robin le 29/08, sur le site comme dans le prototype.
+           On laisse donc passer : l'ancreur (`maybeSnap`) rattrape après le
+           silence, et c'est exactement le chemin prévu pour ce cas. */
+        if (!e.cancelable) return;
+
         /* ⚠️ SORTIE 1 — UN PANNEAU FLOTTANT TIENT L'ÉCRAN. Modale Conseiller,
            panier, recherche, menu mobile : tous verrouillent la page par
            `overflow: hidden`, et tous ont un contenu qui défile à l'intérieur.
