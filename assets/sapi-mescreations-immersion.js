@@ -1218,7 +1218,13 @@
          est verrouillée, annoncer un parcours n'aurait aucun sens.
          `inert` retire focus ET pointeur d'un coup — `opacity: 0` seul laisse
          les repères dans le parcours de tabulation, piège déjà payé ici. */
-      var pret = document.documentElement.style.overflow !== 'hidden';
+      /* ⚠️ ON PASSE PAR `scrollLocked()`, PAS PAR UN TEST À LA MAIN. Lui seul
+         regarde `html` ET `body` : le menu, le panier et la recherche ne
+         verrouillent que `body`. Le test direct ne les voyait pas.
+         Sans conséquence visible aujourd'hui — la pastille est au-dessous de
+         tous ces panneaux — mais c'est une divergence qui n'attend qu'un
+         changement de z-index pour se réveiller. */
+      var pret = !scrollLocked();
       stepsEl.classList.toggle('is-in', pret);
       stepsEl.toggleAttribute('inert', !pret);
 
@@ -1296,8 +1302,10 @@
     }
     /* Hors de cette plage, la page est LIBRE : au-dessus du hero, et dès qu'on
        est descendu sous la dernière étape. On ne retient jamais quelqu'un qui
-       lit le catalogue. Bornes SERRÉES (8 px, la tolérance d'arrivée) : une
-       marge plus large sous la
+       lit le catalogue. Bornes SERRÉES — 8 px, soit `GESTE_MINIMUM` et NON
+       `TOLERANCE_ARRIVEE` qui vaut 4 : ce sont deux constantes différentes, et
+       ce fichier met ailleurs en garde de ne pas les confondre. Une marge plus
+       large sous la
        dernière étape retiendrait le visiteur dans les premiers écrans du
        catalogue, ce qui est exactement l'inverse du but. */
     function inHeroRange(y, stops) {

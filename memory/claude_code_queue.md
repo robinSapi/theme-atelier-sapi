@@ -2334,3 +2334,292 @@ Sur 5 fiches produit (Olivia ×2, Charlie, Claudine, Vincent), une ancienne vale
 
 ⚠️ **Si le sujet revient : ne pas supprimer cette donnée sans faire corriger le code d'abord.** C'est elle qui fait exister la ligne « Poids » sur ces 5 fiches ; la supprimer seule ferait disparaître le poids dynamique au lieu de le réparer. Le détail technique est consigné plus haut dans ce fichier.
 
+
+---
+
+## [TÂCHE] Audit test ↔ master avant mise en prod — lot immersion /mes-creations/
+**Date :** 2026-09-02
+**Priorité :** haute
+**Branches :** comparer `test-theme-sapi-maison` (à jour, tout est recetté par Robin) avec `master` (en ligne). **Ne rien fusionner, ne rien pousser.** Robin décide après lecture.
+
+### Contexte
+
+Dernière mise en prod : 28/08 (262 commits, réussie). Depuis, un gros lot a été livré et recetté sur test, presque entièrement sur le hero immersif de `/mes-creations/` en état B. Cowork a écrit le code, un agent a relu chaque livraison, Robin a validé par recette numérotée. **Ce qu'on cherche ici, c'est le regard qui manque : la cohérence de l'ensemble, et ce qui échappe à une relecture livraison par livraison.**
+
+### Ce qui a changé depuis le 28/08, par sujet
+
+1. **Bouton « Décrire mon projet »** — sorti de la zone sélection pour en devenir le frère suivant ; remonte en desktop par `order` à l'emplacement du bouton « Découvrir ma sélection » ; fond blanc plein ; survol en `--color-wood-dark`. Trois défauts trouvés en relecture : le bouton « Découvrir » gardait `pointer-events: auto` pour toujours et volait les clics ; le voile de `__inner::before` salissait le blanc ; deux `@media (max-height: …)` sans borne de largeur reposaient un `bottom: calc(7vh…)`.
+
+2. **Bascule « desktop court »** (`@media (min-width: 769px) and (max-height: 800px)`, en fin de `style.css`) — sous 800 px de haut, le desktop emprunte le mécanisme du mobile : la zone 1 quitte le flux. Corrige un rognage des cards mesuré par Robin à 720 px ; seuil descendu à ~500 px.
+
+3. **Défilement du hero** — le plus sensible. `sapi-mescreations-immersion.js` : écouteur `wheel` déplacé de la section vers `window` (le header collant mangeait le geste) ; sortie sur `!e.cancelable` (on ne lutte plus contre un élan natif déjà en vol) ; horloge du geste alimentée avant toute sortie ; cumul et verrou par geste ; détection de « relance » ; `easeInOut` et 680 ms ; seuils `--reveal` réétalés côté CSS **et** leur miroir côté JS ; cache des positions d'arrêt.
+
+4. **Indicateur d'étapes** — nouveau `<nav class="mescreations-steps">` dans `archive-product.php`, **hors** de la section immersion (la couche de contenu porte un `transform` + `will-change`). Trois repères, halo orange qui glisse, cliquables.
+
+5. **Card sur-mesure du carrousel** — n'emmène plus vers `/sur-mesure/` : ouvre la modale sur l'écran `s-contact` pré-rempli, sans questionnaire ni IA. Nouveaux textes PHP (`sapi_surmesure_contact_texts`) et table de possessifs à la 1re personne. Le lien garde son `href` en repli.
+
+6. **Divers** — accélération de la machine à écrire (34→22 ms, attente 900→550 ms) ; survol de la card sur-mesure repris en main (la règle globale `a:hover` repeignait son texte en bleu marine).
+
+### À faire
+
+Un rapport écrit dans ce fichier, sous cette tâche. Pas de correction de code sans accord de Robin.
+
+1. **Le diff complet test ↔ master**, par fichier, avec le volume. Signale tout fichier modifié qui n'appartient à aucun des six sujets ci-dessus : c'est là que se cachent les surprises.
+2. **Les régressions possibles hors `/mes-creations/`.** `style.css` et `functions.php` sont partagés par tout le site. L'écouteur `wheel` vit désormais sur `window` : vérifie qu'il ne peut rien bloquer ailleurs (panier, recherche, menu, modale, popup cookies). La règle `a:hover` et le bloc `button::after` ont été touchés localement — vérifie qu'aucune de ces retouches ne déborde.
+3. **La cohérence de l'ensemble.** Chaque livraison a été relue seule. Les six sujets se recouvrent (le même bouton, la même zone, les mêmes seuils) : cherche les contradictions entre eux, les valeurs qui devraient être en phase et ne le sont plus, les commentaires qui décrivent un état antérieur.
+4. **Les seuils dédoublés.** Plusieurs valeurs existent en double, CSS et JS : les opacités de `--reveal` et leurs miroirs de cliquabilité (0,50 et 0,72), le débordement du halo (4 px, écrit quatre fois), la remontée de `-49px` calée sur la hauteur du bouton blanc. Vérifie qu'ils sont d'accord.
+5. **Ce qui n'a jamais été testé en conditions réelles.** La production a Autoptimize (`defer` sur les scripts, minification CSS) et un cache de page o2switch, le site de test n'a ni l'un ni l'autre. Signale tout ce qui pourrait se comporter différemment là-bas — c'est une classe de bug que la recette ne peut pas montrer.
+6. **Les exclusions de déploiement.** Les deux workflows doivent rester identiques et ne jamais exclure `assets/*.txt` (les prompts de l'IA sont lus à l'exécution). Vérifie aussi que les nouveaux fichiers de `mockups/` sont bien exclus.
+7. **Ton avis, franchement.** Est-ce que ce lot est poussable en l'état ? Qu'est-ce que tu ferais autrement ? Qu'est-ce qui te paraît fragile ?
+
+### Critères de succès
+
+Un rapport lisible par Robin (artisan, pas développeur) : ce qui est sûr, ce qui l'est moins, et ce qu'il faut regarder avant de fusionner. Les numéros de ligne et les noms de fichiers pour Cowork. **Un verdict net : poussable ou non.**
+
+### ✅ AUDIT FAIT (2026-09-02, Claude Code) — lecture seule, rien fusionné, rien poussé
+
+## VERDICT : POUSSABLE.
+
+Rien de bloquant. Deux remarques mineures plus bas, aucune n'empêche la fusion. Ce lot n'a
+rien à voir avec celui du 28/08 : **14 fichiers au lieu de 113, dont 5 de code et 9 maquettes.**
+Petit, ciblé, entièrement sur `/mes-creations/`.
+
+**Point de divergence** : `f3b44d7` du 28/08 (le déploiement précédent). 18 commits sur test
+depuis, du 28/08 au 02/09.
+
+**Sécurité de la fusion — vérifiée, pas supposée.** Fusion simulée en mémoire
+(`git merge-tree`, aucun fichier touché) : **zéro conflit**, et le résultat de la fusion est
+**identique à test au bit près**. Autrement dit, master n'a rien que test n'ait déjà : aucun
+correctif de prod ne serait écrasé. Les 18 commits de master hors de test sont sa propre
+ligne d'historique (blindage WC, anti-spam, catalogue) plus le commit de fusion du 28/08 —
+tout est déjà dans test par la fusion.
+
+---
+
+## 1. Le diff, fichier par fichier
+
+Total : **14 fichiers, +4 393 / −139.**
+
+| Fichier | Δ | Sujet |
+|---|---|---|
+| `assets/sapi-mescreations-immersion.js` | +821 | 3 (défilement) + 4 (indicateur) + 5 (card sur-mesure) + 6 |
+| `style.css` | +638 | 1, 2, 4, 5, 6 |
+| `assets/sapi-modal-conseiller.js` | +112 | 5 (écran contact pré-rempli) |
+| `woocommerce/archive-product.php` | +92 | 4 (le `<nav>`) + 5 (la card en `<a>` intercepté) |
+| `functions.php` | +65 | 5 uniquement |
+| `mockups/*.html` (9 nouveaux) | +2 804 | maquettes, prototype, 3 recettes |
+
+**Aucun fichier orphelin.** Les 14 se rattachent aux six sujets. Aucun fichier supprimé.
+Les 9 maquettes sont toutes sous `mockups/`, donc exclues du déploiement (voir §6).
+
+`functions.php` (+65) est strictement le sujet 5 : `sapi_piece_possessive_mienne_map()`
+(l. 3710), `sapi_surmesure_contact_texts()` (l. 3746) et leur transmission au JS (l. 588).
+Additif, rien de touché ailleurs. Sorties échappées (`esc_url`, `esc_attr_e`).
+
+Hygiène : **0 `console.log` ajouté** (les 2 `console.warn` du modal sont d'avant et sur des
+chemins d'erreur), **0 `!important` ajouté**, aucun résidu de débogage, aucun `TODO`.
+
+---
+
+## 2. Régressions hors `/mes-creations/` → AUCUNE. Vérifié un par un.
+
+**`style.css` : les 14 hunks vivent tous entre les lignes 25 391 et la fin du fichier**,
+c'est-à-dire dans le bloc immersion. Tous les sélecteurs ajoutés sont préfixés
+`.mescreations-*`. Un seul sélecteur supprimé, et il est réécrit juste après.
+
+- **La règle globale `a:hover`** (l. 516) est **identique au bit près** entre master et test.
+  Le sujet 6 ne l'a pas touchée : il a écrit un survol VOULU sur `.mescreations-immersion__pcard--sur`
+  (l. 26 117), qui reprend la main localement. C'est la bonne façon.
+- **Le `button::after` global** (l. 243) est lui aussi **identique**. La neutralisation est
+  locale : `.mescreations-steps__item::after { display: none }` (l. 25 686). Ne déborde pas.
+
+**L'écouteur `wheel` sur `window`** — le point le plus sensible, et il tient :
+
+1. **Il n'existe pas ailleurs.** `init()` sort immédiatement si `[data-immersion]` est absent
+   (`imm.js` l. 42-43), et ce marqueur n'est rendu QUE par `archive-product.php` en état B.
+   Le script est chargé sur `is_shop() || is_product()` mais ne s'arme jamais ailleurs.
+   Panier, recherche, menu, fiche produit, accueil : **l'écouteur n'y est même pas posé.**
+2. **Sur la page elle-même**, six sorties précèdent le `preventDefault` (l. 1514) : geste
+   horizontal, `!e.cancelable` (l. 1491), `scrollLocked()` (l. 1499), pas de positions d'arrêt,
+   hors plage du hero, et les deux extrémités.
+3. **`scrollLocked()` (l. 1039) couvre bien tous les panneaux du site.** J'ai vérifié :
+   `menu.js`, `catalogue.js`, `admin-conseiller.js` et `sapi-modal-conseiller.js` verrouillent
+   TOUS par `style.overflow` en ligne, sur `body` ou sur les deux. Aucun ne passe par une
+   classe CSS — j'ai cherché, `style.css` n'en contient aucune. Le test à deux branches
+   (`html` OU `body`) les attrape tous.
+4. **Popup cookies** : c'est une extension, hors du thème, je ne peux pas la lire d'ici. Elle
+   n'apparaît que sur la première visite. Si elle verrouille le défilement autrement qu'en
+   ligne, la molette resterait captée derrière — **à regarder une fois en prod, en navigation
+   privée, sur `/mes-creations/?piece=salon`.** C'est le seul angle mort de ce point.
+
+**Coût sur le catalogue** : l'écouteur tourne sur toute la page, mais chaque événement ne
+coûte que deux lectures de style en ligne et un tableau en cache (`stopsCache`, `imm.js`
+l. 1280). L'invalidation du cache est complète : redimensionnement, remplacement de cards,
+recalage à 600 ms, et `document.fonts.ready`. Rien qui déclenche un recalcul de mise en page.
+
+---
+
+## 3. Cohérence de l'ensemble — deux remarques, aucune bloquante
+
+**⚠️ A. Un commentaire faux, introduit par ce lot.** `imm.js` l. 1299 :
+« Bornes SERRÉES (8 px, la tolérance d'arrivée) ». **La tolérance d'arrivée vaut 4**
+(`TOLERANCE_ARRIVEE`, l. 1000) ; 8, c'est `GESTE_MINIMUM` (l. 999). Master disait « Bornes
+STRICTES » sans chiffre — la réécriture a inventé une équivalence qui n'existe pas. Le code
+est juste (le `8` en dur de `inHeroRange` fait son travail), **seul le commentaire ment** —
+et il ment sur les deux constantes que le même fichier met en garde de ne pas confondre
+(l. 1417). À corriger quand Cowork repassera dessus : soit dire « 8 px, le geste minimum »,
+soit remplacer le `8` en dur par `GESTE_MINIMUM`.
+
+**⚠️ B. Deux tests de verrouillage différents dans le même fichier.** `scrollLocked()`
+(l. 1039) teste `html` **ou** `body`, après un bug documenté. `majEtapes()` (l. 1221) teste
+`html` **seul** pour décider si l'indicateur d'étapes s'affiche. Conséquence : menu, panier
+ou recherche ouverts (ils ne verrouillent que `body`), la pastille reste affichée et
+cliquable. **Aujourd'hui ça ne se voit pas** : j'ai relevé les z-index, tous ces panneaux
+passent au-dessus (mini-panier 9998/9999, menu 9999, recherche 10000/10001, modale 10050)
+contre 9000 pour la pastille. Elle est couverte, donc invisible et inatteignable. Mais le
+jour où un panneau passera sous 9000, ou ne couvrira pas le bord droit, le défaut sortira.
+Aligner l. 1221 sur `scrollLocked()` coûte une ligne.
+
+**Le reste des recouvrements entre sujets est propre**, et c'est le point important :
+
+- Le `-49px` du bouton « Décrire » (sujet 1, `style.css` l. 25 599) est **annulé** par le bloc
+  desktop court (sujet 2, l. 26 680, `margin-top: 14px`) — même sélecteur, plus bas dans le
+  fichier, donc il gagne. C'est écrit noir sur blanc dans le commentaire, et c'est exact.
+- Les deux `@media (max-height:)` sans borne de largeur (l. 26 225 et 26 232) sont
+  **inchangés** par rapport à master. Ils sont neutralisés sur desktop par un sélecteur à
+  deux classes (l. 25 529, `bottom: auto`), qui gagne par spécificité quel que soit l'ordre.
+  Le défaut du sujet 1 est bien traité, et il l'est structurellement.
+- Le `<nav>` de l'indicateur est bien **hors** de la section immersion
+  (`archive-product.php` l. 371, après la fermeture du track) et en `position: fixed` : il ne
+  décale pas le catalogue, donc il ne fausse pas la 3ᵉ position d'arrêt.
+- La card sur-mesure reste un vrai `<a href>` : sans JS, le lien mène encore à `/sur-mesure/`.
+  Clic milieu, ⌘/Ctrl/Maj/Alt : tous laissés passer (l. 360).
+- Le message pré-rempli va dans `prefill`, **pas** dans `contact_message` : un visiteur qui
+  clique puis referme ne laisse pas au tableau de bord une phrase qu'il n'a jamais écrite.
+  Bien vu, c'est le genre de piège qui ne se voit qu'en production, trois semaines plus tard.
+
+---
+
+## 4. Les seuils dédoublés → tous d'accord. Vérifiés au calcul.
+
+**Le débordement du halo, 4 px, écrit quatre fois — les quatre concordent :**
+`GLOW_DEBORD = 4` (`imm.js` l. 1199) · largeur `14px` = 6 (le repère) + 4 + 4 · `left: 5px`
+en desktop = 9 (rembourrage) − 4 · `left: 4px` en mobile = 8 (rembourrage) − 4. ✔
+
+**Les opacités `--reveal` et leurs miroirs de cliquabilité :**
+
+| Élément | CSS | JS | Accord |
+|---|---|---|---|
+| `__reveal-btn.is-in` | s'éteint à 0,50 (`1 − reveal × 2`, l. 25 402) | neutralisé si `p > 0.5` (l. 906) | ✔ exact |
+| `__hint--reveal` | s'éteint à 0,50 (l. 25 811) | cliquable si `p < 0.5` (l. 910) | ✔ exact |
+| `__hint--catalogue` | s'allume à 0,72 (l. 25 819) | cliquable si `p >= 0.72` (l. 911) | ✔ exact |
+| `__selection` / `__describe` | s'allument à 0,15 | cliquables à 0,50 (l. 878, 886) | ✔ **volontaire** |
+
+Le dernier n'est pas un miroir d'opacité mais un **relais** : le carrousel et « Décrire »
+prennent la main exactement là où le fantôme de « Découvrir » la rend, pour qu'aucune zone
+de clic ne se superpose. C'est documenté et cohérent. Conséquence assumée : entre 15 % et
+50 % de la course, les cards sont visibles (jusqu'à 40 % d'opacité) mais inertes. En pratique
+le visiteur est en train de faire son geste, pas de viser une card.
+
+**Le `-49px`, calé sur la hauteur du bouton blanc :** 13 + 13 de rembourrage, 1 + 1 de
+bordure, 21 de boîte de ligne (14 px × 1,5) = **49**. ✔ Et l'icône du bouton fait 16 px
+(l. 25 404), donc elle ne fait pas grandir la ligne. J'ai aussi vérifié que les blocs
+`max-height` ne redimensionnent PAS `__reveal-btn` : le 49 tient aussi sur écran court.
+
+**Point de lecture, pas de bug** : `.mescreations-immersion__reveal-btn.is-in` est déclaré
+**deux fois** (l. 25 385 et 25 401), séparé par un pavé de commentaire. Le second l'emporte
+pour l'opacité, ce qui est l'effet voulu — mais deux règles au même sélecteur à seize lignes
+d'écart, c'est une invitation à en modifier une seule.
+
+---
+
+## 5. Ce qui n'a jamais tourné en conditions réelles
+
+**Le `defer` d'Autoptimize est déjà traité, et bien.** Les cinq scripts qui lisent le projet
+au démarrage — `sapi-project.js`, `sapi-mescreations-immersion.js` (l. 1790),
+`sapi-product-preselect.js`, `sapi-photo-swap.js`, `sapi-modal-conseiller.js` — testent
+`readyState === 'complete'` au lieu du naïf `=== 'loading'`, précisément parce qu'un script
+différé voit déjà « interactive ». La règle est expliquée en toutes lettres dans
+`sapi-project.js` (l. 527-552), avec la mention que le site de test ne peut pas montrer ce
+bug. C'est le meilleur signe de tout ce lot : quelqu'un a pensé à la production sans pouvoir
+la tester. Détail : ce commentaire annonce « QUATRE AUTRES FICHIERS » mais
+`sapi-room-picker.js` suit la même règle — cinq, donc. Antérieur à ce lot.
+
+**La minification CSS** : les formules `clamp(0, calc(1 - var(--reveal) * 2), 1)` sont le
+genre d'expression qu'un minifieur maladroit casse (les espaces autour du `−` sont
+obligatoires dans un `calc`). **Mais master en contient déjà cinq**, en ligne depuis le 28/08
+et sans incident : la question est déjà tranchée en production. Ce lot n'ajoute pas de forme
+nouvelle, seulement des coefficients différents.
+
+**Ce qui reste à vérifier en prod, et nulle part ailleurs :**
+1. **La popup cookies**, première visite, sur `/mes-creations/?piece=salon` : la molette
+   doit rester à elle. C'est le seul acteur que je n'ai pas pu lire.
+2. **Le cache de page o2switch et la chaîne de requête.** L'état B se joue sur `?piece=`.
+   Si le cache sert la même page pour deux pièces différentes, la sélection serait fausse.
+   Déjà en ligne depuis le 28/08, donc probablement déjà éprouvé — mais ce lot ajoute
+   l'indicateur d'étapes, rendu côté serveur, qui sera mis en cache avec la page.
+3. **Un écran court réel** (13 pouces, 1366×768) : c'est le cas que le bloc « desktop court »
+   vise, et une note du code signale que le plancher de 80 px de photo tombe « tout près »
+   de cette résolution.
+
+---
+
+## 6. Les exclusions de déploiement → correctes
+
+Les deux workflows sont **identiques entre eux ET identiques à master** (`git diff` sur
+`.github/` : vide). Ce lot n'y touche pas.
+
+**`assets/*.txt` n'est PAS exclu, et c'est vérifiable.** La liste contient `*.txt`, mais un
+`*` simple ne traverse pas les `/` : il ne prend que la racine. La preuve est dans la liste
+elle-même — `assets/*.html` a dû être ajouté **en plus** de `*.html` pour attraper les deux
+fichiers de `assets/`. Donc `*.txt` ne touche que la racine (où le seul `.txt`,
+`guide-luminaire-v2-regles.txt`, n'est lu par aucun code). Les quatre prompts
+(`assets/guide-prompt-{ton,savoir,regles,exemples}.txt`, lus par `functions.php` l. 2915-2922)
+partent bien en ligne. Et ces exclusions tournent en prod depuis le 28/08 : si les prompts
+avaient sauté, le Conseiller écrirait n'importe quoi depuis cinq jours.
+
+**`mockups/**` est bien exclu** → les 9 nouvelles maquettes ne partiront pas.
+
+---
+
+## 7. Mon avis, franchement
+
+**Poussez-le.** Ce lot est d'une autre nature que celui du 28/08 : petit, borné à une page,
+et le seul mécanisme qui sort de cette page (l'écouteur de molette) ne s'arme nulle part
+ailleurs — je l'ai vérifié plutôt que supposé.
+
+**Ce qui me plaît** : les pièges de production sont traités AVANT d'y arriver. Le `defer`
+d'Autoptimize, le lien qui survit à l'absence de JS, le `touch-action` posé par le JS pour
+qu'un script mort ne bloque pas la page, le `prefill` qui ne pollue pas le tableau de bord.
+Ce sont des décisions qu'on ne prend d'habitude qu'après s'être fait mal.
+
+**Ce que je trouve fragile**, et ce n'est pas dans le code de ce lot :
+
+1. **Le nombre de valeurs qui doivent rester d'accord à la main.** Quatre pour le halo, cinq
+   seuils JS indexés sur des formules CSS, le −49 px calculé de tête. Elles sont toutes
+   justes aujourd'hui, et chacune est accompagnée d'un avertissement — mais un avertissement
+   n'est pas un garde-fou. Le remarque A ci-dessus le montre : **le premier à céder n'a pas
+   été un chiffre, c'est un commentaire.** Il a suffi d'une réécriture pour qu'une note
+   affirme que 8 est la tolérance d'arrivée. Le prochain qui lit ça et « corrige » le code
+   pour le faire coller au commentaire casse le défilement.
+   Ce que je ferais : sortir ces seuils en variables CSS lues par le JS
+   (`getComputedStyle().getPropertyValue('--seuil-x')`), pour qu'il n'y ait plus qu'un
+   endroit. Un chantier à part, à froid, pas maintenant.
+2. **La densité des commentaires.** Ils sont excellents — mais dans `imm.js` ils dépassent
+   le code en volume, et ils portent des faits (« 2,6 → 2,0 le 29/08 », « constaté par
+   Robin »). Un fait vieillit ; du code, non. C'est déjà arrivé deux fois dans ce fichier.
+
+Aucun des deux ne justifie de retarder la mise en ligne.
+
+**Réserve honnête** : ni PHP ni Node sur cette machine, donc pas de `php -l` ni de contrôle
+de syntaxe JS. J'ai vérifié `style.css` par analyse structurelle : **0 sélecteur orphelin,
+accolades équilibrées, exactement le même nombre de blocs vides que master (12)** — donc le
+retrait de règles de ce lot n'a rien laissé de cassé. Pour PHP et JS, la recette de Robin
+sur test reste la preuve, et elle vaut mieux qu'un linter.
+
+**Après la mise en ligne, trois choses à regarder** (dans cet ordre) :
+1. `/mes-creations/?piece=salon` en navigation privée → la popup cookies doit laisser la
+   molette au hero.
+2. La même page sur un écran court (13 pouces) → les cards ne doivent pas être rognées.
+3. Le carrousel sur téléphone → le swipe horizontal des cards doit encore fonctionner
+   (`touch-action: pan-x pinch-zoom`).
