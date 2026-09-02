@@ -26114,6 +26114,34 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   border-bottom: 1px solid #fff;
   padding-bottom: 2px;
 }
+/* ── Le survol de la card sur-mesure ─────────────────────────────────────
+   ⚠️ IL N'Y EN AVAIT AUCUN, ET C'ÉTAIT LE PROBLÈME. Cette card est un `<a>` :
+   la règle globale `a:hover { color: var(--color-link-hover) }` (l. 516) la
+   rattrapait et repeignait TOUT son texte en bleu marine #00365F sur l'orange.
+   Ce n'était pas un effet raté, c'était la couleur de lien du site qui
+   débordait — la maladie déjà connue des `<a>` posés sur une image ou un
+   aplat de couleur.
+   On écrit donc un survol VOULU : la couleur du texte est reprise en main, et
+   l'orange fonce d'un cran, comme tous les CTA orange du site
+   (`--color-orange-hover`). La bordure pointillée s'éclaircit un peu, ce qui
+   suffit à dire que la card réagit sans qu'elle bouge. */
+@media (hover: hover) {
+  .mescreations-immersion__pcard--sur:hover,
+  .mescreations-immersion__pcard--sur:focus-visible {
+    background: var(--color-orange-hover);
+    color: #fff;
+  }
+  .mescreations-immersion__pcard--sur:hover::before,
+  .mescreations-immersion__pcard--sur:focus-visible::before {
+    border-color: rgba(255, 255, 255, .8);
+  }
+}
+.mescreations-immersion__pcard--sur {
+  transition: background .25s ease;
+}
+.mescreations-immersion__pcard--sur::before {
+  transition: border-color .25s ease;
+}
 
 @media (max-width: 900px) {
   .mescreations-immersion__slider .product-card-cinetique,
