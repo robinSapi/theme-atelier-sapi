@@ -61,6 +61,12 @@
   // Round 3 — Lot C2/C4 : URLs pour les CTAs de l'écran s-contact.
   var CONTACT_SURMESURE_URL = config.contactSurmesureUrl || '/sur-mesure/';
   var CONTACT_EMAIL         = config.contactEmail || 'robin@atelier-sapi.fr';
+  /* Les trois textes de l'entrée directe par la card sur-mesure du carrousel,
+     et les possessifs à la PREMIÈRE personne (c'est le visiteur qui écrit).
+     Repli vide plutôt qu'un texte inventé : mieux vaut un champ vide qu'une
+     phrase que Robin n'a jamais relue. */
+  var SURMESURE        = config.surmesure || {};
+  var POSSESSIFS_MIENS = config.possessifsMiens || {};
 
   /* ⚠️ LES TABLES DE TRADUCTION DU PROJET VIVENT DANS `sapi-project.js`.
      `style → essence` existait ici, dans `sapi-product-preselect.js` et dans
@@ -331,8 +337,12 @@
       /* ⚠️ DEUX GARDE-FOUS, MÊME PRINCIPE : on n'enregistre que ce qui a été
          fait PENDANT cette visite. `answers` est gardé par
          REPONSES_DE_CETTE_SESSION, `advice_text` par CONSEIL_DE_CETTE_SESSION.
-         Les champs de contact, eux, partent sans condition : ils ne peuvent
-         venir que du formulaire de cette visite.
+         Les champs de contact partent sans condition, et ils DOIVENT donc
+         rester propres à cette visite. ⚠️ C'est pour ça que l'entrée par la
+         card sur-mesure ne remplit PAS `contact_message` mais une clé
+         `prefill` qui ne va nulle part : sinon un simple clic déposerait ici
+         une phrase que le visiteur n'a jamais écrite, et le tableau de bord
+         l'afficherait comme son message, marqué « abandon ».
          Ne pas retirer l'une de ces deux conditions en croyant simplifier :
          c'est exactement le défaut mesuré sur l'export du 28/08.
          Le projet mémorisé vient peut-être d'une visite d'il y a trois
@@ -2128,6 +2138,55 @@
     });
   }
 
+  /* ══════════════════════════════════════════════════════════════════════
+     ENTRÉE DIRECTE PAR LA CARD SUR-MESURE — sans questionnaire, sans IA
+     ──────────────────────────────────────────────────────────────────────
+     Le chemin normal arrive ici en fin de questionnaire, avec un texte rédigé
+     par l'IA. Par la card, on saute tout ça : il n'y a rien de rédigé, et il
+     ne faut surtout pas attendre un aller-retour serveur — l'intérêt du
+     chemin, c'est que l'écran s'ouvre instantanément.
+     On réutilise donc `showContact` en lui fabriquant le même payload que
+     l'IA aurait produit. Une seule fonction remplit cet écran, quel que soit
+     le chemin : deux copies auraient divergé au premier changement.
+     ══════════════════════════════════════════════════════════════════════ */
+  function showContactSurmesure() {
+    var piece = state.answers && state.answers.piece ? state.answers.piece : '';
+    var mien  = POSSESSIFS_MIENS[piece] || 'ma pièce';
+
+    /* La phrase d'appoint ne s'ajoute QUE si le visiteur a déjà répondu à
+       autre chose que la pièce. Elle répond à ce qu'il se demande à cet
+       instant : « est-ce que je dois tout retaper ? ». La lui montrer alors
+       qu'il n'a rien répondu serait un mensonge poli. */
+    var cles = Object.keys(state.answers || {});
+    var aDesDetails = cles.filter(function (k) { return k !== 'piece' && state.answers[k]; }).length > 0;
+
+    var haut = SURMESURE.accueil || '';
+    if (aDesDetails && SURMESURE.appoint) haut += ' ' + SURMESURE.appoint;
+
+    showContact({
+      message: haut,
+      /* `contact_subject` reste vide : le modèle porte déjà tout le message,
+         et un objet ajouté ici se retrouverait collé en tête du texte que le
+         visiteur envoie. */
+      contact_subject: '',
+      /* ⚠️ `prefill` ET SURTOUT PAS `contact_message`. La différence n'est pas
+         cosmétique : `contact_message` est MÉMORISÉ dans le projet, envoyé au
+         journal et affiché dans le tableau de bord comme « le message du
+         visiteur ». Quelqu'un qui clique la card puis referme aussitôt aurait
+         donc laissé à Robin une phrase qu'il n'a jamais écrite, marquée
+         « abandon ». Une colonne vide se remarque ; une colonne remplie de la
+         mauvaise phrase, non.
+         `prefill` ne sert qu'à garnir la zone de saisie. */
+      prefill: (SURMESURE.message || '').replace('%s', mien),
+      /* ⚠️ AVEC LE TIRET. `surmesure` sans tiret n'est dans aucune des deux
+         listes de valeurs acceptées (sapi-project.js et functions.php) : il
+         serait rejeté des DEUX côtés, en silence. Le mail perdrait son bloc
+         « Type de projet » et ces demandes disparaîtraient du graphe par type
+         du tableau de bord, sans que rien ne paraisse anormal. */
+      contact_kind: 'sur-mesure'
+    });
+  }
+
   function showContact(payload) {
     if (!els.contactMessage || !els.contactForm) return;
 
@@ -2171,7 +2230,13 @@
       var pre = '';
       if (payload && payload.contact_subject) pre += payload.contact_subject + '\n\n';
       if (payload && payload.contact_message) pre += payload.contact_message;
-      els.contactMessageField.value = pre.trim();
+      /* Entrée directe par la card sur-mesure : le texte vient de `prefill`,
+         qui n'est pas mémorisé dans le projet (voir showContactSurmesure). */
+      else if (payload && payload.prefill) pre += payload.prefill;
+      /* ⚠️ ON NE ROGNE QUE LE DÉBUT. Un `trim()` complet mangeait la ligne
+         vide finale du modèle, qui existe pour que le visiteur écrive À LA
+         LIGNE plutôt qu'au bout de la phrase. */
+      els.contactMessageField.value = pre.replace(/^\s+/, '');
     }
 
     // Email vide (le visiteur le remplit)
@@ -2188,6 +2253,20 @@
         contact_message: payload.contact_message || '',
       });
     }
+
+    /* ⚠️ « ← REPRENDRE LA DISCUSSION » N'A RIEN À REPRENDRE PAR CE CHEMIN.
+       Le pied de cet écran ramène au chat. Arrivé par la card sur-mesure, le
+       chat n'a jamais eu lieu : le visiteur atterrirait sur un panneau vide
+       avec un champ de saisie, après un bouton qui lui promettait une
+       discussion. Pire s'il avait discuté plus tôt dans la même page — les
+       anciennes bulles sont encore dans le DOM alors que la conversation est
+       vide côté état : il répondrait à un fil que l'IA ne verra pas.
+       On masque donc le pied entier sur ce chemin, et on le rétablit sur tous
+       les autres — les trois appels qui restent viennent du chat. */
+    var pied = els.contactForm.closest('[data-screen="s-contact"]');
+    pied = pied && pied.querySelector('[data-action="back-to-chat"]');
+    pied = pied && (pied.closest('.modal__foot') || pied);
+    if (pied) pied.hidden = !!(payload && payload.prefill);
 
     showScreen('s-contact');
 
@@ -2324,7 +2403,14 @@
     cleanInvisibleAnswers();
   }
 
-  function openModal(initialScreen) {
+  /* `opts.sansEcran` : ouvre la modale SANS rendre d'écran de départ. Sert
+     aux entrées directes qui affichent elles-mêmes leur écran juste après.
+     ⚠️ Ce n'est pas une coquetterie : chaque `showScreen` envoie un instantané
+     de session. Rendre s0 pour le remplacer aussitôt ferait partir quatre
+     requêtes dans la même image, sur un point d'entrée qui insère puis met à
+     jour la même ligne sans garde-fou — c'est la course déjà payée une fois
+     ici, celle qui perdait la provenance ou la pièce. */
+  function openModal(initialScreen, opts) {
     if (!els.modal) return;
     // F2b Phase 2 — Active le mode court UNIQUEMENT pour l'état "product".
     // Doit être positionné AVANT hydrateFromProject pour que cleanInvisibleAnswers
@@ -2374,7 +2460,9 @@
     //   - Si tous les steps courts sont répondus → directement s-product-recap
     //   - Sinon → S0 hybride avec mode court actif (la prochaine question est
     //     la 1re question du parcours court non répondue)
-    if (initialScreen === 'product') {
+    if (opts && opts.sansEcran) {
+      /* L'appelant affiche son propre écran juste après ce retour. */
+    } else if (initialScreen === 'product') {
       var visible = getVisibleStepIds(state.answers); // filtré short mode
       var allAnswered = visible.length > 0 && visible.every(function (id) { return !!state.answers[id]; });
       if (allAnswered) {
@@ -2485,6 +2573,20 @@
               ? document.activeElement
               : null);
       var st = (e.detail && e.detail.state) || 's0';
+      /* ⚠️ `surmesure` N'EST PAS UN ÉCRAN, C'EST UNE PORTE D'ENTRÉE. On ouvre
+         la modale normalement (elle hydrate le projet depuis sapiProject),
+         PUIS on bascule sur l'écran contact déjà rempli. L'ordre compte :
+         `showContactSurmesure` lit `state.answers`, qui n'existe qu'après
+         l'ouverture. */
+      if (st === 'surmesure') {
+        /* ⚠️ APPEL SYNCHRONE, ET AUCUN ÉCRAN INTERMÉDIAIRE. L'hydratation du
+           projet dans `openModal` est synchrone : `state.answers` est prêt au
+           retour, aucune image d'attente n'est nécessaire. Et ne pas rendre s0
+           évite d'envoyer un instantané pour un écran que personne ne voit. */
+        openModal('s0', { sansEcran: true });
+        showContactSurmesure();
+        return;
+      }
       // Round 2 — 2.1 : garde-fou. state='product' sans config.product (pas
       // sur fiche produit) déclencherait applyProductSelection avec
       // productId:0 silencieux. Mieux vaut abort et logger.

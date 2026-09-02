@@ -227,8 +227,19 @@ if ($imm_piece) {
       }
       ?>
 
-      <!-- Carte sur-mesure en fin de slider -->
-      <a class="mescreations-immersion__pcard mescreations-immersion__pcard--sur" href="<?php echo esc_url(home_url('/sur-mesure/')); ?>">
+      <!-- ══════════════════════════════════════════════════════════════
+           Carte sur-mesure en fin de slider.
+           ⚠️ ELLE RESTE UN `<a>` AVEC UNE VRAIE ADRESSE, ET C'EST VOLONTAIRE.
+           Depuis le 29/08 elle ouvre la modale sur l'écran « contacter Robin »
+           au lieu de quitter la page — mais c'est le JS qui intercepte le clic.
+           Si le script ne tourne pas, le lien fonctionne encore et mène à
+           /sur-mesure/ : on ne remplace pas une destination par rien.
+           C'est aussi ce qui garde le clic milieu, le « ouvrir dans un nouvel
+           onglet » et l'annonce correcte aux lecteurs d'écran.
+           ══════════════════════════════════════════════════════════════ -->
+      <a class="mescreations-immersion__pcard mescreations-immersion__pcard--sur"
+         href="<?php echo esc_url(home_url('/sur-mesure/')); ?>"
+         data-immersion-surmesure>
         <span class="mescreations-immersion__sur-eyebrow"><?php esc_html_e('Sur-mesure', 'theme-sapi-maison'); ?></span>
         <span class="mescreations-immersion__sur-title"><?php esc_html_e('Créons ensemble', 'theme-sapi-maison'); ?></span>
         <?php /* ⚠️ Formulation POSITIVE, décidée par Robin. L'ancienne version

@@ -345,6 +345,26 @@
       lastStopIndex = 2;
       programmaticScrollTo(stops[2]);
     }
+    /* ── La card sur-mesure ouvre la modale au lieu de quitter la page ──────
+       Elle emmenait vers /sur-mesure/, et tout ce que le visiteur venait de
+       dire restait derrière lui : il arrivait sur un formulaire vierge.
+       ⚠️ ON INTERCEPTE, ON NE REMPLACE PAS. Le lien garde sa vraie adresse
+       (voir le gabarit) : si ce script ne tourne pas, il fonctionne encore.
+       Et on laisse passer les clics « ouvrir ailleurs » — ⌘, Ctrl, Maj, Alt —
+       parce qu'ils expriment une intention explicite d'ouvrir la page, et
+       qu'on n'a pas à la contrarier. Le clic milieu, lui, n'émet pas `click`
+       du tout : c'est le `<a href>` conservé qui le sert, pas ce test. */
+    var surmesureEl = section.querySelector('[data-immersion-surmesure]');
+    if (surmesureEl) {
+      surmesureEl.addEventListener('click', function (e) {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        document.dispatchEvent(new CustomEvent('sapi:open-modal', {
+          detail: { state: 'surmesure', trigger: surmesureEl }
+        }));
+      });
+    }
+
     if (hintRevealEl) hintRevealEl.addEventListener('click', scrollToReveal);
     if (hintCatalogueEl) hintCatalogueEl.addEventListener('click', scrollToCatalogue);
 

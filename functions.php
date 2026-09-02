@@ -580,6 +580,12 @@ function sapi_maison_enqueue_assets() {
         // de l'écran s-contact et de la card sur-mesure routée contact.
         'contactSurmesureUrl' => home_url('/sur-mesure/'),
         'contactEmail'        => 'robin@atelier-sapi.fr',
+        /* Les trois textes de l'entrée directe par la card sur-mesure, plus la
+           table des possessifs à la première personne. Envoyés au JS parce que
+           cet écran se remplit sans aller-retour serveur : c'est tout l'intérêt
+           du chemin, l'écran s'ouvre instantanément. */
+        'surmesure'           => sapi_surmesure_contact_texts(),
+        'possessifsMiens'     => sapi_piece_possessive_mienne_map(),
       ]);
       // Tâche 4b — conseils génériques par pièce (bulle initiale du chat),
       // anciennement portés par SAPI_CARDS_CONSEILLER de sapi-cards-conseiller.js
@@ -3688,6 +3694,65 @@ function sapi_piece_possessive_map() {
 function sapi_piece_possessive($piece) {
   $map = sapi_piece_possessive_map();
   return isset($map[$piece]) ? $map[$piece] : 'ta pièce';
+}
+
+/**
+ * La même chose, mais À LA PREMIÈRE PERSONNE.
+ *
+ * ⚠️ CE N'EST PAS LA TABLE CI-DESSUS AVEC UN AUTRE PRONOM. Celle du dessus est
+ * la voix de Robin (« ton salon ») ; celle-ci est la voix du VISITEUR, parce
+ * qu'elle sert à pré-rédiger le message qu'il enverra et qu'il signera.
+ * ⚠️ Et ce n'est pas mécanique : « mon salon », « ma cuisine », mais surtout
+ * PAS « ma chambre enfant ». D'où une table explicite, comme l'autre.
+ * Repli volontairement neutre : sans clé connue, on écrit « ma pièce » plutôt
+ * que d'inventer un genre.
+ */
+function sapi_piece_possessive_mienne_map() {
+  return [
+    'cuisine'        => 'ma cuisine',
+    'bureau'         => 'mon bureau',
+    'salon'          => 'mon salon',
+    'chambre'        => 'ma chambre',
+    'chambre-enfant' => "la chambre de mon enfant",
+    'entree'         => 'mon entrée',
+    'escalier'       => "ma cage d'escalier",
+  ];
+}
+function sapi_piece_possessive_mienne($piece) {
+  $map = sapi_piece_possessive_mienne_map();
+  return isset($map[$piece]) ? $map[$piece] : 'ma pièce';
+}
+
+/**
+ * Les TROIS textes de l'écran « contacter Robin » quand on y arrive par la card
+ * sur-mesure du carrousel (et non par la fin du questionnaire).
+ *
+ * Pourquoi ils existent : par ce chemin, on saute le questionnaire, donc l'IA
+ * n'a rien rédigé. Il faut de quoi remplir l'écran sans elle, et sans latence.
+ *
+ * ⚠️ TROIS TEXTES, PAS TREIZE. Une première version prévoyait un message
+ * rédigé par pièce, puis deux versions selon que le projet était renseigné ou
+ * non. Robin a tranché pour le minimum : un modèle unique où la pièce se
+ * glisse, plus une phrase d'appoint. Moins de matière à maintenir, et surtout
+ * moins de chemins à tester.
+ *
+ * ⚠️ `message` est écrit à la PREMIÈRE personne : c'est le visiteur qui
+ * l'enverra. Ne pas y mettre la voix de Robin.
+ * ⚠️ La ligne vide finale n'est pas une coquetterie : elle ouvre une ligne
+ * sous la phrase, pour que le visiteur écrive en dessous plutôt qu'au bout.
+ * Le curseur, lui, n'est pas placé : on ne donne pas le focus à ce champ, ça
+ * ouvrirait le clavier dès l'affichage sur téléphone.
+ */
+function sapi_surmesure_contact_texts() {
+  return [
+    'accueil' => __("Pour ce projet, un modèle sur-mesure est sans doute la meilleure idée. Dis-moi ce que tu as en tête, je te réponds sous 48h.", 'theme-sapi-maison'),
+    /* Ajoutée à la précédente UNIQUEMENT si le projet contient autre chose que
+       la pièce. Elle répond à la question que se pose le visiteur à ce
+       moment-là : « est-ce que je dois tout retaper ? » */
+    'appoint' => __("Les détails de ton projet me seront envoyés avec ton message.", 'theme-sapi-maison'),
+    /* %s = la pièce au possessif première personne. */
+    'message' => __("Bonjour Robin, je cherche un luminaire sur-mesure pour %s.\n\n", 'theme-sapi-maison'),
+  ];
 }
 
 /**
