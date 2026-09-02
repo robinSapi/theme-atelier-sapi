@@ -77,7 +77,16 @@
     function later(fn, ms) { var t = setTimeout(fn, ms); seqTimers.push(t); return t; }
 
     var charSpans = [];
-    var CHAR_DELAY = 34; // cadence d'apparition (ms/lettre) — un peu plus lente
+    /* ⇦ Cadence d'apparition, en millisecondes par lettre. Accélérée de 34 à
+       22 ms le 29/08 à la demande de Robin : sur un conseil de 140 caractères,
+       la frappe passe de 4,8 à 3,1 secondes.
+       ⚠️ CE CHIFFRE N'EST PAS SEUL À DÉCIDER DU RESSENTI. L'attente avant que
+       la frappe démarre compte tout autant (voir `attenteFrappe`, en bas de la
+       séquence) : c'est du temps où il ne se passe RIEN, donc du temps qui
+       paraît plus long que la frappe elle-même. Descendre les deux ensemble.
+       ⚠️ Plancher raisonnable : sous ~15 ms la lecture ne suit plus, on ne voit
+       plus une main qui écrit mais un bloc qui apparaît par saccades. */
+    var CHAR_DELAY = 22;
 
     /* ─────────────────────────────────────────────
        « J'ai compris, montre-moi » — sauter la frappe
@@ -1725,7 +1734,12 @@
           sautParDefilement = false; // la séquence est finie, on repart à plat
         }, instantane);
       };
-      var attenteFrappe = later(function () { demarrerFrappe(false); }, reduceMotion ? 0 : 900);
+      /* ⇦ Le silence avant la première lettre. Descendu de 900 à 550 ms le
+         29/08, en même temps que la cadence : c'est la moitié du gain ressenti,
+         parce que c'est du temps sans rien à regarder. On en garde une part —
+         la pastille de Robin apparaît d'abord, et la phrase doit sembler venir
+         après elle, pas en même temps. */
+      var attenteFrappe = later(function () { demarrerFrappe(false); }, reduceMotion ? 0 : 550);
       if (!reduceMotion) {
         armerSaut(function () {
           clearTimeout(attenteFrappe);
