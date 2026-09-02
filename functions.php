@@ -3745,7 +3745,7 @@ function sapi_piece_possessive_mienne($piece) {
  */
 function sapi_surmesure_contact_texts() {
   return [
-    'accueil' => __("Pour ce projet, un modèle sur-mesure est sans doute la meilleure idée. Dis-moi ce que tu as en tête, je te réponds sous 48h.", 'theme-sapi-maison'),
+    'accueil' => __("Pour ce projet, un modèle sur-mesure est sans doute une très bonne idée. Dis-moi ce que tu as en tête, je te réponds sous 48h.", 'theme-sapi-maison'),
     /* Ajoutée à la précédente UNIQUEMENT si le projet contient autre chose que
        la pièce. Elle répond à la question que se pose le visiteur à ce
        moment-là : « est-ce que je dois tout retaper ? » */
