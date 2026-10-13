@@ -1397,6 +1397,8 @@ get_header();
             action: 'sapi_add_to_cart',
             product_id: productId,
             quantity: 1,
+            // Case « ampoule recommandée » du formulaire principal (inc/sapi-bundle.php)
+            sapi_add_ampoule: (document.querySelector('form.cart input[name="sapi_add_ampoule"]:checked') || {}).value || '',
             nonce: '<?php echo wp_create_nonce('sapi-add-to-cart'); ?>'
           },
           success: function(response) {
