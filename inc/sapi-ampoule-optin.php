@@ -90,6 +90,13 @@ function sapi_ampoules_for($product) {
   return $list;
 }
 
+/** Nom court pour une ligne compacte : « Ampoule Globe » devient « Globe ». */
+function sapi_ampoule_short_name($amp) {
+  $name  = $amp->get_name();
+  $short = trim(preg_replace('/^\s*ampoules?\s+/iu', '', $name));
+  return $short !== '' ? $short : $name;
+}
+
 /** Ampoule par défaut d'un luminaire (la première de la liste), ou null. */
 function sapi_ampoule_for($product) {
   $list = sapi_ampoules_for($product);
@@ -102,9 +109,9 @@ function sapi_ampoule_for($product) {
  * (assets/sapi-ampoule-optin.js) dans le bloc des add-ons, sous « Couleur du
  * câble et du pavillon », ou sous le prix sur une fiche sans add-on. Si le JS
  * ne tourne pas, la case reste au-dessus du bouton et fonctionne quand même.
- * Le bloc reprend la présentation des add-ons (fond crème, titre majuscule à
- * pastille orange, champ blanc) sans leurs classes `wc-pao-*`, pour que le JS
- * de Product Add-Ons ne le prenne pas pour un des siens.
+ * Une seule ligne compacte (case, « Ajouter l'ampoule », modèle ou liste, prix),
+ * dans une carte au fond crème comme les add-ons mais sans leurs classes
+ * `wc-pao-*`, pour que le JS de Product Add-Ons ne la prenne pas pour une des siennes.
  *
  * La case reste toujours décochée par défaut : une option payante ne peut pas
  * être pré-cochée (droit de la consommation UE). Avec plusieurs ampoules, une
@@ -123,31 +130,22 @@ add_action('woocommerce_before_add_to_cart_button', function () {
   $default_price = (float) wc_get_price_to_display($default);
   ?>
   <div class="sapi-ampoule-addon">
-    <p class="sapi-ampoule-addon__name"><?php esc_html_e('Ampoule', 'theme-sapi-maison'); ?></p>
     <label class="sapi-ampoule-addon__field">
       <input type="checkbox" name="sapi_add_ampoule" value="<?php echo esc_attr($default->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($default_price, $dec)); ?>">
-      <span class="sapi-ampoule-addon__text">
-        <?php if (count($amps) === 1) : ?>
-          <?php
-          /* translators: %s : nom de l'ampoule */
-          printf(esc_html__("Ajouter l'ampoule recommandée : %s", 'theme-sapi-maison'), esc_html($default->get_name()));
-          ?>
-          <span class="sapi-ampoule-addon__price">(+<?php echo wp_kses_post(wc_price($default_price)); ?>)</span>
-        <?php else : ?>
-          <?php esc_html_e("Ajouter l'ampoule recommandée :", 'theme-sapi-maison'); ?>
-        <?php endif; ?>
-      </span>
+      <span class="sapi-ampoule-addon__text"><span class="sapi-ampoule-addon__long"><?php esc_html_e("Ajouter l'ampoule", 'theme-sapi-maison'); ?></span><span class="sapi-ampoule-addon__short"><?php esc_html_e('Ampoule', 'theme-sapi-maison'); ?></span></span>
+      <?php if (count($amps) === 1) : ?>
+        <span class="sapi-ampoule-addon__model"><?php echo esc_html(sapi_ampoule_short_name($default)); ?></span>
+      <?php endif; ?>
     </label>
     <?php if (count($amps) > 1) : ?>
       <select class="sapi-ampoule-addon__select" name="sapi_ampoule_choice" aria-label="<?php esc_attr_e("Choix de l'ampoule", 'theme-sapi-maison'); ?>">
         <?php foreach ($amps as $i => $amp) :
           $p = (float) wc_get_price_to_display($amp); ?>
-          <option value="<?php echo esc_attr($amp->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($p, $dec)); ?>"<?php selected($i, 0); ?>>
-            <?php echo esc_html($amp->get_name() . ' (+' . wp_strip_all_tags(wc_price($p)) . ')'); ?>
-          </option>
+          <option value="<?php echo esc_attr($amp->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($p, $dec)); ?>" data-price-html="<?php echo esc_attr(wp_strip_all_tags(wc_price($p))); ?>"<?php selected($i, 0); ?>><?php echo esc_html(sapi_ampoule_short_name($amp)); ?></option>
         <?php endforeach; ?>
       </select>
     <?php endif; ?>
+    <span class="sapi-ampoule-addon__price">+<?php echo wp_kses_post(wc_price($default_price)); ?></span>
   </div>
   <?php
 });

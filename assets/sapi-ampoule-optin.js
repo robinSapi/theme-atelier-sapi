@@ -28,6 +28,8 @@
     if (!opt) return;
     checkbox.value = opt.value;
     ampPrice = parseFloat(opt.getAttribute('data-price')) || 0;
+    var priceEl = block.querySelector('.sapi-ampoule-addon__price');
+    if (priceEl && opt.getAttribute('data-price-html')) priceEl.textContent = '+' + opt.getAttribute('data-price-html');
   }
   syncChoice();
 
