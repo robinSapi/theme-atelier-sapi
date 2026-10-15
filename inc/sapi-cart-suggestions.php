@@ -214,7 +214,7 @@ function sapi_suggest_card_html($s, $index, $first, $luminaires) {
         <?php
         // Badge vrai seulement si le panier contient exactement 1 luminaire : cette carte serait le 2e.
         if (!$is_amp && $luminaires === 1) : ?>
-          <span class="product-badge badge-new"><?php echo esc_html(sprintf(__('−%d %% en 2e luminaire', 'theme-sapi-maison'), $pct)); ?></span>
+          <span class="product-badge badge-new"><?php echo esc_html(sprintf('−%d%%', $pct)); ?> sur le 2<sup class="sapi-badge-sup">ème</sup> luminaire</span>
         <?php endif; ?>
       </div>
       <div class="product-info">

@@ -27308,6 +27308,14 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   font-size: 0.62rem;
   letter-spacing: 0.06em;
 }
+.sapi-cart-suggest .product-card-cinetique .product-badge .sapi-badge-sup {
+  text-transform: none;
+  font-size: 0.75em;
+  line-height: 0;
+  vertical-align: 0.45em;
+  margin-left: 0.05em;
+  letter-spacing: 0.02em;
+}
 .sapi-cart-suggest button.btn-view {
   font-family: var(--font-body);
 }
