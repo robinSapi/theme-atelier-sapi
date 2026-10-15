@@ -135,6 +135,10 @@ if (!function_exists('sapi_ampoule_for')) {
   require_once get_template_directory() . '/inc/sapi-ampoule-optin.php';
 }
 
+// Options de la fiche produit regroupées dans une seule carte (matériau, taille,
+// add-ons, ampoule). Doit suivre sapi-ampoule-optin.php.
+require_once get_template_directory() . '/inc/sapi-product-options.php';
+
 // Catalogue B2B (prescripteurs) — Temps 1. Source de données + mapping specs +
 // champs ACF éditoriaux. Chargé front ET admin (ACF acf/init + rendu template).
 require_once get_template_directory() . '/inc/catalogue-data.php';

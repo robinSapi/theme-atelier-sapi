@@ -26775,101 +26775,340 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 }
 
 /* ========================================
-   OPTION AMPOULE (inc/sapi-ampoule-optin.php + assets/sapi-ampoule-optin.js)
-   Une seule ligne, carte crème comme les add-ons (.product-form-v2 .wc-pao-addon*).
-   Les !important neutralisent les styles génériques du thème sur label et select
-   du formulaire produit (padding, bordure, largeur 100 %), vérifiés au rendu.
+   OPTIONS FICHE PRODUIT (assets/sapi-product-options.js, maquette du 15/10/2026)
+   Une carte, une ligne par option : matériau, taille, add-ons, ampoule.
+   Tout est scopé sous form.sapi-opts-ready, posée par le JS une fois la carte
+   construite : sans JS, l'ancienne présentation reste intacte.
+   Les !important battent les règles « product-form-v2 .variations » plus haut
+   (grille 2 colonnes, cartes par ligne) et le CSS de Variation Swatches.
    ======================================== */
+.sapi-opts-ready .sapi-opts {
+  --opt-label: 96px;
+  background: var(--color-cream);
+  border: 1px solid rgba(147, 125, 104, 0.18);
+  border-radius: 12px;
+  margin: 0 0 1rem;
+  overflow: hidden;
+}
+
+/* La table des variations devient une suite de lignes */
+.sapi-opts-ready .sapi-opts table.variations {
+  display: block !important;
+  width: 100%;
+  margin: 0 !important;
+  border: 0 !important;
+  gap: 0 !important;
+}
+.sapi-opts-ready .sapi-opts table.variations tbody { display: contents !important; }
+
+/* Ligne commune : variations, add-ons, ampoule */
+.sapi-opts-ready .sapi-opts table.variations tr,
+.sapi-opts-ready .sapi-opts .wc-pao-addon,
+.sapi-opts-ready .sapi-opts .sapi-ampoule-addon {
+  display: grid !important;
+  grid-template-columns: var(--opt-label) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  margin: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.sapi-opts-ready .sapi-opts > * + *,
+.sapi-opts-ready .sapi-opts table.variations tr + tr {
+  border-top: 1px solid rgba(147, 125, 104, 0.18) !important;
+}
+.sapi-opts-ready .sapi-opts table.variations th,
+.sapi-opts-ready .sapi-opts table.variations td {
+  display: block;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  text-align: left;
+  min-width: 0;
+}
+
+/* Étiquette commune : majuscules + pastille */
+.sapi-opts-ready .sapi-opts table.variations th.label label,
+.sapi-opts-ready .sapi-opts .wc-pao-addon-name,
+.sapi-ampoule-addon__name {
+  display: flex !important;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: var(--font-body);
+  font-size: 0.68rem !important;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: normal;
+}
+.sapi-opts-ready .sapi-opts table.variations th.label label::before,
+.sapi-opts-ready .sapi-opts .wc-pao-addon-name::before,
+.sapi-ampoule-addon__name::before {
+  content: '' !important;
+  display: block;
+  width: 7px !important;
+  height: 7px !important;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-orange, #E35B24) !important;
+  transition: background-color 0.25s ease, transform 0.25s ease;
+}
+.sapi-opts-ready .sapi-opts .is-done th.label label::before,
+.sapi-opts-ready .sapi-opts .wc-pao-addon.is-done .wc-pao-addon-name::before,
+.sapi-ampoule-addon.is-done .sapi-ampoule-addon__name::before {
+  background: var(--color-green, #018501) !important;
+  transform: scale(1.15);
+}
+.sapi-opts-ready .sapi-opts .wc-pao-addon-name .required { display: none; }
+
+/* Valeur : pastilles et pilules sur une ligne */
+.sapi-opts-ready .sapi-opts td.value {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+.sapi-opts-ready .sapi-opts ul.variable-items-wrapper {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 6px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.sapi-opts-ready .sapi-opts .reset_variations { display: none !important; }
+.sapi-opt-picked {
+  font-size: 0.75rem;
+  color: var(--color-gray-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Matériau : pastilles de bois rondes */
+.sapi-opts-ready .sapi-opts li.image-variable-item {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--color-white) !important;
+  box-shadow: 0 0 0 1.5px rgba(147, 125, 104, 0.3) !important;
+  overflow: hidden;
+  background: none !important;
+  transition: box-shadow 0.2s ease;
+}
+.sapi-opts-ready .sapi-opts li.image-variable-item .variable-item-contents,
+.sapi-opts-ready .sapi-opts li.image-variable-item img {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  object-fit: cover;
+}
+.sapi-opts-ready .sapi-opts li.image-variable-item.selected {
+  box-shadow: 0 0 0 2px var(--color-dark) !important;
+}
+
+/* Taille : pilules */
+.sapi-opts-ready .sapi-opts li.radio-variable-item {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+.sapi-opts-ready .sapi-opts li.radio-variable-item label {
+  display: block !important;
+  margin: 0 !important;
+  padding: 5px 11px !important;
+  border: 1.5px solid rgba(147, 125, 104, 0.3);
+  border-radius: 999px;
+  background: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-dark);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.sapi-opts-ready .sapi-opts li.radio-variable-item input[type="radio"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  pointer-events: none;
+}
+.sapi-opts-ready .sapi-opts li.radio-variable-item.selected label {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+  color: var(--color-white);
+}
+.sapi-opts-ready .sapi-opts li.variable-item.disabled,
+.sapi-opts-ready .sapi-opts li.variable-item.wvs-disabled {
+  opacity: 0.35;
+}
+@media (hover: hover) {
+  .sapi-opts-ready .sapi-opts li.radio-variable-item:not(.selected) label:hover {
+    border-color: var(--color-wood);
+  }
+}
+
+/* Add-ons : la liste devient une pilule */
+.sapi-opts-ready .sapi-opts .wc-pao-addon-wrap {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-width: 0;
+}
+.sapi-opts-ready .sapi-opts .wc-pao-addon-select {
+  width: auto !important;
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 5px 28px 5px 11px !important;
+  border: 1.5px solid rgba(147, 125, 104, 0.3) !important;
+  border-radius: 999px !important;
+  background-color: var(--color-white) !important;
+  font-family: var(--font-body);
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-dark);
+  cursor: pointer;
+}
+
+/* ----- Ligne ampoule (aussi utilisée hors carte, si le JS de la carte ne tourne pas) ----- */
 .sapi-ampoule-addon {
   flex: 0 0 100%;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: var(--color-cream);
-  border-radius: 12px;
-  border: 1px solid rgba(147, 125, 104, 0.1);
-  padding: 0.6rem 0.875rem;
+  gap: 10px;
+  padding: 10px 12px;
   margin: 0 0 1rem;
+  background: var(--color-cream);
+  border: 1px solid rgba(147, 125, 104, 0.18);
+  border-radius: 12px;
   font-family: var(--font-body);
-  font-size: 0.9rem;
+}
+.sapi-ampoule-addon .sapi-ampoule-addon__pill {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  justify-self: start;
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 5px 11px !important;
+  border: 1.5px dashed var(--color-wood) !important;
+  border-radius: 999px !important;
+  background: var(--color-white) !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  line-height: 1.3;
   color: var(--color-dark);
   white-space: nowrap;
-}
-.wc-pao-addons-container .sapi-ampoule-addon {
-  margin: 0 0 1rem;
-}
-.sapi-ampoule-addon .sapi-ampoule-addon__field {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 0 1 auto;
-  min-width: 0;
-  min-height: 0 !important;
-  margin: 0;
-  padding: 0 !important;
-  border: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
   cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
-.sapi-ampoule-addon__field input[type="checkbox"] {
+.sapi-ampoule-addon__input {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  pointer-events: none;
+}
+.sapi-ampoule-addon__box {
   flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--color-orange, #E35B24);
-  cursor: pointer;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--color-wood);
+  border-radius: 3px;
+  display: grid;
+  place-items: center;
+  background: var(--color-white);
 }
-.sapi-ampoule-addon .sapi-ampoule-addon__text {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.sapi-ampoule-addon__price {
+  color: var(--color-gray-mid);
 }
-.sapi-ampoule-addon__short {
-  display: none;
-}
-.sapi-ampoule-addon__model {
-  font-weight: 600;
-}
-.sapi-ampoule-addon .sapi-ampoule-addon__select {
-  flex: 0 0 auto;
+.sapi-ampoule-addon__select {
+  appearance: none;
+  -webkit-appearance: none;
   width: auto !important;
   min-width: 0 !important;
   height: auto !important;
-  margin: 0;
-  padding: 0.25rem 1.5rem 0.25rem 0.5rem !important;
-  line-height: 1.3;
-  border: 1px solid rgba(147, 125, 104, 0.35);
-  border-radius: 6px;
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-dark);
-  background-color: var(--color-white);
+  margin: 0 !important;
+  padding: 0 14px 0 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%23937D68' fill='none' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right center !important;
+  font: inherit !important;
+  color: inherit !important;
   cursor: pointer;
 }
-@media (hover: hover) {
-  .sapi-ampoule-addon .sapi-ampoule-addon__select:hover,
-  .sapi-ampoule-addon .sapi-ampoule-addon__select:focus {
-    border-color: var(--color-wood);
-    outline: none;
-  }
+/* Cochée */
+.sapi-ampoule-addon__input:checked ~ .sapi-ampoule-addon__box {
+  background: var(--color-orange, #E35B24);
+  border-color: var(--color-white);
 }
-.sapi-ampoule-addon__price {
-  margin-left: auto;
-  flex: 0 0 auto;
-  font-weight: 600;
+.sapi-ampoule-addon__input:checked ~ .sapi-ampoule-addon__box::after {
+  content: '';
+  width: 4px;
+  height: 7px;
+  border: solid var(--color-white);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
 }
-/* Mobile : « Ajouter l'ampoule » devient « Ampoule » pour tenir sur une ligne */
+.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:checked) {
+  border-style: solid !important;
+  border-color: var(--color-dark) !important;
+  background: var(--color-dark) !important;
+  color: var(--color-white);
+}
+.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:checked) .sapi-ampoule-addon__price { color: #ddd; }
+.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:focus-visible) {
+  outline: 2px solid var(--color-orange, #E35B24);
+  outline-offset: 2px;
+}
+
+/* Mobile : colonne d'étiquettes plus étroite, pilules resserrées */
 @media (max-width: 480px) {
-  .sapi-ampoule-addon {
-    font-size: 0.82rem;
-    gap: 0.4rem;
-    padding: 0.55rem 0.7rem;
+  .sapi-opts-ready .sapi-opts { --opt-label: 74px; }
+  .sapi-opts-ready .sapi-opts table.variations tr,
+  .sapi-opts-ready .sapi-opts .wc-pao-addon,
+  .sapi-opts-ready .sapi-opts .sapi-ampoule-addon {
+    gap: 8px !important;
+    padding: 9px 10px !important;
   }
-  .sapi-ampoule-addon__long { display: none; }
-  .sapi-ampoule-addon__short { display: inline; }
+  .sapi-opts-ready .sapi-opts table.variations th.label label,
+  .sapi-opts-ready .sapi-opts .wc-pao-addon-name,
+  .sapi-ampoule-addon__name {
+    font-size: 0.6rem !important;
+    letter-spacing: 0.1em;
+    gap: 0.35rem;
+  }
+  .sapi-opts-ready .sapi-opts ul.variable-items-wrapper { gap: 4px !important; flex-wrap: nowrap; }
+  .sapi-opts-ready .sapi-opts li.radio-variable-item label { padding: 4px 8px !important; font-size: 0.72rem !important; }
+  .sapi-opts-ready .sapi-opts li.image-variable-item { width: 24px !important; height: 24px !important; }
+  .sapi-opts-ready .sapi-opts .wc-pao-addon-select { font-size: 0.72rem !important; padding: 4px 26px 4px 9px !important; }
+  .sapi-ampoule-addon .sapi-ampoule-addon__pill { font-size: 0.72rem !important; padding: 4px 9px !important; gap: 5px; }
 }
