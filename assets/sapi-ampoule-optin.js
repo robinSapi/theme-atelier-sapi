@@ -3,6 +3,7 @@
  *
  * 1. Déplace le bloc dans les add-ons, juste au-dessus du sous-total.
  * 2. Ajoute le prix de l'ampoule au sous-total affiché quand la case est cochée.
+ * 3. Avec plusieurs ampoules, garde la case alignée sur le choix de la liste.
  *
  * Le sous-total est calculé et réécrit par Product Add-Ons à chaque changement
  * (variation, add-on, quantité). On ne le recalcule pas : on repasse derrière
@@ -17,7 +18,18 @@
   var block = form && form.querySelector('.sapi-ampoule-addon');
   if (!block) return;
   var checkbox = block.querySelector('input[name="sapi_add_ampoule"]');
+  var select = block.querySelector('select[name="sapi_ampoule_choice"]');
   var ampPrice = parseFloat(checkbox.getAttribute('data-price')) || 0;
+
+  // Plusieurs ampoules : la case porte l'ID et le prix de celle choisie dans la liste.
+  function syncChoice() {
+    if (!select) return;
+    var opt = select.options[select.selectedIndex];
+    if (!opt) return;
+    checkbox.value = opt.value;
+    ampPrice = parseFloat(opt.getAttribute('data-price')) || 0;
+  }
+  syncChoice();
 
   // 1. Placement
   var paoContainer = form.querySelector('.wc-pao-addons-container');
@@ -94,6 +106,15 @@
     if (paoContainer && $) $(form).trigger('woocommerce-product-addons-update');
     schedule();
   });
+  if (select) {
+    select.addEventListener('change', function () {
+      syncChoice();
+      // Choisir une ampoule dans la liste, c'est la vouloir : on coche la case.
+      checkbox.checked = true;
+      if (paoContainer && $) $(form).trigger('woocommerce-product-addons-update');
+      schedule();
+    });
+  }
   if ($) $(form).on('updated_addons show_variation found_variation', schedule);
 
   // Filet de sécurité : Product Add-Ons ou WooCommerce réécrivent ces zones sans

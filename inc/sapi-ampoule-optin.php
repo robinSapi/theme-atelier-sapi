@@ -54,56 +54,100 @@ function sapi_ampoule_is_luminaire($product_id) {
   return (bool) array_intersect($slugs, sapi_ampoule_luminaire_cats());
 }
 
-/** Ampoule associée à un luminaire, ou null. */
-function sapi_ampoule_for($product) {
+/**
+ * Ampoules proposées pour un luminaire : ventes croisées de la catégorie
+ * « accessoires » dont le nom contient « ampoule » (le câble, le pavillon et le
+ * pied sont aussi des accessoires). Produits simples, achetables, en stock.
+ * Quand il y en a plusieurs, l'ampoule Poire passe en tête : c'est elle qui est
+ * présélectionnée dans la liste (choix de Robin, 15/10/2026). Sinon, l'ordre des
+ * ventes croisées de la fiche.
+ *
+ * @return WC_Product[]
+ */
+function sapi_ampoules_for($product) {
   if (is_numeric($product)) $product = wc_get_product($product);
-  if (!$product) return null;
+  if (!$product) return [];
   if ($product->get_parent_id()) $product = wc_get_product($product->get_parent_id());
-  if (!$product || !sapi_ampoule_is_luminaire($product->get_id())) return null;
+  if (!$product || !sapi_ampoule_is_luminaire($product->get_id())) return [];
 
+  $list = [];
   foreach ($product->get_cross_sell_ids() as $cs_id) {
     $cats = get_the_terms($cs_id, 'product_cat');
     if (!$cats || is_wp_error($cats)) continue;
     if (!in_array('accessoires', wp_list_pluck($cats, 'slug'), true)) continue;
     $amp = wc_get_product($cs_id);
-    if ($amp && $amp->is_type('simple') && !$amp->is_sold_individually()
+    if (!$amp || stripos(remove_accents($amp->get_name()), 'ampoule') === false) continue;
+    if ($amp->is_type('simple') && !$amp->is_sold_individually()
         && $amp->is_purchasable() && $amp->is_in_stock()) {
-      return $amp;
+      $list[] = $amp;
     }
   }
-  return null;
+  usort($list, function ($a, $b) {
+    $pa = stripos($a->get_name(), 'poire') !== false ? 0 : 1;
+    $pb = stripos($b->get_name(), 'poire') !== false ? 0 : 1;
+    return $pa <=> $pb; // usort est stable depuis PHP 8 : l'ordre de la fiche est gardé sinon
+  });
+  return $list;
+}
+
+/** Ampoule par défaut d'un luminaire (la première de la liste), ou null. */
+function sapi_ampoule_for($product) {
+  $list = sapi_ampoules_for($product);
+  return $list ? $list[0] : null;
 }
 
 /*
  * Affichage. Rendu dans form.cart juste avant le bouton (seul hook de WooCommerce
  * qui soit DANS le formulaire et toujours présent), puis déplacé en JS
  * (assets/sapi-ampoule-optin.js) dans le bloc des add-ons, sous « Couleur du
- * câble et du pavillon », pour se lire comme une option de plus et passer
- * au-dessus du sous-total. Si le JS ne tourne pas, la case reste au-dessus du
- * bouton et fonctionne quand même.
+ * câble et du pavillon », ou sous le prix sur une fiche sans add-on. Si le JS
+ * ne tourne pas, la case reste au-dessus du bouton et fonctionne quand même.
  * Le bloc reprend la présentation des add-ons (fond crème, titre majuscule à
  * pastille orange, champ blanc) sans leurs classes `wc-pao-*`, pour que le JS
  * de Product Add-Ons ne le prenne pas pour un des siens.
+ *
+ * La case reste toujours décochée par défaut : une option payante ne peut pas
+ * être pré-cochée (droit de la consommation UE). Avec plusieurs ampoules, une
+ * liste à côté de la case permet de choisir, Poire présélectionnée.
+ * La case porte l'ID de l'ampoule choisie (le JS le tient à jour) : c'est ce que
+ * lisent le bouton principal et la barre sticky. `sapi_ampoule_choice` sert de
+ * secours sans JS.
  */
 add_action('woocommerce_before_add_to_cart_button', function () {
   global $product;
   if (!$product instanceof WC_Product) return;
-  $amp = sapi_ampoule_for($product);
-  if (!$amp) return;
-  $price = (float) wc_get_price_to_display($amp);
+  $amps = sapi_ampoules_for($product);
+  if (!$amps) return;
+  $dec = wc_get_price_decimals();
+  $default = $amps[0];
+  $default_price = (float) wc_get_price_to_display($default);
   ?>
   <div class="sapi-ampoule-addon">
     <p class="sapi-ampoule-addon__name"><?php esc_html_e('Ampoule', 'theme-sapi-maison'); ?></p>
     <label class="sapi-ampoule-addon__field">
-      <input type="checkbox" name="sapi_add_ampoule" value="<?php echo esc_attr($amp->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($price, wc_get_price_decimals())); ?>">
+      <input type="checkbox" name="sapi_add_ampoule" value="<?php echo esc_attr($default->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($default_price, $dec)); ?>">
       <span class="sapi-ampoule-addon__text">
-        <?php
-        /* translators: %s : nom de l'ampoule */
-        printf(esc_html__("Ajouter l'ampoule recommandée : %s", 'theme-sapi-maison'), esc_html($amp->get_name()));
-        ?>
-        <span class="sapi-ampoule-addon__price">(+<?php echo wp_kses_post(wc_price($price)); ?>)</span>
+        <?php if (count($amps) === 1) : ?>
+          <?php
+          /* translators: %s : nom de l'ampoule */
+          printf(esc_html__("Ajouter l'ampoule recommandée : %s", 'theme-sapi-maison'), esc_html($default->get_name()));
+          ?>
+          <span class="sapi-ampoule-addon__price">(+<?php echo wp_kses_post(wc_price($default_price)); ?>)</span>
+        <?php else : ?>
+          <?php esc_html_e("Ajouter l'ampoule recommandée :", 'theme-sapi-maison'); ?>
+        <?php endif; ?>
       </span>
     </label>
+    <?php if (count($amps) > 1) : ?>
+      <select class="sapi-ampoule-addon__select" name="sapi_ampoule_choice" aria-label="<?php esc_attr_e("Choix de l'ampoule", 'theme-sapi-maison'); ?>">
+        <?php foreach ($amps as $i => $amp) :
+          $p = (float) wc_get_price_to_display($amp); ?>
+          <option value="<?php echo esc_attr($amp->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($p, $dec)); ?>"<?php selected($i, 0); ?>>
+            <?php echo esc_html($amp->get_name() . ' (+' . wp_strip_all_tags(wc_price($p)) . ')'); ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+    <?php endif; ?>
   </div>
   <?php
 });
@@ -122,11 +166,18 @@ add_action('woocommerce_add_to_cart', function ($cart_item_key, $product_id, $qu
   if (empty($_REQUEST['sapi_add_ampoule'])) return;
 
   $requested = absint($_REQUEST['sapi_add_ampoule']);
+  // Sans JS, la case garde l'ID par défaut : la liste fait alors foi.
+  if (!empty($_REQUEST['sapi_ampoule_choice'])) $requested = absint($_REQUEST['sapi_ampoule_choice']);
   // Une seule fois par requête, même si add_to_cart est rejoué.
-  unset($_POST['sapi_add_ampoule'], $_GET['sapi_add_ampoule'], $_REQUEST['sapi_add_ampoule']);
+  unset($_POST['sapi_add_ampoule'], $_GET['sapi_add_ampoule'], $_REQUEST['sapi_add_ampoule'],
+        $_POST['sapi_ampoule_choice'], $_GET['sapi_ampoule_choice'], $_REQUEST['sapi_ampoule_choice']);
 
-  $amp = sapi_ampoule_for($product_id);
-  if (!$amp || $amp->get_id() !== $requested) return;
+  // La valeur reçue n'est qu'un choix : elle doit figurer parmi les ampoules du luminaire.
+  $amp = null;
+  foreach (sapi_ampoules_for($product_id) as $candidate) {
+    if ($candidate->get_id() === $requested) { $amp = $candidate; break; }
+  }
+  if (!$amp) return;
 
   $running = true;
   WC()->cart->add_to_cart($amp->get_id(), max(1, (int) $quantity));
