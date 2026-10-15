@@ -27293,29 +27293,6 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 .sapi-cart-suggest .product-card-cinetique .product-actions {
   margin-bottom: 0.75rem;
 }
-/* Pill concentrique au coin de la carte : rayon pill = rayon carte (16px) − écart (6px) = 10px, donc hauteur 20px. */
-.sapi-cart-suggest .product-card-cinetique .product-badge {
-  --sapi-badge-gap: 6px;
-  top: var(--sapi-badge-gap);
-  left: var(--sapi-badge-gap);
-  height: calc(2 * (var(--radius-lg) - var(--sapi-badge-gap)));
-  line-height: calc(2 * (var(--radius-lg) - var(--sapi-badge-gap)));
-  padding: 0 0.65rem;
-  border-radius: calc(var(--radius-lg) - var(--sapi-badge-gap));
-  transform: none;
-  box-sizing: border-box;
-  white-space: nowrap;
-  font-size: 0.62rem;
-  letter-spacing: 0.06em;
-}
-.sapi-cart-suggest .product-card-cinetique .product-badge .sapi-badge-sup {
-  text-transform: none;
-  font-size: 0.75em;
-  line-height: 0;
-  vertical-align: 0.45em;
-  margin-left: 0.05em;
-  letter-spacing: 0.02em;
-}
 .sapi-cart-suggest button.btn-view {
   font-family: var(--font-body);
 }

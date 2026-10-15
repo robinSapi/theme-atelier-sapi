@@ -1,7 +1,7 @@
 <?php
 /**
  * Vitrine « Ça irait bien avec… » dans la zone grisée, à gauche du mini-panier
- * (desktop uniquement), et remise -10 % sur le 2e luminaire.
+ * (desktop uniquement). Pas de remise sur le 2e luminaire (abandonnée le 15/10/2026).
  * Maquette validée par Robin le 15/10/2026 (variante A, trois cartes).
  *
  * CHOIX DES 3 PRODUITS, dans cet ordre, jamais un produit déjà au panier :
@@ -13,10 +13,6 @@
  * Sans luminaire au panier : les trois meilleures ventes.
  * Les luminaires mènent à leur fiche (« Voir ») : ils ont tailles et essences.
  *
- * REMISE : dès 2 luminaires au panier (toutes références, quantités comprises),
- * le moins cher prend -10 %, une fois par commande, en frais négatif visible
- * au panier, au checkout et sur la commande. Calculée après coupon.
- *
  * AFFICHAGE : rendu dans header.php juste après .mini-cart-overlay, visible via
  * `.mini-cart-overlay.is-visible ~ .sapi-cart-suggest`, centré dans la zone
  * libre à gauche du volet. Cartes au gabarit des cartes produit du site
@@ -27,8 +23,6 @@
  */
 
 if (!defined('ABSPATH')) exit;
-
-if (!defined('SAPI_REMISE_2E_LUMINAIRE')) define('SAPI_REMISE_2E_LUMINAIRE', 0.10);
 
 /** Type canonique d'un luminaire (suspensions, appliques, lampadaires, lampesaposer), '' sinon. */
 function sapi_suggest_type($product_id) {
@@ -100,11 +94,9 @@ function sapi_suggest_for_cart() {
   $in_cart = [];
   $has_ampoule = false;
   $source_id = 0;
-  $out['luminaires'] = 0;
   foreach (WC()->cart->get_cart() as $item) {
     $pid = (int) $item['product_id'];
     $in_cart[$pid] = true;
-    if (sapi_suggest_type($pid)) $out['luminaires'] += (int) $item['quantity'];
     if (stripos(remove_accents(get_the_title($pid)), 'ampoule') !== false) $has_ampoule = true;
     if (sapi_suggest_type($pid)) $source_id = $pid; // le dernier luminaire ajouté l'emporte
   }
@@ -178,11 +170,10 @@ function sapi_render_cart_suggestions() {
 }
 
 /** Une carte, au même gabarit que les cartes produit du site (woocommerce/content-product.php). */
-function sapi_suggest_card_html($s, $index, $first, $luminaires) {
+function sapi_suggest_card_html($s, $index, $first) {
   $p = $s['product'];
   $id = $p->get_id();
   $is_amp = $s['kind'] === 'ampoule';
-  $pct = (int) round(SAPI_REMISE_2E_LUMINAIRE * 100);
 
   // Photo : ambiance en principal, photo produit au survol (comme sur le site).
   $amb = function_exists('sapi_get_product_photo_ids') ? sapi_get_product_photo_ids($id, 'ambiance', 1) : [];
@@ -210,11 +201,6 @@ function sapi_suggest_card_html($s, $index, $first, $luminaires) {
         <span class="product-image-main"><?php echo $main_id ? wp_get_attachment_image($main_id, 'woocommerce_thumbnail', false, ['alt' => $p->get_name(), 'loading' => 'lazy']) : wc_placeholder_img('woocommerce_thumbnail'); ?></span>
         <?php if ($hover_id) : ?>
           <span class="product-image-hover"><?php echo wp_get_attachment_image($hover_id, 'woocommerce_thumbnail', false, ['alt' => $p->get_name(), 'loading' => 'lazy']); ?></span>
-        <?php endif; ?>
-        <?php
-        // Badge vrai seulement si le panier contient exactement 1 luminaire : cette carte serait le 2e.
-        if (!$is_amp && $luminaires === 1) : ?>
-          <span class="product-badge badge-new"><?php echo esc_html(sprintf('−%d%%', $pct)); ?> sur le 2<sup class="sapi-badge-sup">ème</sup> luminaire</span>
         <?php endif; ?>
       </div>
       <div class="product-info">
@@ -244,13 +230,12 @@ function sapi_render_cart_suggestions_src() {
   if (!empty($data['items'])) {
     $source = $data['source'];
     $first = $source ? preg_split('/\s+/', trim($source->get_name()))[0] : '';
-    $lum = isset($data['luminaires']) ? (int) $data['luminaires'] : 0;
     echo '<p class="sapi-suggest__eyebrow">' . esc_html__('Pour compléter votre commande', 'theme-sapi-maison') . '</p>';
     echo '<p class="sapi-suggest__title">' . ($first
       ? esc_html(sprintf(__('Ça irait bien avec %s', 'theme-sapi-maison'), $first))
       : esc_html__('Nos meilleures ventes', 'theme-sapi-maison')) . '</p>';
     echo '<ul class="sapi-suggest__cards">';
-    foreach ($data['items'] as $i => $s) echo sapi_suggest_card_html($s, $i, $first, $lum);
+    foreach ($data['items'] as $i => $s) echo sapi_suggest_card_html($s, $i, $first);
     echo '</ul>';
     echo '<button type="button" class="sapi-suggest__close">' . esc_html__('Non merci', 'theme-sapi-maison') . '</button>';
   }
@@ -273,25 +258,3 @@ add_action('wp_enqueue_scripts', function () {
     'nonce'  => wp_create_nonce('sapi-add-to-cart'),
   ]);
 });
-
-/* ---------- Remise -10 % sur le 2e luminaire ---------- */
-add_action('woocommerce_cart_calculate_fees', function ($cart) {
-  if (is_admin() && !wp_doing_ajax()) return;
-  $units = 0;
-  $cheapest = null;
-  foreach ($cart->get_cart() as $item) {
-    if (!sapi_suggest_type($item['product_id'])) continue;
-    $qty = (int) $item['quantity'];
-    if ($qty <= 0) continue;
-    $units += $qty;
-    // line_total : HT, après coupons (BIENVENUE10 et cette remise ne s'additionnent pas, ils se cumulent).
-    $unit_ht = (float) $item['line_total'] / $qty;
-    if ($cheapest === null || $unit_ht < $cheapest['unit_ht']) {
-      $cheapest = ['unit_ht' => $unit_ht, 'tax_class' => $item['data']->get_tax_class()];
-    }
-  }
-  if ($units < 2 || !$cheapest || $cheapest['unit_ht'] <= 0) return;
-  $pct = (int) round(SAPI_REMISE_2E_LUMINAIRE * 100);
-  // Frais négatif taxable, non arrondi : WooCommerce retire la TVA correspondante et arrondit à la fin.
-  $cart->add_fee(sprintf(__('Remise 2e luminaire (-%d %%)', 'theme-sapi-maison'), $pct), -($cheapest['unit_ht'] * SAPI_REMISE_2E_LUMINAIRE), wc_tax_enabled(), $cheapest['tax_class']);
-}, 20);

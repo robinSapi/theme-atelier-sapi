@@ -2,9 +2,8 @@
 /**
  * Case « Ajouter l'ampoule recommandée » sur la fiche produit
  *
- * Étape 1 du chantier « ampoules + bundle » (octobre 2026). La suggestion
- * « même modèle, autre type » et la remise sur le 2e luminaire viendront
- * ensuite, chacune dans son propre fichier.
+ * Étape 1 du chantier « ampoules + bundle » (octobre 2026). La vitrine du
+ * mini-panier est dans sapi-cart-suggestions.php.
  *
  * CE QUE FAIT CE FICHIER
  * Au-dessus du bouton « Ajouter au panier » d'un luminaire, une case décochée

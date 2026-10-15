@@ -139,8 +139,8 @@ if (!function_exists('sapi_ampoule_for')) {
 // add-ons, ampoule). Doit suivre sapi-ampoule-optin.php.
 require_once get_template_directory() . '/inc/sapi-product-options.php';
 
-// Vitrine « Ça irait bien avec… » à gauche du mini-panier (desktop) et remise
-// -10 % sur le 2e luminaire. Utilise les fonctions de sapi-ampoule-optin.php.
+// Vitrine « Ça irait bien avec… » à gauche du mini-panier (desktop).
+// Utilise les fonctions de sapi-ampoule-optin.php.
 require_once get_template_directory() . '/inc/sapi-cart-suggestions.php';
 
 // Catalogue B2B (prescripteurs) — Temps 1. Source de données + mapping specs +
