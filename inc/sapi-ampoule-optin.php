@@ -74,23 +74,45 @@ function sapi_ampoule_for($product) {
   return null;
 }
 
-/* Affichage de la case, dans form.cart, juste avant le bouton */
+/*
+ * Affichage. Rendu dans form.cart juste avant le bouton (seul hook de WooCommerce
+ * qui soit DANS le formulaire et toujours présent), puis déplacé en JS
+ * (assets/sapi-ampoule-optin.js) dans le bloc des add-ons, sous « Couleur du
+ * câble et du pavillon », pour se lire comme une option de plus et passer
+ * au-dessus du sous-total. Si le JS ne tourne pas, la case reste au-dessus du
+ * bouton et fonctionne quand même.
+ * Le bloc reprend la présentation des add-ons (fond crème, titre majuscule à
+ * pastille orange, champ blanc) sans leurs classes `wc-pao-*`, pour que le JS
+ * de Product Add-Ons ne le prenne pas pour un des siens.
+ */
 add_action('woocommerce_before_add_to_cart_button', function () {
   global $product;
   if (!$product instanceof WC_Product) return;
   $amp = sapi_ampoule_for($product);
   if (!$amp) return;
+  $price = (float) wc_get_price_to_display($amp);
   ?>
-  <label class="sapi-ampoule-optin">
-    <input type="checkbox" name="sapi_add_ampoule" value="<?php echo esc_attr($amp->get_id()); ?>">
-    <span class="sapi-ampoule-optin__box" aria-hidden="true"></span>
-    <span class="sapi-ampoule-optin__text">
-      <span class="sapi-ampoule-optin__title"><?php esc_html_e('Ajouter l\'ampoule recommandée', 'theme-sapi-maison'); ?></span>
-      <span class="sapi-ampoule-optin__name"><?php echo esc_html($amp->get_name()); ?></span>
-    </span>
-    <span class="sapi-ampoule-optin__price">+&nbsp;<?php echo wp_kses_post(wc_price(wc_get_price_to_display($amp))); ?></span>
-  </label>
+  <div class="sapi-ampoule-addon">
+    <p class="sapi-ampoule-addon__name"><?php esc_html_e('Ampoule', 'theme-sapi-maison'); ?></p>
+    <label class="sapi-ampoule-addon__field">
+      <input type="checkbox" name="sapi_add_ampoule" value="<?php echo esc_attr($amp->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($price, wc_get_price_decimals())); ?>">
+      <span class="sapi-ampoule-addon__text">
+        <?php
+        /* translators: %s : nom de l'ampoule */
+        printf(esc_html__("Ajouter l'ampoule recommandée : %s", 'theme-sapi-maison'), esc_html($amp->get_name()));
+        ?>
+        <span class="sapi-ampoule-addon__price">(+<?php echo wp_kses_post(wc_price($price)); ?>)</span>
+      </span>
+    </label>
+  </div>
   <?php
+});
+
+add_action('wp_enqueue_scripts', function () {
+  if (!function_exists('is_product') || !is_product()) return;
+  $path = get_template_directory() . '/assets/sapi-ampoule-optin.js';
+  if (!file_exists($path)) return;
+  wp_enqueue_script('sapi-ampoule-optin', get_template_directory_uri() . '/assets/sapi-ampoule-optin.js', ['jquery'], filemtime($path), true);
 });
 
 /* Ajout de l'ampoule au panier en même temps que le luminaire */

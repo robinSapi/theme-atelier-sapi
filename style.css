@@ -26775,79 +26775,74 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 }
 
 /* ========================================
-   CASE AMPOULE RECOMMANDÉE (inc/sapi-ampoule-optin.php, octobre 2026)
+   OPTION AMPOULE (inc/sapi-ampoule-optin.php + assets/sapi-ampoule-optin.js)
+   Calquée sur les add-ons (.product-form-v2 .wc-pao-addon*, plus haut).
    ======================================== */
-
-/* Case « Ajouter l'ampoule recommandée », dans form.cart, au-dessus du bouton */
-.sapi-ampoule-optin {
+.sapi-ampoule-addon {
   flex: 0 0 100%;
   width: 100%;
+  background: var(--color-cream);
+  border-radius: 12px;
+  border: 1px solid rgba(147, 125, 104, 0.1);
+  padding: 0 0.875rem 0.875rem 0.875rem;
+  margin: 0 0 1rem;
+}
+.wc-pao-addons-container .sapi-ampoule-addon {
+  margin: 1rem 0 0;
+}
+.sapi-ampoule-addon__name {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.875rem 0 0.5rem 0;
+}
+.sapi-ampoule-addon__name::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--color-orange, #E35B24);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sapi-ampoule-addon__field {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 0 0 0.75rem;
-  padding: 0.75rem 0.9rem;
-  border: 1px solid var(--color-line, rgba(147, 125, 104, 0.18));
-  border-radius: var(--radius, 5px);
-  background: var(--color-warm, #FBF6EA);
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-dark);
+  background: var(--color-white);
+  transition: all 0.25s var(--ease-smooth);
   cursor: pointer;
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  margin: 0;
 }
-.sapi-ampoule-optin:hover { border-color: var(--color-wood, #937D68); }
-.sapi-ampoule-optin input {
-  position: absolute;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
+@media (hover: hover) {
+  .sapi-ampoule-addon__field:hover {
+    border-color: var(--color-wood);
+  }
 }
-.sapi-ampoule-optin__box {
+.sapi-ampoule-addon__field:focus-within {
+  border-color: var(--color-wood);
+}
+.sapi-ampoule-addon__field input[type="checkbox"] {
   flex: 0 0 auto;
-  width: 20px;
-  height: 20px;
-  border: 1.5px solid var(--color-wood, #937D68);
-  border-radius: 4px;
-  background: var(--color-white, #fff);
-  position: relative;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-orange, #E35B24);
+  cursor: pointer;
 }
-.sapi-ampoule-optin input:checked + .sapi-ampoule-optin__box {
-  background: var(--color-orange, #E35B24);
-  border-color: var(--color-orange, #E35B24);
-}
-.sapi-ampoule-optin input:checked + .sapi-ampoule-optin__box::after {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 5px;
-  height: 10px;
-  border: solid #fff;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-.sapi-ampoule-optin input:focus-visible + .sapi-ampoule-optin__box {
-  outline: 2px solid var(--color-orange, #E35B24);
-  outline-offset: 2px;
-}
-.sapi-ampoule-optin__text {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.sapi-ampoule-optin__title {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--color-dark, #323232);
-}
-.sapi-ampoule-optin__name {
-  font-size: 0.78rem;
-  color: var(--color-gray-mid, #717171);
-}
-.sapi-ampoule-optin__price {
-  flex: 0 0 auto;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--color-dark, #323232);
+.sapi-ampoule-addon__price {
   white-space: nowrap;
 }
