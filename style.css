@@ -26816,8 +26816,12 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   border-radius: 0 !important;
   box-shadow: none !important;
 }
-.sapi-opts-ready .sapi-opts > * + *,
 .sapi-opts-ready .sapi-opts table.variations tr + tr {
+  border-top: 1px solid rgba(147, 125, 104, 0.18) !important;
+}
+/* Filets entre lignes : après la règle commune, qui remet les bordures à zéro */
+.sapi-opts-ready .sapi-opts > .wc-pao-addon:not(:first-child),
+.sapi-opts-ready .sapi-opts > .sapi-ampoule-addon:not(:first-child) {
   border-top: 1px solid rgba(147, 125, 104, 0.18) !important;
 }
 .sapi-opts-ready .sapi-opts table.variations th,
@@ -26861,13 +26865,12 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   flex: 0 0 auto;
   border-radius: 50%;
   background: var(--color-orange, #E35B24) !important;
-  transition: background-color 0.25s ease, transform 0.25s ease;
+  transition: background-color 0.25s ease;
 }
-.sapi-opts-ready .sapi-opts .is-done th.label label::before,
+.sapi-opts-ready .sapi-opts table.variations tr.is-done th.label label::before,
 .sapi-opts-ready .sapi-opts .wc-pao-addon.is-done .wc-pao-addon-name::before,
 .sapi-ampoule-addon.is-done .sapi-ampoule-addon__name::before {
   background: var(--color-green, #018501) !important;
-  transform: scale(1.15);
 }
 .sapi-opts-ready .sapi-opts .wc-pao-addon-name .required { display: none; }
 
@@ -26879,7 +26882,8 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 }
 .sapi-opts-ready .sapi-opts ul.variable-items-wrapper {
   display: flex !important;
-  flex-wrap: wrap;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
   gap: 6px !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -26967,6 +26971,12 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .sapi-opts-ready .sapi-opts li.radio-variable-item:not(.selected) label:hover {
     border-color: var(--color-wood);
   }
+}
+
+/* Avec des add-ons, le sous-total fait foi : le prix de la variation seul
+   (sans câble ni ampoule) prêtait à confusion, on ne garde que le sous-total. */
+.sapi-opts-ready:has(.wc-pao-addons-container) .woocommerce-variation-price {
+  display: none !important;
 }
 
 /* Add-ons : la liste devient une pilule */
@@ -27106,7 +27116,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     letter-spacing: 0.1em;
     gap: 0.35rem;
   }
-  .sapi-opts-ready .sapi-opts ul.variable-items-wrapper { gap: 4px !important; flex-wrap: nowrap; }
+  .sapi-opts-ready .sapi-opts ul.variable-items-wrapper { gap: 4px !important; }
   .sapi-opts-ready .sapi-opts li.radio-variable-item label { padding: 4px 8px !important; font-size: 0.72rem !important; }
   .sapi-opts-ready .sapi-opts li.image-variable-item { width: 24px !important; height: 24px !important; }
   .sapi-opts-ready .sapi-opts .wc-pao-addon-select { font-size: 0.72rem !important; padding: 4px 26px 4px 9px !important; }
