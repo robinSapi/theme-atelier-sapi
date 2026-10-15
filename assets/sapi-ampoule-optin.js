@@ -8,7 +8,7 @@
  * (variation, add-on, quantité). On ne le recalcule pas : on repasse derrière
  * lui. Le montant d'origine est mémorisé sur l'élément (data-sapi-base) ; quand
  * Product Add-Ons réécrit le bloc, l'élément est neuf, donc la base aussi.
- * Sans add-ons sur la fiche, c'est le prix de la variation qui est complété.
+ * Sans add-ons sur la fiche, c'est le prix de la variation (juste au-dessus) qui est complété.
  */
 (function ($) {
   'use strict';
@@ -33,8 +33,10 @@
       paoContainer.insertBefore(block, paoContainer.firstChild);
     }
   } else {
+    // Sans add-ons : même place que sur une fiche qui en a, c'est-à-dire sous le
+    // bloc de la variation (dimensions + prix) et au-dessus de la quantité.
     var priceZone = form.querySelector('.single_variation');
-    if (priceZone && priceZone.parentNode) priceZone.parentNode.insertBefore(block, priceZone);
+    if (priceZone && priceZone.parentNode) priceZone.parentNode.insertBefore(block, priceZone.nextSibling);
   }
 
   // 2. Prix
