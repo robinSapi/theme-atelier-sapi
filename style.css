@@ -27127,148 +27127,194 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    VITRINE À GAUCHE DU MINI-PANIER (inc/sapi-cart-suggestions.php, 15/10/2026)
    Desktop uniquement : en mobile le volet occupe presque tout l'écran.
    Visible quand le voile du mini-panier l'est (sélecteur de frère).
+   Cartes au gabarit .product-card-cinetique, resserrées pour tenir à trois.
    ======================================== */
+
+/* Voile : flou en plus de l'assombrissement, pour la lisibilité des cartes */
+.mini-cart-overlay {
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+}
+.mini-cart-overlay.is-visible {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.sapi-cart-suggest-src { display: none !important; }
 .sapi-cart-suggest { display: none; }
+
 @media (min-width: 1100px) {
+  /* Toute la zone libre à gauche du volet ; la vitrine y est centrée */
   .sapi-cart-suggest:not(:empty) {
-    display: block;
     position: fixed;
-    top: 50%;
-    right: calc(400px + 32px);
-    width: min(620px, calc(100vw - 400px - 64px));
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 400px;
     z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
     color: var(--color-white);
     font-family: var(--font-body);
-    opacity: 0;
     visibility: hidden;
-    transform: translate(16px, -50%);
-    transition: opacity 0.3s ease, transform 0.45s var(--ease-expo, ease), visibility 0.3s;
     pointer-events: none;
+    transition: visibility 0s linear 0.35s;
+  }
+  .sapi-cart-suggest:not(:empty) > * {
+    width: min(780px, 100%);
   }
   .mini-cart-overlay.is-visible ~ .sapi-cart-suggest:not(:empty) {
-    opacity: 1;
     visibility: visible;
-    transform: translate(0, -50%);
+    transition-delay: 0s;
+  }
+  /* Les clics hors des cartes traversent jusqu'au voile (qui ferme le volet) */
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card,
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__close {
     pointer-events: auto;
   }
   .sapi-suggest-off .sapi-cart-suggest { display: none !important; }
+
+  /* Titres : arrivent juste après le volet */
+  .sapi-cart-suggest .sapi-suggest__eyebrow,
+  .sapi-cart-suggest .sapi-suggest__title,
+  .sapi-cart-suggest .sapi-suggest__close {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__eyebrow,
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__title,
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__close {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.45s ease 0.3s, transform 0.6s var(--ease-expo, ease) 0.3s;
+  }
+
+  /* Cartes : arrivée décalée, l'une après l'autre (--i posé par le JS) */
+  .sapi-cart-suggest .sapi-suggest__card {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.5s var(--ease-expo, ease);
+  }
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.5s ease calc(0.4s + var(--i, 0) * 0.09s),
+                transform 0.7s var(--ease-expo, ease) calc(0.4s + var(--i, 0) * 0.09s),
+                box-shadow 0.5s var(--ease-expo, ease);
+  }
+  @media (hover: hover) {
+    .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card:hover {
+      transform: translateY(-2px);
+      transition-delay: 0s;
+    }
+  }
+
+  /* Changement de cartes, volet ouvert : départ et arrivée en fondu */
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card.is-leaving,
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest.is-leaving > * {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+    transition: opacity 0.25s ease, transform 0.28s ease;
+  }
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card.is-entering {
+    animation: sapiSuggestIn 0.55s var(--ease-expo, ease) both;
+  }
 }
+@keyframes sapiSuggestIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sapi-cart-suggest *,
+  .sapi-cart-suggest .sapi-suggest__card {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
 .sapi-suggest__eyebrow {
   margin: 0 0 4px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   opacity: 0.85;
 }
 .sapi-suggest__title {
-  margin: 0 0 14px;
+  margin: 0 0 18px;
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: 2.6rem;
   line-height: 1;
 }
 .sapi-suggest__cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.sapi-suggest__card {
+
+/* Gabarit .product-card-cinetique, à l'échelle de la vitrine */
+.sapi-cart-suggest .product-card-cinetique {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border-radius: 14px;
-  background: var(--color-cream);
-  color: var(--color-dark);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-}
-.sapi-suggest__media img {
-  display: block;
-  width: 100%;
   height: auto;
-  aspect-ratio: 1;
-  object-fit: cover;
-  background: #f3eee6;
+  color: var(--color-dark);
 }
-.sapi-suggest__body {
+.sapi-cart-suggest .product-card-link {
   display: flex;
-  flex: 1;
   flex-direction: column;
-  gap: 3px;
-  padding: 10px 12px 12px;
-}
-.sapi-suggest__tag {
-  align-self: flex-start;
-  margin-bottom: 2px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--color-orange, #E35B24);
-  color: var(--color-white);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-.sapi-suggest__name {
+  height: 100%;
   color: inherit;
   text-decoration: none;
+}
+.sapi-cart-suggest .product-card-cinetique .product-info {
+  padding: 1rem 1.15rem 0.5rem;
+}
+.sapi-cart-suggest .product-card-cinetique .product-name {
+  font-size: 1.1rem !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.sapi-suggest__first {
-  font-size: 0.8rem;
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-.sapi-suggest__rest {
-  margin-left: 4px;
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-}
-.sapi-suggest__why {
-  font-size: 0.68rem;
-  color: var(--color-gray-mid);
-}
-.sapi-suggest__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  margin-top: auto;
-  padding-top: 8px;
-}
-.sapi-suggest__price {
+.sapi-cart-suggest .product-card-cinetique .product-category {
   font-size: 0.85rem;
-  font-weight: 700;
-  white-space: nowrap;
+  margin: 0.25rem 0 0.75rem;
 }
-.sapi-suggest__go {
-  flex: 0 0 auto;
-  padding: 6px 12px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--color-dark);
-  color: var(--color-white);
-  font-family: var(--font-body);
-  font-size: 0.72rem;
-  font-weight: 700;
+.sapi-cart-suggest .product-card-cinetique .price-value {
+  font-size: 1rem;
+}
+.sapi-cart-suggest .product-card-cinetique .product-actions {
+  margin-bottom: 0.75rem;
+}
+.sapi-cart-suggest .product-card-cinetique .product-badge {
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.62rem;
   letter-spacing: 0.06em;
-  text-decoration: none;
-  cursor: pointer;
 }
-.sapi-suggest__go:hover { background: var(--color-orange, #E35B24); color: var(--color-white); }
-.sapi-suggest__go--add { background: var(--color-green, #018501); }
-.sapi-suggest__go--add:hover { background: var(--color-green-hover, #026B02); }
+.sapi-cart-suggest button.btn-view {
+  font-family: var(--font-body);
+}
+.sapi-cart-suggest .sapi-suggest__add {
+  color: var(--color-green, #018501);
+}
 .sapi-suggest__close {
-  margin-top: 12px;
+  margin-top: 16px;
   padding: 0;
   border: 0;
   background: none;
-  color: inherit;
+  color: var(--color-white);
   font-family: var(--font-body);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
+  text-align: left;
   text-decoration: underline;
-  opacity: 0.75;
   cursor: pointer;
 }
 .sapi-suggest__close:hover { opacity: 1; }

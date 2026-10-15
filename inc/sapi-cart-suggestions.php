@@ -18,8 +18,10 @@
  * au panier, au checkout et sur la commande. Calculée après coupon.
  *
  * AFFICHAGE : rendu dans header.php juste après .mini-cart-overlay, visible via
- * `.mini-cart-overlay.is-visible ~ .sapi-cart-suggest` ; rafraîchi par le
- * fragment AJAX `.sapi-cart-suggest` à chaque changement du panier.
+ * `.mini-cart-overlay.is-visible ~ .sapi-cart-suggest`, centré dans la zone
+ * libre à gauche du volet. Cartes au gabarit des cartes produit du site
+ * (photo ambiance, photo produit au survol). Le fragment AJAX met à jour la
+ * source cachée ; le JS anime les cartes qui partent et celles qui arrivent.
  *
  * @package theme-sapi-maison
  */
@@ -161,73 +163,104 @@ function sapi_suggest_for_cart() {
   return $out;
 }
 
-/** Nom en deux parties pour l'affichage maison : prénom en gras, reste en script. */
-function sapi_suggest_name_html($name) {
-  $name = trim((string) $name);
-  $parts = preg_split('/\s+/', $name, 2);
-  $rest = isset($parts[1]) ? $parts[1] : '';
-  return '<span class="sapi-suggest__first">' . esc_html($parts[0]) . '</span>' . ($rest !== '' ? '<span class="sapi-suggest__rest">' . esc_html(ucfirst($rest)) . '</span>' : '');
+/**
+ * Rendu. Deux conteneurs :
+ *  - .sapi-cart-suggest-src (caché) : les cartes calculées côté serveur, seule
+ *    cible du fragment AJAX ;
+ *  - .sapi-cart-suggest : la vitrine visible, construite et mise à jour par
+ *    assets/sapi-cart-suggestions.js à partir de la source, ce qui permet de
+ *    faire partir et arriver les cartes en douceur au lieu de tout remplacer.
+ * Sans JS, rien ne s'affiche : la vitrine est un plus, le panier reste entier.
+ */
+function sapi_render_cart_suggestions() {
+  sapi_render_cart_suggestions_src();
+  echo '<div class="sapi-cart-suggest" aria-live="polite"></div>';
 }
 
-function sapi_render_cart_suggestions() {
+/** Une carte, au même gabarit que les cartes produit du site (woocommerce/content-product.php). */
+function sapi_suggest_card_html($s, $index, $first, $luminaires) {
+  $p = $s['product'];
+  $id = $p->get_id();
+  $is_amp = $s['kind'] === 'ampoule';
+  $pct = (int) round(SAPI_REMISE_2E_LUMINAIRE * 100);
+
+  // Photo : ambiance en principal, photo produit au survol (comme sur le site).
+  $amb = function_exists('sapi_get_product_photo_ids') ? sapi_get_product_photo_ids($id, 'ambiance', 1) : [];
+  $thumb_id = $p->get_image_id();
+  $main_id = !empty($amb) ? (int) $amb[0] : $thumb_id;
+  $hover_id = (!empty($amb) && $thumb_id && $thumb_id !== $main_id) ? $thumb_id : 0;
+
+  if ($is_amp) {
+    $category = $first ? sprintf(__('Recommandée pour %s', 'theme-sapi-maison'), $first) : __('Ampoule recommandée', 'theme-sapi-maison');
+    $price = wc_price(wc_get_price_to_display($p));
+    $from = false;
+  } else {
+    $category = sapi_suggest_type_label($s['type']);
+    $from = $p->is_type('variable');
+    $price = wc_price($from ? $p->get_variation_price('min', true) : wc_get_price_to_display($p));
+  }
+
+  ob_start();
+  $tag_open  = $is_amp ? '<div class="product-card-link">' : '<a class="product-card-link" href="' . esc_url($p->get_permalink()) . '">';
+  $tag_close = $is_amp ? '</div>' : '</a>';
+  ?>
+  <li class="product-card-cinetique sapi-suggest__card" data-product-id="<?php echo esc_attr($id); ?>" data-product-cat="<?php echo esc_attr($is_amp ? 'accessoires' : $s['type']); ?>">
+    <?php echo $tag_open; ?>
+      <div class="product-media<?php echo $hover_id ? ' has-hover-image' : ''; ?>">
+        <span class="product-image-main"><?php echo $main_id ? wp_get_attachment_image($main_id, 'woocommerce_thumbnail', false, ['alt' => $p->get_name(), 'loading' => 'lazy']) : wc_placeholder_img('woocommerce_thumbnail'); ?></span>
+        <?php if ($hover_id) : ?>
+          <span class="product-image-hover"><?php echo wp_get_attachment_image($hover_id, 'woocommerce_thumbnail', false, ['alt' => $p->get_name(), 'loading' => 'lazy']); ?></span>
+        <?php endif; ?>
+        <?php
+        // Badge vrai seulement si le panier contient exactement 1 luminaire : cette carte serait le 2e.
+        if (!$is_amp && $luminaires === 1) : ?>
+          <span class="product-badge badge-new"><?php echo esc_html(sprintf(__('−%d %% en 2e luminaire', 'theme-sapi-maison'), $pct)); ?></span>
+        <?php endif; ?>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name"><?php echo esc_html($p->get_name()); ?></h3>
+        <?php if ($category) : ?><p class="product-category"><?php echo esc_html($category); ?></p><?php endif; ?>
+        <div class="product-price">
+          <?php if ($from) : ?><span class="price-from"><?php esc_html_e('À partir de', 'theme-sapi-maison'); ?></span><?php endif; ?>
+          <span class="price-value"><?php echo wp_kses_post($price); ?></span>
+        </div>
+      </div>
+      <div class="product-actions">
+        <?php if ($is_amp) : ?>
+          <button type="button" class="btn-view sapi-suggest__add" data-product-id="<?php echo esc_attr($id); ?>"><?php esc_html_e('+ Ajouter', 'theme-sapi-maison'); ?></button>
+        <?php else : ?>
+          <span class="btn-view"><?php esc_html_e('Découvrir', 'theme-sapi-maison'); ?> ⇾</span>
+        <?php endif; ?>
+      </div>
+    <?php echo $tag_close; ?>
+  </li>
+  <?php
+  return ob_get_clean();
+}
+
+function sapi_render_cart_suggestions_src() {
   $data = function_exists('WC') && WC()->cart ? sapi_suggest_for_cart() : ['items' => [], 'source' => null];
-  echo '<div class="sapi-cart-suggest" aria-label="' . esc_attr__('Suggestions pour compléter votre commande', 'theme-sapi-maison') . '">';
+  echo '<div class="sapi-cart-suggest-src" hidden>';
   if (!empty($data['items'])) {
     $source = $data['source'];
     $first = $source ? preg_split('/\s+/', trim($source->get_name()))[0] : '';
-    $pct = (int) round(SAPI_REMISE_2E_LUMINAIRE * 100);
-    ?>
-    <p class="sapi-suggest__eyebrow"><?php esc_html_e('Pour compléter votre commande', 'theme-sapi-maison'); ?></p>
-    <p class="sapi-suggest__title"><?php
-      echo $first
-        ? esc_html(sprintf(__('Ça irait bien avec %s', 'theme-sapi-maison'), $first))
-        : esc_html__('Nos meilleures ventes', 'theme-sapi-maison');
-    ?></p>
-    <div class="sapi-suggest__cards">
-      <?php foreach ($data['items'] as $s) :
-        $p = $s['product'];
-        $is_amp = $s['kind'] === 'ampoule';
-        if ($is_amp) {
-          $why = $first ? sprintf(__('Celle que je recommande pour %s', 'theme-sapi-maison'), $first) : __('Ampoule recommandée', 'theme-sapi-maison');
-          $price = wc_price(wc_get_price_to_display($p));
-        } else {
-          $label = sapi_suggest_type_label($s['type']);
-          $why = $label . ' · ' . ($s['kind'] === 'modele' ? __('même modèle', 'theme-sapi-maison') : __('meilleure vente', 'theme-sapi-maison'));
-          $min = $p->is_type('variable') ? $p->get_variation_price('min', true) : wc_get_price_to_display($p);
-          $price = ($p->is_type('variable') ? __('dès', 'theme-sapi-maison') . ' ' : '') . wc_price($min);
-        }
-        ?>
-        <div class="sapi-suggest__card">
-          <a class="sapi-suggest__media" href="<?php echo esc_url($p->get_permalink()); ?>" tabindex="-1"><?php echo $p->get_image('woocommerce_thumbnail', ['loading' => 'lazy']); ?></a>
-          <div class="sapi-suggest__body">
-            <?php
-            // Le badge ne dit vrai que si le panier contient exactement 1 luminaire :
-            // la carte serait alors le 2e. Avec 0 ou 2+, on ne promet rien.
-            if (!$is_amp && isset($data['luminaires']) && $data['luminaires'] === 1) : ?><span class="sapi-suggest__tag"><?php echo esc_html(sprintf(__('−%d %% en 2e luminaire', 'theme-sapi-maison'), $pct)); ?></span><?php endif; ?>
-            <a class="sapi-suggest__name" href="<?php echo esc_url($p->get_permalink()); ?>"><?php echo sapi_suggest_name_html($p->get_name()); ?></a>
-            <span class="sapi-suggest__why"><?php echo esc_html($why); ?></span>
-            <span class="sapi-suggest__row">
-              <span class="sapi-suggest__price"><?php echo wp_kses_post($price); ?></span>
-              <?php if ($is_amp) : ?>
-                <button type="button" class="sapi-suggest__go sapi-suggest__go--add" data-product-id="<?php echo esc_attr($p->get_id()); ?>"><?php esc_html_e('+ Ajouter', 'theme-sapi-maison'); ?></button>
-              <?php else : ?>
-                <a class="sapi-suggest__go" href="<?php echo esc_url($p->get_permalink()); ?>"><?php esc_html_e('Voir', 'theme-sapi-maison'); ?></a>
-              <?php endif; ?>
-            </span>
-          </div>
-        </div>
-      <?php endforeach; ?>
-    </div>
-    <button type="button" class="sapi-suggest__close"><?php esc_html_e('Non merci', 'theme-sapi-maison'); ?></button>
-    <?php
+    $lum = isset($data['luminaires']) ? (int) $data['luminaires'] : 0;
+    echo '<p class="sapi-suggest__eyebrow">' . esc_html__('Pour compléter votre commande', 'theme-sapi-maison') . '</p>';
+    echo '<p class="sapi-suggest__title">' . ($first
+      ? esc_html(sprintf(__('Ça irait bien avec %s', 'theme-sapi-maison'), $first))
+      : esc_html__('Nos meilleures ventes', 'theme-sapi-maison')) . '</p>';
+    echo '<ul class="sapi-suggest__cards">';
+    foreach ($data['items'] as $i => $s) echo sapi_suggest_card_html($s, $i, $first, $lum);
+    echo '</ul>';
+    echo '<button type="button" class="sapi-suggest__close">' . esc_html__('Non merci', 'theme-sapi-maison') . '</button>';
   }
   echo '</div>';
 }
 
 add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
   ob_start();
-  sapi_render_cart_suggestions();
-  $fragments['.sapi-cart-suggest'] = ob_get_clean();
+  sapi_render_cart_suggestions_src();
+  $fragments['.sapi-cart-suggest-src'] = ob_get_clean();
   return $fragments;
 }, 30);
 
