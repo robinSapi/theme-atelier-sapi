@@ -26788,7 +26788,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   margin: 0 0 1rem;
 }
 .wc-pao-addons-container .sapi-ampoule-addon {
-  margin: 1rem 0 0;
+  margin: 0 0 1rem;
 }
 .sapi-ampoule-addon__name {
   font-family: var(--font-body);

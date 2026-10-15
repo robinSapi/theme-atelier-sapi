@@ -22,12 +22,15 @@
   // 1. Placement
   var paoContainer = form.querySelector('.wc-pao-addons-container');
   if (paoContainer) {
-    var totals = paoContainer.querySelector('.product-addon-totals');
-    var anchor = totals ? totals.closest('.wc-pao-addons-container > *') : null;
-    if (anchor) {
-      paoContainer.insertBefore(block, anchor);
+    // Juste après le dernier add-on. On ne se cale pas sur le bloc du sous-total :
+    // Product Add-Ons le remplit après le chargement, il est souvent vide quand
+    // ce script tourne, et la case finissait alors sous le prix.
+    var addons = paoContainer.querySelectorAll(':scope > .wc-pao-addon');
+    var lastAddon = addons.length ? addons[addons.length - 1] : null;
+    if (lastAddon) {
+      lastAddon.parentNode.insertBefore(block, lastAddon.nextSibling);
     } else {
-      paoContainer.appendChild(block);
+      paoContainer.insertBefore(block, paoContainer.firstChild);
     }
   } else {
     var priceZone = form.querySelector('.single_variation');
