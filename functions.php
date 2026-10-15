@@ -130,10 +130,9 @@ if (!function_exists('sapi_related_accessoires_vers_luminaires')) {
   require_once get_template_directory() . '/inc/sapi-related-accessoires.php';
 }
 
-// Ampoule recommandée sur la fiche, suggestion « même modèle, autre type »
-// (panier + à gauche du mini-panier) et remise -15 % sur le 2e luminaire.
-if (!function_exists('sapi_bundle_get_suggestion')) {
-  require_once get_template_directory() . '/inc/sapi-bundle.php';
+// Case « Ajouter l'ampoule recommandée » sur la fiche produit d'un luminaire.
+if (!function_exists('sapi_ampoule_for')) {
+  require_once get_template_directory() . '/inc/sapi-ampoule-optin.php';
 }
 
 // Catalogue B2B (prescripteurs) — Temps 1. Source de données + mapping specs +

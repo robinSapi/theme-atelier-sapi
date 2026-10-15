@@ -26775,7 +26775,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 }
 
 /* ========================================
-   AMPOULE RECOMMANDÉE + BUNDLE 2E LUMINAIRE (inc/sapi-bundle.php, 13/10/2026)
+   CASE AMPOULE RECOMMANDÉE (inc/sapi-ampoule-optin.php, octobre 2026)
    ======================================== */
 
 /* Case « Ajouter l'ampoule recommandée », dans form.cart, au-dessus du bouton */
@@ -26850,88 +26850,4 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   font-size: 0.9rem;
   color: var(--color-dark, #323232);
   white-space: nowrap;
-}
-
-/* Carte « On vous conseille ce luminaire » */
-.sapi-bundle-card {
-  display: grid;
-  grid-template-columns: 96px 1fr;
-  gap: 0.5rem 1rem;
-  padding: 1rem;
-  background: var(--color-white, #fff);
-  border: 1px solid var(--color-line, rgba(147, 125, 104, 0.18));
-  border-radius: var(--radius-lg, 16px);
-  font-family: var(--font-body, 'Montserrat', sans-serif);
-  color: var(--color-dark, #323232);
-}
-.sapi-bundle-card__eyebrow {
-  grid-column: 1 / -1;
-  margin: 0 0 0.25rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-wood-dark, #4A3F35);
-}
-.sapi-bundle-card__media img,
-.sapi-bundle-card__img {
-  display: block;
-  width: 96px;
-  height: 96px;
-  object-fit: cover;
-  border-radius: var(--radius, 5px);
-}
-.sapi-bundle-card__body > p { margin: 0 0 0.25rem; }
-.sapi-bundle-card__name { font-weight: 600; font-size: 0.95rem; }
-.sapi-bundle-card__name a { color: inherit; text-decoration: none; }
-.sapi-bundle-card__type { font-size: 0.8rem; color: var(--color-gray-mid, #717171); }
-.sapi-bundle-card__price { font-size: 0.9rem; }
-.sapi-bundle-card__deal {
-  font-size: 0.8rem;
-  color: var(--color-orange, #E35B24);
-  font-weight: 600;
-}
-.sapi-bundle-card__cta {
-  display: inline-block;
-  margin-top: 0.35rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius, 5px);
-  background: var(--color-dark, #323232);
-  color: var(--color-white, #fff);
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-.sapi-bundle-card__cta:hover { background: var(--color-orange, #E35B24); color: #fff; }
-
-/* Page panier */
-.sapi-bundle-cart {
-  max-width: 560px;
-  margin: 1.5rem 0;
-}
-
-/* À gauche du mini-panier : desktop uniquement, visible quand le volet est ouvert */
-.sapi-bundle-aside {
-  display: none;
-}
-@media (min-width: 1024px) {
-  .sapi-bundle-aside {
-    display: block;
-    position: fixed;
-    top: 50%;
-    right: calc(400px + 32px);
-    width: 320px;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transform: translate(16px, -50%);
-    transition: opacity 0.3s ease, transform 0.4s var(--ease-expo, ease), visibility 0.3s;
-  }
-  .sapi-bundle-aside:empty { display: none; }
-  .mini-cart-overlay.is-visible ~ .sapi-bundle-aside {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(0, -50%);
-  }
-  .sapi-bundle-aside .sapi-bundle-card {
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.18);
-  }
 }
