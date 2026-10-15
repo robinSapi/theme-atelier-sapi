@@ -16,7 +16,7 @@
 (function ($) {
   'use strict';
   var KEY = 'sapiSuggestHidden';
-  var LEAVE_MS = 280;
+  var LEAVE_MS = 320;
 
   try { if (sessionStorage.getItem(KEY) === '1') document.documentElement.classList.add('sapi-suggest-off'); } catch (e) {}
 
@@ -46,11 +46,20 @@
       return;
     }
 
-    // Premier rendu : copie simple, l'animation d'ouverture fera le reste.
+    // Premier rendu. Cas courant : le panier était vide, on ajoute un luminaire,
+    // le volet s'ouvre ET la vitrine se remplit au même moment. Les cartes
+    // arrivent alors dans un voile déjà visible, donc sans transition : on leur
+    // donne la même entrée décalée que lors d'une ouverture normale.
     var list = view.querySelector('.sapi-suggest__cards');
     if (!list) {
       view.innerHTML = src.innerHTML;
-      setIndexes(view.querySelector('.sapi-suggest__cards'));
+      list = view.querySelector('.sapi-suggest__cards');
+      setIndexes(list);
+      list.querySelectorAll('.sapi-suggest__card').forEach(function (c) {
+        c.style.setProperty('--d', '0.7s');
+        c.classList.add('is-entering');
+        c.addEventListener('animationend', function () { c.classList.remove('is-entering'); c.style.removeProperty('--d'); }, { once: true });
+      });
       return;
     }
 
