@@ -139,6 +139,10 @@ if (!function_exists('sapi_ampoule_for')) {
 // add-ons, ampoule). Doit suivre sapi-ampoule-optin.php.
 require_once get_template_directory() . '/inc/sapi-product-options.php';
 
+// Vitrine « Ça irait bien avec… » à gauche du mini-panier (desktop) et remise
+// -10 % sur le 2e luminaire. Utilise les fonctions de sapi-ampoule-optin.php.
+require_once get_template_directory() . '/inc/sapi-cart-suggestions.php';
+
 // Catalogue B2B (prescripteurs) — Temps 1. Source de données + mapping specs +
 // champs ACF éditoriaux. Chargé front ET admin (ACF acf/init + rendu template).
 require_once get_template_directory() . '/inc/catalogue-data.php';
@@ -2214,7 +2218,13 @@ function sapi_render_mini_cart_contents() {
               <?php if (!empty($cart_item['variation'])) : ?>
                 <?php foreach ($cart_item['variation'] as $attr_key => $attr_value) :
                   if (empty($attr_value)) continue;
-                  $attr_name = wc_attribute_label(str_replace('attribute_', '', $attr_key), $product);
+                  $attr_tax  = str_replace('attribute_', '', $attr_key);
+                  $attr_name = wc_attribute_label($attr_tax, $product);
+                  // La variation stocke le slug du terme (« okoume », « 50-cm ») : on affiche son nom.
+                  if (taxonomy_exists($attr_tax)) {
+                    $attr_term = get_term_by('slug', $attr_value, $attr_tax);
+                    if ($attr_term && !is_wp_error($attr_term)) $attr_value = $attr_term->name;
+                  }
                 ?>
                   <div class="mini-cart-var-line">
                     <span class="mini-cart-var-label"><?php echo esc_html($attr_name); ?> :</span>

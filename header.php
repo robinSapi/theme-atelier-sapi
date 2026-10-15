@@ -136,6 +136,7 @@ $logo_alt = get_bloginfo('name');
     <?php endif; ?>
   </div>
   <div class="mini-cart-overlay" id="mini-cart-overlay"></div>
+  <?php if (function_exists('sapi_render_cart_suggestions')) sapi_render_cart_suggestions(); ?>
 
   <!-- Global Search Modal -->
   <div class="global-search-modal" id="global-search-modal" aria-hidden="true">
