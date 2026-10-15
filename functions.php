@@ -143,6 +143,9 @@ require_once get_template_directory() . '/inc/sapi-product-options.php';
 // Utilise les fonctions de sapi-ampoule-optin.php.
 require_once get_template_directory() . '/inc/sapi-cart-suggestions.php';
 
+// Page panier : languette ampoule sous chaque luminaire + vitrine desktop.
+require_once get_template_directory() . '/inc/sapi-cart-page.php';
+
 // Catalogue B2B (prescripteurs) — Temps 1. Source de données + mapping specs +
 // champs ACF éditoriaux. Chargé front ET admin (ACF acf/init + rendu template).
 require_once get_template_directory() . '/inc/catalogue-data.php';

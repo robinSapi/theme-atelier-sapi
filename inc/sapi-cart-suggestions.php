@@ -83,13 +83,13 @@ add_action('woocommerce_variation_set_stock_status', 'sapi_suggest_flush_index')
  * Les suggestions du panier courant : [['product' => WC_Product, 'kind' => ampoule|modele|vente, 'type' => ...], ...]
  * plus le luminaire source. Calculées une fois par requête.
  */
-function sapi_suggest_for_cart() {
-  static $done = false, $out = null;
-  if ($done) return $out;
+function sapi_suggest_for_cart($with_ampoule = true) {
+  static $cache = [];
+  $ck = $with_ampoule ? 'amp' : 'noamp';
+  if (isset($cache[$ck])) return $cache[$ck];
   if (!function_exists('WC') || !WC()->cart) return ['items' => [], 'source' => null];
-  $done = true;
   $out = ['items' => [], 'source' => null];
-  if (WC()->cart->is_empty()) return $out;
+  if (WC()->cart->is_empty()) return $cache[$ck] = $out;
 
   $in_cart = [];
   $has_ampoule = false;
@@ -119,8 +119,8 @@ function sapi_suggest_for_cart() {
     $source_type = sapi_suggest_type($source_id);
     $source_key = sapi_suggest_model_key(get_the_title($source_id));
 
-    // 1. Ampoule
-    if (!$has_ampoule && function_exists('sapi_ampoule_for')) {
+    // 1. Ampoule (pas sur la page panier : elle y a sa propre languette)
+    if ($with_ampoule && !$has_ampoule && function_exists('sapi_ampoule_for')) {
       $add(sapi_ampoule_for($source_id), 'ampoule');
     }
     // 2. Même modèle, autre type
@@ -152,7 +152,7 @@ function sapi_suggest_for_cart() {
     if ($source_key && $row['key'] === $source_key) continue;
     $add(wc_get_product($row['id']), 'vente', $row['type']);
   }
-  return $out;
+  return $cache[$ck] = $out;
 }
 
 /**

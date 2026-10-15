@@ -27312,3 +27312,144 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   cursor: pointer;
 }
 .sapi-suggest__close:hover { opacity: 1; }
+
+/* ========================================
+   PAGE PANIER : LANGUETTE AMPOULE + VITRINE (inc/sapi-cart-page.php, 15/10/2026)
+   Variante B : ce qui n'est pas au panier n'a ni cadre blanc ni contrôles.
+   La languette est accrochée sous la carte du luminaire, sur fond beige.
+   ======================================== */
+
+/* Le bloc natif des ventes croisées est remplacé par la languette */
+.sapi-cart-outer .wc-block-cart__main > .wp-block-woocommerce-product-collection {
+  display: none !important;
+}
+
+/* La carte du luminaire se colle à sa languette */
+.sapi-cart-outer .wc-block-cart-items tr.wc-block-cart-items__row:has(+ tr.sapi-amp-row) {
+  margin-bottom: 0 !important;
+  position: relative;
+  z-index: 1;
+  background: var(--color-white, #fff);
+}
+.sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row {
+  display: block !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 1rem 1rem !important;
+}
+.sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row > td {
+  display: block !important;
+  width: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+.sapi-amp-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem 0.6rem 2rem;
+  background: #F3EEE6;
+  border-radius: 0 0 10px 10px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--color-gray, #717171);
+}
+/* Le petit crochet qui relie la languette à la carte */
+.sapi-amp-tab::before {
+  content: '';
+  position: absolute;
+  left: 0.8rem;
+  top: 0;
+  width: 0.6rem;
+  height: 50%;
+  border-left: 1.5px solid #CBBFAE;
+  border-bottom: 1.5px solid #CBBFAE;
+  border-bottom-left-radius: 8px;
+}
+.sapi-amp-tab__img {
+  flex: 0 0 auto;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 6px !important;
+  object-fit: cover;
+  opacity: 0.75;
+  mix-blend-mode: multiply;
+}
+.sapi-amp-tab__text {
+  flex: 1;
+  margin: 0 !important;
+}
+.sapi-amp-tab__text strong {
+  font-weight: 700;
+  color: var(--color-dark);
+}
+.sapi-amp-tab__add {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.9rem;
+  border: 1.5px solid var(--color-green, #018501);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-green, #018501);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.sapi-amp-tab__add:hover:not(:disabled) {
+  background: var(--color-green, #018501);
+  color: var(--color-white, #fff);
+}
+.sapi-amp-tab__add:disabled { opacity: 0.6; cursor: default; }
+@media (max-width: 600px) {
+  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row { margin: 0 0.6rem 1rem !important; }
+  .sapi-amp-tab { gap: 0.6rem; padding: 0.55rem 0.7rem 0.55rem 1.6rem; font-size: 0.78rem; }
+  .sapi-amp-tab::before { left: 0.6rem; width: 0.5rem; }
+  .sapi-amp-tab__img { width: 34px !important; height: 34px !important; }
+  .sapi-amp-tab__add { padding: 0.3rem 0.7rem; font-size: 0.75rem; }
+  .sapi-amp-tab__long { display: none; }
+}
+
+/* Vitrine sous le panier : desktop seulement, cartes beiges sans ombre */
+.sapi-cart-page-suggest {
+  margin: 2.5rem 0 0;
+  color: var(--color-dark);
+  font-family: var(--font-body);
+}
+.sapi-cart-page-suggest .sapi-suggest__eyebrow { color: var(--color-wood); opacity: 1; }
+.sapi-cart-page-suggest .sapi-suggest__title { font-size: 2.2rem; margin-bottom: 16px; }
+.sapi-cart-page-suggest .sapi-suggest__cards {
+  grid-template-columns: repeat(3, minmax(0, 220px));
+  gap: 16px;
+}
+.sapi-cart-page-suggest .product-card-cinetique {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  background: #F3EEE6 !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+}
+.sapi-cart-page-suggest .product-card-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+.sapi-cart-page-suggest .product-card-cinetique .product-info { padding: 0.85rem 1rem 0.4rem; }
+.sapi-cart-page-suggest .product-card-cinetique .product-name {
+  font-size: 1rem !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sapi-cart-page-suggest .product-card-cinetique .product-category { font-size: 0.8rem; margin: 0.2rem 0 0.6rem; }
+.sapi-cart-page-suggest .product-card-cinetique .price-value { font-size: 0.95rem; }
+.sapi-cart-page-suggest .product-card-cinetique .product-actions { margin-bottom: 0.6rem; }
+@media (max-width: 781px) {
+  .sapi-cart-page-suggest { display: none; }
+}
