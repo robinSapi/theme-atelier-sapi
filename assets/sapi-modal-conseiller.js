@@ -67,6 +67,13 @@
      phrase que Robin n'a jamais relue. */
   var SURMESURE        = config.surmesure || {};
   var POSSESSIFS_MIENS = config.possessifsMiens || {};
+  /* Landing « Conseil de Robin » (réseaux sociaux, nov. 2026). La modale
+     s'ouvre seule, ne montre PAS la sélection : après la dernière question
+     elle demande prénom + email (écran s-lead), et Robin envoie son conseil
+     par mail. Toute sortie (croix, « Non merci », après le merci) mène à
+     /mes-creations/. Partie serveur : inc/sapi-conseil-reseaux.php. */
+  var LANDING  = !!config.landing;
+  var EXIT_URL = config.exitUrl || '/mes-creations/';
 
   /* ⚠️ LES TABLES DE TRADUCTION DU PROJET VIVENT DANS `sapi-project.js`.
      `style → essence` existait ici, dans `sapi-product-preselect.js` et dans
@@ -280,6 +287,10 @@
       if (body && (body.classList.contains('single-product') || path.indexOf('/produit/') !== -1)) {
         return 'product_pill';
       }
+
+      /* Landing réseaux : une page à part, reconnue par sa propre config et
+         non par l'adresse (son slug est choisi par Robin dans l'admin). */
+      if (LANDING) return 'reseaux';
 
       /* Les trois sélecteurs de pièce annoncent leur page dans l'adresse.
          C'est la seule façon de le savoir : ils REDIRIGENT vers
@@ -618,8 +629,12 @@
     cleanInvisibleAnswers();
 
     // Sauvegarde incrémentale dans sapiProject (partielle OK)
+    /* Landing : `set` et pas `update`. La modale y repart de zéro ; `update`
+       fusionnerait avec un ancien projet mémorisé, et le tracking compterait
+       des réponses d'une visite précédente comme données aujourd'hui. */
     if (window.sapiProject) {
-      window.sapiProject.update(state.answers, state.labels);
+      if (LANDING) window.sapiProject.set(state.answers, state.labels);
+      else window.sapiProject.update(state.answers, state.labels);
     }
 
     // Empile la question dans l'historique pour permettre Retour
@@ -667,6 +682,14 @@
         window.sapiProject.set(state.answers, state.labels);
       }
       showProductRecap();
+    } else if (LANDING) {
+      /* Landing réseaux : PAS de sélection à l'écran. Robin enverra son
+         conseil par mail ; on demande prénom + email. Le projet est quand
+         même mémorisé : si le visiteur part sur /mes-creations/, il y
+         retrouve ses réponses. */
+      if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+      noterValidation();
+      showLeadScreen();
     } else {
       // F2a-bis : dernière question répondue → écran transition + appel IA + close
       showTransitionAndExit({ source: 's1' });
@@ -1596,6 +1619,10 @@
 
   // Soumission du champ texte S0 → bascule vers S2.chat avec bulle initiale.
   function submitFromS0Text(text) {
+    /* Landing : le texte libre mène au chat, qui montre la sélection et peut
+       ouvrir le contact sur-mesure. Le champ est masqué en CSS ; cette garde
+       couvre le cas où il serait quand même soumis. */
+    if (LANDING) return;
     text = (text || '').trim();
     if (!text) return;
 
@@ -2417,7 +2444,15 @@
     // utilise la bonne liste de visibles (sinon des steps non-court restent en answers).
     state.shortMode = (initialScreen === 'product');
 
-    hydrateFromProject();
+    /* Landing : on repart de zéro. Un ancien projet mémorisé enverrait le
+       visiteur directement sur le récap S3 (qui mène à la sélection), alors
+       que cette page doit toujours finir sur le formulaire. */
+    if (LANDING) {
+      state.answers = {};
+      state.labels = {};
+    } else {
+      hydrateFromProject();
+    }
     state.questionHistory = [];
     state.transition = false;
     /* ⚠️ CES DEUX-LÀ FUYAIENT D'UNE OUVERTURE À L'AUTRE.
@@ -2534,6 +2569,113 @@
       window.sapiProject.resumeNotifications();
     }
     dispatchConseillerClosed();
+    /* Landing : la page derrière la modale est vide. Fermer, c'est sortir
+       vers les créations. Le snapshot final est déjà parti (sendBeacon). */
+    if (LANDING) {
+      pushLandingEvent('conseil_reseaux_sortie', { ecran: state.screen || '' });
+      /* Court délai : laisse à GTM le temps d'envoyer l'événement avant que
+         la page ne change. */
+      setTimeout(function () { window.location.href = EXIT_URL; }, 250);
+    }
+  }
+
+  /* GA4 via GTM : la landing pousse ses propres événements dans le dataLayer
+     (le pixel Meta / Pinterest peut s'y brancher côté GTM). Silencieux si GTM
+     n'est pas chargé. */
+  function pushLandingEvent(name, extra) {
+    if (!LANDING) return;
+    try {
+      window.dataLayer = window.dataLayer || [];
+      var ev = { event: name };
+      if (extra) Object.keys(extra).forEach(function (k) { ev[k] = extra[k]; });
+      window.dataLayer.push(ev);
+    } catch (e) { /* swallow */ }
+  }
+
+  function showLeadScreen() {
+    showScreen('s-lead');
+    pushLandingEvent('conseil_reseaux_questions_finies', { piece: state.answers.piece || '' });
+    /* Pas de focus automatique sur le prénom : sur mobile il ouvrirait le
+       clavier par-dessus le texte que le visiteur doit lire d'abord. */
+  }
+
+  function submitLeadForm(form) {
+    if (!form || !config.ajaxUrl || form.__envoi) return;
+    var submitBtn = form.querySelector('[data-lead-submit]');
+    var prenomInput = form.querySelector('input[name="prenom"]');
+    var emailInput  = form.querySelector('input[name="email"]');
+    var motInput    = form.querySelector('textarea[name="commentaire"]');
+    var honey       = form.querySelector('input[name="website"]');
+
+    var prenomVal = (prenomInput && prenomInput.value || '').trim();
+    var emailVal  = (emailInput && emailInput.value || '').trim();
+    var motVal    = (motInput && motInput.value || '').trim();
+
+    var prevErr = form.querySelector('.contact-form__error');
+    if (prevErr) prevErr.remove();
+    if (prenomInput) prenomInput.classList.remove('is-invalid');
+    if (emailInput) emailInput.classList.remove('is-invalid');
+
+    var message = '';
+    if (!prenomVal) {
+      if (prenomInput) prenomInput.classList.add('is-invalid');
+      message = 'Indique ton prénom.';
+    }
+    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      if (emailInput) emailInput.classList.add('is-invalid');
+      message = message ? 'Indique ton prénom et un email valide.' : 'Indique un email valide.';
+    }
+    function afficherErreur(txt) {
+      var err = document.createElement('p');
+      err.className = 'contact-form__error';
+      err.setAttribute('role', 'alert');
+      err.textContent = txt;
+      form.appendChild(err);
+    }
+    if (message) { afficherErreur(message); return; }
+
+    /* Verrou contre le double envoi (double tap sur mobile) : un seul mail à
+       Robin, une seule ligne en base. */
+    form.__envoi = true;
+    if (submitBtn) submitBtn.disabled = true;
+
+    SessionTracker.snapshot({ contact_triggered: 1, contact_message: motVal });
+
+    var fd = new FormData();
+    fd.append('action', 'sapi_conseil_lead');
+    fd.append('nonce', config.nonce || '');
+    fd.append('sapi_ts', config.ts || '');
+    fd.append('sapi_tsig', config.tsig || '');
+    fd.append('prenom', prenomVal);
+    fd.append('email', emailVal);
+    fd.append('commentaire', motVal);
+    fd.append('website', honey ? honey.value : '');
+    fd.append('source_url', window.location.href);
+    fd.append('project', JSON.stringify({ answers: state.answers, labels: state.labels }));
+    try { fd.append('session_id', SessionTracker.getSessionId()); } catch (e) { /* swallow */ }
+
+    function relacher(txt) {
+      form.__envoi = false;
+      if (submitBtn) submitBtn.disabled = false;
+      afficherErreur(txt);
+    }
+
+    fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (resp) {
+        if (resp && resp.success) {
+          var titre = els.modal.querySelector('[data-lead-merci-titre]');
+          if (titre) titre.textContent = 'Merci ' + prenomVal;
+          showScreen('s-lead-merci');
+          pushLandingEvent('conseil_reseaux_email', { piece: state.answers.piece || '', avec_mot: motVal ? 1 : 0 });
+          return;
+        }
+        relacher((resp && resp.data && resp.data.fallback) ||
+          "L'envoi a échoué. Tu peux écrire directement à " + CONTACT_EMAIL + '.');
+      })
+      .catch(function () {
+        relacher("Petit souci de connexion. Tu peux réessayer ou écrire à " + CONTACT_EMAIL + '.');
+      });
   }
 
   // Événement déterministe émis à CHAQUE fermeture de la modale (fin ou
@@ -2631,7 +2773,8 @@
 
     // ESC pour fermer — désactivé pendant l'animation morph (state.transition)
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && state.open && !state.transition) {
+      /* Landing : Échap ne doit pas éjecter le visiteur de la page. */
+      if (e.key === 'Escape' && state.open && !state.transition && !LANDING) {
         e.preventDefault();
         closeModal();
       }
@@ -2645,7 +2788,8 @@
       if (state.transition) return;
       // Click sur l'overlay (en dehors du dialog) → ferme
       if (e.target === els.modal) {
-        closeModal();
+        /* Landing : un clic à côté (desktop) ne fait pas quitter la page. */
+        if (!LANDING) closeModal();
         return;
       }
 
@@ -2660,6 +2804,10 @@
           break;
         case 'back':
           backFromQuestion();
+          break;
+        case 'lead-exit':
+          // Landing réseaux : « Non merci » ou après le merci → /mes-creations/
+          closeModal();
           break;
         case 'apply':
           /* CTA « Voir la sélection » du chat.
@@ -2788,6 +2936,14 @@
       });
     }
 
+    // Landing réseaux : formulaire prénom + email + un mot
+    if (els.leadForm) {
+      els.leadForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitLeadForm(els.leadForm);
+      });
+    }
+
     // Round 3 — Lot C2 v2 : submit du form contact intégré
     if (els.contactForm) {
       els.contactForm.addEventListener('submit', function (e) {
@@ -2839,11 +2995,19 @@
     els.contactRecap        = els.modal.querySelector('[data-contact-recap]');
     els.contactForm         = els.modal.querySelector('[data-contact-form]');
     els.contactMessageField = els.modal.querySelector('[data-contact-message-field]');
+    // Landing réseaux
+    els.leadForm            = els.modal.querySelector('[data-lead-form]');
 
     // Marqueur pour les cards Phase 2 (évite leur fallback console.info)
     window.__sapiModalReady = true;
 
     bindEvents();
+
+    /* Landing réseaux : la modale EST la page, elle s'ouvre seule. */
+    if (LANDING) {
+      pushLandingEvent('conseil_reseaux_arrivee');
+      setTimeout(function () { openModal('s0'); }, 50);
+    }
 
     // Round 4 — Si un param URL ?freetext=… est présent (depuis le room
     // picker homepage), auto-ouvre la modale en S0 puis bascule en chat S2

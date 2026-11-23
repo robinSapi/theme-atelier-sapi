@@ -146,6 +146,10 @@ require_once get_template_directory() . '/inc/sapi-cart-suggestions.php';
 // Page panier : languette ampoule sous chaque luminaire + vitrine desktop.
 require_once get_template_directory() . '/inc/sapi-cart-page.php';
 
+// Page cachée « Conseil de Robin » pour les réseaux sociaux (nov. 2026) :
+// landing, table des demandes, endpoint sapi_conseil_lead, écrans de la modale.
+require_once get_template_directory() . '/inc/sapi-conseil-reseaux.php';
+
 // Catalogue B2B (prescripteurs) — Temps 1. Source de données + mapping specs +
 // champs ACF éditoriaux. Chargé front ET admin (ACF acf/init + rendu template).
 require_once get_template_directory() . '/inc/catalogue-data.php';
@@ -519,13 +523,17 @@ function sapi_maison_enqueue_assets() {
   // - is_shop() : tous les scripts (méga-filtre, cards Conseil/Mon projet, modale)
   // - is_product() (F2b) : on étend à la fiche produit pour la modale partagée
   //   (la pill "Comment choisir ?" déclenche un sapi:open-modal).
-  if (class_exists('WooCommerce') && (is_shop() || is_product())) {
+  /* La landing « Conseil de Robin » (réseaux) charge aussi la modale, mais
+     rien de ce qui sert la boutique : pills, GA4 de /mes-creations/,
+     immersion. `$sapi_landing` les écarte ci-dessous. */
+  $sapi_landing = function_exists('sapi_is_landing_conseil') && sapi_is_landing_conseil();
+  if (class_exists('WooCommerce') && (is_shop() || is_product() || $sapi_landing)) {
     require_once get_template_directory() . '/inc/guide-data.php';
 
     // Pills catégorie sur /mes-creations/ (Chantier 3) — filtrage AJAX-less
     // de la grille basse par data-categories.
     $mes_creations_pills_js_path = get_template_directory() . '/assets/sapi-mes-creations-pills.js';
-    if (file_exists($mes_creations_pills_js_path)) {
+    if (!$sapi_landing && file_exists($mes_creations_pills_js_path)) {
       wp_enqueue_script(
         'sapi-mes-creations-pills',
         get_template_directory_uri() . '/assets/sapi-mes-creations-pills.js',
@@ -537,7 +545,7 @@ function sapi_maison_enqueue_assets() {
 
     // Tracking GA4 sur /mes-creations/ (Chantier 4) — 5 events via dataLayer.push
     $mes_creations_ga4_js_path = get_template_directory() . '/assets/sapi-mes-creations-ga4.js';
-    if (file_exists($mes_creations_ga4_js_path)) {
+    if (!$sapi_landing && file_exists($mes_creations_ga4_js_path)) {
       wp_enqueue_script(
         'sapi-mes-creations-ga4',
         get_template_directory_uri() . '/assets/sapi-mes-creations-ga4.js',
@@ -559,7 +567,7 @@ function sapi_maison_enqueue_assets() {
     // over-photo). Chargé partout sur la boutique : il s'auto-désactive si
     // le body n'est pas en mode immersion (pas de ?piece= valide).
     $immersion_js_path = get_template_directory() . '/assets/sapi-mescreations-immersion.js';
-    if (file_exists($immersion_js_path)) {
+    if (!$sapi_landing && file_exists($immersion_js_path)) {
       wp_enqueue_script(
         'sapi-mescreations-immersion',
         get_template_directory_uri() . '/assets/sapi-mescreations-immersion.js',
@@ -636,6 +644,11 @@ function sapi_maison_enqueue_assets() {
            du chemin, l'écran s'ouvre instantanément. */
         'surmesure'           => sapi_surmesure_contact_texts(),
         'possessifsMiens'     => sapi_piece_possessive_mienne_map(),
+        /* Landing réseaux : la modale s'ouvre seule, finit sur le formulaire
+           prénom + email au lieu de la sélection, et toute sortie mène à
+           /mes-creations/. */
+        'landing'             => $sapi_landing,
+        'exitUrl'             => home_url('/mes-creations/'),
       ]);
       // Tâche 4b — conseils génériques par pièce (bulle initiale du chat),
       // anciennement portés par SAPI_CARDS_CONSEILLER de sapi-cards-conseiller.js
@@ -3986,12 +3999,13 @@ function sapi_megafilter_labels_from_slugs(array $filters) {
  */
 function sapi_render_conseiller_modal() {
   if (!class_exists('WooCommerce')) return;
-  if (!(is_shop() || is_product())) return;
+  $is_landing = function_exists('sapi_is_landing_conseil') && sapi_is_landing_conseil();
+  if (!(is_shop() || is_product() || $is_landing)) return;
 
   $pencil_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>';
   $arrow_svg  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
   ?>
-  <div class="conseiller-modal" data-conseiller-modal hidden>
+  <div class="conseiller-modal<?php echo $is_landing ? ' is-landing' : ''; ?>" data-conseiller-modal hidden>
     <div class="conseiller-card conseiller-card--modal" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e('Conseil de Robin', 'theme-sapi-maison'); ?>" data-modal-card>
 
       <!-- Round 4 — Bouton close visible toutes tailles, top-right (mockup-11). -->
@@ -4324,6 +4338,8 @@ function sapi_render_conseiller_modal() {
           </div>
         </div>
       </section>
+
+      <?php if ($is_landing) sapi_render_conseil_lead_screens($pencil_svg); ?>
 
     </div><!-- /.conseiller-card--modal -->
   </div>
@@ -7433,7 +7449,7 @@ function sapi_megafilter_admin_read_filters() {
   /* `conseils_picker` ajouté le 28/08 : le sélecteur de pièce existe sur DEUX
      pages (l'accueil et /conseils-eclaires/), et les confondre reviendrait à ne
      pas savoir laquelle des deux amène des visiteurs. */
-  $valid_entries  = ['home_picker', 'conseils_picker', 'mes_creations', 'product_pill', 'freetext'];
+  $valid_entries  = ['home_picker', 'conseils_picker', 'mes_creations', 'product_pill', 'reseaux', 'freetext'];
   $valid_pieces   = ['salon', 'cuisine', 'chambre', 'chambre-enfant', 'bureau', 'entree', 'escalier'];
   $valid_devices  = ['desktop', 'mobile'];
   $valid_statuses = ['chat', 'contact', 'complete'];
@@ -7660,6 +7676,7 @@ function sapi_megafilter_admin_page() {
     'conseils_picker' => 'Conseils éclairés',
     'mes_creations' => 'Mes créations',
     'product_pill'  => 'Fiche produit',
+    'reseaux'       => 'Réseaux sociaux',
     /* Plus jamais écrite depuis le 28/08 : c'était une méthode dans une
        colonne de pages. Conservée pour que les anciennes lignes restent
        lisibles. */
@@ -7670,6 +7687,7 @@ function sapi_megafilter_admin_page() {
     'conseils_picker' => 'pill--home',
     'mes_creations' => 'pill--mes-creations',
     'product_pill'  => 'pill--product',
+    'reseaux'       => 'pill--product',
     'freetext'      => 'pill--freetext',
   ];
   $contact_kind_labels = [
@@ -7862,6 +7880,7 @@ function sapi_megafilter_admin_page() {
             'conseils_picker' => '#558B2F',
             'mes_creations' => '#E35B24',
             'product_pill'  => '#1565C0',
+            'reseaux'       => '#C2185B',
             'freetext'      => '#7B1FA2',
           ];
           foreach ($stats['top_entry'] as $row) :
@@ -7897,6 +7916,7 @@ function sapi_megafilter_admin_page() {
         <option value="conseils_picker" <?php selected($filters['entry'], 'conseils_picker'); ?>>Conseils éclairés</option>
         <option value="mes_creations" <?php selected($filters['entry'], 'mes_creations'); ?>>Mes créations</option>
         <option value="product_pill"  <?php selected($filters['entry'], 'product_pill'); ?>>Fiche produit</option>
+        <option value="reseaux"       <?php selected($filters['entry'], 'reseaux'); ?>>Réseaux sociaux</option>
         <option value="freetext"      <?php selected($filters['entry'], 'freetext'); ?>>Texte libre (ancien)</option>
       </select>
       <span class="filter-sep"></span>
@@ -8107,6 +8127,7 @@ function sapi_megafilter_render_session_detail($r) {
     'conseils_picker' => 'page Conseils éclairés',
     'mes_creations' => 'page Mes créations',
     'product_pill'  => 'fiche produit',
+    'reseaux'       => 'page Conseil de Robin (réseaux sociaux)',
     'freetext'      => 'texte libre (ancien)',
   ];
   $entry_pill_class = [
@@ -8114,6 +8135,7 @@ function sapi_megafilter_render_session_detail($r) {
     'conseils_picker' => 'pill--home',
     'mes_creations' => 'pill--mes-creations',
     'product_pill'  => 'pill--product',
+    'reseaux'       => 'pill--product',
     'freetext'      => 'pill--freetext',
   ];
   $contact_kind_labels = [
@@ -8181,6 +8203,7 @@ function sapi_megafilter_render_session_detail($r) {
   if ($r->entry_point === 'conseils_picker') $entry_label = 'Conseils éclairés';
   if ($r->entry_point === 'mes_creations') $entry_label = 'Mes créations';
   if ($r->entry_point === 'product_pill') $entry_label = 'Fiche produit';
+  if ($r->entry_point === 'reseaux') $entry_label = 'Réseaux sociaux';
   if ($r->entry_point === 'freetext') $entry_label = 'Texte libre (ancien)';
   ?>
   <div class="drill-section">

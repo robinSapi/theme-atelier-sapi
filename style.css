@@ -27453,3 +27453,38 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 @media (max-width: 781px) {
   .sapi-cart-page-suggest { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   LANDING « CONSEIL DE ROBIN » (réseaux sociaux, nov. 2026)
+   page-conseil-robin.php + inc/sapi-conseil-reseaux.php
+   La modale du Conseiller est la page : fond crème au lieu du voile sombre
+   (il n'y a rien derrière à assombrir), pas de champ texte libre en S0
+   (il mène au chat, qui affiche la sélection : ici elle part par mail).
+   ═══════════════════════════════════════════════════════════════════ */
+body.sapi-landing-conseil {
+  background: var(--color-warm);
+  min-height: 100vh;
+}
+.landing-conseil__noscript {
+  max-width: 480px;
+  margin: 20vh auto 0;
+  padding: 0 24px;
+  text-align: center;
+  color: var(--color-wood-dark);
+}
+.conseiller-modal.is-landing {
+  background: var(--color-warm);
+  -webkit-animation: none;
+  animation: none;
+}
+.conseiller-modal.is-landing .separator-or,
+.conseiller-modal.is-landing [data-s0-form] {
+  display: none !important;
+}
+/* 16px minimum : en dessous, Safari iOS zoome toute la page au focus d'un
+   champ. Le formulaire du Conseiller (13.5px) n'est presque jamais rempli
+   sur téléphone ; celui-ci l'est presque toujours. */
+.conseiller-modal.is-landing .contact-form input,
+.conseiller-modal.is-landing .contact-form textarea {
+  font-size: 16px;
+}
