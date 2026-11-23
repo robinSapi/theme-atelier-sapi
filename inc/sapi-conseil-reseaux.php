@@ -39,7 +39,7 @@
 if (!defined('ABSPATH')) exit;
 
 define('SAPI_CONSEIL_TEMPLATE', 'page-conseil-robin.php');
-if (!defined('SAPI_CONSEIL_DB_VERSION')) define('SAPI_CONSEIL_DB_VERSION', '3');
+if (!defined('SAPI_CONSEIL_DB_VERSION')) define('SAPI_CONSEIL_DB_VERSION', '4');
 
 /** La page courante est-elle la landing « Conseil de Robin » ? */
 function sapi_is_landing_conseil() {
@@ -98,6 +98,7 @@ function sapi_conseil_create_table() {
     brouillon_le DATETIME NULL DEFAULT NULL,
     relance_le DATETIME NULL DEFAULT NULL,
     verrou_le DATETIME NULL DEFAULT NULL,
+    alternatives VARCHAR(60) NOT NULL DEFAULT '',
     PRIMARY KEY  (id),
     KEY statut (statut),
     KEY envoi_prevu (envoi_prevu),
@@ -119,7 +120,7 @@ add_action('init', function () {
      table présente mais un ALTER raté laisserait l'étape 2 morte en silence
      (updates et SELECT sur des colonnes absentes renvoient faux sans bruit). */
   if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) return;
-  if (!$wpdb->get_var("SHOW COLUMNS FROM $table LIKE 'verrou_le'")) return;
+  if (!$wpdb->get_var("SHOW COLUMNS FROM $table LIKE 'alternatives'")) return;
   /* ⚠️ Les demandes nées AVANT l'étape 2 (recette de l'étape 1) n'ont pas de
      brouillon et leurs 24 h sont échues : sans ça, le premier cron les
      préparerait et les enverrait d'un coup, sans relecture. On les annule. */
@@ -412,3 +413,4 @@ function sapi_render_conseil_lead_screens($pencil_svg) {
 
 /* Étape 2 : brouillon, page admin « Demandes réseaux », envoi et cron. */
 require_once __DIR__ . '/sapi-conseil-reseaux-envoi.php';
+require_once __DIR__ . '/sapi-conseil-reseaux-email.php';

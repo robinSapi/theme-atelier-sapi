@@ -147,24 +147,16 @@ function sapi_conseil_preparer_brouillon($id) {
     $lignes[] = SAPI_CONSEIL_MARQUEUR . ' : ta réponse à son mot « ' . trim($row->commentaire) . ' »]';
   }
 
-  if ($choisi) {
-    $lignes[] = '[photo]';
-    $lignes[] = 'Sa fiche : ' . sapi_conseil_lien_produit($choisi);
-    $autres = array_slice($produits, 1, 2);
-    if ($autres) {
-      $noms = array_map(function ($p) { return $p['title'] . ' (' . sapi_conseil_lien_produit($p) . ')'; }, $autres);
-      $lignes[] = 'Si tu veux comparer, ' . implode(' et ', $noms) . (count($autres) > 1 ? ' iraient bien aussi.' : ' irait bien aussi.');
-    }
-  }
-
-  $lignes[] = 'Pour te remercier d\'avoir pris le temps de répondre, tu as -10 % sur ta commande avec le code BIENVENUE10.';
-  $lignes[] = 'Si tu as la moindre question, réponds simplement à ce mail.';
-  $lignes[] = "Robin\nAtelier Sâpi";
+  /* Le texte ne contient QUE le message de Robin. La photo, le bouton, les
+     alternatives, le code et la signature sont posés par le gabarit
+     (sapi-conseil-reseaux-email.php) : Robin n'a que ses mots à relire. */
+  $autres = $choisi ? array_slice($produits, 1, 2) : [];
 
   $sujet = $prenom . ', mon conseil pour ' . $ta_piece;
 
   $data = [
     'produit_id'   => $choisi ? (int) $choisi['id'] : 0,
+    'alternatives' => implode(',', array_map(function ($p) { return (int) $p['id']; }, $autres)),
     'sujet'        => mb_substr($sujet, 0, 200),
     'corps'        => implode("\n\n", $lignes),
     'brouillon_le' => current_time('mysql'),
@@ -196,8 +188,9 @@ add_action('sapi_conseil_preparer_event', function ($id) {
    2. Envoi
    ───────────────────────────────────────────────────────────────────────── */
 
-/** Texte brut de Robin → HTML sobre (paragraphes, liens, photo). */
-function sapi_conseil_corps_html($corps, $produit_id) {
+/* Ancien rendu « texte simple », remplacé le 23/11 par le gabarit
+   newsletter (sapi_conseil_email_html). Gardé pour mémoire, plus appelé. */
+function sapi_conseil_corps_html_ancien($corps, $produit_id) {
   $photo = '';
   if ($produit_id) {
     $img = get_the_post_thumbnail_url($produit_id, 'large');
@@ -246,7 +239,7 @@ function sapi_conseil_envoyer($id) {
   $ok = wp_mail(
     $row->email,
     $row->sujet !== '' ? $row->sujet : 'Mon conseil pour ton luminaire',
-    sapi_conseil_corps_html($row->corps, (int) $row->produit_id),
+    sapi_conseil_email_html($row),
     [
       'Content-Type: text/html; charset=UTF-8',
       'From: Robin - Atelier Sâpi <robin@atelier-sapi.fr>',
@@ -406,7 +399,7 @@ function sapi_conseil_admin_page() {
   echo '<form method="post" action="' . $action . '">' . $nonce;
   echo '<input type="hidden" name="action" value="sapi_conseil_admin"><input type="hidden" name="demande" value="' . (int) $id . '">';
   echo '<p><label>Objet<br><input type="text" name="sujet" class="large-text" value="' . esc_attr($row->sujet) . '"' . ($editable ? '' : ' readonly') . '></label></p>';
-  echo '<p><label>Texte (la ligne <code>[photo]</code> devient la photo du luminaire ; remplace chaque « ' . esc_html(SAPI_CONSEIL_MARQUEUR) . ' … ] » avant d\'envoyer)<br>';
+  echo '<p><label>Ton message (il apparaît dans le bloc « Le mot de Robin » ; le luminaire, les alternatives, le code et ta signature sont ajoutés autour. Remplace chaque « ' . esc_html(SAPI_CONSEIL_MARQUEUR) . ' … ] » avant d\'envoyer)<br>';
   echo '<textarea name="corps" rows="18" class="large-text" style="font-size:14px;line-height:1.5;"' . ($editable ? '' : ' readonly') . '>' . esc_textarea($row->corps) . '</textarea></label></p>';
   if ($editable) {
     echo '<p>';
@@ -419,7 +412,10 @@ function sapi_conseil_admin_page() {
   }
   echo '</form>';
 
-  echo '<h3>Aperçu</h3><div style="background:#fff;padding:16px;border:1px solid #ddd;">' . sapi_conseil_corps_html($row->corps, (int) $row->produit_id) . '</div>'; // phpcs:ignore
+  /* Aperçu du VRAI mail, dans un cadre isolé : les styles de l'admin ne le
+     déforment pas, et ce qu'on voit est ce qui part. */
+  echo '<h3>Aperçu du mail (après « Enregistrer »)</h3>';
+  echo '<iframe title="Aperçu du mail" sandbox="" style="width:100%;max-width:640px;height:1500px;border:1px solid #ddd;background:#F5EDE4;" srcdoc="' . esc_attr(sapi_conseil_email_html($row)) . '"></iframe>';
   echo '</div>';
 }
 
