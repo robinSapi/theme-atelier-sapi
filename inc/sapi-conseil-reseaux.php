@@ -39,7 +39,7 @@
 if (!defined('ABSPATH')) exit;
 
 define('SAPI_CONSEIL_TEMPLATE', 'page-conseil-robin.php');
-if (!defined('SAPI_CONSEIL_DB_VERSION')) define('SAPI_CONSEIL_DB_VERSION', '1');
+if (!defined('SAPI_CONSEIL_DB_VERSION')) define('SAPI_CONSEIL_DB_VERSION', '3');
 
 /** La page courante est-elle la landing « Conseil de Robin » ? */
 function sapi_is_landing_conseil() {
@@ -72,7 +72,10 @@ function sapi_conseil_create_table() {
   /* ⚠️ Aucun commentaire DANS la chaîne : dbDelta lirait chaque ligne comme
      une colonne (même piège que la table des sessions).
      `mode` : 'auto' (part seul à 24 h) ou 'manuel' (Robin répond).
-     `statut` : 'a_traiter' → 'envoye' (étape 2). */
+     `statut` : 'a_traiter' → 'envoi' (verrou pendant l'envoi) → 'envoye',
+     ou 'repondu' (Robin a répondu depuis sa boîte), ou 'annule'.
+     `corps` : texte brut éditable par Robin ; la ligne [photo] devient la
+     photo du luminaire `produit_id` à l'envoi. */
   $sql = "CREATE TABLE $table (
     id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -89,6 +92,12 @@ function sapi_conseil_create_table() {
     envoi_prevu DATETIME NULL DEFAULT NULL,
     envoye_le DATETIME NULL DEFAULT NULL,
     source_url VARCHAR(500) NOT NULL DEFAULT '',
+    produit_id BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
+    sujet VARCHAR(200) NOT NULL DEFAULT '',
+    corps LONGTEXT NULL,
+    brouillon_le DATETIME NULL DEFAULT NULL,
+    relance_le DATETIME NULL DEFAULT NULL,
+    verrou_le DATETIME NULL DEFAULT NULL,
     PRIMARY KEY  (id),
     KEY statut (statut),
     KEY envoi_prevu (envoi_prevu),
@@ -101,15 +110,23 @@ function sapi_conseil_create_table() {
 /* Sur `init` (pas `admin_init`) : la première demande peut arriver avant que
    Robin ne passe dans l'admin. Le contrôle ne coûte qu'un get_option. */
 add_action('init', function () {
-  if (get_option('sapi_conseil_db_version') === SAPI_CONSEIL_DB_VERSION) return;
+  $avant = get_option('sapi_conseil_db_version');
+  if ($avant === SAPI_CONSEIL_DB_VERSION) return;
   sapi_conseil_create_table();
   global $wpdb;
   $table = sapi_conseil_table();
-  /* L'option n'est posée que si la table existe vraiment : sinon on
-     retentera au prochain chargement au lieu de se croire à jour. */
-  if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) === $table) {
-    update_option('sapi_conseil_db_version', SAPI_CONSEIL_DB_VERSION, true);
+  /* L'option n'est posée que si la DERNIÈRE colonne existe vraiment : une
+     table présente mais un ALTER raté laisserait l'étape 2 morte en silence
+     (updates et SELECT sur des colonnes absentes renvoient faux sans bruit). */
+  if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) return;
+  if (!$wpdb->get_var("SHOW COLUMNS FROM $table LIKE 'verrou_le'")) return;
+  /* ⚠️ Les demandes nées AVANT l'étape 2 (recette de l'étape 1) n'ont pas de
+     brouillon et leurs 24 h sont échues : sans ça, le premier cron les
+     préparerait et les enverrait d'un coup, sans relecture. On les annule. */
+  if ($avant === '1') {
+    $wpdb->query("UPDATE $table SET statut = 'annule' WHERE statut = 'a_traiter'");
   }
+  update_option('sapi_conseil_db_version', SAPI_CONSEIL_DB_VERSION, true);
 });
 
 /** Vide prénom, email et commentaire des demandes de plus de 6 mois. */
@@ -118,7 +135,7 @@ function sapi_conseil_purger() {
   $table = sapi_conseil_table();
   if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) return;
   $wpdb->query(
-    "UPDATE $table SET prenom = '', email = '', commentaire = NULL
+    "UPDATE $table SET prenom = '', email = '', commentaire = NULL, sujet = '', corps = NULL
       WHERE created_at < (NOW() - INTERVAL 6 MONTH) AND email <> ''"
   );
 }
@@ -152,7 +169,11 @@ function sapi_ajax_conseil_lead() {
   $commentaire = isset($_POST['commentaire']) ? sanitize_textarea_field(wp_unslash($_POST['commentaire'])) : '';
   $prenom      = trim(mb_substr($prenom, 0, 60));
 
-  if ($prenom === '') {
+  /* ⚠️ Le prénom est recopié dans l'objet et la première ligne du mail que
+     Robin envoie. Sans ce filtre, un bot pourrait y glisser un lien ou une
+     arnaque et faire envoyer son message, par robin@, à l'adresse d'un tiers.
+     Un prénom n'a ni chiffre, ni @, ni « www », ni « mot.domaine ». */
+  if ($prenom === '' || preg_match('~[0-9@/:]|www|\.\p{L}{2,}~iu', $prenom)) {
     wp_send_json_error(['message' => 'prenom', 'fallback' => 'Indique ton prénom.']);
   }
   if (!is_email($email)) {
@@ -267,7 +288,10 @@ function sapi_ajax_conseil_lead() {
   if ($mode === 'manuel') {
     $body .= "── À faire ──\nIl ou elle a laissé un mot : réponds toi-même, sous 3 jours (promis à l'écran).\n\n";
   } else {
-    $body .= "── À faire ──\nPas de mot : le conseil préparé partira seul dans 24 h (étape 2, pas encore en place : en attendant, réponds à la main).\n\n";
+    $body .= "── À faire ──\nPas de mot : le conseil préparé partira seul dans 24 h. Tu peux le relire, le modifier ou l'envoyer avant.\n\n";
+  }
+  if ($demande_id) {
+    $body .= "── Brouillon et envoi ──\n" . admin_url('admin.php?page=sapi-conseil-reseaux&demande=' . $demande_id) . "\n\n";
   }
   $body .= "── Source ──\n";
   $body .= 'Page : ' . ($source_url !== '' ? $source_url : '(non transmise)') . "\n";
@@ -291,6 +315,13 @@ function sapi_ajax_conseil_lead() {
       'message'  => 'save_failed',
       'fallback' => 'Petit souci de mon côté. Tu peux réessayer ou écrire directement à robin@atelier-sapi.fr.',
     ]);
+  }
+
+  /* Brouillon préparé hors de la requête du visiteur : l'appel IA prend
+     plusieurs secondes et il n'a pas à les attendre. Le cron horaire et la
+     page admin rattrapent si cet événement ne passe pas. */
+  if ($demande_id) {
+    wp_schedule_single_event(time(), 'sapi_conseil_preparer_event', [$demande_id]);
   }
 
   if (function_exists('sapi_megafilter_marquer_contact_envoye')) {
@@ -378,3 +409,6 @@ function sapi_render_conseil_lead_screens($pencil_svg) {
       </section>
   <?php
 }
+
+/* Étape 2 : brouillon, page admin « Demandes réseaux », envoi et cron. */
+require_once __DIR__ . '/sapi-conseil-reseaux-envoi.php';
