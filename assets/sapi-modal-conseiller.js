@@ -108,6 +108,11 @@
        ouverture à l'autre une fois ; en ajouter un deuxième rouvrirait la même
        famille de défaut. */
     retourApresEdition: null,
+    /* Réponses écrites (« Préciser ma réponse ») et valeurs des sliders.
+       Une précision ne compte que tant que la réponse de sa question vaut
+       encore le slug avec lequel elle a été donnée : voir precisionsActives(). */
+    precisions: {},       // { stepId: { texte, slug } }
+    mesures: {},          // { taille: 18, hauteur: 2.7 }
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
       sessionId: null,
@@ -564,6 +569,299 @@
     SessionTracker.snapshot();
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     RÉPONSES LIBRES ET SLIDERS (24/11)
+     ───────────────────────────────────────────────────────────────────
+     Sous les cartes, « Préciser ma réponse » ouvre un champ libre. Une
+     réponse écrite veut dire que le cas sort des cases : c'est Robin qui
+     répond. Landing réseaux → la demande passe en manuel (le texte part
+     avec le mot). Conseiller du site → pas de sélection à l'écran, on
+     bascule sur le contact, précisions pré-remplies.
+     Taille et hauteur : un slider remplace les cartes. Le slider SEUL ne
+     déclenche rien de manuel : il donne la catégorie (seuils validés par
+     Robin le 24/11) et la valeur exacte voyage dans le libellé.
+     ⚠️ Une réponse écrite prend un slug EXISTANT (`ne-sais-pas`) pour que
+     le parcours continue normalement. Seule la pièce écrite prend `autre`,
+     ajouté aux règles de visibilité de guide-data.php ; il n'est JAMAIS
+     mémorisé dans le projet (voir persisterProjet) : les autres pages ne
+     connaissent pas cette pièce.
+     ═══════════════════════════════════════════════════════════════════ */
+  var PRECISABLES = ['piece', 'taille', 'taille_escalier', 'sortie', 'hauteur'];
+  var PRECISION_MAX = 200;
+  var PRECISION_EXEMPLES = {
+    piece: 'Ex. : une mezzanine sous les toits',
+    taille: 'Ex. : 35 m², en forme de L',
+    taille_escalier: 'Ex. : escalier en colimaçon, 6 m de haut',
+    sortie: 'Ex. : sortie décentrée, deux points lumineux',
+    hauteur: 'Ex. : 4,20 m sous rampant'
+  };
+  var SLIDERS = {
+    taille: {
+      min: 5, max: 60, pas: 1, defaut: 15, unite: 'm²',
+      aria: 'Surface de la pièce en mètres carrés',
+      reperes: [5, 12, 25, 60],
+      versSlug: function (v) { return v < 12 ? 'petite' : (v <= 25 ? 'moyenne' : 'grande'); }
+    },
+    hauteur: {
+      min: 2.2, max: 5, pas: 0.05, defaut: 2.4, unite: 'm',
+      aria: 'Hauteur sous plafond en mètres',
+      reperes: [2.2, 2.5, 3, 5],
+      versSlug: function (v) { return v < 2.5 ? 'standard' : (v <= 3 ? 'confortable' : 'haute'); }
+    }
+  };
+
+  function nombreMesure(cfg, v) {
+    return cfg.pas < 1 ? String(Math.round(v * 100) / 100).replace('.', ',') : String(Math.round(v));
+  }
+  function texteMesure(cfg, v) {
+    return nombreMesure(cfg, v) + ' ' + cfg.unite + (v >= cfg.max ? ' et +' : '');
+  }
+  function lireSlider(range, cfg) {
+    var v = parseFloat(range.value);
+    if (isNaN(v)) v = cfg.defaut;
+    v = Math.round(v * 100) / 100;
+    return Math.min(cfg.max, Math.max(cfg.min, v));
+  }
+  function majAffichageSlider(range) {
+    var bloc = range.closest('[data-slider]');
+    var cfg = bloc && SLIDERS[bloc.getAttribute('data-slider')];
+    if (!cfg) return;
+    var v = lireSlider(range, cfg);
+    var slug = cfg.versSlug(v);
+    var val = bloc.querySelector('[data-slider-val]');
+    var cat = bloc.querySelector('[data-slider-cat]');
+    if (val) val.textContent = texteMesure(cfg, v);
+    if (cat) cat.textContent = getChoiceLabel(bloc.getAttribute('data-slider'), slug) || '';
+    range.style.setProperty('--pct', ((v - cfg.min) / (cfg.max - cfg.min) * 100) + '%');
+    range.setAttribute('aria-valuetext', texteMesure(cfg, v));
+  }
+
+  function precisionCourte(texte) {
+    return texte.length > 40 ? texte.slice(0, 39).replace(/\s+$/, '') + '…' : texte;
+  }
+
+  // Précisions encore valables, dans l'ordre du questionnaire.
+  function precisionsActives() {
+    var out = [];
+    var visibles = getVisibleStepIds(state.answers);
+    visibles.forEach(function (id) {
+      var p = state.precisions[id];
+      if (p && p.texte && state.answers[id] === p.slug) out.push({ step: id, texte: p.texte });
+    });
+    return out;
+  }
+  function lignesPrecisions() {
+    return precisionsActives().map(function (p) {
+      return (S3_KEY_LABELS[p.step] || p.step) + ' : ' + p.texte;
+    });
+  }
+
+  /* ⚠️ `autre` NE SORT JAMAIS DE LA MODALE. Les sélecteurs de pièce, la
+     page /mes-creations/ et le serveur ne connaissent que les 7 pièces.
+     Sans pièce valable, on écrit le projet SANS pièce, et en `set` : un
+     `update` aurait gardé la pièce d'une visite précédente. */
+  function persisterProjet(fusion) {
+    if (!window.sapiProject) return;
+    var a = {}, l = {};
+    var retire = false;
+    Object.keys(state.answers).forEach(function (k) {
+      var slug = state.answers[k];
+      var step = getStep(k);
+      /* ⚠️ Seuls les slugs du questionnaire sortent de la modale. `autre`
+         (pièce écrite) et `ne-sais-pas` sur une question qui ne l'a pas
+         (escalier, hauteur) resteraient sinon en mémoire après un
+         rechargement, sans leur précision. */
+      if (step && !(step.choices || []).some(function (c) { return c.slug === slug; })) { retire = true; return; }
+      a[k] = slug;
+      /* Le texte libre reste dans la modale : la mémoire garde le libellé
+         de la catégorie, pas la phrase du visiteur. */
+      var p = state.precisions[k];
+      var ecrite = p && p.slug === slug && state.labels[k] === precisionCourte(p.texte);
+      var lab = ecrite ? getChoiceLabel(k, slug) : state.labels[k];
+      if (lab) l[k] = lab;
+    });
+    if (retire) fusion = false;
+    if (fusion) window.sapiProject.update(a, l);
+    else window.sapiProject.set(a, l);
+  }
+
+  // Bloc sous les cartes : slider, « Je ne sais pas », « Préciser ma réponse ».
+  function renderExtras(choicesEl, stepId, avecPrecision) {
+    if (!choicesEl || !choicesEl.parentNode) return;
+    var box = choicesEl.nextElementSibling;
+    if (!box || !box.hasAttribute('data-question-extras')) {
+      box = document.createElement('div');
+      box.className = 'question-extras';
+      box.setAttribute('data-question-extras', '');
+      choicesEl.parentNode.insertBefore(box, choicesEl.nextSibling);
+    }
+    box.innerHTML = '';
+    var step = getStep(stepId);
+    var cfg = SLIDERS[stepId];
+    /* `style.display` et pas `hidden` : `.choices` a un display:grid qui
+       l'emporterait sur l'attribut. */
+    choicesEl.style.display = cfg ? 'none' : '';
+
+    if (cfg) {
+      var depart = state.mesures[stepId];
+      if (typeof depart !== 'number') depart = cfg.defaut;
+      var bloc = document.createElement('div');
+      bloc.className = 'q-slider';
+      bloc.setAttribute('data-slider', stepId);
+      var val = document.createElement('div');
+      val.className = 'q-slider__val';
+      val.setAttribute('data-slider-val', '');
+      val.setAttribute('aria-hidden', 'true');
+      var cat = document.createElement('div');
+      cat.className = 'q-slider__cat';
+      cat.setAttribute('data-slider-cat', '');
+      cat.setAttribute('aria-hidden', 'true');
+      var range = document.createElement('input');
+      range.type = 'range';
+      range.className = 'q-slider__range';
+      range.min = String(cfg.min);
+      range.max = String(cfg.max);
+      range.step = String(cfg.pas);
+      range.value = String(depart);
+      range.setAttribute('aria-label', cfg.aria);
+      /* Touché ou non : une précision écrite sur un slider jamais bougé ne
+         doit pas inventer une valeur que le visiteur n'a pas donnée. */
+      range.__touche = (typeof state.mesures[stepId] === 'number');
+      var rep = document.createElement('div');
+      rep.className = 'q-slider__reperes';
+      rep.setAttribute('aria-hidden', 'true');
+      cfg.reperes.forEach(function (r) {
+        var sp = document.createElement('span');
+        var f = (r - cfg.min) / (cfg.max - cfg.min);
+        sp.style.left = 'calc(14px + (100% - 28px) * ' + f + ')';
+        sp.textContent = (r === cfg.min || r === cfg.max) ? texteMesure(cfg, r) : nombreMesure(cfg, r);
+        rep.appendChild(sp);
+      });
+      var ok = document.createElement('button');
+      ok.type = 'button';
+      ok.className = 'q-slider__valider';
+      ok.setAttribute('data-action', 'slider-valider');
+      ok.textContent = 'Valider';
+      bloc.appendChild(val);
+      bloc.appendChild(cat);
+      bloc.appendChild(range);
+      bloc.appendChild(rep);
+      bloc.appendChild(ok);
+      box.appendChild(bloc);
+      majAffichageSlider(range);
+
+      var aNsp = (step && step.choices || []).some(function (c) { return c.slug === 'ne-sais-pas'; });
+      if (aNsp) {
+        var nsp = document.createElement('button');
+        nsp.type = 'button';
+        nsp.className = 'q-nsp';
+        nsp.setAttribute('data-action', 'slider-nsp');
+        nsp.textContent = getChoiceLabel(stepId, 'ne-sais-pas') || 'Je ne sais pas';
+        if (state.answers[stepId] === 'ne-sais-pas' && !state.precisions[stepId]) nsp.classList.add('is-selected');
+        box.appendChild(nsp);
+      }
+    }
+
+    if (avecPrecision && PRECISABLES.indexOf(stepId) !== -1) {
+      var deja = state.precisions[stepId];
+      var texteDeja = (deja && state.answers[stepId] === deja.slug) ? deja.texte : '';
+      var ouvrir = document.createElement('button');
+      ouvrir.type = 'button';
+      ouvrir.className = 'q-preciser';
+      ouvrir.setAttribute('data-action', 'preciser-ouvrir');
+      ouvrir.textContent = '+ Préciser ma réponse';
+      ouvrir.hidden = !!texteDeja;
+      var champ = document.createElement('div');
+      champ.className = 'q-precision';
+      champ.setAttribute('data-precision', '');
+      champ.hidden = !texteDeja;
+      var ta = document.createElement('textarea');
+      ta.rows = 3;
+      ta.maxLength = PRECISION_MAX;
+      ta.placeholder = PRECISION_EXEMPLES[stepId] || '';
+      ta.setAttribute('aria-label', 'Préciser ma réponse');
+      ta.value = texteDeja;
+      var pied = document.createElement('div');
+      pied.className = 'q-precision__pied';
+      var note = document.createElement('span');
+      note.textContent = 'Je lirai ta précision moi-même.';
+      var valider = document.createElement('button');
+      valider.type = 'button';
+      valider.className = 'q-precision__valider';
+      valider.setAttribute('data-action', 'preciser-valider');
+      valider.textContent = 'Valider';
+      pied.appendChild(note);
+      pied.appendChild(valider);
+      champ.appendChild(ta);
+      champ.appendChild(pied);
+      box.appendChild(ouvrir);
+      box.appendChild(champ);
+    }
+    box.hidden = !box.firstChild;
+  }
+
+  function extrasCourants() {
+    if (!els.modal) return null;
+    var ecran = els.modal.querySelector('[data-screen="' + state.screen + '"]');
+    return ecran ? ecran.querySelector('[data-question-extras]') : null;
+  }
+  // Texte du champ « Préciser » s'il est ouvert, sinon ''.
+  function lirePrecisionOuverte() {
+    var box = extrasCourants();
+    var champ = box && box.querySelector('[data-precision]');
+    if (!champ || champ.hidden) return '';
+    var ta = champ.querySelector('textarea');
+    return ta ? ta.value.trim().slice(0, PRECISION_MAX) : '';
+  }
+
+  /* Une seule porte de sortie pour le slider, « Je ne sais pas » et le
+     champ libre : un texte tapé n'est jamais perdu, quel que soit le bouton
+     pressé ensuite. */
+  function validerExtras(source) {
+    var stepId = state.currentQuestion;
+    if (!stepId) return;
+    var box = extrasCourants();
+    var texte = lirePrecisionOuverte();
+    if (source === 'precision' && !texte) {
+      var ta = box && box.querySelector('[data-precision] textarea');
+      if (ta) { ta.classList.add('is-invalid'); ta.focus(); }
+      return;
+    }
+    var cfg = SLIDERS[stepId];
+    var range = box && box.querySelector('.q-slider__range');
+    var slug = '', label = '';
+    if (source === 'nsp') {
+      slug = 'ne-sais-pas';
+    } else if (cfg && range && (source === 'slider' || range.__touche)) {
+      var v = lireSlider(range, cfg);
+      slug = cfg.versSlug(v);
+      state.mesures[stepId] = v;
+      label = (getChoiceLabel(stepId, slug) || slug) + ' · ' + texteMesure(cfg, v);
+    }
+    if (!slug) slug = (stepId === 'piece') ? 'autre' : 'ne-sais-pas';
+    if (slug === 'ne-sais-pas' && cfg) delete state.mesures[stepId];
+
+    if (texte) {
+      state.precisions[stepId] = { texte: texte, slug: slug };
+      if (!label) label = precisionCourte(texte);
+    } else {
+      delete state.precisions[stepId];
+    }
+    if (!label) label = getChoiceLabel(stepId, slug) || 'Je ne sais pas';
+    answerCurrentQuestion(slug, label);
+  }
+
+  /* Conseiller du site : des précisions = Robin répond par mail. */
+  function showContactPrecisions() {
+    persisterProjet(false);
+    showContact({
+      message: 'Tu m’as donné des précisions : je préfère regarder ton projet moi-même. Laisse-moi ton mail, je te réponds par mail.',
+      contact_subject: '',
+      prefill: 'Mes précisions :\n' + lignesPrecisions().join('\n') + '\n\n',
+      contact_kind: 'simple'
+    });
+  }
+
   function showQuestion(stepId) {
     state.currentQuestion = stepId;
     var step = getStep(stepId);
@@ -618,6 +916,8 @@
       var pct = visible.length > 0 ? Math.max(8, Math.round(((idx + 1) / visible.length) * 100)) : 8;
       els.progressFill.style.width = pct + '%';
     }
+
+    renderExtras(els.choices, stepId, true);
   }
 
   function answerCurrentQuestion(slug, label) {
@@ -632,10 +932,7 @@
     /* Landing : `set` et pas `update`. La modale y repart de zéro ; `update`
        fusionnerait avec un ancien projet mémorisé, et le tracking compterait
        des réponses d'une visite précédente comme données aujourd'hui. */
-    if (window.sapiProject) {
-      if (LANDING) window.sapiProject.set(state.answers, state.labels);
-      else window.sapiProject.update(state.answers, state.labels);
-    }
+    persisterProjet(!LANDING);
 
     // Empile la question dans l'historique pour permettre Retour
     if (state.questionHistory[state.questionHistory.length - 1] !== step) {
@@ -667,27 +964,27 @@
          redemander. */
       var destination = state.retourApresEdition;
       state.retourApresEdition = null;
-      if (window.sapiProject) {
-        /* `set` et non `update` : après une correction pièce → escalier,
-           `cleanInvisibleAnswers` a retiré `taille` de l'état, mais un patch
-           fusionnant l'aurait laissée en mémoire. L'écran aurait été juste et
-           le stockage faux. */
-        window.sapiProject.set(state.answers, state.labels);
-      }
+      /* `set` et non `update` : après une correction pièce → escalier,
+         `cleanInvisibleAnswers` a retiré `taille` de l'état, mais un patch
+         fusionnant l'aurait laissée en mémoire. L'écran aurait été juste et
+         le stockage faux. */
+      persisterProjet(false);
+      /* Une précision vient d'être écrite en corrigeant : le récap mènerait
+         à une sélection, alors que c'est à Robin de répondre. */
+      if (!LANDING && precisionsActives().length) { showContactPrecisions(); return; }
       if (destination === 'product') { showProductRecap(); } else { showS3Recap(); }
     } else if (state.shortMode) {
       // F2b Phase 2 — fin du parcours court : récap produit + IA dédiée (pas de
       // morphing modale→card, on reste dans la modale ouverte).
-      if (window.sapiProject) {
-        window.sapiProject.set(state.answers, state.labels);
-      }
+      persisterProjet(false);
+      if (precisionsActives().length) { showContactPrecisions(); return; }
       showProductRecap();
     } else if (LANDING) {
       /* Landing réseaux : PAS de sélection à l'écran. Robin enverra son
          conseil par mail ; on demande prénom + email. Le projet est quand
          même mémorisé : si le visiteur part sur /mes-creations/, il y
          retrouve ses réponses. */
-      if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+      persisterProjet(false);
       noterValidation();
       showLeadScreen();
     } else {
@@ -811,6 +1108,9 @@
     opts = opts || {};
     if (state.transition) return; // évite double-trigger
 
+    /* Réponses écrites : pas de sélection, Robin répond lui-même. */
+    if (!LANDING && precisionsActives().length) { showContactPrecisions(); return; }
+
     /* Aucune sélection à révéler sur cette page : on redirige (ou on bascule
        sur le contact) AVANT de lancer l'animation de sortie et l'appel IA.
        ⚠️ L'appel IA n'est pas perdu dans le cas « avec pièce » : il est lancé
@@ -819,14 +1119,14 @@
     if (!immersionIsOnPage()) {
       var piece = projectPiece();
       if (!piece) {
-        if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+        persisterProjet(false);
         showContact({
           message: 'Je n’ai pas encore assez d’éléments pour te proposer une sélection. Laisse-moi ton mail et deux mots sur ton projet, je te réponds moi-même.'
         });
         return;
       }
       state.transition = true;
-      if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+      persisterProjet(false);
       fetchAdviceFromIA(opts).then(function (advice) {
         if (advice && window.sapiProject && typeof window.sapiProject.setAdviceText === 'function') {
           window.sapiProject.setAdviceText(advice);
@@ -871,7 +1171,7 @@
     var monProjetCard = document.querySelector('.conseiller-card--mon-projet');
     if (monProjetCard) monProjetCard.classList.add('is-awaiting-advice');
     if (window.sapiProject) {
-      window.sapiProject.set(state.answers, state.labels);
+      persisterProjet(false);
     }
 
     // 3. Lancer la séquence d'animation (fade-out contenu → fade-out modale →
@@ -1090,6 +1390,9 @@
         delete state.answers[key];
         delete state.labels[key];
       } else if (typeof val === 'string' && val) {
+        /* Réponse tirée du chat : une précision écrite plus tôt sur cette
+           question ne la décrit plus. */
+        delete state.precisions[key];
         state.answers[key] = val;
         state.labels[key]  = getChoiceLabel(key, val);
         noterReponse(key); // extraite de ce que le visiteur vient d'écrire
@@ -1098,9 +1401,9 @@
     cleanInvisibleAnswers();
     if (window.sapiProject) {
       if (replaceAll) {
-        window.sapiProject.set(state.answers, state.labels);
+        persisterProjet(false);
       } else {
-        window.sapiProject.update(state.answers, state.labels); // sauvegarde incrémentale
+        persisterProjet(true); // sauvegarde incrémentale
       }
     }
   }
@@ -1345,6 +1648,8 @@
         var filters = data.filters || {};
         state.answers = {};
         state.labels = {};
+        state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+        state.mesures = {};
         applyFiltersBatch(filters, true);
 
         addRobinBubble(data.message || '', { filters: filters });
@@ -1588,6 +1893,9 @@
           }
           els.s0Choices.appendChild(btn);
         });
+        /* Écran d'accueil du site : son champ « Décris ton projet » fait
+           déjà office de réponse libre, on n'en ajoute pas un second. */
+        renderExtras(els.s0Choices, nextStepId, LANDING);
       }
     }
 
@@ -1675,6 +1983,8 @@
     if (window.sapiProject) window.sapiProject.clear();
     state.answers = {};
     state.labels = {};
+    state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+    state.mesures = {};
     state.questionHistory = [];
     state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
@@ -1833,6 +2143,7 @@
      sélection de la pièce, ou vers le contact si aucune pièce n'est connue. */
   function viewSelectionFromS3() {
     noterValidation(); // validation explicite du projet — cf. noterValidation()
+    if (!LANDING && precisionsActives().length) { showContactPrecisions(); return; }
     var project = window.sapiProject ? window.sapiProject.get() : null;
     var needsNewAdvice = !project || !project.advice_text;
     if (needsNewAdvice) {
@@ -1920,6 +2231,8 @@
     }
     state.answers = {};
     state.labels = {};
+    state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+    state.mesures = {};
     state.questionHistory = [];
     state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
@@ -2090,6 +2403,7 @@
   // CTA "Appliquer cette sélection" : ferme la modale, dispatch un event pour
   // que la fiche produit applique la pré-sélection variation.
   function applyProductSelection() {
+    if (!LANDING && precisionsActives().length) { showContactPrecisions(); return; }
     noterValidation(); // validation explicite du projet — cf. noterValidation()
     /* `answers` seulement : `productId` et `labels` n'étaient lus par personne.
        Trois clés inutiles ne cassent rien, mais elles racontent une histoire
@@ -2115,6 +2429,8 @@
     if (window.sapiProject) window.sapiProject.clear();
     state.answers = {};
     state.labels = {};
+    state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+    state.mesures = {};
     state.questionHistory = [];
     state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
@@ -2260,6 +2576,11 @@
       /* Entrée directe par la card sur-mesure : le texte vient de `prefill`,
          qui n'est pas mémorisé dans le projet (voir showContactSurmesure). */
       else if (payload && payload.prefill) pre += payload.prefill;
+      /* Sortie du chat vers le contact avec des précisions encore valables :
+         elles partent avec le message, sinon Robin ne les verrait jamais. */
+      if (!LANDING && precisionsActives().length && pre.indexOf('Mes précisions :') === -1) {
+        pre += (pre ? '\n\n' : '') + 'Mes précisions :\n' + lignesPrecisions().join('\n') + '\n\n';
+      }
       /* ⚠️ ON NE ROGNE QUE LE DÉBUT. Un `trim()` complet mangeait la ligne
          vide finale du modèle, qui existe pour que le visiteur écrive À LA
          LIGNE plutôt qu'au bout de la phrase. */
@@ -2421,6 +2742,8 @@
     var p = window.sapiProject.get();
     state.answers = {};
     state.labels = {};
+    state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+    state.mesures = {};
     if (p && p.answers) {
       Object.keys(p.answers).forEach(function (k) { state.answers[k] = p.answers[k]; });
     }
@@ -2450,6 +2773,8 @@
     if (LANDING) {
       state.answers = {};
       state.labels = {};
+      state.precisions = {};
+      state.mesures = {};
     } else {
       hydrateFromProject();
     }
@@ -2601,7 +2926,8 @@
       recap.innerHTML = '';
       getVisibleStepIds(state.answers).forEach(function (id) {
         var lab = state.labels[id];
-        if (!lab || state.answers[id] === 'ne-sais-pas') return;
+        var ecrite = state.precisions[id] && state.precisions[id].slug === state.answers[id];
+        if (!lab || (state.answers[id] === 'ne-sais-pas' && !ecrite)) return;
         var chip = document.createElement('span');
         chip.className = 'lead-recap__chip';
         chip.textContent = lab;
@@ -2661,6 +2987,9 @@
     fd.append('prenom', prenomVal);
     fd.append('email', emailVal);
     fd.append('commentaire', motVal);
+    /* Les réponses écrites partent à part : le serveur les range avec le
+       mot, et leur présence suffit à faire répondre Robin lui-même. */
+    fd.append('precisions', lignesPrecisions().join('\n'));
     fd.append('website', honey ? honey.value : '');
     fd.append('source_url', window.location.href);
     fd.append('project', JSON.stringify({ answers: state.answers, labels: state.labels }));
@@ -2830,6 +3159,26 @@
           }
           break;
         }
+        case 'slider-valider':
+          validerExtras('slider');
+          break;
+        case 'slider-nsp':
+          validerExtras('nsp');
+          break;
+        case 'preciser-valider':
+          validerExtras('precision');
+          break;
+        case 'preciser-ouvrir': {
+          var boite = actionBtn.closest('[data-question-extras]');
+          var zone = boite && boite.querySelector('[data-precision]');
+          if (zone) {
+            zone.hidden = false;
+            actionBtn.hidden = true;
+            var champTexte = zone.querySelector('textarea');
+            if (champTexte) champTexte.focus();
+          }
+          break;
+        }
         case 'lead-exit':
           // Landing réseaux : « Non merci » ou après le merci → /mes-creations/
           closeModal();
@@ -2869,7 +3218,7 @@
         case 'chat-contact':
           // Seconde sortie du chat, celle que l'IA propose elle-même quand
           // elle sent que le projet mérite un échange direct.
-          if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+          persisterProjet(false);
           showContact({
             message: 'Dis-m’en un peu plus et laisse-moi ton mail : je te réponds moi-même.'
           });
@@ -2913,7 +3262,27 @@
       if (!btn) return;
       var slug = btn.getAttribute('data-choice');
       var label = btn.getAttribute('data-label') || btn.textContent.trim();
+      /* Carte cliquée avec un texte tapé dans « Préciser » : le texte
+         complète la carte, il n'est pas perdu. Sans texte, la carte
+         remplace une précision donnée plus tôt. */
+      if (state.currentQuestion) {
+        var texte = lirePrecisionOuverte();
+        if (texte) state.precisions[state.currentQuestion] = { texte: texte, slug: slug };
+        else delete state.precisions[state.currentQuestion];
+      }
       answerCurrentQuestion(slug, label);
+    });
+
+    // Slider : affichage en direct de la valeur et de la catégorie.
+    els.modal.addEventListener('input', function (e) {
+      var r = e.target;
+      if (!r || !r.classList || !r.classList.contains('q-slider__range')) return;
+      r.__touche = true;
+      majAffichageSlider(r);
+    });
+    els.modal.addEventListener('input', function (e) {
+      var t = e.target;
+      if (t && t.tagName === 'TEXTAREA' && t.closest('[data-precision]')) t.classList.remove('is-invalid');
     });
 
     // Round 4 — Click sur une chip de récap S3 → édite ce step.

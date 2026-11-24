@@ -144,7 +144,7 @@ function sapi_conseil_preparer_brouillon($id) {
   }
 
   if (trim((string) $row->commentaire) !== '') {
-    $lignes[] = SAPI_CONSEIL_MARQUEUR . ' : ta réponse à son mot « ' . trim($row->commentaire) . ' »]';
+    $lignes[] = SAPI_CONSEIL_MARQUEUR . ' : ta réponse à ce qu’il ou elle a écrit « ' . trim($row->commentaire) . ' »]';
   }
 
   /* Le texte ne contient QUE le message de Robin. La photo, le bouton, les

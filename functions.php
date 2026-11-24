@@ -4240,7 +4240,7 @@ function sapi_render_conseiller_modal() {
                 <input type="email" name="email" required
                        placeholder="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>"
                        aria-label="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>">
-                <textarea name="description" rows="5"
+                <textarea name="description" rows="5" maxlength="1500"
                           placeholder="<?php esc_attr_e('Décris ton projet…', 'theme-sapi-maison'); ?>"
                           aria-label="<?php esc_attr_e('Ton message', 'theme-sapi-maison'); ?>"
                           data-contact-message-field></textarea>

@@ -28,7 +28,10 @@ function sapi_guide_get_steps() {
     [
       'id'         => 'taille',
       'question'   => 'Quelle taille fait ta pièce ?',
-      'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree']],
+      /* `autre` = pièce écrite dans « Préciser ma réponse » (24/11). Elle
+         n'existe que dans la modale : jamais mémorisée, jamais acceptée par
+         le serveur. On lui pose les questions génériques. */
+      'visibility' => ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree', 'autre']],
       'dynamic_question' => [
         'piece' => [
           'cuisine' => 'Quelle taille fait ta cuisine ?',
@@ -76,7 +79,7 @@ function sapi_guide_get_steps() {
       'visibility' => ['_or' => [
         ['taille' => ['petite', 'moyenne', 'ne-sais-pas']],
         ['eclairage' => ['principal', 'secondaire']],
-        ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree', 'escalier']],
+        ['piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree', 'escalier', 'autre']],
       ]],
       'choices'    => [
         ['label' => 'Au plafond',               'slug' => 'plafond',       'icon' => 'ceiling-plug'],
@@ -88,7 +91,7 @@ function sapi_guide_get_steps() {
     [
       'id'         => 'hauteur',
       'question'   => 'Quelle hauteur sous plafond ?',
-      'visibility' => ['sortie' => ['plafond'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree']],
+      'visibility' => ['sortie' => ['plafond'], 'piece' => ['cuisine', 'bureau', 'salon', 'chambre', 'chambre-enfant', 'entree', 'autre']],
       'choices'    => [
         ['label' => 'Standard',    'dim' => '< 2,50 m',  'slug' => 'standard',    'icon' => 'ceiling-low'],
         ['label' => 'Confortable', 'dim' => '2,50-3 m',  'slug' => 'confortable', 'icon' => 'ceiling-mid'],

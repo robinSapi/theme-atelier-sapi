@@ -168,6 +168,10 @@ function sapi_ajax_conseil_lead() {
   $prenom      = isset($_POST['prenom']) ? sanitize_text_field(wp_unslash($_POST['prenom'])) : '';
   $email       = isset($_POST['email']) ? sanitize_email(wp_unslash($_POST['email'])) : '';
   $commentaire = isset($_POST['commentaire']) ? sanitize_textarea_field(wp_unslash($_POST['commentaire'])) : '';
+  /* Réponses écrites dans « Préciser ma réponse » (24/11), une par ligne.
+     Elles sont rangées avec le mot et, comme lui, font répondre Robin. */
+  $precisions = isset($_POST['precisions']) ? sanitize_textarea_field(wp_unslash($_POST['precisions'])) : '';
+  $precisions = trim(mb_substr($precisions, 0, 1500));
   $prenom      = trim(mb_substr($prenom, 0, 60));
 
   /* ⚠️ Le prénom est recopié dans l'objet et la première ligne du mail que
@@ -220,7 +224,12 @@ function sapi_ajax_conseil_lead() {
 
   /* Mode : un commentaire = Robin répond lui-même, rien ne part seul.
      (Étape 3 : une photo aura le même effet.) */
-  $mode        = ($commentaire !== '') ? 'manuel' : 'auto';
+  $mot_et_precisions = trim(
+    ($precisions !== '' ? "Ses précisions :\n" . $precisions : '')
+    . ($precisions !== '' && $commentaire !== '' ? "\n\nSon mot :\n" : '')
+    . $commentaire
+  );
+  $mode        = ($mot_et_precisions !== '') ? 'manuel' : 'auto';
   $envoi_prevu = ($mode === 'auto')
     ? gmdate('Y-m-d H:i:s', time() + DAY_IN_SECONDS + (int) (get_option('gmt_offset') * HOUR_IN_SECONDS))
     : null;
@@ -231,7 +240,7 @@ function sapi_ajax_conseil_lead() {
     'session_id'  => $session_id,
     'prenom'      => $prenom,
     'email'       => $email,
-    'commentaire' => $commentaire,
+    'commentaire' => $mot_et_precisions,
     'piece'       => $piece,
     'answers'     => wp_json_encode($answers),
     'labels'      => wp_json_encode($labels),
@@ -286,9 +295,12 @@ function sapi_ajax_conseil_lead() {
   $body  = "Nouvelle demande depuis la page Conseil de Robin (réseaux sociaux).\n\n";
   $body .= "── Visiteur ──\n" . $prenom . ' <' . $email . ">\n\n";
   $body .= "── Projet ──\n" . (!empty($answers) ? sapi_megafilter_format_project_text($answers, $labels) : '(aucune réponse transmise)') . "\n\n";
+  if ($precisions !== '') {
+    $body .= "── Ses précisions ──\n" . $precisions . "\n\n";
+  }
   $body .= "── Son mot ──\n" . ($commentaire !== '' ? $commentaire : '(aucun)') . "\n\n";
   if ($mode === 'manuel') {
-    $body .= "── À faire ──\nIl ou elle a laissé un mot : réponds toi-même, sous 3 jours (promis à l'écran).\n\n";
+    $body .= "── À faire ──\nIl ou elle a écrit " . ($precisions !== '' ? 'des précisions' : 'un mot') . " : réponds toi-même, sous 3 jours (promis à l'écran).\n\n";
   } else {
     $body .= "── À faire ──\nPas de mot : le conseil préparé partira seul dans 24 h. Tu peux le relire, le modifier ou l'envoyer avant.\n\n";
   }
