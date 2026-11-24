@@ -27581,3 +27581,14 @@ body.sapi-landing-conseil .landing-conseil__noscript { color: var(--cons-texte);
 @media (max-width: 600px) {
   .conseiller-card--modal .modal__close { background: rgba(251, 227, 184, .12); border-color: var(--cons-filet); box-shadow: none; color: var(--cons-texte); }
 }
+
+/* Mobile : la précision (« intime », « confortable »…) tombait SOUS l'icône.
+   `grid-row: 1 / -1` ne couvre que la grille explicite, or ces rangées sont
+   implicites : l'icône n'occupait que la rangée 1 et la précision se plaçait
+   en colonne 1. On place chaque enfant explicitement. */
+@media (max-width: 600px) {
+  .conseiller-card--modal .choices .choice__icon { grid-column: 1; grid-row: 1 / span 2; }
+  .conseiller-card--modal .choices .choice__label { grid-column: 2; grid-row: 1; justify-self: start; }
+  .conseiller-card--modal .choices .choice__dim { grid-column: 2; grid-row: 2; justify-self: start; }
+  .conseiller-card--modal .choices .choice:not(:has(.choice__dim)) .choice__label { grid-row: 1 / span 2; }
+}
