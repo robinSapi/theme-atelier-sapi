@@ -351,6 +351,10 @@
     function buildSnapshotPayload() {
       var payload = {};
       var project = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      /* Landing réseaux : le projet n'est mémorisé qu'APRÈS l'email (voir
+         persisterProjet). Le suivi lit donc les réponses de la modale, et
+         surtout pas un projet d'une visite précédente du site. */
+      if (LANDING) project = { answers: state.answers };
       /* ⚠️ DEUX GARDE-FOUS, MÊME PRINCIPE : on n'enregistre que ce qui a été
          fait PENDANT cette visite. `answers` est gardé par
          REPONSES_DE_CETTE_SESSION, `advice_text` par CONSEIL_DE_CETTE_SESSION.
@@ -663,6 +667,10 @@
      `update` aurait gardé la pièce d'une visite précédente. */
   function persisterProjet(fusion) {
     if (!window.sapiProject) return;
+    /* ⚠️ LANDING : RIEN N'EST MÉMORISÉ AVANT L'EMAIL (Robin, 24/11). Sinon
+       « Non merci » menait au site avec la sélection déjà prête, et le mail
+       n'avait plus d'intérêt. Écrit une seule fois, après un envoi réussi. */
+    if (LANDING && !state.leadEnvoye) return;
     var a = {}, l = {};
     var retire = false;
     Object.keys(state.answers).forEach(function (k) {
@@ -3139,6 +3147,9 @@
     })
       .then(function (resp) {
         if (resp && resp.success) {
+          // Email donné : le visiteur retrouvera son projet sur le site.
+          state.leadEnvoye = true;
+          persisterProjet(false);
           var titre = els.modal.querySelector('[data-lead-merci-titre]');
           if (titre) titre.textContent = prenomVal ? 'Merci ' + prenomVal : 'Merci';
           showScreen('s-lead-merci');
