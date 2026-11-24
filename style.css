@@ -27488,3 +27488,96 @@ body.sapi-landing-conseil {
 .conseiller-modal.is-landing .contact-form textarea {
   font-size: 16px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CONSEILLER — AMBIANCE « ALLUMER LA LUMIÈRE » (validée par Robin le 24/11/2026)
+   Maquette : canevas « Robin Conseiller — pistes d'ambiance », page V4.
+   Principe : on ne touche à AUCUN composant (cartes de choix, boutons,
+   champs, pill Robin). Seul l'ENTOURAGE change : fond bois sombre avec un
+   halo chaud, textes crème. Fin du grain rayé (::before).
+   Ce bloc est en fin de fichier exprès : il l'emporte sur les règles
+   d'origine sans les modifier, et se retire d'un coup si besoin.
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  --cons-nuit: radial-gradient(ellipse at 50% 18%, #5E4C3D 0%, #3A3029 45%, #2A221C 100%);
+  --cons-texte: #FBF6EA;
+  --cons-texte-doux: #E6D6C0;
+  --cons-filet: rgba(251, 227, 184, .18);
+  --cons-halo: 0 0 0 1px rgba(251, 227, 184, .25), 0 0 26px rgba(251, 215, 160, .35);
+}
+
+/* ── La pill Robin s'allume, partout où le Conseiller vit ── */
+.conseiller-card--modal .conseiller-sig--v1,
+.home-projet .conseiller-sig--v1,
+.advice-room-picker .conseiller-sig--v1,
+.mescreations-picker-hero .conseiller-sig--v1 { box-shadow: var(--cons-halo); }
+
+/* ── Modale ── */
+.conseiller-card--modal { background: var(--cons-nuit); }
+.conseiller-card--modal::before { display: none; }
+.conseiller-card--modal .modal__foot { border-top: 1px solid var(--cons-filet); }
+.conseiller-card--modal .h2 { color: var(--cons-texte); text-shadow: 0 0 24px rgba(251, 215, 160, .3); }
+.conseiller-card--modal .subtitle,
+.conseiller-card--modal .quote,
+.conseiller-card--modal .recap-hint,
+.conseiller-card--modal .contact-reassure,
+.conseiller-card--modal .contact-disclaimer,
+.conseiller-card--modal [data-s0-reassure] { color: var(--cons-texte-doux) !important; }
+.conseiller-card--modal .chips-label,
+.conseiller-card--modal .recap-group__title { color: var(--cons-texte-doux); opacity: 1; }
+.conseiller-card--modal .footer-link { color: var(--cons-texte-doux); }
+.conseiller-card--modal .footer-link:hover { color: var(--cons-texte); }
+.conseiller-card--modal .modal__close { color: var(--cons-texte-doux); }
+.conseiller-card--modal .modal__close:hover { background: rgba(251, 227, 184, .12); color: var(--cons-texte); }
+.conseiller-card--modal .separator-or::before,
+.conseiller-card--modal .separator-or::after { background: var(--cons-filet); }
+.conseiller-card--modal .separator-or__text { background: transparent; color: var(--cons-texte-doux); border-color: var(--cons-filet); }
+.conseiller-card--modal .progress { background: rgba(251, 227, 184, .2); }
+/* Bulle du visiteur : le bois sombre se perdait sur le fond, un filet la détache. */
+.conseiller-card--modal .chat-bubble--visitor { box-shadow: 0 0 0 1px var(--cons-filet); }
+
+/* Landing réseaux : la page derrière la modale prend la même nuit. */
+body.sapi-landing-conseil,
+.conseiller-modal.is-landing { background: #2A221C; }
+
+/* ── Les trois sélecteurs de pièce (accueil, Conseils éclairés, Mes créations) ── */
+.home-projet-section,
+.advice-room-picker,
+.mescreations-picker-hero { background: var(--cons-nuit); }
+.home-projet-section::before,
+.advice-room-picker::before,
+.mescreations-picker-hero::before { display: none; }
+.mescreations-picker-hero { border-bottom-color: transparent; }
+.home-projet-section .section-title-kinetic,
+.home-projet-section .section-num,
+.home-projet .room-picker-title,
+.advice-room-picker .room-picker-title,
+.mescreations-picker-hero .room-picker-title { color: var(--cons-texte); }
+.home-projet .room-picker-sub,
+.advice-room-picker .room-picker-sub,
+.mescreations-picker-hero .room-picker-sub,
+.home-projet .room-picker-or__text,
+.advice-room-picker .room-picker-or__text,
+.mescreations-picker-hero .room-picker-or__text { color: var(--cons-texte-doux); }
+.home-projet .room-picker-or__text,
+.advice-room-picker .room-picker-or__text,
+.mescreations-picker-hero .room-picker-or__text { background: transparent; border-color: var(--cons-filet); }
+.home-projet .room-picker-or::before, .home-projet .room-picker-or::after,
+.advice-room-picker .room-picker-or::before, .advice-room-picker .room-picker-or::after,
+.mescreations-picker-hero .room-picker-or::before, .mescreations-picker-hero .room-picker-or::after { background: var(--cons-filet); }
+
+.home-projet .room-picker-sub a, .advice-room-picker .room-picker-sub a,
+.mescreations-picker-hero .room-picker-sub a { color: var(--cons-texte); text-decoration: underline; }
+/* La ligne de reprise (« tu cherchais pour ton salon ») est une pilule
+   blanche : c'est un composant, elle garde ses couleurs. */
+.advice-room-picker .room-picker-cards { opacity: 1; }
+.conseiller-card--modal .action-btn--ghost { color: var(--cons-texte); border-color: rgba(251, 227, 184, .35); }
+.conseiller-card--modal .action-btn--ghost:hover { background: rgba(251, 227, 184, .1); }
+.conseiller-card--modal .contact-form__error { background: rgba(255, 255, 255, .92); color: #c44a1d; }
+.conseiller-card--modal [data-screen="s2-chat"] .chat-bubbles { background: rgba(0, 0, 0, .15); border-color: var(--cons-filet); }
+.conseiller-card--modal .chat-bubble-filters { background: rgba(251, 227, 184, .08); border-left-color: var(--cons-texte-doux); color: var(--cons-texte); }
+.conseiller-card--modal .chat-bubble-filters__label { color: var(--cons-texte-doux); }
+body.sapi-landing-conseil .landing-conseil__noscript { color: var(--cons-texte); }
+@media (max-width: 600px) {
+  .conseiller-card--modal .modal__close { background: rgba(251, 227, 184, .12); border-color: var(--cons-filet); box-shadow: none; color: var(--cons-texte); }
+}
