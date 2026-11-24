@@ -438,9 +438,9 @@ function sapi_ajax_conseil_lead() {
       . "\n\n";
   }
   if ($mode === 'manuel') {
-    $body .= "── À faire ──\nIl ou elle a " . ($photos['recues'] > 0 ? 'envoyé des photos' : ($precisions !== '' ? 'écrit des précisions' : 'écrit un mot')) . " : réponds toi-même, sous 3 jours (promis à l'écran).\n\n";
+    $body .= "── À faire ──\nIl ou elle a " . ($photos['recues'] > 0 ? 'envoyé des photos' : ($precisions !== '' ? 'écrit des précisions' : 'écrit un mot')) . ", réponds toi-même, sous 3 jours (promis à l'écran).\n\n";
   } else {
-    $body .= "── À faire ──\nPas de mot : le conseil préparé partira seul dans 24 h. Tu peux le relire, le modifier ou l'envoyer avant.\n\n";
+    $body .= "── À faire ──\nPas de mot, le conseil préparé partira seul dans 24 h. Tu peux le relire, le modifier ou l'envoyer avant.\n\n";
   }
   if ($demande_id) {
     $body .= "── Brouillon et envoi ──\n" . admin_url('admin.php?page=sapi-conseil-reseaux&demande=' . $demande_id) . "\n\n";

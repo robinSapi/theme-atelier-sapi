@@ -64,7 +64,7 @@ function sapi_conseil_email_html($row) {
     if ($p) $autres[] = $p;
   }
   $avatar = home_url('/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice.jpg');
-  $logo   = 'https://atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.svg';
+  $logo   = 'https://atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.png';
   $site   = home_url('/');
   $f      = "font-family:'Montserrat',Arial,Helvetica,sans-serif;";
   $sp     = "font-family:'Square Peg',Georgia,serif;";
@@ -269,7 +269,7 @@ function sapi_conseil_accuse_html($prenom) {
   <div style="display:none;max-height:0;overflow:hidden;">Robin va lire ton projet et t'envoie son conseil sous 3 jours.</div>
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5EDE4;"><tr><td align="center" style="padding:16px 0;">
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;background-color:#FEFDFB;">
-      <tr><td align="center" style="padding:32px 24px 16px;"><img src="https://atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.svg" alt="Atelier Sâpi" width="130" style="display:block;max-width:130px;height:auto;"></td></tr>
+      <tr><td align="center" style="padding:32px 24px 16px;"><img src="https://atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.png" alt="Atelier Sâpi" width="130" style="display:block;max-width:130px;height:auto;"></td></tr>
       <tr><td align="center" style="padding:16px 24px 6px;"><h1 style="margin:0;<?php echo $sp; ?>font-size:44px;font-weight:400;color:#937D68;line-height:50px;">Demande bien reçue</h1></td></tr>
       <tr><td align="center" style="padding:8px 36px 26px;">
         <p style="margin:0 0 10px;<?php echo $f; ?>font-size:16px;font-weight:600;color:#323232;"><?php echo esc_html($bonjour); ?></p>

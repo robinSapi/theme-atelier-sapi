@@ -27797,3 +27797,59 @@ body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
 }
 .lead-photos__note { margin: 0; font-size: 11.5px; color: var(--cons-texte-doux); }
 .lead-form__ajout:disabled { opacity: .6; cursor: wait; }
+
+/* ─────────────────────────────────────────────────────────────
+   ACCUEIL — PROJET ENTAMÉ (24/11, maquette validée)
+   `.has-projet` est posée par le script en ligne de front-page.php
+   AVANT l'affichage : on montre la sélection au lieu du sélecteur.
+   ───────────────────────────────────────────────────────────── */
+.home-projet-section:not(.has-projet) .accueil-projet { display: none; }
+.home-projet-section.has-projet .home-projet { display: none; }
+.accueil-projet {
+  position: relative; z-index: 1;
+  max-width: 1000px; margin: 0 auto; padding: 0 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center;
+}
+.accueil-projet__phrase { margin: 0; max-width: 640px; font-size: 17px; line-height: 1.55; color: var(--cons-texte); }
+.accueil-projet__phrase:empty { display: none; }
+.accueil-projet__cartes {
+  width: 100%; display: flex; justify-content: flex-start; gap: 18px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+  overscroll-behavior-x: contain; padding: 4px 2px 8px; text-align: left;
+}
+.accueil-projet__cartes::-webkit-scrollbar { display: none; }
+/* Centrées quand elles tiennent, défilables depuis la PREMIÈRE quand elles
+   débordent (justify-content: center rognait la gauche, hors d'atteinte). */
+.accueil-projet__cartes > :first-child { margin-left: auto; }
+.accueil-projet__cartes > :last-child { margin-right: auto; }
+.accueil-projet__cartes .product-card-cinetique { flex: 0 0 220px; scroll-snap-align: start; background: #fff; border-radius: 14px; overflow: hidden; }
+.accueil-projet__cartes .product-price { justify-content: center; }
+.accueil-projet__vide {
+  flex: 0 0 220px; height: 320px; border-radius: 14px; background: rgba(255, 255, 255, .08);
+  animation: accueil-vide 1.2s ease-in-out infinite alternate;
+}
+@keyframes accueil-vide { from { opacity: .5; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .accueil-projet__vide { animation: none; } }
+.accueil-projet__actions { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; }
+.accueil-projet__completer {
+  display: inline-flex; align-items: center; padding: 14px 28px; border-radius: 50px;
+  background: var(--color-orange); color: #fff; text-decoration: none;
+  font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.accueil-projet__completer:hover { background: var(--color-orange-hover); color: #fff; }
+.accueil-projet__autre {
+  background: none; border: 0; padding: 6px 0; cursor: pointer; color: var(--cons-texte-doux);
+  font: inherit; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; text-decoration: underline;
+}
+.accueil-projet__autre:hover { color: var(--cons-texte); }
+@media (max-width: 768px) {
+  .accueil-projet { padding: 0; gap: 18px; }
+  .accueil-projet__phrase { font-size: 15px; padding: 0 20px; }
+  .accueil-projet__cartes { justify-content: flex-start; padding-left: 20px; padding-right: 20px; scroll-padding-left: 20px; }
+  .accueil-projet__cartes .product-card-cinetique, .accueil-projet__vide { flex-basis: 62%; }
+  .accueil-projet__actions { flex-direction: column; gap: 16px; width: 100%; padding: 0 20px; box-sizing: border-box; }
+  .accueil-projet__completer { width: 100%; justify-content: center; box-sizing: border-box; }
+}
+.accueil-projet .screen-reader-text {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}

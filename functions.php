@@ -149,6 +149,8 @@ require_once get_template_directory() . '/inc/sapi-cart-page.php';
 // Page cachée « Conseil de Robin » pour les réseaux sociaux (nov. 2026) :
 // landing, table des demandes, endpoint sapi_conseil_lead, écrans de la modale.
 require_once get_template_directory() . '/inc/sapi-conseil-reseaux.php';
+// Habillage HTML des notifications envoyées à Robin (24/11).
+require_once get_template_directory() . '/inc/sapi-mails-robin.php';
 
 // Catalogue B2B (prescripteurs) — Temps 1. Source de données + mapping specs +
 // champs ACF éditoriaux. Chargé front ET admin (ACF acf/init + rendu template).
@@ -514,6 +516,7 @@ function sapi_maison_enqueue_assets() {
       );
       wp_localize_script('sapi-room-picker', 'SAPI_ROOM_PICKER', [
         'creationsUrl' => home_url('/mes-creations/'),
+        'ajaxUrl'      => admin_url('admin-ajax.php'),
       ]);
     }
   }
@@ -5648,6 +5651,36 @@ add_action('wp_ajax_nopriv_sapi_immersion_selection', 'sapi_ajax_immersion_selec
  */
 function sapi_immersion_max_products() {
   return 4;
+}
+
+/**
+ * Accueil avec un projet entamé (24/11) : la sélection du visiteur à la place
+ * du sélecteur de pièce. Même moteur et même rendu de cards que l'immersion.
+ * ⚠️ SANS NONCE, VOLONTAIREMENT : l'accueil est en cache, un nonce y serait
+ * périmé au bout d'un jour et la proposition disparaîtrait sans bruit. Le
+ * point d'entrée ne fait que LIRE le catalogue public, rien n'est écrit.
+ */
+add_action('wp_ajax_sapi_accueil_selection', 'sapi_ajax_accueil_selection');
+add_action('wp_ajax_nopriv_sapi_accueil_selection', 'sapi_ajax_accueil_selection');
+function sapi_ajax_accueil_selection() {
+  $raw = isset($_POST['answers']) ? json_decode(wp_unslash($_POST['answers']), true) : [];
+  if (!is_array($raw)) $raw = [];
+  list($answers) = sapi_megafilter_sanitize_project($raw, []);
+  if (isset($raw['taille_escalier']) && is_string($raw['taille_escalier'])) {
+    $answers['taille_escalier'] = sanitize_key($raw['taille_escalier']);
+  }
+  $piece = isset($answers['piece']) ? $answers['piece'] : '';
+  if ($piece === '') wp_send_json_error(['message' => 'piece']);
+
+  $ctx = sapi_immersion_build_context($answers);
+  ob_start();
+  foreach ($ctx['products'] as $prod) sapi_immersion_render_product_card($prod, $piece);
+  wp_send_json_success([
+    'html'   => ob_get_clean(),
+    'count'  => count($ctx['products']),
+    'title'  => $ctx['title'],
+    'phrase' => $ctx['phrase'],
+  ]);
 }
 
 function sapi_ajax_immersion_selection() {

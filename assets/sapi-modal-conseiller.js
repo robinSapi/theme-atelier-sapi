@@ -1823,6 +1823,8 @@
   // Décide quel écran afficher quand on ouvre la modale via state="s0".
   // Renvoie 's0-initial' | 's0-partiel' | 's3-carrefour'.
   function determineInitialState() {
+    /* Landing : seule compte la visite en cours, jamais un projet du site. */
+    if (LANDING) return Object.keys(state.answers).length ? 's0-partiel' : 's0-initial';
     if (!window.sapiProject || !window.sapiProject.hasProject()) return 's0-initial';
     var visible = getVisibleStepIds(state.answers);
     if (visible.length === 0) return 's0-initial';
@@ -1994,7 +1996,7 @@
   // Action "Effacer et recommencer" depuis S0 (état partiel) : vide le projet
   // et bascule vers l'état initial dans la même modale. Pas de fermeture.
   function resetFromS0() {
-    if (window.sapiProject) window.sapiProject.clear();
+    if (window.sapiProject && !LANDING) window.sapiProject.clear(); // landing : ne jamais effacer un projet du site
     state.answers = {};
     state.labels = {};
     state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
@@ -2240,8 +2242,8 @@
   // à S0 hybride en mode initial (peuplé via renderS0Hybrid pour avoir le
   // badge, la question, les choices et le placeholder corrects).
   function resetFromS3() {
-    if (window.sapiProject) {
-      window.sapiProject.clear();
+    if (window.sapiProject && !LANDING) {
+      window.sapiProject.clear(); // landing : ne jamais effacer un projet du site
     }
     state.answers = {};
     state.labels = {};
@@ -2440,7 +2442,7 @@
   // pattern éprouvé pré-F1c (renderProductGuideResult > redoBtn) — efface le
   // projet entièrement et redémarre le parcours court à la 1re question.
   function modifyProductAnswers() {
-    if (window.sapiProject) window.sapiProject.clear();
+    if (window.sapiProject && !LANDING) window.sapiProject.clear(); // landing : ne jamais effacer un projet du site
     state.answers = {};
     state.labels = {};
     state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
@@ -3576,6 +3578,14 @@
     // au refresh.
     try {
       var params = new URLSearchParams(window.location.search);
+      /* « Compléter mon projet » depuis l'accueil (24/11) : on arrive sur la
+         sélection, modale ouverte là où le visiteur s'était arrêté. */
+      if (params.get('completer') === '1' && !LANDING) {
+        params.delete('completer');
+        var resteCompleter = params.toString();
+        window.history.replaceState({}, '', window.location.pathname + (resteCompleter ? '?' + resteCompleter : '') + (window.location.hash || ''));
+        setTimeout(function () { openModal('s0'); }, 300);
+      }
       var initialFreetext = params.get('freetext');
       if (initialFreetext && initialFreetext.length) {
         // Nettoyer l'URL
