@@ -39,7 +39,7 @@
 if (!defined('ABSPATH')) exit;
 
 define('SAPI_CONSEIL_TEMPLATE', 'page-conseil-robin.php');
-if (!defined('SAPI_CONSEIL_DB_VERSION')) define('SAPI_CONSEIL_DB_VERSION', '4');
+if (!defined('SAPI_CONSEIL_DB_VERSION')) define('SAPI_CONSEIL_DB_VERSION', '5');
 
 /** La page courante est-elle la landing « Conseil de Robin » ? */
 function sapi_is_landing_conseil() {
@@ -99,6 +99,7 @@ function sapi_conseil_create_table() {
     relance_le DATETIME NULL DEFAULT NULL,
     verrou_le DATETIME NULL DEFAULT NULL,
     alternatives VARCHAR(60) NOT NULL DEFAULT '',
+    photos TEXT NULL,
     PRIMARY KEY  (id),
     KEY statut (statut),
     KEY envoi_prevu (envoi_prevu),
@@ -120,7 +121,7 @@ add_action('init', function () {
      table présente mais un ALTER raté laisserait l'étape 2 morte en silence
      (updates et SELECT sur des colonnes absentes renvoient faux sans bruit). */
   if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) return;
-  if (!$wpdb->get_var("SHOW COLUMNS FROM $table LIKE 'alternatives'")) return;
+  if (!$wpdb->get_var("SHOW COLUMNS FROM $table LIKE 'photos'")) return;
   /* ⚠️ Les demandes nées AVANT l'étape 2 (recette de l'étape 1) n'ont pas de
      brouillon et leurs 24 h sont échues : sans ça, le premier cron les
      préparerait et les enverrait d'un coup, sans relecture. On les annule. */
@@ -130,11 +131,127 @@ add_action('init', function () {
   update_option('sapi_conseil_db_version', SAPI_CONSEIL_DB_VERSION, true);
 });
 
-/** Vide prénom, email et commentaire des demandes de plus de 6 mois. */
+/* ─────────────────────────────────────────────────────────────────────────
+   Photos (étape 3, 24/11)
+   Règles validées par Robin : 3 au plus, visibles par lui seul, effacées
+   au bout de 6 mois, et une photo fait répondre Robin lui-même.
+   ⚠️ Dossier FERMÉ au web (.htaccess) et noms tirés au hasard : l'adresse
+   d'un fichier ne se devine pas et ne s'ouvre pas. Robin les voit par
+   l'admin, qui les sert après contrôle des droits (sapi_conseil_photo).
+   ⚠️ Les métadonnées (dont la position GPS d'un téléphone) sont retirées
+   dans le navigateur, qui redessine la photo avant l'envoi. Le serveur la
+   RÉENCODE ensuite, ce qui neutralise un fichier déguisé en image, et
+   retire lui aussi les métadonnées quand l'éditeur d'image le permet.
+   ───────────────────────────────────────────────────────────────────────── */
+define('SAPI_CONSEIL_PHOTOS_MAX', 3);
+
+function sapi_conseil_dossier_photos() {
+  $up  = wp_upload_dir(null, false);
+  $dir = trailingslashit($up['basedir']) . 'sapi-conseil-photos';
+  if (!is_dir($dir)) wp_mkdir_p($dir);
+  if (!file_exists($dir . '/.htaccess')) {
+    @file_put_contents($dir . '/.htaccess', "<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n");
+  }
+  if (!file_exists($dir . '/index.php')) @file_put_contents($dir . '/index.php', "<?php\n// Silence.\n");
+  return $dir;
+}
+
+/** Nom de fichier sûr (rien d'autre que ce que sapi_conseil_recevoir_photos produit). */
+function sapi_conseil_nom_photo_valide($nom) {
+  return is_string($nom) && preg_match('/^[a-zA-Z0-9]{24}\.jpg$/', $nom);
+}
+
+/**
+ * Reçoit les photos envoyées avec la demande.
+ * Renvoie ['noms' => [...fichiers enregistrés], 'recues' => n, 'refusees' => n].
+ * Une photo refusée n'empêche pas la demande : Robin en est prévenu dans son mail.
+ */
+function sapi_conseil_recevoir_photos() {
+  $res = ['noms' => [], 'recues' => 0, 'refusees' => 0];
+  if (empty($_FILES['photos']) || !is_array($_FILES['photos']['tmp_name'] ?? null)) return $res;
+  $f = $_FILES['photos'];
+  $dir = sapi_conseil_dossier_photos();
+  $n = count($f['tmp_name']);
+  for ($i = 0; $i < $n; $i++) {
+    if (($f['error'][$i] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) continue;
+    $res['recues']++;
+    if (count($res['noms']) >= SAPI_CONSEIL_PHOTOS_MAX) { $res['refusees']++; continue; }
+    $tmp = $f['tmp_name'][$i];
+    $ok = ($f['error'][$i] === UPLOAD_ERR_OK) && is_uploaded_file($tmp) && (int) $f['size'][$i] <= 8 * MB_IN_BYTES;
+    $info = $ok ? @getimagesize($tmp) : false;
+    if (!$info || !in_array($info[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_WEBP], true)) {
+      $res['refusees']++;
+      error_log('[sapi-conseil] Photo refusée (erreur ' . (int) ($f['error'][$i] ?? -1) . ', taille ' . (int) ($f['size'][$i] ?? 0) . ')');
+      continue;
+    }
+    $editeur = wp_get_image_editor($tmp);
+    if (is_wp_error($editeur)) {
+      $res['refusees']++;
+      error_log('[sapi-conseil] Photo illisible : ' . $editeur->get_error_message());
+      continue;
+    }
+    if (method_exists($editeur, 'maybe_exif_rotate')) $editeur->maybe_exif_rotate();
+    $editeur->resize(1600, 1600, false); // WP_Error si déjà plus petite : sans gravité
+    $editeur->set_quality(82);
+    add_filter('image_strip_meta', '__return_true');
+    $nom = wp_generate_password(24, false, false) . '.jpg';
+    $sauve = $editeur->save($dir . '/' . $nom, 'image/jpeg');
+    if (is_wp_error($sauve)) {
+      $res['refusees']++;
+      error_log('[sapi-conseil] Photo non enregistrée : ' . $sauve->get_error_message());
+      continue;
+    }
+    $res['noms'][] = $nom;
+  }
+  return $res;
+}
+
+function sapi_conseil_effacer_photos($json) {
+  $noms = json_decode((string) $json, true);
+  if (!is_array($noms)) return;
+  $dir = sapi_conseil_dossier_photos();
+  foreach ($noms as $nom) {
+    if (sapi_conseil_nom_photo_valide($nom) && file_exists($dir . '/' . $nom)) @unlink($dir . '/' . $nom);
+  }
+}
+
+/* Robin voit les photos depuis l'admin : servies ici, jamais par une adresse publique. */
+add_action('admin_post_sapi_conseil_photo', function () {
+  if (!current_user_can('manage_options')) wp_die('Accès refusé.', 403);
+  $id = isset($_GET['demande']) ? (int) $_GET['demande'] : 0;
+  $i  = isset($_GET['i']) ? (int) $_GET['i'] : -1;
+  check_admin_referer('sapi_conseil_photo_' . $id);
+  global $wpdb;
+  $json = $wpdb->get_var($wpdb->prepare('SELECT photos FROM ' . sapi_conseil_table() . ' WHERE id = %d', $id));
+  $noms = json_decode((string) $json, true);
+  $nom  = (is_array($noms) && isset($noms[$i])) ? $noms[$i] : '';
+  $chemin = sapi_conseil_dossier_photos() . '/' . $nom;
+  if (!sapi_conseil_nom_photo_valide($nom) || !file_exists($chemin)) wp_die('Photo introuvable (effacée après 6 mois ?).', 404);
+  nocache_headers();
+  header('Content-Type: image/jpeg');
+  header('Content-Length: ' . filesize($chemin));
+  header('X-Content-Type-Options: nosniff');
+  readfile($chemin);
+  exit;
+});
+
+/** Vide prénom, email et commentaire des demandes de plus de 6 mois, et efface leurs photos. */
 function sapi_conseil_purger() {
   global $wpdb;
   $table = sapi_conseil_table();
   if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) !== $table) return;
+  $vieilles = $wpdb->get_results(
+    "SELECT id, photos FROM $table WHERE created_at < (NOW() - INTERVAL 6 MONTH) AND photos IS NOT NULL AND photos <> ''"
+  );
+  foreach ((array) $vieilles as $v) {
+    sapi_conseil_effacer_photos($v->photos);
+    $wpdb->update($table, ['photos' => ''], ['id' => (int) $v->id]);
+  }
+  /* Filet : un fichier sans ligne (PHP arrêté entre l'enregistrement et
+     l'insertion) ne serait jamais retrouvé par la boucle ci-dessus. */
+  foreach ((array) glob(sapi_conseil_dossier_photos() . '/*.jpg') as $fichier) {
+    if (is_file($fichier) && filemtime($fichier) < time() - 183 * DAY_IN_SECONDS) @unlink($fichier);
+  }
   $wpdb->query(
     "UPDATE $table SET prenom = '', email = '', commentaire = NULL, sujet = '', corps = NULL
       WHERE created_at < (NOW() - INTERVAL 6 MONTH) AND email <> ''"
@@ -218,6 +335,9 @@ function sapi_ajax_conseil_lead() {
   }
   $piece = $answers['piece'] ?? '';
 
+  /* Après les contrôles anti-spam (une demande jetée n'enregistre rien). */
+  $photos = sapi_conseil_recevoir_photos();
+
   $session_id = isset($_POST['session_id']) ? sanitize_text_field(wp_unslash($_POST['session_id'])) : '';
   $session_id = mb_substr($session_id, 0, 36);
   $source_url = isset($_POST['source_url']) ? esc_url_raw(wp_unslash($_POST['source_url'])) : '';
@@ -229,7 +349,9 @@ function sapi_ajax_conseil_lead() {
     . ($precisions !== '' && $commentaire !== '' ? "\n\nSon mot :\n" : '')
     . $commentaire
   );
-  $mode        = ($mot_et_precisions !== '') ? 'manuel' : 'auto';
+  /* Une photo, même refusée, fait répondre Robin : le visiteur s'attend à ce
+     qu'on la regarde. */
+  $mode        = ($mot_et_precisions !== '' || $photos['recues'] > 0) ? 'manuel' : 'auto';
   $envoi_prevu = ($mode === 'auto')
     ? gmdate('Y-m-d H:i:s', time() + DAY_IN_SECONDS + (int) (get_option('gmt_offset') * HOUR_IN_SECONDS))
     : null;
@@ -244,12 +366,23 @@ function sapi_ajax_conseil_lead() {
     'piece'       => $piece,
     'answers'     => wp_json_encode($answers),
     'labels'      => wp_json_encode($labels),
+    /* Photos REÇUES, pas seulement enregistrées : le brouillon recalcule le
+       mode sur ce nombre, et une photo refusée doit quand même faire
+       répondre Robin (sinon le mail partait seul à 24 h). */
+    'nb_photos'   => $photos['recues'],
+    'photos'      => $photos['noms'] ? wp_json_encode($photos['noms']) : '',
     'mode'        => $mode,
     'statut'      => 'a_traiter',
     'envoi_prevu' => $envoi_prevu,
     'source_url'  => mb_substr($source_url, 0, 500),
   ]);
   $demande_id = $inserted ? (int) $wpdb->insert_id : 0;
+  if (!$inserted && $photos['noms']) {
+    /* Sans ligne en base, personne ne pourrait voir ni effacer ces fichiers. */
+    sapi_conseil_effacer_photos(wp_json_encode($photos['noms']));
+    $photos['refusees'] += count($photos['noms']);
+    $photos['noms'] = [];
+  }
   if (!$inserted) {
     /* On ne perd pas la demande pour autant : le mail à Robin part quand même
        et contient tout. Mais l'étape 2 ne pourra pas la traiter seule. */
@@ -299,8 +432,13 @@ function sapi_ajax_conseil_lead() {
     $body .= "── Ses précisions ──\n" . $precisions . "\n\n";
   }
   $body .= "── Son mot ──\n" . ($commentaire !== '' ? $commentaire : '(aucun)') . "\n\n";
+  if ($photos['recues'] > 0) {
+    $body .= "── Photos ──\n" . count($photos['noms']) . " photo(s), à voir dans l'admin (lien ci-dessous)."
+      . ($photos['refusees'] ? "\n⚠️ " . $photos['refusees'] . " photo(s) n'ont pas pu être enregistrées : demande-les-lui par mail." : '')
+      . "\n\n";
+  }
   if ($mode === 'manuel') {
-    $body .= "── À faire ──\nIl ou elle a écrit " . ($precisions !== '' ? 'des précisions' : 'un mot') . " : réponds toi-même, sous 3 jours (promis à l'écran).\n\n";
+    $body .= "── À faire ──\nIl ou elle a " . ($photos['recues'] > 0 ? 'envoyé des photos' : ($precisions !== '' ? 'écrit des précisions' : 'écrit un mot')) . " : réponds toi-même, sous 3 jours (promis à l'écran).\n\n";
   } else {
     $body .= "── À faire ──\nPas de mot : le conseil préparé partira seul dans 24 h. Tu peux le relire, le modifier ou l'envoyer avant.\n\n";
   }
@@ -421,7 +559,15 @@ function sapi_render_conseil_lead_screens($pencil_svg) {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
                   <?php esc_html_e('Ajouter un mot', 'theme-sapi-maison'); ?>
                 </button>
-                <?php /* « Ajouter une photo » viendra ici avec l'étape 3. */ ?>
+                <button type="button" class="lead-form__ajout" data-action="lead-photo-ouvrir">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                  <?php esc_html_e('Ajouter une photo', 'theme-sapi-maison'); ?>
+                </button>
+                <input type="file" accept="image/*" multiple hidden data-lead-photo-input aria-label="<?php esc_attr_e('Photos de ta pièce', 'theme-sapi-maison'); ?>">
+              </div>
+              <div class="lead-photos" data-lead-photos hidden>
+                <div class="lead-photos__liste" data-lead-photos-liste></div>
+                <p class="lead-photos__note"><?php esc_html_e('Visibles par moi seul, effacées au bout de 6 mois.', 'theme-sapi-maison'); ?></p>
               </div>
 
               <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;">

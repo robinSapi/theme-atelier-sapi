@@ -113,6 +113,7 @@
        encore le slug avec lequel elle a été donnée : voir precisionsActives(). */
     precisions: {},       // { stepId: { texte, slug } }
     mesures: {},          // { taille: 18, hauteur: 2.7 }
+    photos: [],           // landing : [{ blob, url }] déjà réduites, 3 au plus
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
       sessionId: null,
@@ -2780,6 +2781,7 @@
       state.labels = {};
       state.precisions = {};
       state.mesures = {};
+      viderPhotos();
     } else {
       hydrateFromProject();
     }
@@ -2926,6 +2928,99 @@
     } catch (e) { /* swallow */ }
   }
 
+  /* ═══ PHOTOS (landing, 24/11) ═══════════════════════════════════════
+     Réduites dans le navigateur (1600 px, JPEG) avant l'envoi : une photo
+     de téléphone fait 3 à 8 Mo, ce qui ferait échouer l'envoi sur une
+     connexion mobile. Le serveur les réencode ensuite de toute façon. */
+  var PHOTOS_MAX = 3;
+  function viderPhotos() {
+    (state.photos || []).forEach(function (p) { try { URL.revokeObjectURL(p.url); } catch (e) { /* swallow */ } });
+    state.photos = [];
+    renderPhotos();
+  }
+  function reduirePhoto(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var max = 1600;
+        var r = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        var w = Math.max(1, Math.round(img.naturalWidth * r));
+        var h = Math.max(1, Math.round(img.naturalHeight * r));
+        var c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { if (b) resolve(b); else reject(new Error('toBlob')); }, 'image/jpeg', 0.82);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
+      img.src = url;
+    });
+  }
+  function renderPhotos() {
+    if (!els.modal) return;
+    var bloc = els.modal.querySelector('[data-lead-photos]');
+    var liste = els.modal.querySelector('[data-lead-photos-liste]');
+    var ajout = els.modal.querySelector('[data-action="lead-photo-ouvrir"]');
+    if (liste) {
+      liste.innerHTML = '';
+      state.photos.forEach(function (p, i) {
+        var fig = document.createElement('span');
+        fig.className = 'lead-photos__item';
+        var im = document.createElement('img');
+        im.src = p.url;
+        im.alt = 'Photo ' + (i + 1);
+        var x = document.createElement('button');
+        x.type = 'button';
+        x.className = 'lead-photos__retirer';
+        x.setAttribute('data-action', 'lead-photo-retirer');
+        x.setAttribute('data-i', String(i));
+        x.setAttribute('aria-label', 'Retirer la photo ' + (i + 1));
+        x.textContent = '×';
+        fig.appendChild(im);
+        fig.appendChild(x);
+        liste.appendChild(fig);
+      });
+    }
+    if (bloc) bloc.hidden = state.photos.length === 0;
+    if (ajout) ajout.hidden = state.photos.length >= PHOTOS_MAX;
+  }
+  function ajouterPhotos(fichiers) {
+    var form = els.leadForm;
+    var prev = form && form.querySelector('.lead-photos__erreur');
+    if (prev) prev.remove();
+    var place = PHOTOS_MAX - state.photos.length;
+    var liste = Array.prototype.slice.call(fichiers || [], 0, Math.max(0, place));
+    var trop = (fichiers ? fichiers.length : 0) > place;
+    var echecs = 0;
+    var ajout = els.modal.querySelector('[data-action="lead-photo-ouvrir"]');
+    if (ajout) ajout.disabled = true;
+    state.photosEnCours = true;
+    return liste.reduce(function (p, f) {
+      return p.then(function () {
+        return reduirePhoto(f).then(function (blob) {
+          if (state.photos.length >= PHOTOS_MAX) return;
+          state.photos.push({ blob: blob, url: URL.createObjectURL(blob) });
+        }, function () { echecs++; });
+      });
+    }, Promise.resolve()).then(function () {
+      state.photosEnCours = false;
+      if (ajout) ajout.disabled = false;
+      renderPhotos();
+      var msg = '';
+      if (echecs) msg = echecs > 1 ? 'Ces photos n’ont pas pu être lues, essaie-en d’autres.' : 'Cette photo n’a pas pu être lue, essaie-en une autre.';
+      else if (trop) msg = 'Trois photos au plus.';
+      if (msg && form) {
+        var err = document.createElement('p');
+        err.className = 'contact-form__error lead-photos__erreur';
+        err.setAttribute('role', 'alert');
+        err.textContent = msg;
+        var bloc = els.modal.querySelector('[data-lead-photos]');
+        (bloc && !bloc.hidden ? bloc : form.querySelector('.lead-form__extras')).insertAdjacentElement('afterend', err);
+      }
+    });
+  }
+
   function showLeadScreen() {
     /* Rappel des réponses en pastilles : la personne voit que le travail
        est fait et qu'il lui revient. Libellés connus seulement, dans
@@ -2961,8 +3056,7 @@
     var emailVal  = (emailInput && emailInput.value || '').trim();
     var motVal    = (motInput && motInput.value || '').trim();
 
-    var prevErr = form.querySelector('.contact-form__error');
-    if (prevErr) prevErr.remove();
+    form.querySelectorAll('.contact-form__error').forEach(function (e) { e.remove(); });
     if (prenomInput) prenomInput.classList.remove('is-invalid');
     if (emailInput) emailInput.classList.remove('is-invalid');
 
@@ -2980,6 +3074,8 @@
       form.appendChild(err);
     }
     if (message) { afficherErreur(message); return; }
+    /* Photos encore en cours de réduction : elles partiraient sans elles. */
+    if (state.photosEnCours) { afficherErreur('Tes photos se préparent, réessaie dans une seconde.'); return; }
 
     /* Verrou contre le double envoi (double tap sur mobile) : un seul mail à
        Robin, une seule ligne en base. */
@@ -3000,6 +3096,7 @@
        mot, et leur présence suffit à faire répondre Robin lui-même. */
     fd.append('precisions', lignesPrecisions().join('\n'));
     fd.append('website', honey ? honey.value : '');
+    state.photos.forEach(function (p, i) { fd.append('photos[]', p.blob, 'photo-' + (i + 1) + '.jpg'); });
     fd.append('source_url', window.location.href);
     fd.append('project', JSON.stringify({ answers: state.answers, labels: state.labels }));
     try { fd.append('session_id', SessionTracker.getSessionId()); } catch (e) { /* swallow */ }
@@ -3017,7 +3114,7 @@
           var titre = els.modal.querySelector('[data-lead-merci-titre]');
           if (titre) titre.textContent = prenomVal ? 'Merci ' + prenomVal : 'Merci';
           showScreen('s-lead-merci');
-          pushLandingEvent('conseil_reseaux_email', { piece: state.answers.piece || '', avec_mot: motVal ? 1 : 0 });
+          pushLandingEvent('conseil_reseaux_email', { piece: state.answers.piece || '', avec_mot: motVal ? 1 : 0, nb_photos: state.photos.length });
           return;
         }
         relacher((resp && resp.data && resp.data.fallback) ||
@@ -3188,6 +3285,20 @@
           }
           break;
         }
+        case 'lead-photo-ouvrir': {
+          var champPhoto = els.modal.querySelector('[data-lead-photo-input]');
+          if (champPhoto) { champPhoto.value = ''; champPhoto.click(); }
+          break;
+        }
+        case 'lead-photo-retirer': {
+          var iPhoto = parseInt(actionBtn.getAttribute('data-i'), 10);
+          var vieilleErreur = els.leadForm && els.leadForm.querySelector('.lead-photos__erreur');
+          if (vieilleErreur) vieilleErreur.remove();
+          var retiree = state.photos.splice(iPhoto, 1)[0];
+          if (retiree) { try { URL.revokeObjectURL(retiree.url); } catch (e) { /* swallow */ } }
+          renderPhotos();
+          break;
+        }
         case 'accueil-go':
           renderS0Hybrid('s0-initial');
           break;
@@ -3283,6 +3394,11 @@
         else delete state.precisions[state.currentQuestion];
       }
       answerCurrentQuestion(slug, label);
+    });
+
+    els.modal.addEventListener('change', function (e) {
+      var t = e.target;
+      if (t && t.hasAttribute && t.hasAttribute('data-lead-photo-input')) ajouterPhotos(t.files);
     });
 
     // Slider : affichage en direct de la valeur et de la catégorie.

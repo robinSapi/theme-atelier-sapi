@@ -27781,3 +27781,19 @@ body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
 .landing-accueil__salut { margin: 0; font-family: var(--font-display); font-size: 38px; line-height: 1; color: #fff; }
 .landing-accueil__texte { margin: 0; font-size: 16px; line-height: 1.5; color: var(--cons-texte); }
 .landing-accueil__go { max-width: 320px; }
+
+/* Landing — écran email : [hidden] doit gagner sur les display:flex des
+   boutons pointillés (« Ajouter un mot » restait visible une fois ouvert). */
+.lead-form [hidden] { display: none !important; }
+
+/* Photos (24/11) : vignettes carrées avec une croix, sous les boutons. */
+.lead-photos { display: flex; flex-direction: column; gap: 6px; }
+.lead-photos__liste { display: flex; gap: 10px; flex-wrap: wrap; }
+.lead-photos__item { position: relative; width: 76px; height: 76px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(251, 227, 184, .35); }
+.lead-photos__item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lead-photos__retirer {
+  position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%;
+  background: rgba(42, 34, 28, .75); color: #fff; font: inherit; font-size: 16px; line-height: 24px; text-align: center; cursor: pointer;
+}
+.lead-photos__note { margin: 0; font-size: 11.5px; color: var(--cons-texte-doux); }
+.lead-form__ajout:disabled { opacity: .6; cursor: wait; }

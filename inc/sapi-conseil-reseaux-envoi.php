@@ -146,6 +146,9 @@ function sapi_conseil_preparer_brouillon($id) {
   if (trim((string) $row->commentaire) !== '') {
     $lignes[] = SAPI_CONSEIL_MARQUEUR . ' : ta réponse à ce qu’il ou elle a écrit « ' . trim($row->commentaire) . ' »]';
   }
+  if ((int) ($row->nb_photos ?? 0) > 0) {
+    $lignes[] = SAPI_CONSEIL_MARQUEUR . ' : ce que tu vois sur ses photos]';
+  }
 
   /* Le texte ne contient QUE le message de Robin. La photo, le bouton, les
      alternatives, le code et la signature sont posés par le gabarit
@@ -164,7 +167,9 @@ function sapi_conseil_preparer_brouillon($id) {
   /* Part seul seulement si tout est là ET que le visiteur n'a pas laissé de
      mot. Recalculé à chaque brouillon : un « Refaire » qui réussit après une
      panne de l'IA remet la demande en automatique. */
-  $auto = $choisi && $raison !== '' && trim((string) $row->commentaire) === '';
+  /* ⚠️ Les photos comptent aussi : sans ce test, un « Refaire » remettait
+     en automatique une demande avec photos et sans mot. */
+  $auto = $choisi && $raison !== '' && trim((string) $row->commentaire) === '' && (int) ($row->nb_photos ?? 0) === 0;
   $data['mode'] = $auto ? 'auto' : 'manuel';
   /* Jamais une échéance déjà passée : un « Refaire » au-delà des 24 h
      partirait sinon au cron suivant, avant que Robin l'ait relu. On laisse
@@ -357,12 +362,12 @@ function sapi_conseil_admin_page() {
 
   if (!$id) {
     $rows = $wpdb->get_results("SELECT * FROM $t ORDER BY id DESC LIMIT 200");
-    echo '<table class="widefat striped"><thead><tr><th>Date</th><th>Prénom</th><th>Pièce</th><th>Mot</th><th>Statut</th><th></th></tr></thead><tbody>';
+    echo '<table class="widefat striped"><thead><tr><th>Date</th><th>Prénom</th><th>Pièce</th><th>Mot / photos</th><th>Statut</th><th></th></tr></thead><tbody>';
     if (!$rows) echo '<tr><td colspan="6">Aucune demande pour l\'instant.</td></tr>';
     foreach ($rows as $r) {
       $url = admin_url('admin.php?page=sapi-conseil-reseaux&demande=' . (int) $r->id);
       echo '<tr><td>' . esc_html($r->created_at) . '</td><td>' . esc_html($r->prenom !== '' ? $r->prenom : ($r->email === '' ? '(effacé)' : '—')) . '</td><td>' . esc_html($r->piece)
-        . '</td><td>' . (trim((string) $r->commentaire) !== '' ? 'Oui' : '') . '</td><td>' . esc_html(sapi_conseil_statut_label($r))
+        . '</td><td>' . trim((trim((string) $r->commentaire) !== '' ? 'Mot ' : '') . ((int) $r->nb_photos > 0 ? (int) $r->nb_photos . ' photo(s)' : '')) . '</td><td>' . esc_html(sapi_conseil_statut_label($r))
         . '</td><td><a href="' . esc_url($url) . '">Ouvrir</a></td></tr>';
     }
     echo '</tbody></table></div>';
@@ -390,6 +395,17 @@ function sapi_conseil_admin_page() {
     . esc_html($answers ? sapi_megafilter_format_project_text($answers, $labels) : '(aucune réponse)') . '</pre>';
   if (trim((string) $row->commentaire) !== '') {
     echo '<h3>Son mot</h3><blockquote style="background:#fff8e5;padding:12px;border-left:4px solid #E35B24;">' . nl2br(esc_html($row->commentaire)) . '</blockquote>';
+  }
+  $noms_photos = json_decode((string) ($row->photos ?? ''), true);
+  if (is_array($noms_photos) && $noms_photos) {
+    echo '<h3>Ses photos</h3><p style="display:flex;gap:12px;flex-wrap:wrap;">';
+    foreach (array_keys($noms_photos) as $i) {
+      $src = wp_nonce_url(admin_url('admin-post.php?action=sapi_conseil_photo&demande=' . (int) $id . '&i=' . (int) $i), 'sapi_conseil_photo_' . (int) $id);
+      echo '<a href="' . esc_url($src) . '" target="_blank" rel="noopener"><img src="' . esc_url($src) . '" alt="" style="width:220px;height:220px;object-fit:cover;border-radius:8px;border:1px solid #ddd;"></a>';
+    }
+    echo '</p>';
+  } elseif ((int) ($row->nb_photos ?? 0) > 0) {
+    echo '<p><em>' . (int) $row->nb_photos . ' photo(s) reçue(s) mais pas enregistrée(s), ou effacée(s) après 6 mois : demande-les-lui par mail si besoin.</em></p>';
   }
 
   $action = esc_url(admin_url('admin-post.php'));
