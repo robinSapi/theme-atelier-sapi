@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recette prod Conseil réseaux</title>
+<style>
+  :root {
+    --bg: #FBF6EA; --card: #FEFDFB; --ink: #323232; --muted: #7a6a5a; --line: #E8DCC4;
+    --wood: #937D68; --orange: #E35B24; --ok: #2E7D4F; --ko: #C0392B; --na: #8a8a8a;
+    --ok-bg: #E6F3EA; --ko-bg: #FBE7E4; --na-bg: #EEEEEE; --code: #F3EADC;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1E1B18; --card: #272320; --ink: #EDE6DC; --muted: #B3A493; --line: #3A332C;
+      --wood: #C4AE97; --orange: #F07A48; --ok: #6CC791; --ko: #F08A7E; --na: #aaa;
+      --ok-bg: #1F3528; --ko-bg: #3D2320; --na-bg: #333; --code: #3A322A;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 Montserrat, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 24px 16px 80px; }
+  header h1 { font-size: 24px; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--muted); }
+  .bar { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 0; border-bottom: 1px solid var(--line); margin: 16px 0 8px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; font-weight: 600; }
+  .pill { padding: 4px 10px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); }
+  .pill.ok { color: var(--ok); } .pill.ko { color: var(--ko); } .pill.na { color: var(--na); }
+  .progress { flex: 1 1 160px; height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; min-width: 120px; }
+  .progress span { display: block; height: 100%; width: 0; background: var(--ok); transition: width .2s; }
+  .bar button { font: 600 13px inherit; font-family: inherit; padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--wood); background: var(--card); color: var(--ink); cursor: pointer; }
+  .bar button.primary { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 10px; margin: 12px 0 4px; }
+  .meta label { font-size: 12px; font-weight: 600; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+  input[type=text], textarea { font: inherit; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; }
+  textarea { min-height: 80px; resize: vertical; font-size: 14px; flex: 1; }
+  textarea:focus, input:focus { outline: 2px solid var(--orange); outline-offset: 1px; }
+  section { margin-top: 28px; }
+  section > h2 { font-size: 17px; margin: 0 0 4px; display: flex; gap: 8px; align-items: baseline; }
+  section > h2 .n { color: var(--orange); }
+  section > p.intro { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+  .test { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 8px 0; }
+  .test.s-ok { border-left-color: var(--ok); } .test.s-ko { border-left-color: var(--ko); background: var(--ko-bg); } .test.s-na { border-left-color: var(--na); opacity: .75; }
+  .what > b { display: block; margin-bottom: 6px; font-size: 15.5px; }
+  .row { font-size: 13.5px; margin-top: 6px; }
+  .row > .k { font-weight: 700; color: var(--wood); text-transform: uppercase; font-size: 11px; letter-spacing: .08em; display: block; margin-bottom: 1px; }
+  .row ul { margin: 2px 0 0; padding-left: 18px; }
+  .row li { margin: 2px 0; }
+  .row li::marker { content: "☐  "; color: var(--wood); }
+  .row.ko { color: var(--muted); }
+  .row.ko > .k { color: var(--ko); }
+  .side { display: flex; flex-direction: column; gap: 8px; }
+  .status { display: flex; gap: 6px; }
+  .status button { flex: 1; font: 700 12.5px inherit; font-family: inherit; padding: 6px 0; border-radius: 8px; border: 1.5px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+  .status button[data-v=ok].on { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+  .status button[data-v=ko].on { background: var(--ko-bg); border-color: var(--ko); color: var(--ko); }
+  .status button[data-v=na].on { background: var(--na-bg); border-color: var(--na); color: var(--na); }
+  code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: 12.5px; word-break: break-all; }
+  kbd { font: 600 12px inherit; font-family: inherit; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; }
+  a { color: var(--orange); word-break: break-all; }
+  .note { background: var(--card); border: 1px dashed var(--wood); border-radius: 10px; padding: 10px 14px; font-size: 14px; margin-top: 12px; }
+  .note ul { margin: 4px 0 0; padding-left: 18px; }
+  .toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 8px 16px; border-radius: 99px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  @media (max-width: 760px) { .test { grid-template-columns: 1fr; } }
+  @media print { .bar button { display: none; } .bar { position: static; } textarea { min-height: 40px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Recette prod : Conseil réseaux + panier/ampoule</h1>
+    <p>Fusion <code>test-theme-sapi-maison</code> → <code>master</code>. Navigation privée partout. Tes réponses sont gardées dans ce navigateur.</p>
+  </header>
+
+  <div class="note"><b>Avant de commencer, sur le Mac :</b>
+    <ul>
+      <li>Safari › Réglages › Avancées › cocher <b>« Afficher les fonctionnalités pour les développeurs web »</b>. Le menu <b>Développement</b> apparaît.</li>
+      <li>Inspecteur : <kbd>⌥⌘I</kbd> (onglets Réseau, Stockage, Console). Code source : <kbd>⌥⌘U</kbd>.</li>
+      <li>Fenêtre privée : <kbd>⇧⌘N</kbd>.</li>
+    </ul>
+  </div>
+
+  <div class="meta">
+    <label>Date de la recette <input type="text" data-meta="date" placeholder="ex. 25/11/2026"></label>
+    <label>Adresse perso de test (pas robin@) <input type="text" data-meta="email" placeholder="ton adresse perso"></label>
+    <label>Heure du déploiement <input type="text" data-meta="heure" placeholder="ex. 10 h 15"></label>
+  </div>
+
+  <div class="bar">
+    <div class="stats">
+      <span class="pill ok" id="c-ok">0 OK</span>
+      <span class="pill ko" id="c-ko">0 KO</span>
+      <span class="pill na" id="c-na">0 sans objet</span>
+      <span class="pill" id="c-todo">0 à faire</span>
+    </div>
+    <div class="progress"><span id="prog"></span></div>
+    <button class="primary" id="copy">Copier le compte rendu</button>
+    <button id="reset">Tout effacer</button>
+  </div>
+
+  <div id="tests"></div>
+
+  <div class="note"><b>Plan de repli</b> si le site tombe : restaurer le <b>thème seul</b> depuis UpdraftPlus (la table <code>wp_sapi_conseil_demandes</code> peut rester). Ensuite, appeler Claude Code pour annuler le merge sur <code>master</code> (ancien sommet <code>307595c</code>) et relancer Deploy to Production.</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* Chaque test : id (ne pas changer, il porte tes réponses), titre, où / quoi faire, à vérifier (liste), si KO. */
+const SECTIONS = [
+  { n: '0', t: 'Fusion et déploiement', tests: [
+    { id: 'decision', t: 'Lot panier/ampoule du 15/10 validé pour partir',
+      faire: 'Te poser la question : la case ampoule sur la fiche, la vitrine du mini-panier, la languette panier et la fin du -10 % sur le 2e luminaire ont-elles été vérifiées sur test.atelier-sapi.fr ?',
+      voir: ['Oui → OK, on continue', 'Non → faire d\'abord la section 11 sur <b>test</b>.atelier-sapi.fr'],
+      ko: 'Ne pas fusionner.' },
+    { id: 'merge', t: 'Fusion dans GitHub Desktop',
+      faire: 'Current Branch = <code>master</code> › menu Branch › <b>Merge into Current Branch…</b> › choisir <code>test-theme-sapi-maison</code> › <b>Create a merge commit</b> › <b>Push origin</b>.',
+      voir: ['La fenêtre de fusion affiche « This will merge 35 commits » (34 + le commit de ce compte rendu) et <b>pas</b> de conflit', 'Après le push : History en haut = « Merge branch \'test-theme-sapi-maison\' »'],
+      ko: 'Conflit annoncé = Abort, appeler Claude Code.' },
+    { id: 'deploy', t: 'Déploiement',
+      faire: 'github.com/robinSapi/theme-atelier-sapi › onglet <b>Actions</b> › <b>Deploy to Production</b> › Run workflow › Branch <code>master</code> › Run.',
+      voir: ['Le job passe au rond vert (2-5 min)', 'L\'étape « Deploy to O2Switch via FTP » indique des fichiers envoyés (Uploading…)'],
+      ko: 'Copier dans le commentaire le nom de l\'étape rouge et sa dernière ligne.' },
+  ]},
+  { n: '1', t: 'Le site est debout', intro: 'Les 30 premières secondes, en fenêtre privée, avant tout le reste.', tests: [
+    { id: 'home', t: 'Accueil',
+      faire: 'Ouvrir <a href="https://atelier-sapi.fr/" target="_blank">https://atelier-sapi.fr/</a>.',
+      voir: ['Polices, couleurs et photos normales (pas du texte noir sur fond blanc)', 'Le carrousel et le sélecteur de pièce « Le conseil de Robin » sont là'],
+      ko: 'Page blanche ou « erreur critique » = plan de repli tout de suite.' },
+    { id: 'fiche', t: 'Une fiche produit',
+      faire: 'Cliquer n\'importe quel luminaire.',
+      voir: ['Photos, prix, choix matériau/taille dans une seule carte', 'Bouton Ajouter au panier présent'],
+      ko: '' },
+    { id: 'minicart', t: 'Mini-panier',
+      faire: 'Cliquer l\'icône panier en haut, puis la croix.',
+      voir: ['Le volet s\'ouvre à droite et se referme'],
+      ko: '' },
+    { id: 'table', t: 'Table des demandes créée',
+      faire: 'wp-admin › menu de gauche <b>Robin Conseiller</b> › <b>Demandes réseaux</b>.',
+      voir: ['Titre « Demandes réseaux »', 'Tableau avec la ligne « Aucune demande pour l\'instant. »'],
+      ko: 'Sous-menu absent, message « Table … doesn\'t exist » ou page blanche = table non créée : appeler Claude Code.' },
+  ]},
+  { n: '2', t: 'Créer la page /conseil/', tests: [
+    { id: 'page', t: 'Créer la page',
+      faire: 'Pages › Ajouter. Titre « Conseil de Robin ». Panneau de droite : <b>Modèle</b> = « Conseil de Robin (réseaux) », <b>Slug</b> (Permalien) = <code>conseil</code>. Encart Yoast › Avancé › « Autoriser les moteurs de recherche » = <b>Non</b>. Publier. Ne l\'ajouter à aucun menu.',
+      voir: ['Après publication, le permalien affiché est bien <code>atelier-sapi.fr/conseil/</code> (et pas <code>/conseil-2/</code>)'],
+      ko: '<code>/conseil-2/</code> = une page ou un brouillon « conseil » existe déjà dans la corbeille ou les brouillons : le supprimer définitivement, puis remettre le slug.' },
+    { id: 'page-url', t: 'La page s\'ouvre',
+      faire: 'Fenêtre privée › <a href="https://atelier-sapi.fr/conseil/" target="_blank">https://atelier-sapi.fr/conseil/</a>.',
+      voir: ['La barre d\'adresse reste sur <code>/conseil/</code>', 'Fond bois sombre, ta photo, « Salut, moi c\'est Robin », bouton « C\'est parti »', 'Pas de menu ni de pied de page du site'],
+      ko: 'Atterrit sur /conseils-eclairage-interieur/ : Yoast › Redirections (ou extension Redirection), chercher <code>/conseil</code> et supprimer la règle.' },
+  ]},
+  { n: '3', t: 'Caches', intro: 'Dans cet ordre, ne pas l\'inverser.', tests: [
+    { id: 'c-ao', t: 'Autoptimize',
+      faire: 'Barre noire du haut de wp-admin › <b>Autoptimize</b> › <b>Vider le cache</b>.',
+      voir: ['Le menu Autoptimize indique ensuite une taille de cache proche de 0'],
+      ko: '' },
+    { id: 'c-wpsc', t: 'WP Super Cache',
+      faire: 'Réglages › WP Super Cache › onglet <b>Contenu</b> › <b>Supprimer le cache</b>.',
+      voir: ['« Pages en cache : 0 » (ou très peu)'],
+      ko: '' },
+    { id: 'c-redis', t: 'Redis',
+      faire: 'Chercher « Redis » dans Réglages ou le menu de gauche. S\'il existe : <b>Flush Cache</b>. Sinon cocher « Sans objet ».',
+      voir: ['Message de confirmation « Object cache flushed »'],
+      ko: '' },
+    { id: 'c-ls', t: 'Cache o2switch',
+      faire: 'cPanel o2switch › <b>LiteSpeed Web Cache Manager</b> › <b>Flush All</b> sur atelier-sapi.fr.',
+      voir: ['Message de succès vert'],
+      ko: '' },
+    { id: 'c-inline', t: 'Option Autoptimize « JS en ligne »',
+      faire: 'Réglages › Autoptimize › onglet JS, CSS & HTML › bloc Options JavaScript.',
+      voir: ['« Agréger aussi le JS en ligne » est <b>décoché</b>'],
+      ko: 'Cochée : la décocher, Enregistrer et vider le cache. Sinon le formulaire refusera tout le monde au bout d\'un jour (« La page a expiré »).' },
+    { id: 'c-headers', t: 'La page /conseil/ n\'est pas en cache',
+      faire: 'Fenêtre privée sur <code>/conseil/</code> › <kbd>⌥⌘I</kbd> › onglet <b>Réseau</b> › recharger › cliquer la 1re ligne <code>conseil/</code> › En-têtes › Réponse. Puis <kbd>⌥⌘U</kbd> et descendre tout en bas du code source.',
+      voir: ['<code>Cache-Control</code> contient <code>no-store</code>', 'Dernières lignes du code source : <b>pas</b> de « Cached page generated by WP-Super-Cache »'],
+      ko: 'Noter dans le commentaire la valeur exacte de Cache-Control et la dernière ligne du code source.' },
+  ]},
+  { n: '4', t: 'Barre cookies', intro: 'Sur le Mac, une fenêtre privée NEUVE à chaque test (les cookies d\'avant faussent tout).', tests: [
+    { id: 'ck-bar', t: 'Barre fine seule',
+      faire: 'Nouvelle fenêtre privée › <code>atelier-sapi.fr/conseil/</code>.',
+      voir: ['En bas : une barre crème fine « Un petit coup de main pour l\'atelier ?… » avec « Non merci » et « J\'accepte »', '<b>Pas</b> la grande fenêtre cookies plein écran', '<b>Pas</b> le popup email -10 %', 'Le bouton « Voir directement mes créations » reste visible au-dessus de la barre'],
+      ko: 'Grande fenêtre visible = le snippet cookies n\'a pas le même identifiant en prod : prévenir Claude Code.' },
+    { id: 'ck-deny', t: '« Non merci »',
+      faire: 'Cliquer « Non merci ». Recharger. Puis aller sur <code>atelier-sapi.fr/</code>.',
+      voir: ['La barre disparaît et ne revient pas au rechargement', 'Sur l\'accueil, la grande fenêtre cookies ne s\'ouvre pas', '<kbd>⌥⌘I</kbd> › Stockage › Cookies : <code>cmplz_banner-status</code> = <code>dismissed</code>'],
+      ko: '' },
+    { id: 'ck-accept', t: '« J\'accepte »',
+      faire: 'Nouvelle fenêtre privée › <code>/conseil/</code> › « J\'accepte » › <kbd>⌥⌘I</kbd> › Stockage › Cookies › atelier-sapi.fr.',
+      voir: ['<code>cmplz_marketing</code> = <code>allow</code> et <code>cmplz_statistics</code> = <code>allow</code>', 'Onglet Console : aucune ligne rouge'],
+      ko: 'Pas de cmplz_marketing = l\'API Complianz n\'a pas répondu : prévenir Claude Code (le consentement n\'est pas enregistré).' },
+  ]},
+  { n: '5', t: 'Parcours complet sur iPhone', intro: 'Safari en navigation privée sur l\'iPhone.', tests: [
+    { id: 'p-parcours', t: 'Questions',
+      faire: '<code>atelier-sapi.fr/conseil/</code> › C\'est parti › Salon › répondre à toutes les questions jusqu\'au bout.',
+      voir: ['1re question « Pour commencer, c\'est pour quelle pièce ? »', 'Taille et hauteur sont des curseurs, la valeur exacte s\'affiche (ex. « 22 m² »)', 'Un choix par ligne, rien de coupé en haut ou caché par la barre cookies', 'Dernier écran : « Où je t\'envoie mon conseil ? » avec tes réponses en pastilles'],
+      ko: 'Noter la question où ça coince.' },
+    { id: 'p-envoi', t: 'Envoi sans mot ni photo',
+      faire: 'Taper ton adresse perso. Laisser le prénom vide, ne pas ouvrir « Ajouter un mot » ni « Ajouter une photo ». « Recevoir mon conseil ».',
+      voir: ['Écran « Merci » : « Tu viens de recevoir un mail de confirmation… sous 3 jours »'],
+      ko: 'Recopier le message rouge exact. « La page a expiré » = problème de cache (section 3).' },
+    { id: 'p-accuse', t: 'Accusé de réception (visiteur)',
+      faire: 'Boîte de ton adresse perso (et ses indésirables), dans les 2 min.',
+      voir: ['Objet « Demande bien reçue, Robin regarde ton projet »', 'Expéditeur « Robin - Atelier Sâpi »', 'Le code <b>BIENVENUE10</b> en gros', 'Les images s\'affichent (logo, photo)'],
+      ko: 'Rien reçu : wp-admin › WP Mail SMTP › Journal des e-mails, noter l\'erreur.' },
+    { id: 'p-notif', t: 'Notification à Robin',
+      faire: 'Boîte robin@.',
+      voir: ['Objet « [Conseil réseaux] ton-adresse · Salon »', 'Mail mis en forme : logo, badge « CONSEIL RÉSEAUX », intertitres VISITEUR, PROJET, SON MOT, À FAIRE', 'À FAIRE dit « le conseil préparé partira seul dans 24 h »', 'Un lien dans BROUILLON ET ENVOI, un bouton orange « Répondre à ton-adresse »'],
+      ko: '' },
+  ]},
+  { n: '6', t: 'Brouillon et envoi automatique', tests: [
+    { id: 'b-ligne', t: 'Ligne dans l\'admin',
+      faire: '10 min après l\'envoi : Robin Conseiller › Demandes réseaux.',
+      voir: ['Une ligne : Pièce « salon », Mot/photos vide', 'Statut « <b>Part seul le</b> » + date de demain, même heure'],
+      ko: 'Toujours « Brouillon en préparation » : les tâches planifiées ne tournent pas, aller à la section 8.' },
+    { id: 'b-texte', t: 'Brouillon',
+      faire: 'Cliquer « Ouvrir » sur la ligne. <b>Ne rien enregistrer ni envoyer.</b>',
+      voir: ['Objet « Mon conseil pour ton salon »', 'Message : « Bonjour, » puis « Je pense que le meilleur luminaire pour ton salon, c\'est … En effet, … »', 'Aucun « [À compléter » dans le texte', 'Aperçu en bas : titre « Robin a trouvé ton luminaire », bloc « Le mot de Robin », photo du luminaire + bouton, 2 alternatives, carte BIENVENUE10'],
+      ko: '« [À compléter : pourquoi ce modèle] » = l\'IA n\'a pas répondu (clé ANTHROPIC_API_KEY en prod ?).' },
+    { id: 'b-auto', t: 'Départ automatique (le lendemain)',
+      faire: 'Ne pas toucher à la demande. Le lendemain, 1 à 2 h après l\'heure prévue : ta boîte perso, puis la liste Demandes réseaux.',
+      voir: ['Mail « Mon conseil pour ton salon » reçu, identique à l\'aperçu', 'Statut « Envoyé le … »'],
+      ko: 'Rien parti : section 8.' },
+  ]},
+  { n: '7', t: 'Photos', tests: [
+    { id: 'ph-envoi', t: 'Demande avec mot et photo',
+      faire: 'Sur l\'iPhone, refaire un parcours : même adresse perso, « Ajouter un mot » (ex. « test photo »), « Ajouter une photo » (1 photo), Recevoir mon conseil.',
+      voir: ['Pendant l\'envoi, le bouton affiche « Envoi des photos… xx % »', 'Mail robin@ : objet « [Conseil réseaux · <b>à toi de répondre</b>] … », intertitre PHOTOS « 1 photo(s) »', 'Admin › la demande : statut « À toi de répondre », bloc « Ses photos » avec la vignette', 'Le brouillon contient « [À compléter : ce que tu vois sur ses photos] »'],
+      ko: 'Mail « n\'ont pas pu être enregistrées » = la photo a été refusée par le serveur : noter le format (HEIC ?).' },
+    { id: 'ph-ferme', t: 'Dossier fermé au web',
+      faire: 'Ouvrir <a href="https://atelier-sapi.fr/wp-content/uploads/sapi-conseil-photos/index.php" target="_blank">…/uploads/sapi-conseil-photos/index.php</a> en fenêtre privée.',
+      voir: ['Une page d\'erreur <b>403 Forbidden</b> (ou une page 404)'],
+      ko: 'Page <b>blanche</b> sans rien = le dossier est ouvert : prévenir Claude Code tout de suite.' },
+    { id: 'ph-htaccess', t: '.htaccess présent',
+      faire: 'cPanel › Gestionnaire de fichiers › Paramètres (en haut à droite) › cocher « Afficher les fichiers cachés » › aller dans <code>wp-content/uploads/sapi-conseil-photos/</code>.',
+      voir: ['Fichiers <code>.htaccess</code> et <code>index.php</code>', 'Un fichier <code>xxxxxxxx.jpg</code> au nom illisible (ta photo)'],
+      ko: '' },
+    { id: 'ph-annuler', t: 'Annuler la demande photo',
+      faire: 'Admin › la demande photo › bouton rouge <b>Annuler</b> › confirmer.',
+      voir: ['Message « Demande annulée, aucun mail ne partira. »', 'Statut « Annulé » dans la liste'],
+      ko: '' },
+  ]},
+  { n: '8', t: 'Tâches planifiées (WP-Cron)', tests: [
+    { id: 'cron', t: 'Événements présents',
+      faire: 'Si l\'extension WP Crontrol est installée : Outils › <b>Cron Events</b>, chercher « sapi_conseil ». Sinon : se fier aux sections 6 (brouillon prêt en 10 min, mail parti le lendemain).',
+      voir: ['<code>sapi_conseil_cron</code>, récurrence « Once Hourly », prochain passage dans moins d\'1 h', '<code>sapi_conseil_purge_event</code>, récurrence « Once Daily »', 'Aucune ligne en rouge « late » / en retard'],
+      ko: 'Absents ou en retard : cPanel › Gestionnaire de fichiers › <code>wp-config.php</code> › chercher <code>DISABLE_WP_CRON</code>. S\'il vaut true, cPanel › Tâches Cron doit appeler <code>wp-cron.php</code>. Noter ce que tu trouves.' },
+  ]},
+  { n: '9', t: 'Brevo', tests: [
+    { id: 'brevo-liste', t: 'Contact dans la liste #6',
+      faire: 'Brevo › Contacts › rechercher ton adresse perso › ouvrir la fiche.',
+      voir: ['Listes : la liste n° 6', 'Attribut <b>SOURCE</b> = <code>reseaux</code>'],
+      ko: 'Absent : wp-admin, journal d\'erreurs PHP, chercher « [sapi-conseil] Brevo ».' },
+    { id: 'brevo-auto', t: 'Hors automatisation d\'accueil',
+      faire: 'Le lendemain : Brevo › Automatisations › automatisation d\'accueil › Journal (ou la fiche contact › onglet Automatisations).',
+      voir: ['Le contact n\'est <b>pas</b> entré dans la branche A', 'Tu n\'as pas reçu le mail Brevo BIENVENUE10 avant celui de Robin'],
+      ko: 'Entré : ajouter une condition « SOURCE différent de reseaux » à la branche A.' },
+  ]},
+  { n: '10', t: 'Accueil avec projet', intro: 'Sur l\'iPhone, en navigation privée (le projet vit dans le navigateur).', tests: [
+    { id: 'acc-bloc', t: 'Bloc « Ta sélection »',
+      faire: 'Accueil › sélecteur de pièce › Salon (ça mène à la sélection) › revenir sur <code>atelier-sapi.fr/</code>.',
+      voir: ['À la place du sélecteur : « Le conseil de Robin » / titre de ta sélection, une phrase, <b>4 cartes produit</b>', 'Au chargement, on ne voit <b>pas</b> passer le sélecteur de pièce avant (pas de clignotement)'],
+      ko: 'Clignotement = Autoptimize a déplacé le script : prévenir Claude Code.' },
+    { id: 'acc-completer', t: '« Compléter mon projet »',
+      faire: 'Cliquer « Compléter mon projet ».',
+      voir: ['On arrive sur /mes-creations/ et le Conseiller s\'ouvre directement sur la question <b>après</b> la pièce (taille)'],
+      ko: '' },
+    { id: 'acc-autre', t: '« Choisir une autre pièce »',
+      faire: 'Revenir sur l\'accueil, cliquer « Choisir une autre pièce ».',
+      voir: ['Les 4 cartes laissent place au sélecteur de pièce habituel'],
+      ko: '' },
+  ]},
+  { n: '11', t: 'Panier et ampoule', intro: 'Seulement si le lot du 15/10 part (sinon « Sans objet »). Fenêtre privée sur ordinateur, panier vide au départ.', tests: [
+    { id: 'amp-case', t: 'Case ampoule sur la fiche',
+      faire: 'Ouvrir une suspension (luminaire avec une ampoule liée).',
+      voir: ['Dans la carte des options, une ligne « Ampoule » avec une case <b>décochée</b>', 'S\'il y a plusieurs ampoules : liste avec « Poire » présélectionnée, et le prix « +xx € »'],
+      ko: '' },
+    { id: 'amp-ajout', t: 'Ajout avec ampoule',
+      faire: 'Choisir matériau/taille, cocher la case ampoule, Ajouter au panier.',
+      voir: ['Avant l\'ajout, le sous-total augmente du prix de l\'ampoule', 'Le mini-panier s\'ouvre avec <b>2 lignes</b> : le luminaire et l\'ampoule', 'Les variations sont lisibles (« Okoumé », pas « okoume »)'],
+      ko: '' },
+    { id: 'amp-vitrine', t: 'Vitrine du mini-panier (ordinateur)',
+      faire: 'Mini-panier ouvert, écran large.',
+      voir: ['À gauche du volet, fond flouté et titre « Ça irait bien avec [modèle] » ou « Pour compléter votre commande »', 'Cartes au style du site avec prix et « + Ajouter » ou « Découvrir »', 'Sur mobile : vitrine absente'],
+      ko: '' },
+    { id: 'amp-panier', t: 'Languette sur la page panier',
+      faire: 'Retirer l\'ampoule du panier, puis ouvrir la page Panier.',
+      voir: ['Sous le luminaire, languette beige « <b>Ampoule non incluse.</b> … » avec « + Ajouter »', 'Clic « + Ajouter » : l\'ampoule entre au panier et la languette disparaît'],
+      ko: '' },
+    { id: 'amp-remise', t: 'Plus de -10 % au 2e luminaire',
+      faire: 'Ajouter un 2e luminaire, regarder le récapitulatif du panier.',
+      voir: ['Aucune ligne de remise négative « -10 % 2e luminaire »', 'Total = somme des articles'],
+      ko: '' },
+    { id: 'amp-commande', t: 'Jusqu\'à la page de paiement',
+      faire: 'Valider la commande jusqu\'à la page de paiement, <b>sans payer</b>.',
+      voir: ['Articles, livraison et total cohérents', 'Pas de message d\'erreur'],
+      ko: '' },
+  ]},
+  { n: '12', t: 'Ménage', tests: [
+    { id: 'm-demandes', t: 'Demandes de test',
+      faire: 'Admin › Demandes réseaux.',
+      voir: ['Plus aucune de tes demandes de test en « Part seul le » ou « À toi de répondre » (Annuler si besoin)'],
+      ko: '' },
+    { id: 'm-brevo', t: 'Brevo',
+      faire: 'Brevo › ta fiche contact perso.',
+      voir: ['Retirée de la liste n° 6 (si tu ne veux pas recevoir les newsletters)'],
+      ko: '' },
+    { id: 'm-commit', t: 'Commit du compte rendu',
+      faire: 'GitHub Desktop, branche <code>test-theme-sapi-maison</code>.',
+      voir: ['<code>memory/claude_code_queue.md</code> et cette page commités et poussés'],
+      ko: '' },
+  ]},
+];
+
+const KEY = 'sapi-recette-prod-conseil-2026-11';
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { state = {}; }
+state.tests = state.tests || {}; state.meta = state.meta || {};
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+const root = document.getElementById('tests');
+SECTIONS.forEach(s => {
+  const sec = document.createElement('section');
+  sec.innerHTML = `<h2><span class="n">${s.n}.</span> ${s.t}</h2>` + (s.intro ? `<p class="intro">${s.intro}</p>` : '');
+  s.tests.forEach((x, i) => {
+    const id = x.id;
+    const t = state.tests[id] || {};
+    const el = document.createElement('div');
+    el.className = 'test' + (t.s ? ' s-' + t.s : '');
+    el.innerHTML = `
+      <div class="what"><b>${s.n}.${i + 1} ${x.t}</b>
+        <div class="row"><span class="k">Où / quoi faire</span>${x.faire}</div>
+        <div class="row"><span class="k">À vérifier</span><ul>${x.voir.map(v => `<li>${v}</li>`).join('')}</ul></div>
+        ${x.ko ? `<div class="row ko"><span class="k">Si KO</span>${x.ko}</div>` : ''}
+      </div>
+      <div class="side">
+        <div class="status" role="group" aria-label="Résultat">
+          <button type="button" data-v="ok">OK</button><button type="button" data-v="ko">KO</button><button type="button" data-v="na">Sans objet</button>
+        </div>
+        <textarea placeholder="Ton commentaire…" aria-label="Commentaire : ${x.t.replace(/"/g, '')}"></textarea>
+      </div>`;
+    const ta = el.querySelector('textarea');
+    ta.value = t.c || '';
+    el.querySelectorAll('.status button').forEach(b => b.classList.toggle('on', b.dataset.v === t.s));
+    el.querySelector('.status').addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const cur = state.tests[id] || (state.tests[id] = {});
+      cur.s = cur.s === b.dataset.v ? '' : b.dataset.v;
+      el.className = 'test' + (cur.s ? ' s-' + cur.s : '');
+      el.querySelectorAll('.status button').forEach(y => y.classList.toggle('on', y.dataset.v === cur.s));
+      save(); count();
+    });
+    ta.addEventListener('input', () => { (state.tests[id] || (state.tests[id] = {})).c = ta.value; save(); });
+    sec.appendChild(el);
+  });
+  root.appendChild(sec);
+});
+
+document.querySelectorAll('[data-meta]').forEach(i => {
+  i.value = state.meta[i.dataset.meta] || '';
+  i.addEventListener('input', () => { state.meta[i.dataset.meta] = i.value; save(); });
+});
+
+const total = SECTIONS.reduce((n, s) => n + s.tests.length, 0);
+function count() {
+  const c = { ok: 0, ko: 0, na: 0 };
+  Object.values(state.tests).forEach(t => { if (t.s) c[t.s]++; });
+  const done = c.ok + c.ko + c.na;
+  document.getElementById('c-ok').textContent = c.ok + ' OK';
+  document.getElementById('c-ko').textContent = c.ko + ' KO';
+  document.getElementById('c-na').textContent = c.na + ' sans objet';
+  document.getElementById('c-todo').textContent = (total - done) + ' à faire';
+  document.getElementById('prog').style.width = (done / total * 100) + '%';
+  document.getElementById('prog').style.background = c.ko ? 'var(--ko)' : 'var(--ok)';
+}
+count();
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200); }
+const LBL = { ok: 'OK', ko: 'KO', na: 'sans objet' };
+document.getElementById('copy').addEventListener('click', () => {
+  const m = state.meta;
+  let out = `# Recette prod Conseil réseaux\nDate : ${m.date || '?'} · déploiement : ${m.heure || '?'}\n`;
+  SECTIONS.forEach(s => {
+    out += `\n## ${s.n}. ${s.t}\n`;
+    s.tests.forEach((x, i) => {
+      const t = state.tests[x.id] || {};
+      out += `- ${s.n}.${i + 1} ${x.t} : ${t.s ? LBL[t.s] : 'à faire'}${t.c ? ' — ' + t.c.trim().replace(/\n+/g, ' / ') : ''}\n`;
+    });
+  });
+  const done = () => toast('Compte rendu copié, colle-le à Claude');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(out).then(done, () => fallback(out));
+  else fallback(out);
+  function fallback(txt) { const a = document.createElement('textarea'); a.value = txt; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); done(); } catch (e) { toast('Copie impossible'); } a.remove(); }
+});
+document.getElementById('reset').addEventListener('click', () => {
+  if (!confirm('Effacer tous les résultats et commentaires ?')) return;
+  state = { tests: {}, meta: {} }; save(); location.reload();
+});
+</script>
+</body>
+</html>

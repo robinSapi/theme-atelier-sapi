@@ -4,6 +4,83 @@
 
 ---
 
+## [AUDIT — 2026-11-24] Mise en prod : fusion `test-theme-sapi-maison` → `master`
+**Par :** Claude Code · **Audit seul** : aucun commit, aucun merge, aucun push. Robin fusionne et pousse depuis GitHub Desktop. Sauvegarde UpdraftPlus prod faite.
+
+### Verdict : ✅ on peut fusionner, sans correctif préalable
+Aucun conflit, aucun bloquant dans le code. **Une décision avant de cliquer** : la fusion emporte aussi le **lot panier / ampoule du 13–15/10** (case ampoule sur la fiche, vitrine « Ça irait bien avec… » du mini-panier, languette ampoule sur la page panier, **retrait de la remise -10 % sur le 2e luminaire**). Il n'est pas séparable sans cherry-pick. S'il n'a pas été recetté sur test, le faire avant (c'est le tunnel d'achat).
+Puis **trois gestes après le déploiement** (recette ci-dessous) : créer la page `/conseil/`, vérifier que WP-Cron tourne, vider les caches.
+
+### 1. Écart réel
+- `test` : **34 commits** (13/10 → 24/11), **22 fichiers**, +4 976 / −70 lignes. Nouveaux : `inc/sapi-conseil-reseaux{,-envoi,-email}.php`, `inc/sapi-mails-robin.php`, `inc/sapi-ampoule-optin.php`, `inc/sapi-cart-page.php`, `inc/sapi-cart-suggestions.php`, `inc/sapi-product-options.php`, `page-conseil-robin.php`, 4 JS (`sapi-ampoule-optin`, `sapi-cart-page`, `sapi-cart-suggestions`, `sapi-product-options`).
+- **Divergence de forme seulement.** `master` a 22 commits absents de l'historique de `test` (3 merges + 17 cherry-picks/hotfixes de juin–sept. + 1 merge), mais **l'arbre de `master` est identique à la base commune** (`c781793`, 09/09) : `master` n'apporte aucun contenu. `test` n'est pas un descendant direct de `master` → pas de fast-forward, GitHub Desktop fera un commit de merge.
+- **Fusion simulée** dans un worktree temporaire (supprimé depuis) : **0 conflit**, et l'arbre fusionné est **octet pour octet celui de `test`**. Ce qui part en prod = exactement ce qui tourne sur test.
+
+### 2. Base de données
+- **Une seule nouvelle table** : `wp_sapi_conseil_demandes` (`inc/sapi-conseil-reseaux.php`, `sapi_conseil_create_table()`). Pas de nouvelle migration dans `functions.php` : celle des sessions (`SAPI_SESSIONS_DB_VERSION = '1'`, colonne `piece_hors_perimetre`) est inchangée et déjà en prod.
+- **Hook : `init`**, pas `admin_init` → tourne seule au **premier chargement de n'importe quelle page** en prod, avant toute demande d'un visiteur.
+- **Version vérifiée après coup** : l'option `sapi_conseil_db_version` ('5') n'est posée que si la table existe ET que la dernière colonne (`photos`) existe. Sinon nouvel essai à la requête suivante.
+- Prod n'a pas l'option → `$avant === false` → la requête « annuler les demandes de l'étape 1 » (`$avant === '1'`) **ne joue pas**. Correct.
+- ⚠️ Deux faiblesses (non bloquantes) : en cas d'échec, **rien n'est écrit dans le journal** (contrairement à la migration des sessions), et `dbDelta` est rejoué **à chaque requête** jusqu'à réussite. L'insert raté, lui, est journalisé (`[sapi-conseil] Insert échoué`), et le mail à Robin part quand même avec tout le contenu.
+- **À la main si échec** (phpMyAdmin o2switch, préfixe à adapter si ≠ `wp_`) : le signe est « Table … doesn't exist » ou une liste vide qui ne se remplit jamais dans Demandes réseaux. Désactiver puis réactiver le thème ne suffit pas (pas d'`after_switch_theme`) : coller le `CREATE TABLE` de `sapi_conseil_create_table()` dans phpMyAdmin, puis charger une page (l'option se pose seule). Vérifier : `SELECT option_value FROM wp_options WHERE option_name='sapi_conseil_db_version'` → `5`.
+
+### 3. Fichiers, serveur, configuration
+- **Dossier photos** : `wp-content/uploads/sapi-conseil-photos/`, créé à la première photo reçue (ou au premier passage de la purge), avec `.htaccess` (`Require all denied` / `Deny from all`) + `index.php` vide. Noms aléatoires de 24 caractères. Photos servies uniquement par `admin-post.php?action=sapi_conseil_photo` (contrôle `manage_options` + nonce). ⚠️ L'écriture du `.htaccess` est en `@file_put_contents` : un échec est **silencieux** → à vérifier à la main (recette 7). Droits : ceux de `wp_mkdir_p`, comme le reste des uploads.
+- **Effacement à 6 mois** : WP-Cron, `sapi_conseil_purge_event` (quotidien). Vide prénom/email/commentaire/sujet/corps, efface les photos, + filet sur les fichiers orphelins de plus de 183 jours.
+- **WP-Cron porte aussi le cœur du parcours** : `sapi_conseil_cron` (horaire) = brouillons manquants, **envoi automatique à 24 h**, rappel à Robin à 48 h ; `sapi_conseil_preparer_event` = brouillon juste après la demande. Si la prod a `DISABLE_WP_CRON` sans tâche cron système, **rien ne part seul**. Je ne peux pas lire `wp-config.php` d'ici → recette 8.
+- **Constantes wp-config** : seulement `BREVO_API_KEY` et `ANTHROPIC_API_KEY`, **déjà utilisées par master** (donc déjà présentes en prod). Aucune nouvelle constante.
+- **Page WordPress** : `/conseil/` **n'existe pas en prod** — aujourd'hui `atelier-sapi.fr/conseil/` renvoie **301 → `/conseils-eclairage-interieur/`** (devinette de slug de WordPress ou règle de redirection). À créer (recette 2).
+- **Options** : aucune à créer (seule `sapi_conseil_db_version`, posée par le code).
+- **Code Snippets** : le snippet cookies n'est **pas modifié** et pas requis ; la page le masque (`#sapi-cookie-overlay`) et saute le popup promo via le cookie `sapi_promo_dismissed`. Si le snippet porte un autre id en prod, la grande fenêtre s'afficherait par-dessus → recette 4.
+- **Images des mails** : `uploads/2024/12/logo_sapi.png` et `uploads/2026/03/Robin-face-avec-Alice-lhelice.jpg` → **200 en prod**, vérifié.
+- **Brevo** : liste #6, attribut `SOURCE=reseaux`. La branche A de l'automatisation d'accueil ne doit pas prendre `reseaux` (sinon E1 arrive avant le mail de Robin). Configuration Brevo, pas du thème → à vérifier dans Brevo.
+
+### 4. Workflow `deploy-prod.yml`
+- Inchangé par ce lot (identique sur master). Déclencheur `workflow_dispatch` uniquement.
+- Exclusions : `.claude/**`, `memory/**`, `mockups/**` ✅. **Pas de `assets/*.txt`** ✅ (le commentaire d'avertissement est en place).
+- Contrôle en ligne : `…/theme-sapi-maison/memory/MEMORY.md` → 404 ✅, `…/assets/guide-prompt-ton.txt` et `-regles.txt` → 200 ✅.
+- Nouveaux fichiers (`inc/*.php`, `assets/*.js`, `page-conseil-robin.php`) : aucun ne tombe sous `*.md`, `*.csv`, `*.txt`, `*.html` → bien déployés.
+
+### 5. Extensions — ce que le site de test ne prouve pas (ni Autoptimize, ni cache de page)
+- **Cache de page** : `/conseil/` pose `DONOTCACHEPAGE` (respecté par WP Super Cache) + `nocache_headers()` (sur test : `Cache-Control: no-store, private` ✅). `litespeed_control_set_nocache` n'a d'effet qu'avec le plugin LiteSpeed (absent) : en prod c'est l'en-tête `no-store` qui doit suffire au cache o2switch. **Non testable sur test** → recette 3.
+- **Autoptimize** : le script de l'accueil est exclu (`noptimize`, `data-no-optimize`, `data-no-defer`) ✅. Les scripts en ligne de `/conseil/` (barre cookies, cookie promo) ne le sont pas : ils restent fonctionnels différés. ⚠️ Si l'option **« Agréger aussi le JS en ligne »** est cochée, le nonce de la page serait figé dans un fichier en cache → « La page a expiré » au bout d'un jour. À vérifier dans Réglages › Autoptimize.
+- **Complianz** : la barre appelle `cmplz_accept_all` / `cmplz_deny_all` (repli `cmplz_set_consent`), comme le snippet. Si aucune n'existe, le clic ne fait qu'écrire `cmplz_banner-status=dismissed` (sans erreur visible) → recette 4 vérifie le cookie de consentement.
+- **wp_mail / WP Mail SMTP** : 3 mails nouveaux (notification à Robin, accusé visiteur, conseil final) + rappel 48 h. Échecs journalisés (`[sapi-conseil] wp_mail …`). ⚠️ `inc/sapi-mails-robin.php` habille en HTML **tout mail en texte brut adressé à robin@ ou contact@**, y compris ceux d'autres extensions. Les mails déjà en HTML (WooCommerce) passent tels quels.
+- **Accueil avec projet** : AJAX `sapi_accueil_selection` volontairement **sans nonce** (accueil en cache, lecture seule du catalogue) ✅ compatible cache.
+
+### 6. Robustesse
+- **`php -l` NON exécuté** : PHP n'est pas installé sur ce Mac (ni Homebrew, ni Local, ni Docker). Preuve indirecte forte : tous les fichiers modifiés sont chargés **sans condition** depuis `functions.php`, et test.atelier-sapi.fr (même arbre, octet pour octet) répond 200 et sert `/conseil/` → aucune erreur de syntaxe. Pour un vrai lint : `brew install php` puis `php -l` sur les 14 PHP.
+- **Gardes WooCommerce (crash du 05/08)** : le blindage A1–A6 + B est présent dans l'arbre fusionné (ex. `admin_init` : `if (!function_exists('wc_get_page_id')) return;`). Le nouveau code panier/ampoule est soit gardé (`function_exists('WC') && WC()->cart`, `function_exists('is_product')`, `function_exists('is_cart')`), soit accroché à des hooks `woocommerce_*` qui ne tournent pas sans WooCommerce. Seul point non gardé : l'AJAX `sapi_accueil_selection` (erreur limitée à cet appel si WooCommerce était désactivé). Acceptable.
+
+### Risques classés
+1. **Lot panier/ampoule du 15/10 embarqué** (tunnel d'achat, fin du -10 % 2e luminaire) → confirmer qu'il est voulu et recetté.
+2. **WP-Cron inactif en prod** → aucun envoi à 24 h, pas de rappel, pas de purge RGPD, en silence → recette 8.
+3. **`/conseil/` absente en prod (301 vers conseils-eclairage)** → les liens des publications mèneraient ailleurs → recette 2 avant toute publication.
+4. **Cache o2switch / Autoptimize sur `/conseil/`** (nonce figé = toutes les demandes refusées) → recette 3, et refaire un envoi le lendemain.
+5. **`.htaccess` du dossier photos non écrit** (échec silencieux) → recette 7.
+6. **Barre cookies : API Complianz** non vérifiable sur test → recette 4.
+7. **Habillage HTML de tous les mails texte vers robin@/contact@** (y compris extensions) → effet de bord de présentation, sans perte.
+8. **Migration en échec** : non journalisée, `dbDelta` rejoué à chaque requête → recette 1 le détecte en 10 s.
+
+### Recette prod (navigation privée, iPhone Safari pour le parcours)
+0. **GitHub Desktop** : branche `master` → *Branch › Merge into current branch…* → `test-theme-sapi-maison` → *Create a merge commit* (aucun conflit attendu) → *Push origin*. GitHub › Actions › **Deploy to Production** › *Run workflow* sur `master`. Attendre le vert.
+1. Ouvrir `https://atelier-sapi.fr/` → page normale. Puis une fiche produit, puis ouvrir/fermer le mini-panier. Puis `wp-admin` › **Robin Conseiller › Demandes réseaux** → doit afficher « Aucune demande pour l'instant. » Une erreur SQL ou une page blanche = migration ratée (§2, à la main).
+2. **Créer la page** : Pages › Ajouter · titre « Conseil de Robin » · slug `conseil` · Modèle **« Conseil de Robin (réseaux) »** · Yoast › Avancé › *Autoriser les moteurs…* = **Non** · dans aucun menu · Publier. Ouvrir `https://atelier-sapi.fr/conseil/` → l'écran « Salut, moi c'est Robin » s'affiche, **pas** la page conseils-eclairage. Si la redirection persiste : Yoast › Redirections (ou extension Redirection) › chercher `/conseil`.
+3. **Vider les caches, dans cet ordre** : Autoptimize (Réglages › Autoptimize › Vider le cache) → WP Super Cache (Contenu › Supprimer le cache) → Redis s'il existe → cPanel › LiteSpeed Web Cache Manager › Flush All. Puis Réglages › Autoptimize : **« Agréger aussi le JS en ligne » doit être décoché**. Puis Safari › Développement › Réseau sur `/conseil/` : l'en-tête `Cache-Control` contient **`no-store`**, et le bas du code source n'a **pas** de commentaire « WP Super Cache ».
+4. **Cookies** (fenêtre privée neuve) sur `/conseil/` : barre fine en bas, **ni** grande fenêtre cookies **ni** popup -10 %. Cliquer « Non merci » → la barre disparaît ; recharger → elle ne revient pas ; aller sur l'accueil → la grande fenêtre ne s'affiche pas non plus. Nouvelle fenêtre privée, « J'accepte » → Développement › Stockage › Cookies : un cookie `cmplz_marketing` = `allow`. Console : aucune erreur rouge.
+5. **Parcours complet sur iPhone** : `/conseil/` › C'est parti › Salon › slider taille › … › écran « Où je t'envoie mon conseil ? ». Mettre **ton adresse perso** (pas robin@), sans prénom, sans mot, sans photo › « Recevoir mon conseil ». Attendu : écran Merci ; en 2 min, sur l'adresse perso, le mail **« Demande bien reçue »** avec BIENVENUE10 ; sur robin@, la notification **en HTML** (logo, badge « Conseil réseaux », sections, bouton Répondre).
+6. **Admin › Demandes réseaux** : la ligne affiche **« Part seul le <demain même heure> »**. L'ouvrir : le texte commence par « Je pense que le meilleur luminaire pour ton salon, c'est … En effet… » et l'aperçu montre le mail avec photo, 2 alternatives et BIENVENUE10. **La laisser partir seule** : demain, vérifier la réception sur l'adresse perso et le statut « Envoyé le … ». C'est la preuve que WP-Cron tourne.
+7. **Photo** : 2e demande, même adresse perso, avec **un mot** et **une photo** → objet « [Conseil réseaux · à toi de répondre] », la photo visible dans l'admin. Puis ouvrir `https://atelier-sapi.fr/wp-content/uploads/sapi-conseil-photos/index.php` → doit répondre **403 (ou 404), jamais une page blanche** ; cPanel › Gestionnaire de fichiers (fichiers cachés affichés) › `wp-content/uploads/sapi-conseil-photos/` → `.htaccess` présent. Puis **Annuler** cette demande.
+8. **Cron** : si l'extension WP Crontrol est là, Outils › Cron Events → `sapi_conseil_cron` (horaire) et `sapi_conseil_purge_event` (quotidien) présents, « Next run » dans le futur proche. Sinon : si à l'étape 6 la ligne reste « Brouillon en préparation » plus de 10 min, ou si rien n'est parti le lendemain, vérifier `DISABLE_WP_CRON` dans `wp-config.php` (cPanel) et la tâche cron o2switch.
+9. **Brevo** : le contact perso est dans la liste #6 avec `SOURCE = reseaux`, et **n'est pas entré** dans la branche A de l'automatisation d'accueil (journal de l'automatisation, le lendemain).
+10. **Accueil avec projet** : sur `/mes-creations/`, choisir Salon dans le sélecteur de pièce, puis revenir sur `https://atelier-sapi.fr/` → le bloc « Ta sélection » avec 4 cartes, **sans** voir passer le sélecteur. « Compléter mon projet » → le Conseiller s'ouvre sur la question suivante. « Choisir une autre pièce » → le sélecteur revient.
+11. **Panier / ampoule** (si le lot du 15/10 part) : fiche d'un luminaire avec ampoule liée → case ampoule (Poire présélectionnée, case décochée), cocher → sous-total + prix ampoule → Ajouter → le mini-panier contient luminaire **et** ampoule, vitrine à gauche (desktop). Page panier : languette ampoule sous un luminaire sans ampoule, **aucune remise -10 %** sur un 2e luminaire.
+12. **Ménage** : Annuler la demande de test restante si elle n'est pas partie ; retirer l'adresse perso de la liste Brevo #6 si besoin.
+
+**Plan de repli** : le plus rapide, restauration UpdraftPlus du **thème seul** (la table `wp_sapi_conseil_demandes` peut rester, elle ne gêne rien). Ensuite, pour remettre le dépôt d'accord avec la prod : appeler Claude Code pour un `git revert -m 1` du commit de merge sur `master` (ancien sommet : `307595c`), puis relancer Deploy to Production.
+
+---
+
 ## [TÂCHE] Maintenance du dépôt : sortir la maquette `sapi-radical-atelier` et lancer le `git gc`
 
 **Date :** 2026-09-09
