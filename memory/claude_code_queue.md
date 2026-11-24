@@ -77,6 +77,15 @@ Puis **trois gestes après le déploiement** (recette ci-dessous) : créer la pa
 11. **Panier / ampoule** (si le lot du 15/10 part) : fiche d'un luminaire avec ampoule liée → case ampoule (Poire présélectionnée, case décochée), cocher → sous-total + prix ampoule → Ajouter → le mini-panier contient luminaire **et** ampoule, vitrine à gauche (desktop). Page panier : languette ampoule sous un luminaire sans ampoule, **aucune remise -10 %** sur un 2e luminaire.
 12. **Ménage** : Annuler la demande de test restante si elle n'est pas partie ; retirer l'adresse perso de la liste Brevo #6 si besoin.
 
+### Résultat de la recette (24/11) — déployé, tout fonctionne
+Merge `768bedb` poussé et déployé. Tous les tests OK sauf ce qui reste ouvert :
+- **6.3 / 9.2** à vérifier le 25/11 : départ automatique du conseil à 24 h ; contact `reseaux` hors branche A de l'automatisation Brevo.
+- **Dossier photos non prouvé** : en prod, `uploads/sapi-conseil-photos/…` répond comme un dossier inexistant (301/404, pas 403). Robin doit trouver le vrai chemin dans cPanel et donner le nom d'une photo → tester son URL directe (attendu 403).
+- **Logo absent dans les 3 mails** (accusé, notif Robin, demande photo). Le PNG répond 200 à tous les user-agents → probablement images distantes bloquées par le client. Correctif proposé, non fait : logo intégré en CID (`phpmailer_init` + `AddEmbeddedImage`).
+- **Accusé visiteur en indésirables** : DNS OK (SPF o2switch, DKIM `default`, DMARC p=none). En attente des en-têtes `Authentication-Results` du mail reçu. Piste : ajouter une version texte (AltBody).
+- **Cron système o2switch** à poser APRÈS le 6.3 : tâche `*/5` `/usr/local/bin/php /home/velu1541/public_html/wp-cron.php`, puis `DISABLE_WP_CRON` dans wp-config, puis vérifier qu'un brouillon se prépare en < 5 min.
+- LSCache n'est pas activé en prod (cache de page = WP Super Cache) ; Autoptimize : pas de concaténation, JS en ligne différé → sans risque pour le nonce.
+
 **Plan de repli** : le plus rapide, restauration UpdraftPlus du **thème seul** (la table `wp_sapi_conseil_demandes` peut rester, elle ne gêne rien). Ensuite, pour remettre le dépôt d'accord avec la prod : appeler Claude Code pour un `git revert -m 1` du commit de merge sur `master` (ancien sommet : `307595c`), puis relancer Deploy to Production.
 
 ---
