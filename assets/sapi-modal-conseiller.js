@@ -2943,7 +2943,9 @@
       var url = URL.createObjectURL(file);
       var img = new Image();
       img.onload = function () {
-        var max = 1600;
+        /* 1280 px suffit pour juger une pièce et allège nettement l'envoi
+           depuis un téléphone, qui était long (24/11). */
+        var max = 1280;
         var r = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
         var w = Math.max(1, Math.round(img.naturalWidth * r));
         var h = Math.max(1, Math.round(img.naturalHeight * r));
@@ -2951,7 +2953,7 @@
         c.width = w; c.height = h;
         c.getContext('2d').drawImage(img, 0, 0, w, h);
         URL.revokeObjectURL(url);
-        c.toBlob(function (b) { if (b) resolve(b); else reject(new Error('toBlob')); }, 'image/jpeg', 0.82);
+        c.toBlob(function (b) { if (b) resolve(b); else reject(new Error('toBlob')); }, 'image/jpeg', 0.78);
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
       img.src = url;
@@ -3101,14 +3103,40 @@
     fd.append('project', JSON.stringify({ answers: state.answers, labels: state.labels }));
     try { fd.append('session_id', SessionTracker.getSessionId()); } catch (e) { /* swallow */ }
 
+    /* Avec des photos, l'envoi prend quelques secondes sur mobile : le bouton
+       dit ce qui se passe et où on en est, au lieu de rester figé. */
+    var libelleBouton = submitBtn ? submitBtn.innerHTML : '';
+    function etatBouton(txt) {
+      if (submitBtn) submitBtn.textContent = txt;
+    }
+    etatBouton(state.photos.length ? 'Envoi des photos…' : 'Envoi…');
+
     function relacher(txt) {
       form.__envoi = false;
-      if (submitBtn) submitBtn.disabled = false;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = libelleBouton; }
       afficherErreur(txt);
     }
 
-    fetch(config.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
+    /* XMLHttpRequest et pas fetch : seul lui donne l'avancement de l'envoi. */
+    new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', config.ajaxUrl);
+      xhr.withCredentials = true;
+      if (xhr.upload && state.photos.length) {
+        xhr.upload.onprogress = function (ev) {
+          if (!ev.lengthComputable) return;
+          var pct = Math.round(ev.loaded / ev.total * 100);
+          etatBouton(pct < 100 ? 'Envoi des photos… ' + pct + ' %' : 'Presque fini…');
+        };
+      }
+      xhr.onload = function () {
+        try { resolve(JSON.parse(xhr.responseText)); } catch (e) { reject(e); }
+      };
+      xhr.onerror = function () { reject(new Error('reseau')); };
+      xhr.ontimeout = function () { reject(new Error('timeout')); };
+      xhr.timeout = 90000;
+      xhr.send(fd);
+    })
       .then(function (resp) {
         if (resp && resp.success) {
           var titre = els.modal.querySelector('[data-lead-merci-titre]');
