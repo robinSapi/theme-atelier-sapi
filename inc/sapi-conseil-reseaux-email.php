@@ -38,6 +38,10 @@ function sapi_conseil_email_message($corps) {
     /* Anciens brouillons (avant ce gabarit) : la photo et les liens sont
        désormais construits par le gabarit, on ignore la ligne [photo]. */
     if ($para === '' || $para === '[photo]') continue;
+    /* Brouillons préparés avant ce gabarit : leurs lignes de liens, de code
+       et de signature sont maintenant affichées par le gabarit lui-même.
+       On les saute pour ne pas les montrer deux fois, en URL brutes. */
+    if (preg_match('/^(Sa fiche :|Si tu veux comparer,|Pour te remercier d\'avoir pris le temps|Si tu as la moindre question|Robin\s*\nAtelier Sâpi$)/u', $para)) continue;
     $html .= '<p style="margin:0 0 14px;font-family:\'Montserrat\',Arial,Helvetica,sans-serif;font-size:15px;color:#323232;line-height:26px;">'
       . nl2br(make_clickable(esc_html($para))) . '</p>';
   }
