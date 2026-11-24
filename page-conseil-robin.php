@@ -78,10 +78,10 @@ nocache_headers();
   body.has-landing-cookies .conseiller-modal.is-landing { padding-bottom: var(--landing-cookies-h, 64px); }
 </style>
 <div class="landing-cookies" data-landing-cookies hidden role="region" aria-label="<?php esc_attr_e('Cookies', 'theme-sapi-maison'); ?>">
-  <p><?php esc_html_e('Avec ton accord, cette page mesure sa fréquentation (Google, Meta, Pinterest). Sans ton accord, rien n\'est mesuré.', 'theme-sapi-maison'); ?></p>
+  <p><?php esc_html_e('Un petit coup de main pour l\'atelier ? Avec les cookies, je vois quelles publications t\'ont amené ici et je fais mieux les suivantes. Robin', 'theme-sapi-maison'); ?></p>
   <span class="landing-cookies__btns">
-    <button type="button" data-cookies="deny"><?php esc_html_e('Refuser', 'theme-sapi-maison'); ?></button>
-    <button type="button" data-cookies="accept"><?php esc_html_e('Accepter', 'theme-sapi-maison'); ?></button>
+    <button type="button" data-cookies="deny"><?php esc_html_e('Non merci', 'theme-sapi-maison'); ?></button>
+    <button type="button" data-cookies="accept"><?php esc_html_e('J\'accepte', 'theme-sapi-maison'); ?></button>
   </span>
 </div>
 <script>
