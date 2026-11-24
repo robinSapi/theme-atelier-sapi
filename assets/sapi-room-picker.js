@@ -59,7 +59,7 @@
      main : c'est elle qui connaît l'ordre canonique des clés et qui efface
      d'abord les anciennes. Une adresse écrite à la main ici divergerait au
      premier ajout de question, et le visiteur reprendrait un projet amputé. */
-  function adresseDeReprise(picker) {
+  function adresseDeReprise() {
     var p = window.sapiProject;
     var projet = p.get();
     var url;
@@ -146,7 +146,72 @@
     cases.parentNode.insertBefore(bloc, cases);
   }
 
+  /* ─────────────────────────────────────────────
+     Accueil avec un projet entamé (24/11)
+     Le script en ligne de front-page.php a déjà posé `.has-projet` avant
+     l'affichage. Ici on remplit la proposition ; au moindre doute (pas de
+     pièce connue, réseau, zéro modèle) on RETIRE la classe : le visiteur
+     retrouve le sélecteur, jamais un bloc vide.
+     ───────────────────────────────────────────── */
+  function proposerProjet() {
+    var section = document.querySelector('[data-accueil-section]');
+    if (!section) return;
+    var bloc = section.querySelector('[data-accueil-projet]');
+    var p = window.sapiProject;
+    function afficherSelecteur() { section.classList.remove('has-projet'); }
+
+    var autre = bloc && bloc.querySelector('[data-accueil-autre]');
+    if (autre) autre.addEventListener('click', function () {
+      afficherSelecteur();
+      // On vient de refuser ce projet : le rappel « Reprendre » serait redondant.
+      var rappel = section.querySelector('[data-picker-reprise]');
+      if (rappel) rappel.remove();
+      var titre = section.querySelector('.room-picker-title');
+      if (titre) { titre.setAttribute('tabindex', '-1'); titre.focus(); }
+    });
+
+    if (!bloc || !p || typeof p.get !== 'function') { afficherSelecteur(); return; }
+    var projet = p.get();
+    var answers = projet.answers || {};
+    var possessifs = (window.SAPI_PROJECT || {}).possessifs || {};
+    if (!answers.piece || !possessifs[answers.piece] || !CFG.ajaxUrl) { afficherSelecteur(); return; }
+    section.classList.add('has-projet');
+
+    // « Compléter mon projet » : la page de sélection, modale ouverte sur la prochaine question.
+    var completer = bloc.querySelector('[data-accueil-completer]');
+    var href = adresseDeReprise();
+    if (completer && href) completer.href = href + (href.indexOf('?') === -1 ? '?' : '&') + 'completer=1';
+
+    var fd = new FormData();
+    fd.append('action', 'sapi_accueil_selection');
+    fd.append('answers', JSON.stringify(answers));
+    fetch(CFG.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (resp) {
+        var d = resp && resp.success && resp.data;
+        if (!d || !d.count || !d.html) { afficherSelecteur(); return; }
+        var titre = bloc.querySelector('[data-accueil-titre]');
+        if (titre && d.title) titre.textContent = d.title;
+        /* Le conseil rédigé pour CE projet s'il existe (court), sinon la
+           phrase de Robin pour la pièce. */
+        var conseil = (typeof projet.advice_text === 'string' && projet.advice_text.length <= 400) ? projet.advice_text : '';
+        var phrase = bloc.querySelector('[data-accueil-phrase]');
+        if (phrase) phrase.textContent = conseil || d.phrase || '';
+        var cartes = bloc.querySelector('[data-accueil-cartes]');
+        if (cartes) cartes.innerHTML = d.html; // rendu serveur, mêmes cards que /mes-creations/
+      })
+      .catch(afficherSelecteur);
+  }
+
   function init() {
+    proposerProjet();
+    /* Retour arrière servi par le cache du navigateur : le projet a pu changer
+       sur /mes-creations/ entre-temps. */
+    var lire = function () { try { return localStorage.getItem('sapiProject') || ''; } catch (err) { return ''; } };
+    var auChargement = lire();
+    window.addEventListener('pageshow', function (e) {
+      if (e.persisted && document.querySelector('[data-accueil-section]') && lire() !== auChargement) window.location.reload();
+    });
     var liste = pickers();
     if (!liste.length) return; // pas de sélecteur sur cette page
     liste.forEach(function (picker) {

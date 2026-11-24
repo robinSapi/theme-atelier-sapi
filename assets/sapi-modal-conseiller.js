@@ -67,6 +67,13 @@
      phrase que Robin n'a jamais relue. */
   var SURMESURE        = config.surmesure || {};
   var POSSESSIFS_MIENS = config.possessifsMiens || {};
+  /* Landing « Conseil de Robin » (réseaux sociaux, nov. 2026). La modale
+     s'ouvre seule, ne montre PAS la sélection : après la dernière question
+     elle demande prénom + email (écran s-lead), et Robin envoie son conseil
+     par mail. Toute sortie (croix, « Non merci », après le merci) mène à
+     /mes-creations/. Partie serveur : inc/sapi-conseil-reseaux.php. */
+  var LANDING  = !!config.landing;
+  var EXIT_URL = config.exitUrl || '/mes-creations/';
 
   /* ⚠️ LES TABLES DE TRADUCTION DU PROJET VIVENT DANS `sapi-project.js`.
      `style → essence` existait ici, dans `sapi-product-preselect.js` et dans
@@ -101,6 +108,12 @@
        ouverture à l'autre une fois ; en ajouter un deuxième rouvrirait la même
        famille de défaut. */
     retourApresEdition: null,
+    /* Réponses écrites (« Préciser ma réponse ») et valeurs des sliders.
+       Une précision ne compte que tant que la réponse de sa question vaut
+       encore le slug avec lequel elle a été donnée : voir precisionsActives(). */
+    precisions: {},       // { stepId: { texte, slug } }
+    mesures: {},          // { taille: 18, hauteur: 2.7 }
+    photos: [],           // landing : [{ blob, url }] déjà réduites, 3 au plus
     chat: {
       conversation: [],   // [{role:'user'|'assistant', content:'...'}]
       sessionId: null,
@@ -281,6 +294,10 @@
         return 'product_pill';
       }
 
+      /* Landing réseaux : une page à part, reconnue par sa propre config et
+         non par l'adresse (son slug est choisi par Robin dans l'admin). */
+      if (LANDING) return 'reseaux';
+
       /* Les trois sélecteurs de pièce annoncent leur page dans l'adresse.
          C'est la seule façon de le savoir : ils REDIRIGENT vers
          /mes-creations/, et la modale n'est chargée sur aucune des deux autres
@@ -334,6 +351,10 @@
     function buildSnapshotPayload() {
       var payload = {};
       var project = window.sapiProject && window.sapiProject.get ? window.sapiProject.get() : null;
+      /* Landing réseaux : le projet n'est mémorisé qu'APRÈS l'email (voir
+         persisterProjet). Le suivi lit donc les réponses de la modale, et
+         surtout pas un projet d'une visite précédente du site. */
+      if (LANDING) project = { answers: state.answers };
       /* ⚠️ DEUX GARDE-FOUS, MÊME PRINCIPE : on n'enregistre que ce qui a été
          fait PENDANT cette visite. `answers` est gardé par
          REPONSES_DE_CETTE_SESSION, `advice_text` par CONSEIL_DE_CETTE_SESSION.
@@ -553,6 +574,303 @@
     SessionTracker.snapshot();
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     RÉPONSES LIBRES ET SLIDERS (24/11)
+     ───────────────────────────────────────────────────────────────────
+     Sous les cartes, « Préciser ma réponse » ouvre un champ libre. Une
+     réponse écrite veut dire que le cas sort des cases : c'est Robin qui
+     répond. Landing réseaux → la demande passe en manuel (le texte part
+     avec le mot). Conseiller du site → pas de sélection à l'écran, on
+     bascule sur le contact, précisions pré-remplies.
+     Taille et hauteur : un slider remplace les cartes. Le slider SEUL ne
+     déclenche rien de manuel : il donne la catégorie (seuils validés par
+     Robin le 24/11) et la valeur exacte voyage dans le libellé.
+     ⚠️ Une réponse écrite prend un slug EXISTANT (`ne-sais-pas`) pour que
+     le parcours continue normalement. Seule la pièce écrite prend `autre`,
+     ajouté aux règles de visibilité de guide-data.php ; il n'est JAMAIS
+     mémorisé dans le projet (voir persisterProjet) : les autres pages ne
+     connaissent pas cette pièce.
+     ═══════════════════════════════════════════════════════════════════ */
+  var PRECISABLES = ['piece', 'taille', 'taille_escalier', 'sortie', 'hauteur'];
+  var PRECISION_MAX = 200;
+  var PRECISION_EXEMPLES = {
+    piece: 'Ex. : une mezzanine sous les toits',
+    taille: 'Ex. : 35 m², en forme de L',
+    taille_escalier: 'Ex. : escalier en colimaçon, 6 m de haut',
+    sortie: 'Ex. : sortie décentrée, deux points lumineux',
+    hauteur: 'Ex. : 4,20 m sous rampant'
+  };
+  var SLIDERS = {
+    taille: {
+      min: 5, max: 60, pas: 1, defaut: 15, unite: 'm²',
+      aria: 'Surface de la pièce en mètres carrés',
+      reperes: [5, 12, 25, 60],
+      versSlug: function (v) { return v < 12 ? 'petite' : (v <= 25 ? 'moyenne' : 'grande'); }
+    },
+    hauteur: {
+      min: 2.2, max: 5, pas: 0.05, defaut: 2.4, unite: 'm',
+      aria: 'Hauteur sous plafond en mètres',
+      reperes: [2.2, 2.5, 3, 5],
+      versSlug: function (v) { return v < 2.5 ? 'standard' : (v <= 3 ? 'confortable' : 'haute'); }
+    }
+  };
+
+  function nombreMesure(cfg, v) {
+    return cfg.pas < 1 ? String(Math.round(v * 100) / 100).replace('.', ',') : String(Math.round(v));
+  }
+  function texteMesure(cfg, v) {
+    return nombreMesure(cfg, v) + ' ' + cfg.unite + (v >= cfg.max ? ' et +' : '');
+  }
+  function lireSlider(range, cfg) {
+    var v = parseFloat(range.value);
+    if (isNaN(v)) v = cfg.defaut;
+    v = Math.round(v * 100) / 100;
+    return Math.min(cfg.max, Math.max(cfg.min, v));
+  }
+  function majAffichageSlider(range) {
+    var bloc = range.closest('[data-slider]');
+    var cfg = bloc && SLIDERS[bloc.getAttribute('data-slider')];
+    if (!cfg) return;
+    var v = lireSlider(range, cfg);
+    var slug = cfg.versSlug(v);
+    var val = bloc.querySelector('[data-slider-val]');
+    var cat = bloc.querySelector('[data-slider-cat]');
+    if (val) val.textContent = texteMesure(cfg, v);
+    if (cat) cat.textContent = getChoiceLabel(bloc.getAttribute('data-slider'), slug) || '';
+    range.style.setProperty('--pct', ((v - cfg.min) / (cfg.max - cfg.min) * 100) + '%');
+    range.setAttribute('aria-valuetext', texteMesure(cfg, v));
+  }
+
+  function precisionCourte(texte) {
+    return texte.length > 40 ? texte.slice(0, 39).replace(/\s+$/, '') + '…' : texte;
+  }
+
+  // Précisions encore valables, dans l'ordre du questionnaire.
+  function precisionsActives() {
+    var out = [];
+    var visibles = getVisibleStepIds(state.answers);
+    visibles.forEach(function (id) {
+      var p = state.precisions[id];
+      if (p && p.texte && state.answers[id] === p.slug) out.push({ step: id, texte: p.texte });
+    });
+    return out;
+  }
+  function lignesPrecisions() {
+    return precisionsActives().map(function (p) {
+      return (S3_KEY_LABELS[p.step] || p.step) + ' : ' + p.texte;
+    });
+  }
+
+  /* ⚠️ `autre` NE SORT JAMAIS DE LA MODALE. Les sélecteurs de pièce, la
+     page /mes-creations/ et le serveur ne connaissent que les 7 pièces.
+     Sans pièce valable, on écrit le projet SANS pièce, et en `set` : un
+     `update` aurait gardé la pièce d'une visite précédente. */
+  function persisterProjet(fusion) {
+    if (!window.sapiProject) return;
+    /* ⚠️ LANDING : RIEN N'EST MÉMORISÉ AVANT L'EMAIL (Robin, 24/11). Sinon
+       « Non merci » menait au site avec la sélection déjà prête, et le mail
+       n'avait plus d'intérêt. Écrit une seule fois, après un envoi réussi. */
+    if (LANDING && !state.leadEnvoye) return;
+    var a = {}, l = {};
+    var retire = false;
+    Object.keys(state.answers).forEach(function (k) {
+      var slug = state.answers[k];
+      var step = getStep(k);
+      /* ⚠️ Seuls les slugs du questionnaire sortent de la modale. `autre`
+         (pièce écrite) et `ne-sais-pas` sur une question qui ne l'a pas
+         (escalier, hauteur) resteraient sinon en mémoire après un
+         rechargement, sans leur précision. */
+      if (step && !(step.choices || []).some(function (c) { return c.slug === slug; })) { retire = true; return; }
+      a[k] = slug;
+      /* Le texte libre reste dans la modale : la mémoire garde le libellé
+         de la catégorie, pas la phrase du visiteur. */
+      var p = state.precisions[k];
+      var ecrite = p && p.slug === slug && state.labels[k] === precisionCourte(p.texte);
+      var lab = ecrite ? getChoiceLabel(k, slug) : state.labels[k];
+      if (lab) l[k] = lab;
+    });
+    if (retire) fusion = false;
+    if (fusion) window.sapiProject.update(a, l);
+    else window.sapiProject.set(a, l);
+  }
+
+  // Bloc sous les cartes : slider, « Je ne sais pas », « Préciser ma réponse ».
+  function renderExtras(choicesEl, stepId, avecPrecision) {
+    if (!choicesEl || !choicesEl.parentNode) return;
+    var box = choicesEl.nextElementSibling;
+    if (!box || !box.hasAttribute('data-question-extras')) {
+      box = document.createElement('div');
+      box.className = 'question-extras';
+      box.setAttribute('data-question-extras', '');
+      choicesEl.parentNode.insertBefore(box, choicesEl.nextSibling);
+    }
+    box.innerHTML = '';
+    var step = getStep(stepId);
+    var cfg = SLIDERS[stepId];
+    /* `style.display` et pas `hidden` : `.choices` a un display:grid qui
+       l'emporterait sur l'attribut. */
+    choicesEl.style.display = cfg ? 'none' : '';
+
+    if (cfg) {
+      var depart = state.mesures[stepId];
+      if (typeof depart !== 'number') depart = cfg.defaut;
+      var bloc = document.createElement('div');
+      bloc.className = 'q-slider';
+      bloc.setAttribute('data-slider', stepId);
+      var val = document.createElement('div');
+      val.className = 'q-slider__val';
+      val.setAttribute('data-slider-val', '');
+      val.setAttribute('aria-hidden', 'true');
+      var cat = document.createElement('div');
+      cat.className = 'q-slider__cat';
+      cat.setAttribute('data-slider-cat', '');
+      cat.setAttribute('aria-hidden', 'true');
+      var range = document.createElement('input');
+      range.type = 'range';
+      range.className = 'q-slider__range';
+      range.min = String(cfg.min);
+      range.max = String(cfg.max);
+      range.step = String(cfg.pas);
+      range.value = String(depart);
+      range.setAttribute('aria-label', cfg.aria);
+      /* Touché ou non : une précision écrite sur un slider jamais bougé ne
+         doit pas inventer une valeur que le visiteur n'a pas donnée. */
+      range.__touche = (typeof state.mesures[stepId] === 'number');
+      var rep = document.createElement('div');
+      rep.className = 'q-slider__reperes';
+      rep.setAttribute('aria-hidden', 'true');
+      cfg.reperes.forEach(function (r) {
+        var sp = document.createElement('span');
+        var f = (r - cfg.min) / (cfg.max - cfg.min);
+        sp.style.left = 'calc(14px + (100% - 28px) * ' + f + ')';
+        sp.textContent = (r === cfg.min || r === cfg.max) ? texteMesure(cfg, r) : nombreMesure(cfg, r);
+        rep.appendChild(sp);
+      });
+      var ok = document.createElement('button');
+      ok.type = 'button';
+      ok.className = 'q-slider__valider';
+      ok.setAttribute('data-action', 'slider-valider');
+      ok.textContent = 'Valider';
+      bloc.appendChild(val);
+      bloc.appendChild(cat);
+      bloc.appendChild(range);
+      bloc.appendChild(rep);
+      bloc.appendChild(ok);
+      box.appendChild(bloc);
+      majAffichageSlider(range);
+
+      var aNsp = (step && step.choices || []).some(function (c) { return c.slug === 'ne-sais-pas'; });
+      if (aNsp) {
+        var nsp = document.createElement('button');
+        nsp.type = 'button';
+        nsp.className = 'q-nsp';
+        nsp.setAttribute('data-action', 'slider-nsp');
+        nsp.textContent = getChoiceLabel(stepId, 'ne-sais-pas') || 'Je ne sais pas';
+        if (state.answers[stepId] === 'ne-sais-pas' && !state.precisions[stepId]) nsp.classList.add('is-selected');
+        box.appendChild(nsp);
+      }
+    }
+
+    if (avecPrecision && PRECISABLES.indexOf(stepId) !== -1) {
+      var deja = state.precisions[stepId];
+      var texteDeja = (deja && state.answers[stepId] === deja.slug) ? deja.texte : '';
+      var ouvrir = document.createElement('button');
+      ouvrir.type = 'button';
+      ouvrir.className = 'q-preciser';
+      ouvrir.setAttribute('data-action', 'preciser-ouvrir');
+      ouvrir.textContent = '+ Préciser ma réponse';
+      ouvrir.hidden = !!texteDeja;
+      var champ = document.createElement('div');
+      champ.className = 'q-precision';
+      champ.setAttribute('data-precision', '');
+      champ.hidden = !texteDeja;
+      var ta = document.createElement('textarea');
+      ta.rows = 3;
+      ta.maxLength = PRECISION_MAX;
+      ta.placeholder = PRECISION_EXEMPLES[stepId] || '';
+      ta.setAttribute('aria-label', 'Préciser ma réponse');
+      ta.value = texteDeja;
+      var pied = document.createElement('div');
+      pied.className = 'q-precision__pied';
+      var note = document.createElement('span');
+      note.textContent = 'Je lirai ta précision moi-même.';
+      var valider = document.createElement('button');
+      valider.type = 'button';
+      valider.className = 'q-precision__valider';
+      valider.setAttribute('data-action', 'preciser-valider');
+      valider.textContent = 'Valider';
+      pied.appendChild(note);
+      pied.appendChild(valider);
+      champ.appendChild(ta);
+      champ.appendChild(pied);
+      box.appendChild(ouvrir);
+      box.appendChild(champ);
+    }
+    box.hidden = !box.firstChild;
+  }
+
+  function extrasCourants() {
+    if (!els.modal) return null;
+    var ecran = els.modal.querySelector('[data-screen="' + state.screen + '"]');
+    return ecran ? ecran.querySelector('[data-question-extras]') : null;
+  }
+  // Texte du champ « Préciser » s'il est ouvert, sinon ''.
+  function lirePrecisionOuverte() {
+    var box = extrasCourants();
+    var champ = box && box.querySelector('[data-precision]');
+    if (!champ || champ.hidden) return '';
+    var ta = champ.querySelector('textarea');
+    return ta ? ta.value.trim().slice(0, PRECISION_MAX) : '';
+  }
+
+  /* Une seule porte de sortie pour le slider, « Je ne sais pas » et le
+     champ libre : un texte tapé n'est jamais perdu, quel que soit le bouton
+     pressé ensuite. */
+  function validerExtras(source) {
+    var stepId = state.currentQuestion;
+    if (!stepId) return;
+    var box = extrasCourants();
+    var texte = lirePrecisionOuverte();
+    if (source === 'precision' && !texte) {
+      var ta = box && box.querySelector('[data-precision] textarea');
+      if (ta) { ta.classList.add('is-invalid'); ta.focus(); }
+      return;
+    }
+    var cfg = SLIDERS[stepId];
+    var range = box && box.querySelector('.q-slider__range');
+    var slug = '', label = '';
+    if (source === 'nsp') {
+      slug = 'ne-sais-pas';
+    } else if (cfg && range && (source === 'slider' || range.__touche)) {
+      var v = lireSlider(range, cfg);
+      slug = cfg.versSlug(v);
+      state.mesures[stepId] = v;
+      label = (getChoiceLabel(stepId, slug) || slug) + ' · ' + texteMesure(cfg, v);
+    }
+    if (!slug) slug = (stepId === 'piece') ? 'autre' : 'ne-sais-pas';
+    if (slug === 'ne-sais-pas' && cfg) delete state.mesures[stepId];
+
+    if (texte) {
+      state.precisions[stepId] = { texte: texte, slug: slug };
+      if (!label) label = precisionCourte(texte);
+    } else {
+      delete state.precisions[stepId];
+    }
+    if (!label) label = getChoiceLabel(stepId, slug) || 'Je ne sais pas';
+    answerCurrentQuestion(slug, label);
+  }
+
+  /* Conseiller du site : des précisions = Robin répond par mail. */
+  function showContactPrecisions() {
+    persisterProjet(false);
+    showContact({
+      message: 'Tu m’as donné des précisions : je préfère regarder ton projet moi-même. Laisse-moi ton mail, je te réponds par mail.',
+      contact_subject: '',
+      prefill: 'Mes précisions :\n' + lignesPrecisions().join('\n') + '\n\n',
+      contact_kind: 'simple'
+    });
+  }
+
   function showQuestion(stepId) {
     state.currentQuestion = stepId;
     var step = getStep(stepId);
@@ -607,6 +925,8 @@
       var pct = visible.length > 0 ? Math.max(8, Math.round(((idx + 1) / visible.length) * 100)) : 8;
       els.progressFill.style.width = pct + '%';
     }
+
+    renderExtras(els.choices, stepId, true);
   }
 
   function answerCurrentQuestion(slug, label) {
@@ -618,9 +938,10 @@
     cleanInvisibleAnswers();
 
     // Sauvegarde incrémentale dans sapiProject (partielle OK)
-    if (window.sapiProject) {
-      window.sapiProject.update(state.answers, state.labels);
-    }
+    /* Landing : `set` et pas `update`. La modale y repart de zéro ; `update`
+       fusionnerait avec un ancien projet mémorisé, et le tracking compterait
+       des réponses d'une visite précédente comme données aujourd'hui. */
+    persisterProjet(!LANDING);
 
     // Empile la question dans l'historique pour permettre Retour
     if (state.questionHistory[state.questionHistory.length - 1] !== step) {
@@ -652,21 +973,29 @@
          redemander. */
       var destination = state.retourApresEdition;
       state.retourApresEdition = null;
-      if (window.sapiProject) {
-        /* `set` et non `update` : après une correction pièce → escalier,
-           `cleanInvisibleAnswers` a retiré `taille` de l'état, mais un patch
-           fusionnant l'aurait laissée en mémoire. L'écran aurait été juste et
-           le stockage faux. */
-        window.sapiProject.set(state.answers, state.labels);
-      }
+      /* `set` et non `update` : après une correction pièce → escalier,
+         `cleanInvisibleAnswers` a retiré `taille` de l'état, mais un patch
+         fusionnant l'aurait laissée en mémoire. L'écran aurait été juste et
+         le stockage faux. */
+      persisterProjet(false);
+      /* Une précision vient d'être écrite en corrigeant : le récap mènerait
+         à une sélection, alors que c'est à Robin de répondre. */
+      if (!LANDING && precisionsActives().length) { showContactPrecisions(); return; }
       if (destination === 'product') { showProductRecap(); } else { showS3Recap(); }
     } else if (state.shortMode) {
       // F2b Phase 2 — fin du parcours court : récap produit + IA dédiée (pas de
       // morphing modale→card, on reste dans la modale ouverte).
-      if (window.sapiProject) {
-        window.sapiProject.set(state.answers, state.labels);
-      }
+      persisterProjet(false);
+      if (precisionsActives().length) { showContactPrecisions(); return; }
       showProductRecap();
+    } else if (LANDING) {
+      /* Landing réseaux : PAS de sélection à l'écran. Robin enverra son
+         conseil par mail ; on demande prénom + email. Le projet est quand
+         même mémorisé : si le visiteur part sur /mes-creations/, il y
+         retrouve ses réponses. */
+      persisterProjet(false);
+      noterValidation();
+      showLeadScreen();
     } else {
       // F2a-bis : dernière question répondue → écran transition + appel IA + close
       showTransitionAndExit({ source: 's1' });
@@ -788,6 +1117,9 @@
     opts = opts || {};
     if (state.transition) return; // évite double-trigger
 
+    /* Réponses écrites : pas de sélection, Robin répond lui-même. */
+    if (!LANDING && precisionsActives().length) { showContactPrecisions(); return; }
+
     /* Aucune sélection à révéler sur cette page : on redirige (ou on bascule
        sur le contact) AVANT de lancer l'animation de sortie et l'appel IA.
        ⚠️ L'appel IA n'est pas perdu dans le cas « avec pièce » : il est lancé
@@ -796,14 +1128,14 @@
     if (!immersionIsOnPage()) {
       var piece = projectPiece();
       if (!piece) {
-        if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+        persisterProjet(false);
         showContact({
           message: 'Je n’ai pas encore assez d’éléments pour te proposer une sélection. Laisse-moi ton mail et deux mots sur ton projet, je te réponds moi-même.'
         });
         return;
       }
       state.transition = true;
-      if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+      persisterProjet(false);
       fetchAdviceFromIA(opts).then(function (advice) {
         if (advice && window.sapiProject && typeof window.sapiProject.setAdviceText === 'function') {
           window.sapiProject.setAdviceText(advice);
@@ -848,7 +1180,7 @@
     var monProjetCard = document.querySelector('.conseiller-card--mon-projet');
     if (monProjetCard) monProjetCard.classList.add('is-awaiting-advice');
     if (window.sapiProject) {
-      window.sapiProject.set(state.answers, state.labels);
+      persisterProjet(false);
     }
 
     // 3. Lancer la séquence d'animation (fade-out contenu → fade-out modale →
@@ -1067,6 +1399,9 @@
         delete state.answers[key];
         delete state.labels[key];
       } else if (typeof val === 'string' && val) {
+        /* Réponse tirée du chat : une précision écrite plus tôt sur cette
+           question ne la décrit plus. */
+        delete state.precisions[key];
         state.answers[key] = val;
         state.labels[key]  = getChoiceLabel(key, val);
         noterReponse(key); // extraite de ce que le visiteur vient d'écrire
@@ -1075,9 +1410,9 @@
     cleanInvisibleAnswers();
     if (window.sapiProject) {
       if (replaceAll) {
-        window.sapiProject.set(state.answers, state.labels);
+        persisterProjet(false);
       } else {
-        window.sapiProject.update(state.answers, state.labels); // sauvegarde incrémentale
+        persisterProjet(true); // sauvegarde incrémentale
       }
     }
   }
@@ -1322,6 +1657,8 @@
         var filters = data.filters || {};
         state.answers = {};
         state.labels = {};
+        state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+        state.mesures = {};
         applyFiltersBatch(filters, true);
 
         addRobinBubble(data.message || '', { filters: filters });
@@ -1486,6 +1823,8 @@
   // Décide quel écran afficher quand on ouvre la modale via state="s0".
   // Renvoie 's0-initial' | 's0-partiel' | 's3-carrefour'.
   function determineInitialState() {
+    /* Landing : seule compte la visite en cours, jamais un projet du site. */
+    if (LANDING) return Object.keys(state.answers).length ? 's0-partiel' : 's0-initial';
     if (!window.sapiProject || !window.sapiProject.hasProject()) return 's0-initial';
     var visible = getVisibleStepIds(state.answers);
     if (visible.length === 0) return 's0-initial';
@@ -1536,7 +1875,12 @@
     var step = getStep(nextStepId);
     if (step) {
       state.currentQuestion = nextStepId;
-      if (els.s0Question) els.s0Question.textContent = getDynamicQuestion(step);
+      /* Premier écran d'un projet vierge : la question arrive sans rien
+         avant elle, on l'introduit (Robin, 24/11). Pas en reprise ni en
+         correction, où « pour commencer » serait faux. */
+      var titreS0 = getDynamicQuestion(step);
+      if (mode !== 's0-partiel' && nextStepId === 'piece') titreS0 = 'Pour commencer, c’est pour quelle pièce ?';
+      if (els.s0Question) els.s0Question.textContent = titreS0;
       if (els.s0Choices) {
         els.s0Choices.innerHTML = '';
         var choices = step.choices || [];
@@ -1565,6 +1909,9 @@
           }
           els.s0Choices.appendChild(btn);
         });
+        /* Écran d'accueil du site : son champ « Décris ton projet » fait
+           déjà office de réponse libre, on n'en ajoute pas un second. */
+        renderExtras(els.s0Choices, nextStepId, LANDING);
       }
     }
 
@@ -1596,6 +1943,10 @@
 
   // Soumission du champ texte S0 → bascule vers S2.chat avec bulle initiale.
   function submitFromS0Text(text) {
+    /* Landing : le texte libre mène au chat, qui montre la sélection et peut
+       ouvrir le contact sur-mesure. Le champ est masqué en CSS ; cette garde
+       couvre le cas où il serait quand même soumis. */
+    if (LANDING) return;
     text = (text || '').trim();
     if (!text) return;
 
@@ -1645,9 +1996,11 @@
   // Action "Effacer et recommencer" depuis S0 (état partiel) : vide le projet
   // et bascule vers l'état initial dans la même modale. Pas de fermeture.
   function resetFromS0() {
-    if (window.sapiProject) window.sapiProject.clear();
+    if (window.sapiProject && !LANDING) window.sapiProject.clear(); // landing : ne jamais effacer un projet du site
     state.answers = {};
     state.labels = {};
+    state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+    state.mesures = {};
     state.questionHistory = [];
     state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
@@ -1806,6 +2159,7 @@
      sélection de la pièce, ou vers le contact si aucune pièce n'est connue. */
   function viewSelectionFromS3() {
     noterValidation(); // validation explicite du projet — cf. noterValidation()
+    if (!LANDING && precisionsActives().length) { showContactPrecisions(); return; }
     var project = window.sapiProject ? window.sapiProject.get() : null;
     var needsNewAdvice = !project || !project.advice_text;
     if (needsNewAdvice) {
@@ -1888,11 +2242,13 @@
   // à S0 hybride en mode initial (peuplé via renderS0Hybrid pour avoir le
   // badge, la question, les choices et le placeholder corrects).
   function resetFromS3() {
-    if (window.sapiProject) {
-      window.sapiProject.clear();
+    if (window.sapiProject && !LANDING) {
+      window.sapiProject.clear(); // landing : ne jamais effacer un projet du site
     }
     state.answers = {};
     state.labels = {};
+    state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+    state.mesures = {};
     state.questionHistory = [];
     state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
@@ -2063,6 +2419,7 @@
   // CTA "Appliquer cette sélection" : ferme la modale, dispatch un event pour
   // que la fiche produit applique la pré-sélection variation.
   function applyProductSelection() {
+    if (!LANDING && precisionsActives().length) { showContactPrecisions(); return; }
     noterValidation(); // validation explicite du projet — cf. noterValidation()
     /* `answers` seulement : `productId` et `labels` n'étaient lus par personne.
        Trois clés inutiles ne cassent rien, mais elles racontent une histoire
@@ -2085,9 +2442,11 @@
   // pattern éprouvé pré-F1c (renderProductGuideResult > redoBtn) — efface le
   // projet entièrement et redémarre le parcours court à la 1re question.
   function modifyProductAnswers() {
-    if (window.sapiProject) window.sapiProject.clear();
+    if (window.sapiProject && !LANDING) window.sapiProject.clear(); // landing : ne jamais effacer un projet du site
     state.answers = {};
     state.labels = {};
+    state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+    state.mesures = {};
     state.questionHistory = [];
     state.retourApresEdition = null; // on repart de zéro : plus d'édition en cours
     renderS0Hybrid('s0-initial');
@@ -2233,6 +2592,11 @@
       /* Entrée directe par la card sur-mesure : le texte vient de `prefill`,
          qui n'est pas mémorisé dans le projet (voir showContactSurmesure). */
       else if (payload && payload.prefill) pre += payload.prefill;
+      /* Sortie du chat vers le contact avec des précisions encore valables :
+         elles partent avec le message, sinon Robin ne les verrait jamais. */
+      if (!LANDING && precisionsActives().length && pre.indexOf('Mes précisions :') === -1) {
+        pre += (pre ? '\n\n' : '') + 'Mes précisions :\n' + lignesPrecisions().join('\n') + '\n\n';
+      }
       /* ⚠️ ON NE ROGNE QUE LE DÉBUT. Un `trim()` complet mangeait la ligne
          vide finale du modèle, qui existe pour que le visiteur écrive À LA
          LIGNE plutôt qu'au bout de la phrase. */
@@ -2394,6 +2758,8 @@
     var p = window.sapiProject.get();
     state.answers = {};
     state.labels = {};
+    state.precisions = {}; // les réponses repartent de zéro : leurs précisions aussi
+    state.mesures = {};
     if (p && p.answers) {
       Object.keys(p.answers).forEach(function (k) { state.answers[k] = p.answers[k]; });
     }
@@ -2417,7 +2783,18 @@
     // utilise la bonne liste de visibles (sinon des steps non-court restent en answers).
     state.shortMode = (initialScreen === 'product');
 
-    hydrateFromProject();
+    /* Landing : on repart de zéro. Un ancien projet mémorisé enverrait le
+       visiteur directement sur le récap S3 (qui mène à la sélection), alors
+       que cette page doit toujours finir sur le formulaire. */
+    if (LANDING) {
+      state.answers = {};
+      state.labels = {};
+      state.precisions = {};
+      state.mesures = {};
+      viderPhotos();
+    } else {
+      hydrateFromProject();
+    }
     state.questionHistory = [];
     state.transition = false;
     /* ⚠️ CES DEUX-LÀ FUYAIENT D'UNE OUVERTURE À L'AUTRE.
@@ -2462,6 +2839,10 @@
     //     la 1re question du parcours court non répondue)
     if (opts && opts.sansEcran) {
       /* L'appelant affiche son propre écran juste après ce retour. */
+    } else if (LANDING) {
+      /* Landing réseaux : Robin se présente d'abord ; « C'est parti »
+         mène à la première question. */
+      showScreen('s-accueil');
     } else if (initialScreen === 'product') {
       var visible = getVisibleStepIds(state.answers); // filtré short mode
       var allAnswered = visible.length > 0 && visible.every(function (id) { return !!state.answers[id]; });
@@ -2534,6 +2915,255 @@
       window.sapiProject.resumeNotifications();
     }
     dispatchConseillerClosed();
+    /* Landing : la page derrière la modale est vide. Fermer, c'est sortir
+       vers les créations. Le snapshot final est déjà parti (sendBeacon). */
+    if (LANDING) {
+      pushLandingEvent('conseil_reseaux_sortie', { ecran: state.screen || '' });
+      /* Court délai : laisse à GTM le temps d'envoyer l'événement avant que
+         la page ne change. */
+      setTimeout(function () { window.location.href = EXIT_URL; }, 250);
+    }
+  }
+
+  /* GA4 via GTM : la landing pousse ses propres événements dans le dataLayer
+     (le pixel Meta / Pinterest peut s'y brancher côté GTM). Silencieux si GTM
+     n'est pas chargé. */
+  function pushLandingEvent(name, extra) {
+    if (!LANDING) return;
+    try {
+      window.dataLayer = window.dataLayer || [];
+      var ev = { event: name };
+      if (extra) Object.keys(extra).forEach(function (k) { ev[k] = extra[k]; });
+      window.dataLayer.push(ev);
+    } catch (e) { /* swallow */ }
+  }
+
+  /* ═══ PHOTOS (landing, 24/11) ═══════════════════════════════════════
+     Réduites dans le navigateur (1600 px, JPEG) avant l'envoi : une photo
+     de téléphone fait 3 à 8 Mo, ce qui ferait échouer l'envoi sur une
+     connexion mobile. Le serveur les réencode ensuite de toute façon. */
+  var PHOTOS_MAX = 3;
+  function viderPhotos() {
+    (state.photos || []).forEach(function (p) { try { URL.revokeObjectURL(p.url); } catch (e) { /* swallow */ } });
+    state.photos = [];
+    renderPhotos();
+  }
+  function reduirePhoto(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        /* 1280 px suffit pour juger une pièce et allège nettement l'envoi
+           depuis un téléphone, qui était long (24/11). */
+        var max = 1280;
+        var r = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        var w = Math.max(1, Math.round(img.naturalWidth * r));
+        var h = Math.max(1, Math.round(img.naturalHeight * r));
+        var c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { if (b) resolve(b); else reject(new Error('toBlob')); }, 'image/jpeg', 0.78);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
+      img.src = url;
+    });
+  }
+  function renderPhotos() {
+    if (!els.modal) return;
+    var bloc = els.modal.querySelector('[data-lead-photos]');
+    var liste = els.modal.querySelector('[data-lead-photos-liste]');
+    var ajout = els.modal.querySelector('[data-action="lead-photo-ouvrir"]');
+    if (liste) {
+      liste.innerHTML = '';
+      state.photos.forEach(function (p, i) {
+        var fig = document.createElement('span');
+        fig.className = 'lead-photos__item';
+        var im = document.createElement('img');
+        im.src = p.url;
+        im.alt = 'Photo ' + (i + 1);
+        var x = document.createElement('button');
+        x.type = 'button';
+        x.className = 'lead-photos__retirer';
+        x.setAttribute('data-action', 'lead-photo-retirer');
+        x.setAttribute('data-i', String(i));
+        x.setAttribute('aria-label', 'Retirer la photo ' + (i + 1));
+        x.textContent = '×';
+        fig.appendChild(im);
+        fig.appendChild(x);
+        liste.appendChild(fig);
+      });
+    }
+    if (bloc) bloc.hidden = state.photos.length === 0;
+    if (ajout) ajout.hidden = state.photos.length >= PHOTOS_MAX;
+  }
+  function ajouterPhotos(fichiers) {
+    var form = els.leadForm;
+    var prev = form && form.querySelector('.lead-photos__erreur');
+    if (prev) prev.remove();
+    var place = PHOTOS_MAX - state.photos.length;
+    var liste = Array.prototype.slice.call(fichiers || [], 0, Math.max(0, place));
+    var trop = (fichiers ? fichiers.length : 0) > place;
+    var echecs = 0;
+    var ajout = els.modal.querySelector('[data-action="lead-photo-ouvrir"]');
+    if (ajout) ajout.disabled = true;
+    state.photosEnCours = true;
+    return liste.reduce(function (p, f) {
+      return p.then(function () {
+        return reduirePhoto(f).then(function (blob) {
+          if (state.photos.length >= PHOTOS_MAX) return;
+          state.photos.push({ blob: blob, url: URL.createObjectURL(blob) });
+        }, function () { echecs++; });
+      });
+    }, Promise.resolve()).then(function () {
+      state.photosEnCours = false;
+      if (ajout) ajout.disabled = false;
+      renderPhotos();
+      var msg = '';
+      if (echecs) msg = echecs > 1 ? 'Ces photos n’ont pas pu être lues, essaie-en d’autres.' : 'Cette photo n’a pas pu être lue, essaie-en une autre.';
+      else if (trop) msg = 'Trois photos au plus.';
+      if (msg && form) {
+        var err = document.createElement('p');
+        err.className = 'contact-form__error lead-photos__erreur';
+        err.setAttribute('role', 'alert');
+        err.textContent = msg;
+        var bloc = els.modal.querySelector('[data-lead-photos]');
+        (bloc && !bloc.hidden ? bloc : form.querySelector('.lead-form__extras')).insertAdjacentElement('afterend', err);
+      }
+    });
+  }
+
+  function showLeadScreen() {
+    /* Rappel des réponses en pastilles : la personne voit que le travail
+       est fait et qu'il lui revient. Libellés connus seulement, dans
+       l'ordre du questionnaire. */
+    var recap = els.modal.querySelector('[data-lead-recap]');
+    if (recap) {
+      recap.innerHTML = '';
+      getVisibleStepIds(state.answers).forEach(function (id) {
+        var lab = state.labels[id];
+        var ecrite = state.precisions[id] && state.precisions[id].slug === state.answers[id];
+        if (!lab || (state.answers[id] === 'ne-sais-pas' && !ecrite)) return;
+        var chip = document.createElement('span');
+        chip.className = 'lead-recap__chip';
+        chip.textContent = lab;
+        recap.appendChild(chip);
+      });
+    }
+    showScreen('s-lead');
+    pushLandingEvent('conseil_reseaux_questions_finies', { piece: state.answers.piece || '' });
+    /* Pas de focus automatique sur le prénom : sur mobile il ouvrirait le
+       clavier par-dessus le texte que le visiteur doit lire d'abord. */
+  }
+
+  function submitLeadForm(form) {
+    if (!form || !config.ajaxUrl || form.__envoi) return;
+    var submitBtn = form.querySelector('[data-lead-submit]');
+    var prenomInput = form.querySelector('input[name="prenom"]');
+    var emailInput  = form.querySelector('input[name="email"]');
+    var motInput    = form.querySelector('textarea[name="commentaire"]');
+    var honey       = form.querySelector('input[name="website"]');
+
+    var prenomVal = (prenomInput && prenomInput.value || '').trim();
+    var emailVal  = (emailInput && emailInput.value || '').trim();
+    var motVal    = (motInput && motInput.value || '').trim();
+
+    form.querySelectorAll('.contact-form__error').forEach(function (e) { e.remove(); });
+    if (prenomInput) prenomInput.classList.remove('is-invalid');
+    if (emailInput) emailInput.classList.remove('is-invalid');
+
+    /* Seul l'email est obligatoire (24/11). */
+    var message = '';
+    if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+      if (emailInput) emailInput.classList.add('is-invalid');
+      message = 'Indique ton email pour recevoir le conseil.';
+    }
+    function afficherErreur(txt) {
+      var err = document.createElement('p');
+      err.className = 'contact-form__error';
+      err.setAttribute('role', 'alert');
+      err.textContent = txt;
+      form.appendChild(err);
+    }
+    if (message) { afficherErreur(message); return; }
+    /* Photos encore en cours de réduction : elles partiraient sans elles. */
+    if (state.photosEnCours) { afficherErreur('Tes photos se préparent, réessaie dans une seconde.'); return; }
+
+    /* Verrou contre le double envoi (double tap sur mobile) : un seul mail à
+       Robin, une seule ligne en base. */
+    form.__envoi = true;
+    if (submitBtn) submitBtn.disabled = true;
+
+    SessionTracker.snapshot({ contact_triggered: 1, contact_message: motVal });
+
+    var fd = new FormData();
+    fd.append('action', 'sapi_conseil_lead');
+    fd.append('nonce', config.nonce || '');
+    fd.append('sapi_ts', config.ts || '');
+    fd.append('sapi_tsig', config.tsig || '');
+    fd.append('prenom', prenomVal);
+    fd.append('email', emailVal);
+    fd.append('commentaire', motVal);
+    /* Les réponses écrites partent à part : le serveur les range avec le
+       mot, et leur présence suffit à faire répondre Robin lui-même. */
+    fd.append('precisions', lignesPrecisions().join('\n'));
+    fd.append('website', honey ? honey.value : '');
+    state.photos.forEach(function (p, i) { fd.append('photos[]', p.blob, 'photo-' + (i + 1) + '.jpg'); });
+    fd.append('source_url', window.location.href);
+    fd.append('project', JSON.stringify({ answers: state.answers, labels: state.labels }));
+    try { fd.append('session_id', SessionTracker.getSessionId()); } catch (e) { /* swallow */ }
+
+    /* Avec des photos, l'envoi prend quelques secondes sur mobile : le bouton
+       dit ce qui se passe et où on en est, au lieu de rester figé. */
+    var libelleBouton = submitBtn ? submitBtn.innerHTML : '';
+    function etatBouton(txt) {
+      if (submitBtn) submitBtn.textContent = txt;
+    }
+    etatBouton(state.photos.length ? 'Envoi des photos…' : 'Envoi…');
+
+    function relacher(txt) {
+      form.__envoi = false;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = libelleBouton; }
+      afficherErreur(txt);
+    }
+
+    /* XMLHttpRequest et pas fetch : seul lui donne l'avancement de l'envoi. */
+    new Promise(function (resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', config.ajaxUrl);
+      xhr.withCredentials = true;
+      if (xhr.upload && state.photos.length) {
+        xhr.upload.onprogress = function (ev) {
+          if (!ev.lengthComputable) return;
+          var pct = Math.round(ev.loaded / ev.total * 100);
+          etatBouton(pct < 100 ? 'Envoi des photos… ' + pct + ' %' : 'Presque fini…');
+        };
+      }
+      xhr.onload = function () {
+        try { resolve(JSON.parse(xhr.responseText)); } catch (e) { reject(e); }
+      };
+      xhr.onerror = function () { reject(new Error('reseau')); };
+      xhr.ontimeout = function () { reject(new Error('timeout')); };
+      xhr.timeout = 90000;
+      xhr.send(fd);
+    })
+      .then(function (resp) {
+        if (resp && resp.success) {
+          // Email donné : le visiteur retrouvera son projet sur le site.
+          state.leadEnvoye = true;
+          persisterProjet(false);
+          var titre = els.modal.querySelector('[data-lead-merci-titre]');
+          if (titre) titre.textContent = prenomVal ? 'Merci ' + prenomVal : 'Merci';
+          showScreen('s-lead-merci');
+          pushLandingEvent('conseil_reseaux_email', { piece: state.answers.piece || '', avec_mot: motVal ? 1 : 0, nb_photos: state.photos.length });
+          return;
+        }
+        relacher((resp && resp.data && resp.data.fallback) ||
+          "L'envoi a échoué. Tu peux écrire directement à " + CONTACT_EMAIL + '.');
+      })
+      .catch(function () {
+        relacher("Petit souci de connexion. Tu peux réessayer ou écrire à " + CONTACT_EMAIL + '.');
+      });
   }
 
   // Événement déterministe émis à CHAQUE fermeture de la modale (fin ou
@@ -2631,7 +3261,8 @@
 
     // ESC pour fermer — désactivé pendant l'animation morph (state.transition)
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && state.open && !state.transition) {
+      /* Landing : Échap ne doit pas éjecter le visiteur de la page. */
+      if (e.key === 'Escape' && state.open && !state.transition && !LANDING) {
         e.preventDefault();
         closeModal();
       }
@@ -2645,7 +3276,8 @@
       if (state.transition) return;
       // Click sur l'overlay (en dehors du dialog) → ferme
       if (e.target === els.modal) {
-        closeModal();
+        /* Landing : un clic à côté (desktop) ne fait pas quitter la page. */
+        if (!LANDING) closeModal();
         return;
       }
 
@@ -2660,6 +3292,60 @@
           break;
         case 'back':
           backFromQuestion();
+          break;
+        case 'lead-mot-ouvrir':
+        case 'lead-mot-retirer': {
+          var bloc = els.modal.querySelector('[data-lead-mot]');
+          var ouvrir = els.modal.querySelector('[data-action="lead-mot-ouvrir"]');
+          var ouvre = (action === 'lead-mot-ouvrir');
+          if (bloc) bloc.hidden = !ouvre;
+          if (ouvrir) ouvrir.hidden = ouvre;
+          if (bloc) {
+            var ta = bloc.querySelector('textarea');
+            if (ta) { if (ouvre) ta.focus(); else ta.value = ''; }
+          }
+          break;
+        }
+        case 'slider-valider':
+          validerExtras('slider');
+          break;
+        case 'slider-nsp':
+          validerExtras('nsp');
+          break;
+        case 'preciser-valider':
+          validerExtras('precision');
+          break;
+        case 'preciser-ouvrir': {
+          var boite = actionBtn.closest('[data-question-extras]');
+          var zone = boite && boite.querySelector('[data-precision]');
+          if (zone) {
+            zone.hidden = false;
+            actionBtn.hidden = true;
+            var champTexte = zone.querySelector('textarea');
+            if (champTexte) champTexte.focus();
+          }
+          break;
+        }
+        case 'lead-photo-ouvrir': {
+          var champPhoto = els.modal.querySelector('[data-lead-photo-input]');
+          if (champPhoto) { champPhoto.value = ''; champPhoto.click(); }
+          break;
+        }
+        case 'lead-photo-retirer': {
+          var iPhoto = parseInt(actionBtn.getAttribute('data-i'), 10);
+          var vieilleErreur = els.leadForm && els.leadForm.querySelector('.lead-photos__erreur');
+          if (vieilleErreur) vieilleErreur.remove();
+          var retiree = state.photos.splice(iPhoto, 1)[0];
+          if (retiree) { try { URL.revokeObjectURL(retiree.url); } catch (e) { /* swallow */ } }
+          renderPhotos();
+          break;
+        }
+        case 'accueil-go':
+          renderS0Hybrid('s0-initial');
+          break;
+        case 'lead-exit':
+          // Landing réseaux : « Non merci » ou après le merci → /mes-creations/
+          closeModal();
           break;
         case 'apply':
           /* CTA « Voir la sélection » du chat.
@@ -2696,7 +3382,7 @@
         case 'chat-contact':
           // Seconde sortie du chat, celle que l'IA propose elle-même quand
           // elle sent que le projet mérite un échange direct.
-          if (window.sapiProject) window.sapiProject.set(state.answers, state.labels);
+          persisterProjet(false);
           showContact({
             message: 'Dis-m’en un peu plus et laisse-moi ton mail : je te réponds moi-même.'
           });
@@ -2740,7 +3426,32 @@
       if (!btn) return;
       var slug = btn.getAttribute('data-choice');
       var label = btn.getAttribute('data-label') || btn.textContent.trim();
+      /* Carte cliquée avec un texte tapé dans « Préciser » : le texte
+         complète la carte, il n'est pas perdu. Sans texte, la carte
+         remplace une précision donnée plus tôt. */
+      if (state.currentQuestion) {
+        var texte = lirePrecisionOuverte();
+        if (texte) state.precisions[state.currentQuestion] = { texte: texte, slug: slug };
+        else delete state.precisions[state.currentQuestion];
+      }
       answerCurrentQuestion(slug, label);
+    });
+
+    els.modal.addEventListener('change', function (e) {
+      var t = e.target;
+      if (t && t.hasAttribute && t.hasAttribute('data-lead-photo-input')) ajouterPhotos(t.files);
+    });
+
+    // Slider : affichage en direct de la valeur et de la catégorie.
+    els.modal.addEventListener('input', function (e) {
+      var r = e.target;
+      if (!r || !r.classList || !r.classList.contains('q-slider__range')) return;
+      r.__touche = true;
+      majAffichageSlider(r);
+    });
+    els.modal.addEventListener('input', function (e) {
+      var t = e.target;
+      if (t && t.tagName === 'TEXTAREA' && t.closest('[data-precision]')) t.classList.remove('is-invalid');
     });
 
     // Round 4 — Click sur une chip de récap S3 → édite ce step.
@@ -2785,6 +3496,14 @@
         var val = els.chatInput.value;
         els.chatInput.value = '';
         submitChat(val);
+      });
+    }
+
+    // Landing réseaux : formulaire prénom + email + un mot
+    if (els.leadForm) {
+      els.leadForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitLeadForm(els.leadForm);
       });
     }
 
@@ -2839,11 +3558,19 @@
     els.contactRecap        = els.modal.querySelector('[data-contact-recap]');
     els.contactForm         = els.modal.querySelector('[data-contact-form]');
     els.contactMessageField = els.modal.querySelector('[data-contact-message-field]');
+    // Landing réseaux
+    els.leadForm            = els.modal.querySelector('[data-lead-form]');
 
     // Marqueur pour les cards Phase 2 (évite leur fallback console.info)
     window.__sapiModalReady = true;
 
     bindEvents();
+
+    /* Landing réseaux : la modale EST la page, elle s'ouvre seule. */
+    if (LANDING) {
+      pushLandingEvent('conseil_reseaux_arrivee');
+      setTimeout(function () { openModal('s0'); }, 50);
+    }
 
     // Round 4 — Si un param URL ?freetext=… est présent (depuis le room
     // picker homepage), auto-ouvre la modale en S0 puis bascule en chat S2
@@ -2851,6 +3578,14 @@
     // au refresh.
     try {
       var params = new URLSearchParams(window.location.search);
+      /* « Compléter mon projet » depuis l'accueil (24/11) : on arrive sur la
+         sélection, modale ouverte là où le visiteur s'était arrêté. */
+      if (params.get('completer') === '1' && !LANDING) {
+        params.delete('completer');
+        var resteCompleter = params.toString();
+        window.history.replaceState({}, '', window.location.pathname + (resteCompleter ? '?' + resteCompleter : '') + (window.location.hash || ''));
+        setTimeout(function () { openModal('s0'); }, 300);
+      }
       var initialFreetext = params.get('freetext');
       if (initialFreetext && initialFreetext.length) {
         // Nettoyer l'URL

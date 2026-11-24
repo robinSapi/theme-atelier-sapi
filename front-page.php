@@ -540,7 +540,42 @@ foreach ($carousel_products as $product) {
 <?php endif; ?>
 
 <!-- Entrée projet — room picker (bande crème) -->
-<section class="home-projet-section">
+<section class="home-projet-section" data-accueil-section>
+  <?php /* ⚠️ AVANT LE PREMIER AFFICHAGE : la page est en cache et le projet vit
+           dans le navigateur. Ce script lit le projet pendant le chargement et
+           choisit le bon bloc tout de suite, sinon on verrait le sélecteur
+           puis la proposition (clignotement). Même règle d'âge que
+           sapi-project.js (10 jours). Exclu des optimiseurs : différé, il
+           arriverait trop tard. */ ?>
+  <!--noptimize--><script data-no-optimize="1" data-no-defer="1" data-cfasync="false">
+  (function () { try {
+    var p = JSON.parse(localStorage.getItem('sapiProject') || 'null');
+    var t = p && (p.updated_at || p.created_at);
+    var frais = !(typeof t === 'number' && t > 0 && Date.now() / 1000 - t > 864000);
+    if (p && p.answers && p.answers.piece && frais) document.querySelector('[data-accueil-section]').classList.add('has-projet');
+  } catch (e) {} })();
+  </script><!--/noptimize-->
+
+  <!-- Projet entamé : sa sélection à la place du sélecteur (maquette validée le 24/11) -->
+  <div class="accueil-projet" data-accueil-projet>
+    <h2 class="screen-reader-text"><?php esc_html_e('Ta sélection en cours', 'theme-sapi-maison'); ?></h2>
+    <div class="conseiller-sig conseiller-sig--v1">
+      <span class="conseiller-sig__avatar"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']); ?></span>
+      <span class="conseiller-sig__text">
+        <span class="conseiller-sig__who">Le conseil de Robin</span>
+        <span class="conseiller-sig__hook" data-accueil-titre><?php esc_html_e('Ta sélection', 'theme-sapi-maison'); ?></span>
+      </span>
+    </div>
+    <p class="accueil-projet__phrase" data-accueil-phrase aria-live="polite"></p>
+    <div class="accueil-projet__cartes" data-accueil-cartes>
+      <span class="accueil-projet__vide"></span><span class="accueil-projet__vide"></span><span class="accueil-projet__vide"></span><span class="accueil-projet__vide"></span>
+    </div>
+    <div class="accueil-projet__actions">
+      <a class="accueil-projet__completer" href="<?php echo esc_url(home_url('/mes-creations/')); ?>" data-accueil-completer><?php esc_html_e('Compléter mon projet', 'theme-sapi-maison'); ?></a>
+      <button type="button" class="accueil-projet__autre" data-accueil-autre><?php esc_html_e('Choisir une autre pièce', 'theme-sapi-maison'); ?></button>
+    </div>
+  </div>
+
   <div class="home-projet" data-room-picker data-room-picker-from="home">
     <div class="room-picker-inner">
       <div class="conseiller-sig conseiller-sig--v1">

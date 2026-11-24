@@ -26773,3 +26773,1083 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     height: 34svh;
   }
 }
+
+/* ========================================
+   OPTIONS FICHE PRODUIT (assets/sapi-product-options.js, maquette du 15/10/2026)
+   Une carte, une ligne par option : matériau, taille, add-ons, ampoule.
+   Tout est scopé sous form.sapi-opts-ready, posée par le JS une fois la carte
+   construite : sans JS, l'ancienne présentation reste intacte.
+   Les !important battent les règles « product-form-v2 .variations » plus haut
+   (grille 2 colonnes, cartes par ligne) et le CSS de Variation Swatches.
+   ======================================== */
+.sapi-opts-ready .sapi-opts {
+  --opt-label: 96px;
+  background: var(--color-cream);
+  border: 1px solid rgba(147, 125, 104, 0.18);
+  border-radius: 12px;
+  margin: 0 0 1rem;
+  overflow: hidden;
+}
+
+/* La table des variations devient une suite de lignes */
+.sapi-opts-ready .sapi-opts table.variations {
+  display: block !important;
+  width: 100%;
+  margin: 0 !important;
+  border: 0 !important;
+  gap: 0 !important;
+}
+.sapi-opts-ready .sapi-opts table.variations tbody { display: contents !important; }
+
+/* Ligne commune : variations, add-ons, ampoule */
+.sapi-opts-ready .sapi-opts table.variations tr,
+.sapi-opts-ready .sapi-opts .wc-pao-addon,
+.sapi-opts-ready .sapi-opts .sapi-ampoule-addon {
+  display: grid !important;
+  grid-template-columns: var(--opt-label) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  margin: 0 !important;
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.sapi-opts-ready .sapi-opts table.variations tr + tr {
+  border-top: 1px solid rgba(147, 125, 104, 0.18) !important;
+}
+/* Filets entre lignes : après la règle commune, qui remet les bordures à zéro */
+.sapi-opts-ready .sapi-opts > .wc-pao-addon:not(:first-child),
+.sapi-opts-ready .sapi-opts > .sapi-ampoule-addon:not(:first-child) {
+  border-top: 1px solid rgba(147, 125, 104, 0.18) !important;
+}
+.sapi-opts-ready .sapi-opts table.variations th,
+.sapi-opts-ready .sapi-opts table.variations td {
+  display: block;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  text-align: left;
+  min-width: 0;
+}
+
+/* Étiquette commune : majuscules + pastille */
+.sapi-opts-ready .sapi-opts table.variations th.label label,
+.sapi-opts-ready .sapi-opts .wc-pao-addon-name,
+.sapi-ampoule-addon__name {
+  display: flex !important;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: var(--font-body);
+  font-size: 0.68rem !important;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: normal;
+}
+.sapi-opts-ready .sapi-opts table.variations th.label label::before,
+.sapi-opts-ready .sapi-opts .wc-pao-addon-name::before,
+.sapi-ampoule-addon__name::before {
+  content: '' !important;
+  display: block;
+  width: 7px !important;
+  height: 7px !important;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-orange, #E35B24) !important;
+  transition: background-color 0.25s ease;
+}
+.sapi-opts-ready .sapi-opts table.variations tr.is-done th.label label::before,
+.sapi-opts-ready .sapi-opts .wc-pao-addon.is-done .wc-pao-addon-name::before,
+.sapi-ampoule-addon.is-done .sapi-ampoule-addon__name::before {
+  background: var(--color-green, #018501) !important;
+}
+.sapi-opts-ready .sapi-opts .wc-pao-addon-name .required { display: none; }
+
+/* Valeur : pastilles et pilules sur une ligne */
+.sapi-opts-ready .sapi-opts td.value {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+.sapi-opts-ready .sapi-opts ul.variable-items-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.sapi-opts-ready .sapi-opts .reset_variations { display: none !important; }
+.sapi-opt-picked {
+  font-size: 0.75rem;
+  color: var(--color-gray-mid);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Matériau : pastilles de bois rondes */
+.sapi-opts-ready .sapi-opts li.image-variable-item {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--color-white) !important;
+  box-shadow: 0 0 0 1.5px rgba(147, 125, 104, 0.3) !important;
+  overflow: hidden;
+  background: none !important;
+  transition: box-shadow 0.2s ease;
+}
+.sapi-opts-ready .sapi-opts li.image-variable-item .variable-item-contents,
+.sapi-opts-ready .sapi-opts li.image-variable-item img {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 50% !important;
+  object-fit: cover;
+}
+.sapi-opts-ready .sapi-opts li.image-variable-item.selected {
+  box-shadow: 0 0 0 2px var(--color-dark) !important;
+}
+
+/* Taille : pilules */
+.sapi-opts-ready .sapi-opts li.radio-variable-item {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+.sapi-opts-ready .sapi-opts li.radio-variable-item label {
+  display: block !important;
+  margin: 0 !important;
+  padding: 5px 11px !important;
+  border: 1.5px solid rgba(147, 125, 104, 0.3);
+  border-radius: 999px;
+  background: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-dark);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+.sapi-opts-ready .sapi-opts li.radio-variable-item input[type="radio"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  pointer-events: none;
+}
+.sapi-opts-ready .sapi-opts li.radio-variable-item.selected label {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+  color: var(--color-white);
+}
+.sapi-opts-ready .sapi-opts li.variable-item.disabled,
+.sapi-opts-ready .sapi-opts li.variable-item.wvs-disabled {
+  opacity: 0.35;
+}
+@media (hover: hover) {
+  .sapi-opts-ready .sapi-opts li.radio-variable-item:not(.selected) label:hover {
+    border-color: var(--color-wood);
+  }
+}
+
+/* Avec des add-ons, le sous-total fait foi : le prix de la variation seul
+   (sans câble ni ampoule) prêtait à confusion, on ne garde que le sous-total. */
+.sapi-opts-ready:has(.wc-pao-addons-container) .woocommerce-variation-price {
+  display: none !important;
+}
+
+/* Add-ons : la liste devient une pilule */
+.sapi-opts-ready .sapi-opts .wc-pao-addon-wrap {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-width: 0;
+}
+.sapi-opts-ready .sapi-opts .wc-pao-addon-select {
+  width: auto !important;
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 5px 28px 5px 11px !important;
+  border: 1.5px solid rgba(147, 125, 104, 0.3) !important;
+  border-radius: 999px !important;
+  background-color: var(--color-white) !important;
+  font-family: var(--font-body);
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-dark);
+  cursor: pointer;
+}
+
+/* ----- Ligne ampoule (aussi utilisée hors carte, si le JS de la carte ne tourne pas) ----- */
+.sapi-ampoule-addon {
+  flex: 0 0 100%;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 0 0 1rem;
+  background: var(--color-cream);
+  border: 1px solid rgba(147, 125, 104, 0.18);
+  border-radius: 12px;
+  font-family: var(--font-body);
+}
+.sapi-ampoule-addon .sapi-ampoule-addon__pill {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  justify-self: start;
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 5px 11px !important;
+  border: 1.5px dashed var(--color-wood) !important;
+  border-radius: 999px !important;
+  background: var(--color-white) !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  font-size: 0.78rem !important;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-dark);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.sapi-ampoule-addon__input {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: 0 !important;
+  pointer-events: none;
+}
+.sapi-ampoule-addon__box {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--color-wood);
+  border-radius: 3px;
+  display: grid;
+  place-items: center;
+  background: var(--color-white);
+}
+.sapi-ampoule-addon__price {
+  color: var(--color-gray-mid);
+}
+.sapi-ampoule-addon__select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 14px 0 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M1 1l3 3 3-3' stroke='%23937D68' fill='none' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right center !important;
+  font: inherit !important;
+  color: inherit !important;
+  cursor: pointer;
+}
+/* Cochée */
+.sapi-ampoule-addon__input:checked ~ .sapi-ampoule-addon__box {
+  background: var(--color-orange, #E35B24);
+  border-color: var(--color-white);
+}
+.sapi-ampoule-addon__input:checked ~ .sapi-ampoule-addon__box::after {
+  content: '';
+  width: 4px;
+  height: 7px;
+  border: solid var(--color-white);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:checked) {
+  border-style: solid !important;
+  border-color: var(--color-dark) !important;
+  background: var(--color-dark) !important;
+  color: var(--color-white);
+}
+.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:checked) .sapi-ampoule-addon__price { color: #ddd; }
+.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:focus-visible) {
+  outline: 2px solid var(--color-orange, #E35B24);
+  outline-offset: 2px;
+}
+
+/* Mobile : colonne d'étiquettes plus étroite, pilules resserrées */
+@media (max-width: 480px) {
+  .sapi-opts-ready .sapi-opts { --opt-label: 74px; }
+  .sapi-opts-ready .sapi-opts table.variations tr,
+  .sapi-opts-ready .sapi-opts .wc-pao-addon,
+  .sapi-opts-ready .sapi-opts .sapi-ampoule-addon {
+    gap: 8px !important;
+    padding: 9px 10px !important;
+  }
+  .sapi-opts-ready .sapi-opts table.variations th.label label,
+  .sapi-opts-ready .sapi-opts .wc-pao-addon-name,
+  .sapi-ampoule-addon__name {
+    font-size: 0.6rem !important;
+    letter-spacing: 0.1em;
+    gap: 0.35rem;
+  }
+  .sapi-opts-ready .sapi-opts ul.variable-items-wrapper { gap: 4px !important; }
+  .sapi-opts-ready .sapi-opts li.radio-variable-item label { padding: 4px 8px !important; font-size: 0.72rem !important; }
+  .sapi-opts-ready .sapi-opts li.image-variable-item { width: 24px !important; height: 24px !important; }
+  .sapi-opts-ready .sapi-opts .wc-pao-addon-select { font-size: 0.72rem !important; padding: 4px 26px 4px 9px !important; }
+  .sapi-ampoule-addon .sapi-ampoule-addon__pill { font-size: 0.72rem !important; padding: 4px 9px !important; gap: 5px; }
+}
+
+/* ========================================
+   VITRINE À GAUCHE DU MINI-PANIER (inc/sapi-cart-suggestions.php, 15/10/2026)
+   Desktop uniquement : en mobile le volet occupe presque tout l'écran.
+   Visible quand le voile du mini-panier l'est (sélecteur de frère).
+   Cartes au gabarit .product-card-cinetique, resserrées pour tenir à trois.
+   ======================================== */
+
+/* Voile : flou en plus de l'assombrissement, pour la lisibilité des cartes */
+.mini-cart-overlay {
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+}
+.mini-cart-overlay.is-visible {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.sapi-cart-suggest-src { display: none !important; }
+.sapi-cart-suggest { display: none; }
+
+@media (min-width: 1100px) {
+  /* Toute la zone libre à gauche du volet ; la vitrine y est centrée */
+  .sapi-cart-suggest:not(:empty) {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 400px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    color: var(--color-white);
+    font-family: var(--font-body);
+    visibility: hidden;
+    pointer-events: none;
+    transition: visibility 0s linear 0.35s;
+  }
+  .sapi-cart-suggest:not(:empty) > * {
+    width: min(780px, 100%);
+  }
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest:not(:empty) {
+    visibility: visible;
+    transition-delay: 0s;
+  }
+  /* Les clics hors des cartes traversent jusqu'au voile (qui ferme le volet) */
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card,
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__close {
+    pointer-events: auto;
+  }
+  .sapi-suggest-off .sapi-cart-suggest { display: none !important; }
+
+  /* Titres : arrivent juste après le volet */
+  .sapi-cart-suggest .sapi-suggest__eyebrow,
+  .sapi-cart-suggest .sapi-suggest__title,
+  .sapi-cart-suggest .sapi-suggest__close {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__eyebrow,
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__title,
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__close {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.6s ease 0.45s, transform 0.8s var(--ease-expo, ease) 0.45s;
+  }
+
+  /* Cartes : arrivée décalée, l'une après l'autre (--i posé par le JS) */
+  .sapi-cart-suggest .sapi-suggest__card {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.5s var(--ease-expo, ease);
+  }
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.7s ease calc(0.7s + var(--i, 0) * 0.18s),
+                transform 0.9s var(--ease-expo, ease) calc(0.7s + var(--i, 0) * 0.18s),
+                box-shadow 0.5s var(--ease-expo, ease);
+  }
+  @media (hover: hover) {
+    .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card:hover {
+      transform: translateY(-2px);
+      transition-delay: 0s;
+    }
+  }
+
+  /* Changement de cartes, volet ouvert : départ et arrivée en fondu */
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card.is-leaving,
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest.is-leaving > * {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+    transition: opacity 0.25s ease, transform 0.28s ease;
+  }
+  .mini-cart-overlay.is-visible ~ .sapi-cart-suggest .sapi-suggest__card.is-entering {
+    animation: sapiSuggestIn 0.8s var(--ease-expo, ease) both;
+    animation-delay: calc(var(--d, 0.15s) + var(--i, 0) * 0.18s);
+  }
+}
+@keyframes sapiSuggestIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sapi-cart-suggest *,
+  .sapi-cart-suggest .sapi-suggest__card {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.sapi-suggest__eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.sapi-suggest__title {
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  line-height: 1;
+}
+.sapi-suggest__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Gabarit .product-card-cinetique, à l'échelle de la vitrine */
+.sapi-cart-suggest .product-card-cinetique {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  color: var(--color-dark);
+}
+.sapi-cart-suggest .product-card-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+.sapi-cart-suggest .product-card-cinetique .product-info {
+  padding: 1rem 1.15rem 0.5rem;
+}
+.sapi-cart-suggest .product-card-cinetique .product-name {
+  font-size: 1.1rem !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sapi-cart-suggest .product-card-cinetique .product-category {
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0.75rem;
+}
+.sapi-cart-suggest .product-card-cinetique .price-value {
+  font-size: 1rem;
+}
+.sapi-cart-suggest .product-card-cinetique .product-actions {
+  margin-bottom: 0.75rem;
+}
+.sapi-cart-suggest button.btn-view {
+  font-family: var(--font-body);
+}
+.sapi-cart-suggest .sapi-suggest__add {
+  color: var(--color-green, #018501);
+}
+.sapi-suggest__close {
+  margin-top: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.sapi-suggest__close:hover { opacity: 1; }
+
+/* ========================================
+   PAGE PANIER : LANGUETTE AMPOULE + VITRINE (inc/sapi-cart-page.php, 15/10/2026)
+   Variante B : ce qui n'est pas au panier n'a ni cadre blanc ni contrôles.
+   La languette est accrochée sous la carte du luminaire, sur fond beige.
+   ======================================== */
+
+/* Le bloc natif des ventes croisées est remplacé par la languette */
+.sapi-cart-outer .wc-block-cart__main > .wp-block-woocommerce-product-collection {
+  display: none !important;
+}
+
+/* La carte du luminaire se colle à sa languette */
+.sapi-cart-outer .wc-block-cart-items tr.wc-block-cart-items__row:has(+ tr.sapi-amp-row) {
+  margin-bottom: 0 !important;
+  position: relative;
+  z-index: 1;
+  background: var(--color-white, #fff);
+}
+.sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row {
+  display: block !important;
+  border: 0 !important;
+  padding: 0 !important;
+  margin: 0 1rem 1rem !important;
+}
+.sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row > td {
+  display: block !important;
+  width: auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+.sapi-amp-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem 0.6rem 2rem;
+  background: #F3EEE6;
+  border-radius: 0 0 10px 10px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--color-gray, #717171);
+}
+/* Le petit crochet qui relie la languette à la carte */
+.sapi-amp-tab::before {
+  content: '';
+  position: absolute;
+  left: 0.8rem;
+  top: 0;
+  width: 0.6rem;
+  height: 50%;
+  border-left: 1.5px solid #CBBFAE;
+  border-bottom: 1.5px solid #CBBFAE;
+  border-bottom-left-radius: 8px;
+}
+.sapi-amp-tab__img {
+  flex: 0 0 auto;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 6px !important;
+  object-fit: cover;
+  opacity: 0.75;
+  mix-blend-mode: multiply;
+}
+.sapi-amp-tab__text {
+  flex: 1;
+  margin: 0 !important;
+}
+.sapi-amp-tab__text strong {
+  font-weight: 700;
+  color: var(--color-dark);
+}
+.sapi-amp-tab__add {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.9rem;
+  border: 1.5px solid var(--color-green, #018501);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-green, #018501);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.sapi-amp-tab__add:hover:not(:disabled) {
+  background: var(--color-green, #018501);
+  color: var(--color-white, #fff);
+}
+.sapi-amp-tab__add:disabled { opacity: 0.6; cursor: default; }
+@media (max-width: 600px) {
+  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row { margin: 0 0.6rem 1rem !important; }
+  .sapi-amp-tab { gap: 0.6rem; padding: 0.55rem 0.7rem 0.55rem 1.6rem; font-size: 0.78rem; }
+  .sapi-amp-tab::before { left: 0.6rem; width: 0.5rem; }
+  .sapi-amp-tab__img { width: 34px !important; height: 34px !important; }
+  .sapi-amp-tab__add { padding: 0.3rem 0.7rem; font-size: 0.75rem; }
+  .sapi-amp-tab__long { display: none; }
+}
+
+/* Vitrine sous le panier : desktop seulement, cartes beiges sans ombre */
+.sapi-cart-page-suggest {
+  margin: 2.5rem 0 0;
+  color: var(--color-dark);
+  font-family: var(--font-body);
+}
+.sapi-cart-page-suggest .sapi-suggest__eyebrow { color: var(--color-wood); opacity: 1; }
+.sapi-cart-page-suggest .sapi-suggest__title { font-size: 2.2rem; margin-bottom: 16px; }
+.sapi-cart-page-suggest .sapi-suggest__cards {
+  grid-template-columns: repeat(3, minmax(0, 220px));
+  gap: 16px;
+}
+.sapi-cart-page-suggest .product-card-cinetique {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  background: #F3EEE6 !important;
+  -webkit-box-shadow: none !important;
+  box-shadow: none !important;
+}
+.sapi-cart-page-suggest .product-card-link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+.sapi-cart-page-suggest .product-card-cinetique .product-info { padding: 0.85rem 1rem 0.4rem; }
+.sapi-cart-page-suggest .product-card-cinetique .product-name {
+  font-size: 1rem !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sapi-cart-page-suggest .product-card-cinetique .product-category { font-size: 0.8rem; margin: 0.2rem 0 0.6rem; }
+.sapi-cart-page-suggest .product-card-cinetique .price-value { font-size: 0.95rem; }
+.sapi-cart-page-suggest .product-card-cinetique .product-actions { margin-bottom: 0.6rem; }
+@media (max-width: 781px) {
+  .sapi-cart-page-suggest { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LANDING « CONSEIL DE ROBIN » (réseaux sociaux, nov. 2026)
+   page-conseil-robin.php + inc/sapi-conseil-reseaux.php
+   La modale du Conseiller est la page : fond crème au lieu du voile sombre
+   (il n'y a rien derrière à assombrir), pas de champ texte libre en S0
+   (il mène au chat, qui affiche la sélection : ici elle part par mail).
+   ═══════════════════════════════════════════════════════════════════ */
+body.sapi-landing-conseil {
+  background: var(--color-warm);
+  min-height: 100vh;
+}
+.landing-conseil__noscript {
+  max-width: 480px;
+  margin: 20vh auto 0;
+  padding: 0 24px;
+  text-align: center;
+  color: var(--color-wood-dark);
+}
+.conseiller-modal.is-landing {
+  background: var(--color-warm);
+  -webkit-animation: none;
+  animation: none;
+}
+.conseiller-modal.is-landing .separator-or,
+.conseiller-modal.is-landing [data-s0-form] {
+  display: none !important;
+}
+/* 16px minimum : en dessous, Safari iOS zoome toute la page au focus d'un
+   champ. Le formulaire du Conseiller (13.5px) n'est presque jamais rempli
+   sur téléphone ; celui-ci l'est presque toujours. */
+.conseiller-modal.is-landing .contact-form input,
+.conseiller-modal.is-landing .contact-form textarea {
+  font-size: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CONSEILLER — AMBIANCE « ALLUMER LA LUMIÈRE » (validée par Robin le 24/11/2026)
+   Maquette : canevas « Robin Conseiller — pistes d'ambiance », page V4.
+   Principe : on ne touche à AUCUN composant (cartes de choix, boutons,
+   champs, pill Robin). Seul l'ENTOURAGE change : fond bois sombre avec un
+   halo chaud, textes crème. Fin du grain rayé (::before).
+   Ce bloc est en fin de fichier exprès : il l'emporte sur les règles
+   d'origine sans les modifier, et se retire d'un coup si besoin.
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  --cons-nuit: radial-gradient(ellipse at 50% 18%, #5E4C3D 0%, #3A3029 45%, #2A221C 100%);
+  --cons-texte: #FBF6EA;
+  --cons-texte-doux: #E6D6C0;
+  --cons-filet: rgba(251, 227, 184, .18);
+  --cons-halo: 0 0 0 1px rgba(251, 227, 184, .25), 0 0 26px rgba(251, 215, 160, .35);
+}
+
+/* ── La pill Robin s'allume, partout où le Conseiller vit ── */
+.conseiller-card--modal .conseiller-sig--v1,
+.home-projet .conseiller-sig--v1,
+.advice-room-picker .conseiller-sig--v1,
+.mescreations-picker-hero .conseiller-sig--v1 { box-shadow: var(--cons-halo); }
+
+/* ── Modale ── */
+.conseiller-card--modal { background: var(--cons-nuit); }
+.conseiller-card--modal::before { display: none; }
+.conseiller-card--modal .modal__foot { border-top: 1px solid var(--cons-filet); }
+.conseiller-card--modal .h2 { color: var(--cons-texte); text-shadow: 0 0 24px rgba(251, 215, 160, .3); }
+.conseiller-card--modal .subtitle,
+.conseiller-card--modal .quote,
+.conseiller-card--modal .recap-hint,
+.conseiller-card--modal .contact-reassure,
+.conseiller-card--modal .contact-disclaimer,
+.conseiller-card--modal [data-s0-reassure] { color: var(--cons-texte-doux) !important; }
+.conseiller-card--modal .chips-label,
+.conseiller-card--modal .recap-group__title { color: var(--cons-texte-doux); opacity: 1; }
+.conseiller-card--modal .footer-link { color: var(--cons-texte-doux); }
+.conseiller-card--modal .footer-link:hover { color: var(--cons-texte); }
+.conseiller-card--modal .modal__close { color: var(--cons-texte-doux); }
+.conseiller-card--modal .modal__close:hover { background: rgba(251, 227, 184, .12); color: var(--cons-texte); }
+.conseiller-card--modal .separator-or::before,
+.conseiller-card--modal .separator-or::after { background: var(--cons-filet); }
+.conseiller-card--modal .separator-or__text { background: transparent; color: var(--cons-texte-doux); border-color: var(--cons-filet); }
+.conseiller-card--modal .progress { background: rgba(251, 227, 184, .2); }
+/* Bulle du visiteur : le bois sombre se perdait sur le fond, un filet la détache. */
+.conseiller-card--modal .chat-bubble--visitor { box-shadow: 0 0 0 1px var(--cons-filet); }
+
+/* Landing réseaux : la page derrière la modale prend la même nuit. */
+body.sapi-landing-conseil,
+.conseiller-modal.is-landing { background: #2A221C; }
+
+/* ── Les trois sélecteurs de pièce (accueil, Conseils éclairés, Mes créations) ── */
+.home-projet-section,
+.advice-room-picker,
+.mescreations-picker-hero { background: var(--cons-nuit); }
+.home-projet-section::before,
+.advice-room-picker::before,
+.mescreations-picker-hero::before { display: none; }
+.mescreations-picker-hero { border-bottom-color: transparent; }
+.home-projet-section .section-title-kinetic,
+.home-projet-section .section-num,
+.home-projet .room-picker-title,
+.advice-room-picker .room-picker-title,
+.mescreations-picker-hero .room-picker-title { color: var(--cons-texte); }
+.home-projet .room-picker-sub,
+.advice-room-picker .room-picker-sub,
+.mescreations-picker-hero .room-picker-sub,
+.home-projet .room-picker-or__text,
+.advice-room-picker .room-picker-or__text,
+.mescreations-picker-hero .room-picker-or__text { color: var(--cons-texte-doux); }
+.home-projet .room-picker-or__text,
+.advice-room-picker .room-picker-or__text,
+.mescreations-picker-hero .room-picker-or__text { background: transparent; border-color: var(--cons-filet); }
+.home-projet .room-picker-or::before, .home-projet .room-picker-or::after,
+.advice-room-picker .room-picker-or::before, .advice-room-picker .room-picker-or::after,
+.mescreations-picker-hero .room-picker-or::before, .mescreations-picker-hero .room-picker-or::after { background: var(--cons-filet); }
+
+.home-projet .room-picker-sub a, .advice-room-picker .room-picker-sub a,
+.mescreations-picker-hero .room-picker-sub a { color: var(--cons-texte); text-decoration: underline; }
+/* La ligne de reprise (« tu cherchais pour ton salon ») est une pilule
+   blanche : c'est un composant, elle garde ses couleurs. */
+.advice-room-picker .room-picker-cards { opacity: 1; }
+.conseiller-card--modal .action-btn--ghost { color: var(--cons-texte); border-color: rgba(251, 227, 184, .35); }
+.conseiller-card--modal .action-btn--ghost:hover { background: rgba(251, 227, 184, .1); }
+.conseiller-card--modal .contact-form__error { background: rgba(255, 255, 255, .92); color: #c44a1d; }
+.conseiller-card--modal [data-screen="s2-chat"] .chat-bubbles { background: rgba(0, 0, 0, .15); border-color: var(--cons-filet); }
+.conseiller-card--modal .chat-bubble-filters { background: rgba(251, 227, 184, .08); border-left-color: var(--cons-texte-doux); color: var(--cons-texte); }
+.conseiller-card--modal .chat-bubble-filters__label { color: var(--cons-texte-doux); }
+body.sapi-landing-conseil .landing-conseil__noscript { color: var(--cons-texte); }
+@media (max-width: 600px) {
+  .conseiller-card--modal .modal__close { background: rgba(251, 227, 184, .12); border-color: var(--cons-filet); box-shadow: none; color: var(--cons-texte); }
+}
+
+/* Mobile : la précision (« intime », « confortable »…) tombait SOUS l'icône.
+   `grid-row: 1 / -1` ne couvre que la grille explicite, or ces rangées sont
+   implicites : l'icône n'occupait que la rangée 1 et la précision se plaçait
+   en colonne 1. On place chaque enfant explicitement. */
+@media (max-width: 600px) {
+  .conseiller-card--modal .choices .choice__icon { grid-column: 1; grid-row: 1 / span 2; }
+  .conseiller-card--modal .choices .choice__label { grid-column: 2; grid-row: 1; justify-self: start; }
+  .conseiller-card--modal .choices .choice__dim { grid-column: 2; grid-row: 2; justify-self: start; }
+  .conseiller-card--modal .choices .choice:not(:has(.choice__dim)) .choice__label { grid-row: 1 / span 2; }
+}
+
+/* ═══ Landing réseaux : écran email (maquette V4 « Écran email », 24/11) ═══ */
+.lead-recap { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 440px; }
+.lead-recap:empty { display: none; }
+.lead-recap__chip { padding: 5px 11px; border-radius: 50px; border: 1px solid rgba(251, 227, 184, .22); font-size: 12px; font-weight: 600; color: var(--cons-texte-doux); }
+.lead-form { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 14px; }
+.lead-form__email { display: flex; flex-direction: column; gap: 6px; }
+.lead-form__label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--cons-texte); }
+.lead-form input[type="email"] {
+  width: 100%; box-sizing: border-box; padding: 15px 18px; border: 2px solid #F2C79A; border-radius: 12px;
+  background: #fff; font: inherit; font-size: 16px; color: var(--color-wood-dark); box-shadow: 0 0 0 4px rgba(242, 199, 154, .18);
+}
+.lead-form input[type="email"]:focus { outline: none; border-color: var(--color-orange); }
+.lead-form input[type="email"].is-invalid { border-color: #c44a1d; }
+.lead-form__prenom,
+.lead-form textarea {
+  width: 100%; box-sizing: border-box; padding: 13px 18px; border: 1.5px solid rgba(251, 227, 184, .35); border-radius: 12px;
+  background: rgba(255, 255, 255, .07); font: inherit; font-size: 16px; color: var(--cons-texte);
+}
+.lead-form textarea { border-style: dashed; resize: vertical; min-height: 86px; }
+.lead-form__prenom::placeholder, .lead-form textarea::placeholder { color: #B9A792; }
+.lead-form__prenom:focus, .lead-form textarea:focus { outline: none; border-color: rgba(251, 227, 184, .7); }
+.lead-form__mot { display: flex; flex-direction: column; gap: 6px; }
+.lead-form__mot-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; color: var(--cons-texte-doux); }
+.lead-form__retirer { background: none; border: 0; padding: 0; font: inherit; color: var(--cons-texte-doux); text-decoration: underline; cursor: pointer; text-transform: none; letter-spacing: 0; }
+.lead-form__extras { display: flex; gap: 10px; }
+.lead-form__ajout {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 10px;
+  background: transparent; border: 1.5px dashed rgba(251, 227, 184, .45); border-radius: 12px;
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--cons-texte-doux); text-transform: none; letter-spacing: 0; cursor: pointer;
+}
+.lead-form__ajout:hover { border-color: rgba(251, 227, 184, .8); color: var(--cons-texte); }
+.lead-form__ajout svg { width: 16px; height: 16px; }
+.lead-form__submit {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 15px 18px;
+  border: 0; border-radius: 50px; background: var(--color-orange); color: #fff;
+  font: inherit; font-weight: 700; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer;
+}
+.lead-form__submit:hover { background: var(--color-orange-hover); }
+.lead-form__submit:disabled { opacity: .6; cursor: wait; }
+.lead-form__submit svg { width: 14px; height: 14px; }
+.lead-form__legal { margin: -4px 0 0; font-size: 11px; line-height: 1.5; color: #CDBBA5; text-align: center; }
+.lead-form .contact-form__error { margin: 0; }
+
+/* Landing + barre cookies : la pill disparaissait en haut sur iPhone.
+   La barre réserve sa hauteur en bas (padding), mais la carte mobile fait
+   100dvh : elle débordait, centrée, et son en-tête passait au-dessus de
+   l'écran. Tant que la barre est là, la carte se raccourcit d'autant. */
+body.has-landing-cookies .conseiller-modal.is-landing { align-items: flex-start; }
+body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
+  max-height: calc(100dvh - var(--landing-cookies-h, 64px));
+}
+@media (max-width: 600px) {
+  body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
+    height: calc(100dvh - var(--landing-cookies-h, 64px));
+  }
+}
+
+/* Boutons de réponse mobile : liste pleine largeur, plus grands
+   (choix B de la maquette du 24/11). Un bouton par ligne : plus facile à
+   toucher, la précision (« intime »…) se lit. Une question à 6 choix
+   défile dans la modale, c'est accepté. */
+@media (max-width: 600px) {
+  .conseiller-card--modal .choices,
+  .conseiller-card--modal .choices.choices--4col,
+  .conseiller-card--modal .choices.choices--2col { grid-template-columns: 1fr; gap: 10px; }
+  .conseiller-card--modal .choices .choice {
+    padding: 14px 18px; min-height: 68px; column-gap: 14px; border-radius: 14px;
+  }
+  .conseiller-card--modal .choices .choice__icon { width: 44px; height: 44px; border-radius: 11px; }
+  .conseiller-card--modal .choices .choice__icon svg { width: 22px; height: 22px; }
+  .conseiller-card--modal .choices .choice__label { font-size: 15px; letter-spacing: .04em; }
+  .conseiller-card--modal .choices .choice__dim { font-size: 13px; margin-top: 2px; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CONSEILLER — RÉPONSES LIBRES ET SLIDERS (24/11)
+   Sous les cartes : slider (taille, hauteur), « Je ne sais pas »,
+   bouton pointillé « Préciser ma réponse » et son champ.
+   Même vocabulaire que l'écran email (pointillés crème sur bois).
+   ───────────────────────────────────────────────────────────── */
+.question-extras { width: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 10px; margin-top: 12px; }
+.question-extras[hidden],
+.question-extras [hidden] { display: none !important; }
+
+.q-slider {
+  box-sizing: border-box; width: 100%; padding: 20px 18px 18px; border-radius: 16px;
+  background: rgba(255, 255, 255, .06); border: 1px solid rgba(251, 227, 184, .2); text-align: center;
+}
+.q-slider__val { font-size: 32px; font-weight: 700; line-height: 1.1; color: var(--cons-texte); }
+.q-slider__cat {
+  display: inline-block; margin-top: 6px; padding: 4px 14px; border-radius: 30px;
+  background: var(--cons-texte); color: var(--color-wood-dark);
+  font-size: 11.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.q-slider__cat:empty { display: none; }
+.q-slider__range {
+  --pct: 50%;
+  display: block; width: 100%; height: 28px; margin: 18px 0 0; padding: 0;
+  -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer;
+}
+.q-slider__range:focus { outline: none; }
+.q-slider__range::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 2px;
+  background: linear-gradient(to right, var(--color-orange) var(--pct), rgba(251, 227, 184, .25) var(--pct));
+}
+.q-slider__range::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(251, 227, 184, .25); }
+.q-slider__range::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--color-orange); }
+.q-slider__range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 28px; height: 28px; margin-top: -12px; border: 0; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 0 4px rgba(227, 91, 36, .35), 0 2px 6px rgba(0, 0, 0, .4);
+}
+.q-slider__range::-moz-range-thumb {
+  width: 28px; height: 28px; border: 0; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 0 4px rgba(227, 91, 36, .35), 0 2px 6px rgba(0, 0, 0, .4);
+}
+.q-slider__range:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px var(--color-orange), 0 2px 6px rgba(0, 0, 0, .4); }
+.q-slider__range:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 4px var(--color-orange), 0 2px 6px rgba(0, 0, 0, .4); }
+.q-slider__reperes { position: relative; height: 16px; margin-top: 6px; font-size: 11px; color: var(--cons-texte-doux); }
+.q-slider__reperes span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.q-slider__reperes span:first-child { transform: none; left: 0 !important; }
+.q-slider__reperes span:last-child { transform: none; left: auto !important; right: 0; }
+.q-slider__valider,
+.q-precision__valider {
+  border: 0; border-radius: 40px; background: var(--color-orange); color: #fff; cursor: pointer;
+  font: inherit; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.q-slider__valider { margin-top: 18px; padding: 13px 34px; }
+.q-slider__valider:hover,
+.q-precision__valider:hover { background: var(--color-orange-hover); }
+
+.q-nsp {
+  align-self: center; padding: 10px 22px; border-radius: 40px; cursor: pointer;
+  background: none; border: 1px solid rgba(251, 227, 184, .35); color: var(--cons-texte-doux);
+  font: inherit; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+}
+.q-nsp:hover, .q-nsp.is-selected { border-color: rgba(251, 227, 184, .8); color: var(--cons-texte); }
+
+.q-preciser {
+  width: 100%; padding: 13px 16px; border-radius: 12px; cursor: pointer;
+  background: transparent; border: 1.5px dashed rgba(251, 227, 184, .45); color: var(--cons-texte-doux);
+  font: inherit; font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none;
+}
+.q-preciser:hover { border-color: rgba(251, 227, 184, .8); color: var(--cons-texte); }
+.q-precision { display: flex; flex-direction: column; gap: 8px; }
+.q-precision textarea {
+  width: 100%; box-sizing: border-box; min-height: 78px; padding: 12px 14px; resize: vertical;
+  border: 1.5px dashed rgba(251, 227, 184, .45); border-radius: 12px; background: rgba(255, 255, 255, .06);
+  font: inherit; font-size: 16px; color: var(--cons-texte);
+}
+.q-precision textarea::placeholder { color: #B9A792; }
+.q-precision textarea:focus { outline: none; border-color: rgba(251, 227, 184, .8); }
+.q-precision textarea.is-invalid { border-color: #F2A07A; }
+.q-precision__pied { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.q-precision__pied span { font-size: 12px; line-height: 1.35; color: var(--cons-texte-doux); text-align: left; }
+.q-precision__valider { flex: none; padding: 11px 22px; font-size: 12.5px; }
+
+/* Modale : un contenu plus haut que l'écran devenait inatteignable par le
+   haut (7 pièces en liste + barre cookies, capture de Robin du 24/11).
+   `flex: 1` + `min-height: 0` laissait le bloc rétrécir sous son contenu,
+   et le centrage vertical poussait alors le surplus AU-DESSUS du cadre de
+   défilement, là où on ne peut pas remonter. Avec `flex-shrink: 0`, le
+   bloc garde sa hauteur : il reste centré quand il tient, et c'est
+   `.modal__body` qui défile, depuis le haut, quand il ne tient pas. */
+.conseiller-card--modal .modal__body-content { flex: 1 0 auto; }
+/* Sauf le chat : son cadre de bulles défile lui-même au-dessus du champ de
+   saisie, ce qui suppose un bloc borné à la hauteur de l'écran. */
+.conseiller-card--modal [data-screen="s2-chat"] .modal__body-content { flex: 1 1 0%; min-height: 0; }
+
+/* Mobile : au-delà de 4 choix (les 7 pièces), cartes plus basses pour que
+   la liste tienne mieux sans défiler. */
+@media (max-width: 600px) {
+  .conseiller-card--modal .choices:has(> .choice:nth-child(5)) { gap: 8px; }
+  .conseiller-card--modal .choices:has(> .choice:nth-child(5)) .choice { min-height: 54px; padding: 9px 16px; }
+  .conseiller-card--modal .choices:has(> .choice:nth-child(5)) .choice__icon { width: 36px; height: 36px; }
+  .conseiller-card--modal .choices:has(> .choice:nth-child(5)) .choice__icon svg { width: 19px; height: 19px; }
+}
+
+/* Landing réseaux — écran d'accueil (24/11) : photo, salut, une phrase. */
+.landing-accueil { gap: 22px; text-align: center; padding: 10px 6px; }
+.landing-accueil__photo {
+  width: 120px; height: 120px; border-radius: 50%; overflow: hidden; flex: none;
+  border: 3px solid var(--cons-texte);
+  box-shadow: 0 0 0 6px rgba(251, 227, 184, .12), 0 0 40px rgba(251, 215, 160, .35);
+}
+.landing-accueil__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.landing-accueil__salut { margin: 0; font-family: var(--font-display); font-size: 38px; line-height: 1; color: #fff; }
+.landing-accueil__texte { margin: 0; font-size: 16px; line-height: 1.5; color: var(--cons-texte); }
+.landing-accueil__go { max-width: 320px; }
+
+/* Landing — écran email : [hidden] doit gagner sur les display:flex des
+   boutons pointillés (« Ajouter un mot » restait visible une fois ouvert). */
+.lead-form [hidden] { display: none !important; }
+
+/* Photos (24/11) : vignettes carrées avec une croix, sous les boutons. */
+.lead-photos { display: flex; flex-direction: column; gap: 6px; }
+.lead-photos__liste { display: flex; gap: 10px; flex-wrap: wrap; }
+.lead-photos__item { position: relative; width: 76px; height: 76px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(251, 227, 184, .35); }
+.lead-photos__item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lead-photos__retirer {
+  position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 50%;
+  background: rgba(42, 34, 28, .75); color: #fff; font: inherit; font-size: 16px; line-height: 24px; text-align: center; cursor: pointer;
+}
+.lead-photos__note { margin: 0; font-size: 11.5px; color: var(--cons-texte-doux); }
+.lead-form__ajout:disabled { opacity: .6; cursor: wait; }
+
+/* ─────────────────────────────────────────────────────────────
+   ACCUEIL — PROJET ENTAMÉ (24/11, maquette validée)
+   `.has-projet` est posée par le script en ligne de front-page.php
+   AVANT l'affichage : on montre la sélection au lieu du sélecteur.
+   ───────────────────────────────────────────────────────────── */
+.home-projet-section:not(.has-projet) .accueil-projet { display: none; }
+.home-projet-section.has-projet .home-projet { display: none; }
+.accueil-projet {
+  position: relative; z-index: 1;
+  max-width: 1000px; margin: 0 auto; padding: 0 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center;
+}
+.accueil-projet__phrase { margin: 0; max-width: 640px; font-size: 17px; line-height: 1.55; color: var(--cons-texte); }
+.accueil-projet__phrase:empty { display: none; }
+.accueil-projet__cartes {
+  width: 100%; display: flex; justify-content: flex-start; gap: 18px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+  overscroll-behavior-x: contain; padding: 4px 2px 8px; text-align: left;
+}
+.accueil-projet__cartes::-webkit-scrollbar { display: none; }
+/* Centrées quand elles tiennent, défilables depuis la PREMIÈRE quand elles
+   débordent (justify-content: center rognait la gauche, hors d'atteinte). */
+.accueil-projet__cartes > :first-child { margin-left: auto; }
+.accueil-projet__cartes > :last-child { margin-right: auto; }
+.accueil-projet__cartes .product-card-cinetique { flex: 0 0 220px; scroll-snap-align: start; background: #fff; border-radius: 14px; overflow: hidden; }
+.accueil-projet__cartes .product-price { justify-content: center; }
+.accueil-projet__vide {
+  flex: 0 0 220px; height: 320px; border-radius: 14px; background: rgba(255, 255, 255, .08);
+  animation: accueil-vide 1.2s ease-in-out infinite alternate;
+}
+@keyframes accueil-vide { from { opacity: .5; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .accueil-projet__vide { animation: none; } }
+.accueil-projet__actions { display: flex; align-items: center; justify-content: center; gap: 28px; flex-wrap: wrap; }
+.accueil-projet__completer {
+  display: inline-flex; align-items: center; padding: 14px 28px; border-radius: 50px;
+  background: var(--color-orange); color: #fff; text-decoration: none;
+  font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.accueil-projet__completer:hover { background: var(--color-orange-hover); color: #fff; }
+.accueil-projet__autre {
+  background: none; border: 0; padding: 6px 0; cursor: pointer; color: var(--cons-texte-doux);
+  font: inherit; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; text-decoration: underline;
+}
+.accueil-projet__autre:hover { color: var(--cons-texte); }
+@media (max-width: 768px) {
+  .accueil-projet { padding: 0; gap: 18px; }
+  .accueil-projet__phrase { font-size: 15px; padding: 0 20px; }
+  .accueil-projet__cartes { justify-content: flex-start; padding-left: 20px; padding-right: 20px; scroll-padding-left: 20px; }
+  .accueil-projet__cartes .product-card-cinetique, .accueil-projet__vide { flex-basis: 62%; }
+  .accueil-projet__actions { flex-direction: column; gap: 16px; width: 100%; padding: 0 20px; box-sizing: border-box; }
+  .accueil-projet__completer { width: 100%; justify-content: center; box-sizing: border-box; }
+}
+.accueil-projet .screen-reader-text {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
