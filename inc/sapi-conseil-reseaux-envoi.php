@@ -132,7 +132,7 @@ function sapi_conseil_preparer_brouillon($id) {
   $choisi = $produits[0] ?? null;
   $raison = $choisi ? sapi_conseil_raison_ia($answers, $labels, $choisi, $notes) : '';
 
-  $lignes = ['Bonjour ' . $prenom . ','];
+  $lignes = [$prenom !== '' ? 'Bonjour ' . $prenom . ',' : 'Bonjour,'];
 
   if ($choisi && $raison !== '') {
     $lignes[] = 'Je pense que le meilleur luminaire pour ' . $ta_piece . ', c\'est ' . $choisi['title'] . '. ' . $raison;
@@ -152,7 +152,7 @@ function sapi_conseil_preparer_brouillon($id) {
      (sapi-conseil-reseaux-email.php) : Robin n'a que ses mots à relire. */
   $autres = $choisi ? array_slice($produits, 1, 2) : [];
 
-  $sujet = $prenom . ', mon conseil pour ' . $ta_piece;
+  $sujet = $prenom !== '' ? $prenom . ', mon conseil pour ' . $ta_piece : 'Mon conseil pour ' . $ta_piece;
 
   $data = [
     'produit_id'   => $choisi ? (int) $choisi['id'] : 0,
@@ -361,7 +361,7 @@ function sapi_conseil_admin_page() {
     if (!$rows) echo '<tr><td colspan="6">Aucune demande pour l\'instant.</td></tr>';
     foreach ($rows as $r) {
       $url = admin_url('admin.php?page=sapi-conseil-reseaux&demande=' . (int) $r->id);
-      echo '<tr><td>' . esc_html($r->created_at) . '</td><td>' . esc_html($r->prenom ?: '(effacé)') . '</td><td>' . esc_html($r->piece)
+      echo '<tr><td>' . esc_html($r->created_at) . '</td><td>' . esc_html($r->prenom !== '' ? $r->prenom : ($r->email === '' ? '(effacé)' : '—')) . '</td><td>' . esc_html($r->piece)
         . '</td><td>' . (trim((string) $r->commentaire) !== '' ? 'Oui' : '') . '</td><td>' . esc_html(sapi_conseil_statut_label($r))
         . '</td><td><a href="' . esc_url($url) . '">Ouvrir</a></td></tr>';
     }

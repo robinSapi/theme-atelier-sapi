@@ -196,7 +196,7 @@ function sapi_conseil_email_html($row) {
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:2px dashed #937D68;background-color:#FBF6EA;border-radius:12px;">
                 <tr>
                   <td align="center" style="padding:20px 16px;">
-                    <p style="margin:0;<?php echo $f; ?>font-size:12px;font-weight:600;color:#937D68;text-transform:uppercase;letter-spacing:2px;">Pour te remercier d'avoir répondu</p>
+                    <p style="margin:0;<?php echo $f; ?>font-size:12px;font-weight:600;color:#937D68;text-transform:uppercase;letter-spacing:2px;">Pour rappel, ton code</p>
                     <p style="margin:8px 0 4px;<?php echo $f; ?>font-size:26px;font-weight:800;color:#E35B24;letter-spacing:3px;">BIENVENUE10</p>
                     <p style="margin:0;<?php echo $f; ?>font-size:15px;font-weight:700;color:#323232;">-10 % sur ta commande</p>
                     <p style="margin:6px 0 0;<?php echo $f; ?>font-size:12px;font-style:italic;color:#717171;">À saisir au moment de payer sur atelier-sapi.fr</p>
@@ -245,4 +245,68 @@ function sapi_conseil_email_html($row) {
 </html>
 <?php
   return ob_get_clean();
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Accusé de réception, envoyé TOUT DE SUITE après la demande (décision Robin
+   24/11) : la personne a une trace immédiate, et le -10 % arrive au moment
+   où elle est la plus intéressée. Le mail de Robin, plus tard, le rappelle.
+   ───────────────────────────────────────────────────────────────────────── */
+function sapi_conseil_accuse_html($prenom) {
+  $f  = "font-family:'Montserrat',Arial,Helvetica,sans-serif;";
+  $sp = "font-family:'Square Peg',Georgia,serif;";
+  $bonjour = $prenom !== '' ? 'Merci ' . $prenom . ' !' : 'Merci !';
+  ob_start();
+  ?><!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demande bien reçue</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Square+Peg&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;background-color:#F5EDE4;<?php echo $f; ?>">
+  <div style="display:none;max-height:0;overflow:hidden;">Robin va lire ton projet et t'envoie son conseil sous 3 jours.</div>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F5EDE4;"><tr><td align="center" style="padding:16px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;background-color:#FEFDFB;">
+      <tr><td align="center" style="padding:32px 24px 16px;"><img src="https://atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.svg" alt="Atelier Sâpi" width="130" style="display:block;max-width:130px;height:auto;"></td></tr>
+      <tr><td align="center" style="padding:16px 24px 6px;"><h1 style="margin:0;<?php echo $sp; ?>font-size:44px;font-weight:400;color:#937D68;line-height:50px;">Demande bien reçue</h1></td></tr>
+      <tr><td align="center" style="padding:8px 36px 26px;">
+        <p style="margin:0 0 10px;<?php echo $f; ?>font-size:16px;font-weight:600;color:#323232;"><?php echo esc_html($bonjour); ?></p>
+        <p style="margin:0;<?php echo $f; ?>font-size:15px;color:#323232;line-height:26px;">Robin va lire ton projet et t'envoie son conseil sous 3 jours, par mail, à cette adresse.</p>
+      </td></tr>
+      <tr><td style="background-color:#FAF6F0;padding:28px 32px;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border:2px dashed #937D68;background-color:#FBF6EA;border-radius:12px;"><tr><td align="center" style="padding:20px 16px;">
+          <p style="margin:0;<?php echo $f; ?>font-size:12px;font-weight:600;color:#937D68;text-transform:uppercase;letter-spacing:2px;">Pour te remercier d'avoir répondu</p>
+          <p style="margin:8px 0 4px;<?php echo $f; ?>font-size:26px;font-weight:800;color:#E35B24;letter-spacing:3px;">BIENVENUE10</p>
+          <p style="margin:0;<?php echo $f; ?>font-size:15px;font-weight:700;color:#323232;">-10 % sur ta commande</p>
+          <p style="margin:6px 0 0;<?php echo $f; ?>font-size:12px;font-style:italic;color:#717171;">À saisir au moment de payer sur atelier-sapi.fr</p>
+        </td></tr></table>
+      </td></tr>
+      <tr><td align="center" style="padding:24px 24px 6px;"><p style="margin:0;<?php echo $f; ?>font-size:13px;color:#717171;">Une précision à ajouter ? Réponds simplement à ce mail.</p></td></tr>
+      <tr><td align="center" style="padding:4px 24px 10px;"><p style="margin:0;<?php echo $sp; ?>font-size:30px;color:#937D68;">Robin</p></td></tr>
+      <tr><td align="center" style="padding:6px 32px 24px;"><p style="margin:0;<?php echo $f; ?>font-size:10px;color:#bbbbbb;line-height:15px;">Tu reçois ce mail parce que tu as demandé conseil à Robin sur atelier-sapi.fr. © <?php echo esc_html(date('Y')); ?> Atelier Sâpi</p></td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>
+<?php
+  return ob_get_clean();
+}
+
+function sapi_conseil_envoyer_accuse($id) {
+  $row = function_exists('sapi_conseil_get') ? sapi_conseil_get($id) : null;
+  if (!$row || $row->email === '') return false;
+  $ok = wp_mail(
+    $row->email,
+    'Demande bien reçue, Robin regarde ton projet',
+    sapi_conseil_accuse_html((string) $row->prenom),
+    [
+      'Content-Type: text/html; charset=UTF-8',
+      'From: Robin - Atelier Sâpi <robin@atelier-sapi.fr>',
+      'Reply-To: robin@atelier-sapi.fr',
+    ]
+  );
+  if (!$ok) error_log('[sapi-conseil] accusé de réception non envoyé, demande ' . (int) $id);
+  return $ok;
 }

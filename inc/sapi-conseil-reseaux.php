@@ -174,8 +174,9 @@ function sapi_ajax_conseil_lead() {
      Robin envoie. Sans ce filtre, un bot pourrait y glisser un lien ou une
      arnaque et faire envoyer son message, par robin@, à l'adresse d'un tiers.
      Un prénom n'a ni chiffre, ni @, ni « www », ni « mot.domaine ». */
-  if ($prenom === '' || preg_match('~[0-9@/:]|www|\.\p{L}{2,}~iu', $prenom)) {
-    wp_send_json_error(['message' => 'prenom', 'fallback' => 'Indique ton prénom.']);
+  /* Prénom FACULTATIF (24/11). S'il est donné, même filtre qu'avant. */
+  if ($prenom !== '' && preg_match('~[0-9@/:]|www|\.\p{L}{2,}~iu', $prenom)) {
+    wp_send_json_error(['message' => 'prenom', 'fallback' => 'Ce prénom ne semble pas valide.']);
   }
   if (!is_email($email)) {
     wp_send_json_error(['message' => 'email', 'fallback' => 'Cet email ne semble pas valide.']);
@@ -280,7 +281,7 @@ function sapi_ajax_conseil_lead() {
   // Mail à Robin
   $piece_label = $labels['piece'] ?? '';
   $subject = ($mode === 'manuel' ? '[Conseil réseaux · à toi de répondre] ' : '[Conseil réseaux] ')
-    . $prenom . ($piece_label !== '' ? ' · ' . $piece_label : '');
+    . ($prenom !== '' ? $prenom : $email) . ($piece_label !== '' ? ' · ' . $piece_label : '');
 
   $body  = "Nouvelle demande depuis la page Conseil de Robin (réseaux sociaux).\n\n";
   $body .= "── Visiteur ──\n" . $prenom . ' <' . $email . ">\n\n";
@@ -325,6 +326,11 @@ function sapi_ajax_conseil_lead() {
     wp_schedule_single_event(time(), 'sapi_conseil_preparer_event', [$demande_id]);
   }
 
+  /* Accusé de réception immédiat, avec le code -10 %. Non bloquant. */
+  if ($demande_id && function_exists('sapi_conseil_envoyer_accuse')) {
+    sapi_conseil_envoyer_accuse($demande_id);
+  }
+
   if (function_exists('sapi_megafilter_marquer_contact_envoye')) {
     sapi_megafilter_marquer_contact_envoye($session_id);
   }
@@ -354,25 +360,48 @@ function sapi_render_conseil_lead_screens($pencil_svg) {
 
         <div class="modal__body">
           <div class="modal__body-content">
-            <h2 class="h2"><?php esc_html_e('Merci, j\'ai tout ce qu\'il me faut', 'theme-sapi-maison'); ?></h2>
-            <p class="subtitle"><?php esc_html_e('Robin prendra le temps de regarder ton cas pour te proposer le meilleur luminaire. Il t\'envoie un mail sous 3 jours.', 'theme-sapi-maison'); ?></p>
+            <?php /* Écran le plus stratégique du parcours (décision Robin 24/11) :
+                     UN seul champ obligatoire, l'email, mis en avant. Prénom
+                     facultatif et discret. Le mot et la photo sont des boutons
+                     en pointillés qui n'ouvrent leur champ qu'au clic : l'écran
+                     a l'air court. Le -10 % n'est plus ici : il part dans
+                     l'accusé de réception envoyé tout de suite. */ ?>
+            <h2 class="h2"><?php esc_html_e('Où je t\'envoie mon conseil ?', 'theme-sapi-maison'); ?></h2>
+            <div class="lead-recap" data-lead-recap aria-label="<?php esc_attr_e('Tes réponses', 'theme-sapi-maison'); ?>"></div>
 
-            <form class="contact-form" data-lead-form novalidate>
-              <input type="text" name="prenom" required maxlength="60" autocomplete="given-name"
-                     placeholder="<?php esc_attr_e('Ton prénom', 'theme-sapi-maison'); ?>"
-                     aria-label="<?php esc_attr_e('Ton prénom', 'theme-sapi-maison'); ?>">
-              <input type="email" name="email" required autocomplete="email" inputmode="email"
-                     placeholder="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>"
-                     aria-label="<?php esc_attr_e('Ton email', 'theme-sapi-maison'); ?>">
-              <textarea name="commentaire" rows="3" maxlength="1500"
-                        placeholder="<?php esc_attr_e('Un petit mot pour Robin ? (facultatif)', 'theme-sapi-maison'); ?>"
-                        aria-label="<?php esc_attr_e('Un petit mot pour Robin, facultatif', 'theme-sapi-maison'); ?>"></textarea>
+            <form class="lead-form" data-lead-form novalidate>
+              <label class="lead-form__email">
+                <span class="lead-form__label"><?php esc_html_e('Ton email', 'theme-sapi-maison'); ?></span>
+                <input type="email" name="email" required autocomplete="email" inputmode="email"
+                       placeholder="<?php esc_attr_e('prenom@exemple.fr', 'theme-sapi-maison'); ?>">
+              </label>
+              <input type="text" name="prenom" maxlength="60" autocomplete="given-name" class="lead-form__prenom"
+                     placeholder="<?php esc_attr_e('Ton prénom (facultatif)', 'theme-sapi-maison'); ?>"
+                     aria-label="<?php esc_attr_e('Ton prénom, facultatif', 'theme-sapi-maison'); ?>">
+
+              <div class="lead-form__mot" data-lead-mot hidden>
+                <span class="lead-form__mot-head">
+                  <label for="sapi-lead-mot"><?php esc_html_e('Ton mot pour Robin', 'theme-sapi-maison'); ?></label>
+                  <button type="button" class="lead-form__retirer" data-action="lead-mot-retirer"><?php esc_html_e('Retirer', 'theme-sapi-maison'); ?></button>
+                </span>
+                <textarea id="sapi-lead-mot" name="commentaire" rows="3" maxlength="1500"></textarea>
+              </div>
+              <div class="lead-form__extras">
+                <button type="button" class="lead-form__ajout" data-action="lead-mot-ouvrir">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                  <?php esc_html_e('Ajouter un mot', 'theme-sapi-maison'); ?>
+                </button>
+                <?php /* « Ajouter une photo » viendra ici avec l'étape 3. */ ?>
+              </div>
+
               <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;">
-              <button type="submit" data-lead-submit>
-                <?php esc_html_e('Envoyer à Robin', 'theme-sapi-maison'); ?>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+              <button type="submit" class="lead-form__submit" data-lead-submit>
+                <?php esc_html_e('Recevoir mon conseil', 'theme-sapi-maison'); ?>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
               </button>
-              <p class="contact-disclaimer"><?php esc_html_e('En envoyant ta demande, tu acceptes de recevoir occasionnellement des nouvelles de l\'Atelier Sâpi. Désinscription possible à tout moment.', 'theme-sapi-maison'); ?></p>
+              <?php /* ⚠️ OBLIGATOIRE : le contact entre dans la newsletter (#6).
+                       On peut raccourcir cette ligne, pas la retirer. */ ?>
+              <p class="lead-form__legal"><?php esc_html_e('Tu recevras aussi les nouvelles de l\'atelier. Désinscription en un clic.', 'theme-sapi-maison'); ?></p>
             </form>
           </div>
         </div>
@@ -399,7 +428,7 @@ function sapi_render_conseil_lead_screens($pencil_svg) {
         <div class="modal__body">
           <div class="modal__body-content">
             <h2 class="h2" data-lead-merci-titre><?php esc_html_e('Merci', 'theme-sapi-maison'); ?></h2>
-            <p class="subtitle"><?php esc_html_e('Robin regarde tes réponses et t\'écrit sous 3 jours avec le luminaire qu\'il te conseille.', 'theme-sapi-maison'); ?></p>
+            <p class="subtitle"><?php esc_html_e('Tu viens de recevoir un mail de confirmation. Robin va lire ton projet et t\'envoie son conseil sous 3 jours.', 'theme-sapi-maison'); ?></p>
           </div>
         </div>
         <footer class="modal__foot">

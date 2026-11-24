@@ -2593,6 +2593,21 @@
   }
 
   function showLeadScreen() {
+    /* Rappel des réponses en pastilles : la personne voit que le travail
+       est fait et qu'il lui revient. Libellés connus seulement, dans
+       l'ordre du questionnaire. */
+    var recap = els.modal.querySelector('[data-lead-recap]');
+    if (recap) {
+      recap.innerHTML = '';
+      getVisibleStepIds(state.answers).forEach(function (id) {
+        var lab = state.labels[id];
+        if (!lab || state.answers[id] === 'ne-sais-pas') return;
+        var chip = document.createElement('span');
+        chip.className = 'lead-recap__chip';
+        chip.textContent = lab;
+        recap.appendChild(chip);
+      });
+    }
     showScreen('s-lead');
     pushLandingEvent('conseil_reseaux_questions_finies', { piece: state.answers.piece || '' });
     /* Pas de focus automatique sur le prénom : sur mobile il ouvrirait le
@@ -2616,14 +2631,11 @@
     if (prenomInput) prenomInput.classList.remove('is-invalid');
     if (emailInput) emailInput.classList.remove('is-invalid');
 
+    /* Seul l'email est obligatoire (24/11). */
     var message = '';
-    if (!prenomVal) {
-      if (prenomInput) prenomInput.classList.add('is-invalid');
-      message = 'Indique ton prénom.';
-    }
     if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
       if (emailInput) emailInput.classList.add('is-invalid');
-      message = message ? 'Indique ton prénom et un email valide.' : 'Indique un email valide.';
+      message = 'Indique ton email pour recevoir le conseil.';
     }
     function afficherErreur(txt) {
       var err = document.createElement('p');
@@ -2665,7 +2677,7 @@
       .then(function (resp) {
         if (resp && resp.success) {
           var titre = els.modal.querySelector('[data-lead-merci-titre]');
-          if (titre) titre.textContent = 'Merci ' + prenomVal;
+          if (titre) titre.textContent = prenomVal ? 'Merci ' + prenomVal : 'Merci';
           showScreen('s-lead-merci');
           pushLandingEvent('conseil_reseaux_email', { piece: state.answers.piece || '', avec_mot: motVal ? 1 : 0 });
           return;
@@ -2805,6 +2817,19 @@
         case 'back':
           backFromQuestion();
           break;
+        case 'lead-mot-ouvrir':
+        case 'lead-mot-retirer': {
+          var bloc = els.modal.querySelector('[data-lead-mot]');
+          var ouvrir = els.modal.querySelector('[data-action="lead-mot-ouvrir"]');
+          var ouvre = (action === 'lead-mot-ouvrir');
+          if (bloc) bloc.hidden = !ouvre;
+          if (ouvrir) ouvrir.hidden = ouvre;
+          if (bloc) {
+            var ta = bloc.querySelector('textarea');
+            if (ta) { if (ouvre) ta.focus(); else ta.value = ''; }
+          }
+          break;
+        }
         case 'lead-exit':
           // Landing réseaux : « Non merci » ou après le merci → /mes-creations/
           closeModal();
