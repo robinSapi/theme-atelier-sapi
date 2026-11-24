@@ -7559,6 +7559,33 @@ function sapi_megafilter_admin_compute_stats($filters) {
   $completed_q = "SELECT COUNT(*) FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . ' answers_completed = 1';
   $completed = (int) ($args ? $wpdb->get_var($wpdb->prepare($completed_q, $args)) : $wpdb->get_var($completed_q));
 
+  /* ⚠️ « QUIZ COMPLÉTÉS » SUR TOUTES LES SESSIONS ÉTAIT TROMPEUR (24/11).
+     Un clic sur une pièce ouvre une session et mène DIRECTEMENT à une
+     sélection, sans questions : depuis l'immersion (septembre), c'est le
+     parcours de la majorité. Ces visiteurs comptaient comme des abandons, et
+     l'indicateur affichait 7 % alors que 82 % de ceux qui commencent les
+     questions vont plus loin que la taille. On sépare donc trois parcours :
+     - fiches produit (parcours court taille + style). Reconnues aussi par
+       l'adresse : avant le 28/08 elles étaient étiquetées `mes_creations` ;
+     - sélections affinées : hors fiche produit, au moins une question au-delà
+       de la pièce ;
+     - questionnaires finis parmi ceux-là. */
+  $et = ($where_sql ? ' AND ' : ' WHERE ');
+  $compter = function ($condition) use ($wpdb, $table, $where_sql, $args, $et) {
+    $q = "SELECT COUNT(*) FROM $table $where_sql" . $et . $condition;
+    return (int) ($args ? $wpdb->get_var($wpdb->prepare($q, $args)) : $wpdb->get_var($q));
+  };
+  $est_produit = "(entry_point = 'product_pill' OR COALESCE(entry_url, '') REGEXP '/mes-creations/[^/?#]+/?([?#]|$)')";
+  $a_repondu   = "(taille <> '' OR taille_escalier <> '' OR eclairage <> '' OR sortie <> '' OR hauteur <> '' OR style <> '')";
+  /* Une pièce écrite à la main (`autre`) n'est pas enregistrée : la session
+     a des réponses sans pièce. Elle compte quand même dans le dénominateur,
+     sinon on afficherait « 5 affinées sur 3 ». */
+  $selections      = $compter("NOT $est_produit AND (piece <> '' OR $a_repondu)");
+  $affinees        = $compter("NOT $est_produit AND $a_repondu");
+  $affinees_finies = $compter("NOT $est_produit AND $a_repondu AND answers_completed = 1");
+  $produit_ouverts = $compter($est_produit);
+  $produit_finis   = $compter("$est_produit AND taille <> '' AND style <> ''");
+
   $chat_q = "SELECT COUNT(*) FROM $table $where_sql " . ($where_sql ? 'AND' : 'WHERE') . ' ai_chat_used = 1';
   $chat_used = (int) ($args ? $wpdb->get_var($wpdb->prepare($chat_q, $args)) : $wpdb->get_var($chat_q));
 
@@ -7625,6 +7652,11 @@ function sapi_megafilter_admin_compute_stats($filters) {
   return [
     'total'             => $total,
     'completed'         => $completed,
+    'selections'        => $selections,
+    'affinees'          => $affinees,
+    'affinees_finies'   => $affinees_finies,
+    'produit_ouverts'   => $produit_ouverts,
+    'produit_finis'     => $produit_finis,
     'chat_used'         => $chat_used,
     'contacts'          => $contacts,
     'delta_pct'         => $delta_pct,
@@ -7714,6 +7746,8 @@ function sapi_megafilter_admin_page() {
   $period_label = $period_label_map[$period] ?? '7 jours';
 
   $completed_pct = $stats['total'] > 0 ? round(($stats['completed'] / $stats['total']) * 100) : 0;
+  // Aucun questionnaire commencé sur ce filtre : « — », pas un « 0 % » qui ferait croire à une chute.
+  $affinees_pct  = $stats['affinees'] > 0 ? round(($stats['affinees_finies'] / $stats['affinees']) * 100) . ' %' : '—';
   $chat_pct      = $stats['total'] > 0 ? round(($stats['chat_used'] / $stats['total']) * 100) : 0;
 
   // Top valeurs absolues pour normaliser les barres
@@ -7791,9 +7825,13 @@ function sapi_megafilter_admin_page() {
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-card__label">Quiz complétés</div>
-        <div class="stat-card__value"><?php echo esc_html($completed_pct); ?> %</div>
-        <div class="stat-card__sub"><?php echo esc_html($stats['completed']); ?> sessions sur <?php echo esc_html($stats['total']); ?></div>
+        <div class="stat-card__label">Questionnaires finis</div>
+        <div class="stat-card__value"><?php echo esc_html($affinees_pct); ?></div>
+        <div class="stat-card__sub">
+          <?php echo esc_html($stats['affinees_finies']); ?> sur <?php echo esc_html($stats['affinees']); ?> commencés
+          · <?php echo esc_html($stats['affinees']); ?> sélections affinées sur <?php echo esc_html($stats['selections']); ?>
+          <br>Fiches produit : <?php echo esc_html($stats['produit_finis']); ?> parcours courts finis sur <?php echo esc_html($stats['produit_ouverts']); ?>
+        </div>
       </div>
       <div class="stat-card">
         <div class="stat-card__label">IA chat utilisée</div>

@@ -1864,7 +1864,12 @@
     var step = getStep(nextStepId);
     if (step) {
       state.currentQuestion = nextStepId;
-      if (els.s0Question) els.s0Question.textContent = getDynamicQuestion(step);
+      /* Premier écran d'un projet vierge : la question arrive sans rien
+         avant elle, on l'introduit (Robin, 24/11). Pas en reprise ni en
+         correction, où « pour commencer » serait faux. */
+      var titreS0 = getDynamicQuestion(step);
+      if (mode !== 's0-partiel' && nextStepId === 'piece') titreS0 = 'Pour commencer, c’est pour quelle pièce ?';
+      if (els.s0Question) els.s0Question.textContent = titreS0;
       if (els.s0Choices) {
         els.s0Choices.innerHTML = '';
         var choices = step.choices || [];
@@ -2822,6 +2827,10 @@
     //     la 1re question du parcours court non répondue)
     if (opts && opts.sansEcran) {
       /* L'appelant affiche son propre écran juste après ce retour. */
+    } else if (LANDING) {
+      /* Landing réseaux : Robin se présente d'abord ; « C'est parti »
+         mène à la première question. */
+      showScreen('s-accueil');
     } else if (initialScreen === 'product') {
       var visible = getVisibleStepIds(state.answers); // filtré short mode
       var allAnswered = visible.length > 0 && visible.every(function (id) { return !!state.answers[id]; });
@@ -3179,6 +3188,9 @@
           }
           break;
         }
+        case 'accueil-go':
+          renderS0Hybrid('s0-initial');
+          break;
         case 'lead-exit':
           // Landing réseaux : « Non merci » ou après le merci → /mes-creations/
           closeModal();

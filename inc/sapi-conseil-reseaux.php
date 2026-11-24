@@ -357,6 +357,24 @@ function sapi_ajax_conseil_lead() {
 function sapi_render_conseil_lead_screens($pencil_svg) {
   $avatar = sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'thumbnail', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'conseiller-sig__img', 'loading' => 'lazy']);
   ?>
+      <!-- ═══ Landing réseaux — accueil (24/11) ═══════════════
+           Premier écran en arrivant d'un post : Robin se présente et pose
+           le cadre en une phrase, avant toute question. Volontairement très
+           court (Robin : « trop de texte » sur la première maquette). -->
+      <section class="modal__screen" data-screen="s-accueil" hidden>
+        <div class="modal__body">
+          <div class="modal__body-content landing-accueil">
+            <span class="landing-accueil__photo"><?php echo sapi_image('2026/03/Robin-face-avec-Alice-lhelice.jpg', 'medium', ['alt' => 'Robin, artisan de l\'Atelier Sâpi', 'class' => 'landing-accueil__img']); // phpcs:ignore WordPress.Security.EscapeOutput ?></span>
+            <p class="landing-accueil__salut"><?php esc_html_e('Salut, moi c\'est Robin', 'theme-sapi-maison'); ?></p>
+            <p class="landing-accueil__texte"><?php esc_html_e('Quelques questions sur ta pièce,', 'theme-sapi-maison'); ?><br><?php esc_html_e('et je t\'envoie mon conseil par mail.', 'theme-sapi-maison'); ?></p>
+            <button type="button" class="lead-form__submit landing-accueil__go" data-action="accueil-go"><?php esc_html_e('C\'est parti', 'theme-sapi-maison'); ?></button>
+          </div>
+        </div>
+        <footer class="modal__foot">
+          <button type="button" class="footer-link" data-action="lead-exit"><?php esc_html_e('Voir directement mes créations', 'theme-sapi-maison'); ?></button>
+        </footer>
+      </section>
+
       <!-- ═══ Landing réseaux — prénom + email + un mot ═══════ -->
       <section class="modal__screen" data-screen="s-lead" hidden>
         <header class="modal__head">
