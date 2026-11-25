@@ -7,11 +7,13 @@
  *    accrochée à sa carte propose l'ampoule recommandée (sapi_ampoule_for).
  *    Elle n'a ni cadre blanc ni contrôles, pour qu'on voie qu'elle n'est pas
  *    au panier. Ajout en un clic via le store WooCommerce Blocks (le panier se
- *    met à jour sans recharger). Les languettes disparaissent dès qu'une
- *    ampoule est au panier. Rendu par assets/sapi-cart-page.js.
- * 2. VITRINE « ÇA IRAIT BIEN AVEC… » (desktop) : sous le panier, avant la
- *    réassurance, trois luminaires choisis comme dans le mini-panier mais
- *    sans l'ampoule. Masquée en mobile.
+ *    met à jour sans recharger). La languette d'un luminaire disparaît dès
+ *    qu'une de SES ampoules est au panier. Rendu par assets/sapi-cart-page.js.
+ * 2. VITRINE « ÇA IRAIT BIEN AVEC… » : trois luminaires choisis comme dans le
+ *    mini-panier. Rendue après le panier, puis déplacée en JS dans la mise en
+ *    page du panier : sous la carte des articles en desktop (grille, la
+ *    colonne des totaux s'étend à côté), après les totaux en mobile, en
+ *    bandeau qui défile.
  * Le bloc natif des ventes croisées a été retiré de la page Panier (éditeur,
  * 25/11/2026) : la languette le remplace.
  *
@@ -33,10 +35,20 @@ function sapi_cart_page_amp_data() {
     if (!$amp) continue;
     $lum = wc_get_product($pid);
     $parts = preg_split('/\s+/', trim($lum ? $lum->get_name() : ''));
+    // Ampoules compatibles : ids (store du panier Blocks) et noms décodés (repli)
+    $ids = [];
+    $names = [];
+    $list = function_exists('sapi_ampoules_for') ? sapi_ampoules_for($pid) : [$amp];
+    foreach ($list as $a) {
+      $ids[] = $a->get_id();
+      $names[] = html_entity_decode($a->get_name(), ENT_QUOTES, 'UTF-8');
+    }
     $out[$key] = [
       'id'    => $amp->get_id(),
-      'first' => $parts[0],
-      'name'  => sapi_ampoule_short_name($amp),
+      'ids'   => $ids,
+      'names' => $names,
+      'first' => html_entity_decode($parts[0], ENT_QUOTES, 'UTF-8'),
+      'name'  => html_entity_decode(sapi_ampoule_short_name($amp), ENT_QUOTES, 'UTF-8'),
       'price' => html_entity_decode(wp_strip_all_tags(wc_price(wc_get_price_to_display($amp))), ENT_QUOTES, 'UTF-8'),
       'img'   => $amp->get_image_id() ? (string) wp_get_attachment_image_url($amp->get_image_id(), 'thumbnail') : '',
     ];
@@ -78,7 +90,7 @@ add_filter('render_block', function ($content, $block) {
       ? esc_html(sprintf(__('Ça irait bien avec %s', 'theme-sapi-maison'), $first))
       : esc_html__('Nos meilleures ventes', 'theme-sapi-maison'); ?></p>
     <ul class="sapi-suggest__cards">
-      <?php foreach ($data['items'] as $i => $s) echo sapi_suggest_card_html($s, $i, $first, '220px'); ?>
+      <?php foreach ($data['items'] as $i => $s) echo sapi_suggest_card_html($s, $i, $first, '(max-width: 768px) 60vw, 280px'); ?>
     </ul>
   </section>
   <?php

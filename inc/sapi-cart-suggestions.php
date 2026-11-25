@@ -5,8 +5,8 @@
  * Maquette validée par Robin le 15/10/2026 (variante A, trois cartes).
  *
  * CHOIX DES 3 PRODUITS, dans cet ordre, jamais un produit déjà au panier :
- *   1. l'ampoule recommandée du dernier luminaire ajouté, s'il n'y a aucune
- *      ampoule au panier (seule carte avec ajout direct : pas d'options) ;
+ *   1. (plus utilisé depuis le 25/11/2026 : l'ampoule a sa languette sous
+ *      chaque luminaire du volet et de la page panier) l'ampoule recommandée ;
  *   2. le même modèle (même prénom) dans un autre type ;
  *   3. les meilleures ventes d'un type complémentaire (suspension -> lampe à
  *      poser puis applique, etc.), puis n'importe quelle meilleure vente.
@@ -226,7 +226,8 @@ function sapi_suggest_card_html($s, $index, $first, $sizes = '(min-width: 1100px
 }
 
 function sapi_render_cart_suggestions_src() {
-  $data = function_exists('WC') && WC()->cart ? sapi_suggest_for_cart() : ['items' => [], 'source' => null];
+  // Sans ampoule : elle a sa languette sous chaque luminaire du volet (25/11/2026)
+  $data = function_exists('WC') && WC()->cart ? sapi_suggest_for_cart(false) : ['items' => [], 'source' => null];
   echo '<div class="sapi-cart-suggest-src" hidden>';
   if (!empty($data['items'])) {
     $source = $data['source'];
@@ -259,3 +260,79 @@ add_action('wp_enqueue_scripts', function () {
     'nonce'  => wp_create_nonce('sapi-add-to-cart'),
   ]);
 });
+
+/* ========================================================================
+ * VOLET PANIER (25/11/2026)
+ * 1. Languette ampoule sous chaque luminaire, comme sur la page panier.
+ *    Masquée pour un luminaire dès qu'une de SES ampoules est au panier.
+ *    Bouton « + Ajouter » : assets/sapi-cart-suggestions.js (ajax
+ *    sapi_add_to_cart, même quantité que le luminaire).
+ * 2. Bandeau de suggestions sous les articles, sous 1100 px (là où la
+ *    vitrine latérale n'a pas la place) : mêmes luminaires que la vitrine.
+ * Les deux vivent dans .mini-cart-body : le fragment AJAX les met à jour.
+ * ======================================================================== */
+
+/** Une des ampoules compatibles avec ce luminaire est-elle au panier ? */
+function sapi_cart_has_ampoule_for($product_id) {
+  if (!function_exists('sapi_ampoules_for') || !function_exists('WC') || !WC()->cart) return false;
+  $in_cart = [];
+  foreach (WC()->cart->get_cart() as $item) $in_cart[(int) $item['product_id']] = true;
+  foreach (sapi_ampoules_for($product_id) as $amp) {
+    if (isset($in_cart[$amp->get_id()])) return true;
+  }
+  return false;
+}
+
+/** Languette ampoule sous une ligne du volet. */
+function sapi_mini_cart_amp_tab($cart_item) {
+  if (!function_exists('sapi_ampoule_for') || !function_exists('sapi_suggest_type')) return;
+  $pid = (int) $cart_item['product_id'];
+  if (!sapi_suggest_type($pid)) return;
+  $amp = sapi_ampoule_for($pid);
+  if (!$amp || sapi_cart_has_ampoule_for($pid)) return;
+  $img = $amp->get_image_id() ? wp_get_attachment_image_url($amp->get_image_id(), 'thumbnail') : '';
+  $price = wp_strip_all_tags(wc_price(wc_get_price_to_display($amp)));
+  ?>
+  <div class="sapi-amp-tab sapi-amp-tab--mini">
+    <?php if ($img) : ?><img class="sapi-amp-tab__img" src="<?php echo esc_url($img); ?>" alt="" width="40" height="40" loading="lazy"><?php endif; ?>
+    <p class="sapi-amp-tab__text"><strong><?php esc_html_e('Ampoule non incluse.', 'theme-sapi-maison'); ?></strong> <?php echo esc_html(sapi_ampoule_short_name($amp) . ', ' . html_entity_decode($price, ENT_QUOTES, 'UTF-8')); ?></p>
+    <button type="button" class="sapi-amp-tab__add sapi-mc-amp__add" data-product-id="<?php echo esc_attr($amp->get_id()); ?>" data-qty="<?php echo esc_attr(max(1, (int) $cart_item['quantity'])); ?>"><?php esc_html_e('+ Ajouter', 'theme-sapi-maison'); ?></button>
+  </div>
+  <?php
+}
+
+/** Bandeau de suggestions sous les articles du volet (affiché sous 1100 px). */
+function sapi_render_mini_cart_suggest() {
+  if (!function_exists('WC') || !WC()->cart) return;
+  $data = sapi_suggest_for_cart(false);
+  if (empty($data['items'])) return;
+  $source = $data['source'];
+  $first = $source ? preg_split('/\s+/', trim($source->get_name()))[0] : '';
+  ?>
+  <div class="mini-cart-suggest">
+    <p class="sapi-suggest__eyebrow"><?php esc_html_e('Pour compléter votre commande', 'theme-sapi-maison'); ?></p>
+    <p class="mini-cart-suggest__title"><?php echo $first
+      ? esc_html(sprintf(__('Ça irait bien avec %s', 'theme-sapi-maison'), $first))
+      : esc_html__('Nos meilleures ventes', 'theme-sapi-maison'); ?></p>
+    <ul class="mini-cart-suggest__list">
+      <?php foreach ($data['items'] as $s) :
+        $p = $s['product'];
+        $id = $p->get_id();
+        $amb = function_exists('sapi_get_product_photo_ids') ? sapi_get_product_photo_ids($id, 'ambiance', 1) : [];
+        $img_id = !empty($amb) ? (int) $amb[0] : $p->get_image_id();
+        $from = $p->is_type('variable');
+        $price = wc_price($from ? $p->get_variation_price('min', true) : wc_get_price_to_display($p));
+      ?>
+        <li>
+          <a class="mini-cart-suggest__card" href="<?php echo esc_url($p->get_permalink()); ?>">
+            <span class="mini-cart-suggest__img"><?php echo $img_id ? wp_get_attachment_image($img_id, 'woocommerce_thumbnail', false, ['alt' => $p->get_name(), 'loading' => 'lazy', 'sizes' => '150px']) : wc_placeholder_img('woocommerce_thumbnail'); ?></span>
+            <span class="mini-cart-suggest__name"><?php echo esc_html($p->get_name()); ?></span>
+            <span class="mini-cart-suggest__meta"><?php echo esc_html(sapi_suggest_type_label($s['type'])); ?></span>
+            <span class="mini-cart-suggest__price"><?php if ($from) esc_html_e('dès ', 'theme-sapi-maison'); echo wp_kses_post($price); ?></span>
+          </a>
+        </li>
+      <?php endforeach; ?>
+    </ul>
+  </div>
+  <?php
+}

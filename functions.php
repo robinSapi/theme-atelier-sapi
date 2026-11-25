@@ -2223,8 +2223,10 @@ function sapi_render_mini_cart_contents() {
             </svg>
           </button>
         </div>
+        <?php if (function_exists('sapi_mini_cart_amp_tab')) sapi_mini_cart_amp_tab($cart_item); ?>
       <?php endforeach; ?>
     </div>
+    <?php if (function_exists('sapi_render_mini_cart_suggest')) sapi_render_mini_cart_suggest(); ?>
   </div>
   <?php
 }

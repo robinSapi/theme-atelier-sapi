@@ -4,7 +4,9 @@
  * Le panier est rendu par React (WooCommerce Blocks). On ajoute une ligne
  * <tr class="sapi-amp-row"> juste après la ligne du luminaire, et on la
  * resynchronise à chaque changement du DOM : retirée si le luminaire part,
- * retirées toutes dès qu'une ampoule est au panier.
+ * ou dès qu'une de ses ampoules est au panier.
+ * La vitrine « Ça irait bien avec… » est déplacée dans la mise en page du
+ * panier (.wc-block-components-sidebar-layout), que le CSS passe en grille.
  * « + Ajouter » passe par le store du panier Blocks (mise à jour sans
  * rechargement) ; à défaut, ajout AJAX classique puis rechargement.
  */
@@ -24,9 +26,21 @@
     for (var i = 0; i < rows.length; i++) if (rows[i].getAttribute('data-cart-item-key') === key) return rows[i];
     return null;
   }
-  function cartHasAmpoule() {
+  /** Une des ampoules compatibles avec ce luminaire est-elle au panier ? */
+  function hasAmpouleFor(a) {
+    // 1. Par id, dans le store du panier Blocks
+    var sel = window.wp && wp.data && wp.data.select && wp.data.select('wc/store/cart');
+    var data = sel && typeof sel.getCartData === 'function' ? sel.getCartData() : null;
+    if (data && data.items && data.items.length) {
+      var ids = (a.ids || []).map(Number);
+      return data.items.some(function (it) { return ids.indexOf(Number(it.id)) !== -1; });
+    }
+    // 2. Repli : par nom affiché
+    var wanted = (a.names || []).map(function (n) { return norm(n).trim(); });
     var names = document.querySelectorAll('.wc-block-cart-items__row .wc-block-components-product-name');
-    for (var i = 0; i < names.length; i++) if (norm(names[i].textContent).indexOf('ampoule') !== -1) return true;
+    for (var i = 0; i < names.length; i++) {
+      if (wanted.indexOf(norm(names[i].textContent).trim()) !== -1) return true;
+    }
     return false;
   }
   function tabHtml(key, a) {
@@ -40,24 +54,28 @@
   }
 
   var busy = false;
+  var vitrine = document.querySelector('.sapi-cart-page-suggest');
   function sync() {
-    var hide = cartHasAmpoule();
     document.querySelectorAll('tr.sapi-amp-row').forEach(function (tr) {
-      var row = rowFor(tr.getAttribute('data-for'));
-      if (hide || !row || row.nextElementSibling !== tr) tr.remove();
+      var key = tr.getAttribute('data-for');
+      var row = rowFor(key);
+      if (!row || row.nextElementSibling !== tr || (amp[key] && hasAmpouleFor(amp[key]))) tr.remove();
     });
-    // Vitrine sous le panier : rendue au chargement, masquée si son luminaire
-    // source a quitté le panier (ou si le panier est vide).
-    var vitrine = document.querySelector('.sapi-cart-page-suggest');
+    // Vitrine : placée dans la mise en page du panier (React peut la recréer,
+    // on la replace alors), masquée si son luminaire source a quitté le panier.
+    var layout = document.querySelector('.sapi-cart-outer .wc-block-components-sidebar-layout');
+    if (vitrine && layout && vitrine.parentNode !== layout) {
+      layout.appendChild(vitrine);
+      vitrine.classList.add('is-placed');
+    }
     if (vitrine) {
       var src = vitrine.getAttribute('data-source-key');
       var anyRow = document.querySelector('.wc-block-cart-items__row');
       vitrine.hidden = !anyRow || (src ? !rowFor(src) : false);
     }
-    if (hide) return;
     Object.keys(amp).forEach(function (key) {
       var row = rowFor(key);
-      if (!row) return;
+      if (!row || hasAmpouleFor(amp[key])) return;
       var next = row.nextElementSibling;
       if (next && next.classList.contains('sapi-amp-row')) return;
       var tr = document.createElement('tr');
@@ -79,7 +97,7 @@
   }
 
   document.addEventListener('click', function (e) {
-    var btn = e.target.closest && e.target.closest('.sapi-amp-tab__add');
+    var btn = e.target.closest && e.target.closest('.sapi-amp-tab__add[data-key]');
     if (!btn || btn.disabled) return;
     e.preventDefault();
     var key = btn.getAttribute('data-key');
@@ -112,5 +130,8 @@
   });
 
   sync();
+  // Filet : si la mise en page du panier reste introuvable, la vitrine
+  // s'affiche à sa place d'origine (sous le panier) plutôt que jamais.
+  setTimeout(function () { if (vitrine && !vitrine.classList.contains('is-placed')) vitrine.classList.add('is-placed'); }, 4000);
   new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
 })();

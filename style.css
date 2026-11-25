@@ -27357,16 +27357,41 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .sapi-amp-tab__long { display: none; }
 }
 
-/* Vitrine sous le panier : desktop seulement, cartes beiges sans ombre */
+/* Vitrine : déplacée en JS dans .wc-block-components-sidebar-layout.
+   Cachée tant qu'elle n'est pas à sa place, pour ne pas la voir sauter. */
+.sapi-cart-page-suggest:not(.is-placed) { display: none; }
+@media (min-width: 769px) {
+  /* Grille : articles puis vitrine à gauche, totaux à droite sur les deux rangées */
+  .sapi-cart-outer .wc-block-components-sidebar-layout:has(> .sapi-cart-page-suggest.is-placed:not([hidden])) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 65fr) minmax(0, 35fr);
+  }
+  .sapi-cart-outer .wc-block-components-sidebar-layout:has(> .sapi-cart-page-suggest.is-placed:not([hidden])) > .wc-block-components-main {
+    grid-column: 1;
+    grid-row: 1;
+    width: auto !important;
+  }
+  .sapi-cart-outer .wc-block-components-sidebar-layout:has(> .sapi-cart-page-suggest.is-placed:not([hidden])) > .wc-block-components-sidebar {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    width: auto !important;
+  }
+  .sapi-cart-outer .wc-block-components-sidebar-layout > .sapi-cart-page-suggest {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}
+
+/* Cartes beiges sans ombre */
 .sapi-cart-page-suggest {
-  margin: 2.5rem 0 0;
+  margin: 0.5rem 0 0;
   color: var(--color-dark);
   font-family: var(--font-body);
 }
 .sapi-cart-page-suggest .sapi-suggest__eyebrow { color: var(--color-wood); opacity: 1; }
 .sapi-cart-page-suggest .sapi-suggest__title { font-size: 2.2rem; margin-bottom: 16px; }
 .sapi-cart-page-suggest .sapi-suggest__cards {
-  grid-template-columns: repeat(3, minmax(0, 220px));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 .sapi-cart-page-suggest .product-card-cinetique {
@@ -27394,8 +27419,108 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 .sapi-cart-page-suggest .product-card-cinetique .product-category { font-size: 0.8rem; margin: 0.2rem 0 0.6rem; }
 .sapi-cart-page-suggest .product-card-cinetique .price-value { font-size: 0.95rem; }
 .sapi-cart-page-suggest .product-card-cinetique .product-actions { margin-bottom: 0.6rem; }
-@media (max-width: 781px) {
-  .sapi-cart-page-suggest { display: none; }
+/* Mobile : après les totaux, bandeau qui défile au doigt */
+@media (max-width: 768px) {
+  .sapi-cart-page-suggest {
+    width: 100%;
+    flex: 0 0 100%;
+    margin: 1.5rem 0 0;
+    padding: 0 0.5rem;
+    box-sizing: border-box;
+  }
+  .sapi-cart-page-suggest .sapi-suggest__title { font-size: 1.8rem; margin-bottom: 12px; }
+  .sapi-cart-page-suggest .sapi-suggest__cards {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 60%;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+  .sapi-cart-page-suggest .product-card-cinetique { scroll-snap-align: start; }
+}
+
+/* ========================================
+   VOLET PANIER : LANGUETTE AMPOULE + BANDEAU DE SUGGESTIONS (25/11/2026)
+   inc/sapi-cart-suggestions.php (sapi_mini_cart_amp_tab, sapi_render_mini_cart_suggest)
+   ======================================== */
+.mini-cart-item:has(+ .sapi-amp-tab--mini) {
+  margin-bottom: 0;
+  position: relative;
+  z-index: 1;
+}
+.sapi-amp-tab--mini {
+  margin: 0 0.75rem 1rem;
+  padding: 0.5rem 0.7rem 0.5rem 1.6rem;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+}
+.sapi-amp-tab--mini::before { left: 0.6rem; width: 0.5rem; }
+.sapi-amp-tab--mini .sapi-amp-tab__img { width: 34px !important; height: 34px !important; }
+.sapi-amp-tab--mini .sapi-amp-tab__add { padding: 0.3rem 0.7rem; font-size: 0.75rem; }
+
+/* Bandeau : seulement là où la vitrine latérale n'a pas la place */
+.mini-cart-suggest { display: none; }
+@media (max-width: 1099px) {
+  .mini-cart-suggest {
+    display: block;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(147, 125, 104, 0.2);
+    font-family: var(--font-body);
+  }
+  .mini-cart-suggest .sapi-suggest__eyebrow { color: var(--color-wood); opacity: 1; }
+  .mini-cart-suggest__title {
+    margin: 0 0 12px;
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    line-height: 1;
+    color: var(--color-dark);
+  }
+  .mini-cart-suggest__list {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 42%;
+    gap: 10px;
+    margin: 0;
+    padding: 0 0 6px;
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .mini-cart-suggest__list > li { scroll-snap-align: start; min-width: 0; }
+  .mini-cart-suggest__card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--color-dark);
+    text-decoration: none;
+  }
+  .mini-cart-suggest__img {
+    display: block;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #F3EEE6;
+    margin-bottom: 6px;
+  }
+  .mini-cart-suggest__img img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+  .mini-cart-suggest__name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mini-cart-suggest__meta { font-size: 0.75rem; color: var(--color-gray, #717171); }
+  .mini-cart-suggest__price { font-size: 0.8rem; color: var(--color-wood); font-weight: 700; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════
