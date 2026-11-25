@@ -56,12 +56,12 @@
     var specs = (a.specs || []).map(function (s) {
       return '<li><span class="sapi-amp-picker__k">' + esc(s[0]) + '</span> ' + esc(s[1]) + '</li>';
     }).join('');
-    var photo = a.amb || a.img;
+    // Toujours la photo produit de l'ampoule (25/11/2026), l'ambiance seulement à défaut.
+    var photo = a.img || a.amb;
     return '<div class="sapi-amp-card' + (reco ? ' is-reco' : '') + (picked ? ' is-picked' : '') + '">' +
       (reco ? '<span class="sapi-amp-card__band"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l1.9 4 4.4.5-3.3 3 .9 4.4L8 11.2 4.1 13.4l.9-4.4-3.3-3 4.4-.5z" fill="currentColor"/></svg>Ma recommandation pour ' + esc(first) + '</span>' : '') +
       '<div class="sapi-amp-card__photos">' +
         (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy">' : '') +
-        (a.amb && a.img ? '<img class="sapi-amp-card__pk" src="' + esc(a.img) + '" alt="" loading="lazy">' : '') +
       '</div>' +
       '<div class="sapi-amp-card__body">' +
         '<div class="sapi-amp-card__name"><b>' + esc(a.name) + '</b><span>' + esc(a.priceHtml) + '</span></div>' +
@@ -79,7 +79,7 @@
     var first = o.first || 'ton luminaire';
     root.querySelector('.sapi-amp-picker__title').textContent = 'Quelle ampoule pour ' + first + ' ?';
     root.querySelector('.sapi-amp-picker__sub').textContent = ids.length > 1
-      ? 'Elles vont toutes avec ' + first + '. Elles changent surtout l\'effet de la lumière à travers le bois.'
+      ? 'Ces ampoules conviennent à cette dimension de ' + first + '. À toi de choisir !'
       : '';
     root.querySelector('.sapi-amp-picker__grid').innerHTML = ids.map(function (id) {
       return card(DATA[id], id === o.recoId, id === o.pickedId, first);

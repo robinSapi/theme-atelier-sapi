@@ -171,6 +171,11 @@ function sapi_render_cart_suggestions() {
 
 /** Une carte, au même gabarit que les cartes produit du site (woocommerce/content-product.php). */
 /** $sizes : largeur affichée de la carte, pour que le navigateur choisisse la bonne image. */
+/** Ampoule ou accessoire (catégorie « accessoires ») : on montre la photo produit, jamais l'ambiance. */
+function sapi_suggest_is_accessoire($id) {
+  return has_term('accessoires', 'product_cat', $id);
+}
+
 function sapi_suggest_card_html($s, $index, $first, $sizes = '(min-width: 1100px) 360px, 220px', $img_size = 'woocommerce_single', $lazy = true) {
   $img_attr = ['alt' => $s['product']->get_name(), 'sizes' => $sizes];
   if ($lazy) $img_attr['loading'] = 'lazy';
@@ -179,7 +184,8 @@ function sapi_suggest_card_html($s, $index, $first, $sizes = '(min-width: 1100px
   $is_amp = $s['kind'] === 'ampoule';
 
   // Photo : ambiance en principal, photo produit au survol (comme sur le site).
-  $amb = function_exists('sapi_get_product_photo_ids') ? sapi_get_product_photo_ids($id, 'ambiance', 1) : [];
+  // Ampoules et accessoires : toujours la photo produit.
+  $amb = (!sapi_suggest_is_accessoire($id) && function_exists('sapi_get_product_photo_ids')) ? sapi_get_product_photo_ids($id, 'ambiance', 1) : [];
   $thumb_id = $p->get_image_id();
   $main_id = !empty($amb) ? (int) $amb[0] : $thumb_id;
   $hover_id = (!empty($amb) && $thumb_id && $thumb_id !== $main_id) ? $thumb_id : 0;
@@ -468,7 +474,7 @@ function sapi_render_mini_cart_suggest() {
       <?php foreach ($data['items'] as $s) :
         $p = $s['product'];
         $id = $p->get_id();
-        $amb = function_exists('sapi_get_product_photo_ids') ? sapi_get_product_photo_ids($id, 'ambiance', 1) : [];
+        $amb = (!sapi_suggest_is_accessoire($id) && function_exists('sapi_get_product_photo_ids')) ? sapi_get_product_photo_ids($id, 'ambiance', 1) : [];
         $img_id = !empty($amb) ? (int) $amb[0] : $p->get_image_id();
         $from = $p->is_type('variable');
         $price = wc_price($from ? $p->get_variation_price('min', true) : wc_get_price_to_display($p));
