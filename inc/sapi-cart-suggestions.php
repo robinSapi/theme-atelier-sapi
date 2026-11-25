@@ -440,7 +440,7 @@ function sapi_mini_cart_amp_tab($cart_item) {
     <?php /* Bouton « + Ajouter l'ampoule » avec la bulle de choix dedans. Choisir
        dans le panneau change la bulle et l'ampoule que le bouton ajoutera. */ ?>
     <span class="sapi-amp-split">
-      <button type="button" class="sapi-amp-tab__add sapi-mc-amp__add" data-product-id="<?php echo esc_attr($amp->get_id()); ?>" data-qty="<?php echo esc_attr($qty); ?>"><?php esc_html_e("+ Ajouter l'ampoule", 'theme-sapi-maison'); ?></button>
+      <button type="button" class="sapi-amp-tab__add sapi-mc-amp__add" data-product-id="<?php echo esc_attr($amp->get_id()); ?>" data-qty="<?php echo esc_attr($qty); ?>"><?php esc_html_e('+ Ajouter', 'theme-sapi-maison'); ?><span class="sapi-amp-split__long">&nbsp;<?php esc_html_e("l'ampoule", 'theme-sapi-maison'); ?></span></button>
       <button type="button" class="sapi-amp-bubble is-reco<?php echo count($ids) > 1 ? '' : ' is-solo'; ?>" data-ids="<?php echo esc_attr(implode(',', $ids)); ?>" data-reco="<?php echo esc_attr($amp->get_id()); ?>" data-first="<?php echo esc_attr(sapi_cart_line_first_name($cart_item)); ?>"<?php echo count($ids) > 1 ? ' aria-haspopup="dialog"' : ' tabindex="-1"'; ?>>
         <span class="sapi-amp-bubble__name"><?php echo esc_html(sapi_ampoule_short_name($amp)); ?></span>
         <span class="sapi-amp-bubble__price">· <?php echo esc_html($price); ?></span>

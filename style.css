@@ -28378,6 +28378,10 @@ html.sapi-amp-picker-open { overflow: hidden; }
 .sapi-amp-tab--mini { flex-wrap: wrap; row-gap: 0.4rem; }
 .sapi-amp-tab--mini .sapi-amp-tab__title { flex: 1; }
 /* Pas de retrait sous la vignette : le volet est étroit, le bouton prend toute la largeur utile */
-.sapi-amp-tab--mini .sapi-amp-split { margin-left: 0; font-size: 0.74rem; }
+.sapi-amp-tab--mini { container-type: inline-size; padding-right: 0.55rem; padding-left: 1.3rem; }
+.sapi-amp-tab--mini::before { left: 0.45rem; width: 0.45rem; }
+.sapi-amp-tab--mini .sapi-amp-split { margin-left: 0; gap: 4px; font-size: 0.72rem; }
 .sapi-amp-tab--mini .sapi-amp-split .sapi-amp-tab__add { padding-left: 10px; }
 .sapi-amp-tab--mini .sapi-amp-bubble { padding: 3px 8px 3px 9px; }
+/* Languette trop étroite pour « + Ajouter l'ampoule » + la bulle : « + Ajouter » suffit */
+@container (max-width: 300px) { .sapi-amp-tab--mini .sapi-amp-split__long { display: none; } }

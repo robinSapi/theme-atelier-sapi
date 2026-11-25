@@ -133,7 +133,7 @@
       (img ? '<img class="sapi-amp-tab__img" src="' + esc(img) + '" alt="" width="40" height="40" loading="lazy">' : '') +
       '<strong class="sapi-amp-tab__title">Ampoule non incluse</strong>' +
       '<span class="sapi-amp-split">' +
-        '<button type="button" class="sapi-amp-tab__add" data-key="' + esc(key) + '">+ Ajouter l\'ampoule</button>' +
+        '<button type="button" class="sapi-amp-tab__add" data-key="' + esc(key) + '">+ Ajouter<span class="sapi-amp-split__long">&nbsp;l\'ampoule</span></button>' +
         '<button type="button" class="sapi-amp-bubble' + (reco ? ' is-reco' : '') + (multi ? '' : ' is-solo') + '" data-key="' + esc(key) + '"' + (multi ? ' aria-haspopup="dialog"' : ' tabindex="-1"') + '>' +
           '<span class="sapi-amp-bubble__name">' + esc(name) + '</span> ' +
           '<span class="sapi-amp-bubble__price">· ' + esc(shortPrice(price)) + '</span>' + CHEV +
