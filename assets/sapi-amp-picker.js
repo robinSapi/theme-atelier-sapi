@@ -45,9 +45,11 @@
       close();
       if (typeof cb === 'function') cb(id);
     });
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && root && !root.hidden) close();
-    });
+    // En capture sur window : Échap ferme le panneau seul, pas le volet dessous
+    // (menu.js écoute aussi Échap sur document).
+    window.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && root && !root.hidden) { e.stopImmediatePropagation(); close(); }
+    }, true);
   }
 
   function card(a, reco, picked, first) {

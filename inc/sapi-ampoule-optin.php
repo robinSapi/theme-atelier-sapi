@@ -110,6 +110,12 @@ function sapi_ampoules_variation_ids($variation) {
   return is_array($ids) ? array_values(array_filter(array_map('intval', $ids))) : [];
 }
 
+/** Prix court d'une ampoule, en texte : « 10 € » plutôt que « 10,00 € », « 8,50 € » inchangé. */
+function sapi_amp_price_short($amount) {
+  $txt = html_entity_decode(wp_strip_all_tags(wc_price($amount)), ENT_QUOTES, 'UTF-8');
+  return preg_replace('/[,.]00(?=\D*$)/u', '', $txt);
+}
+
 /** Une ampoule : produit de la catégorie « accessoires » dont le nom contient « ampoule ». */
 function sapi_ampoule_is_catalogue($p) {
   if (!$p) return false;
@@ -259,20 +265,18 @@ add_action('woocommerce_before_add_to_cart_button', function () {
       <span class="sapi-ampoule-addon__box" aria-hidden="true"></span>
       <span class="sapi-ampoule-addon__text"><?php esc_html_e('Ajouter', 'theme-sapi-maison'); ?></span>
       <span class="sapi-ampoule-addon__model"<?php echo count($amps) > 1 ? ' hidden' : ''; ?>><?php echo esc_html(sapi_ampoule_short_name($default)); ?></span>
+      <span class="sapi-amp-reco" hidden><?php esc_html_e('Reco', 'theme-sapi-maison'); ?></span>
+      <?php /* Sans JS : la liste permet de choisir. Avec JS, elle est masquée et
+         le choix se fait dans le panneau « Comparer ». */ ?>
       <select class="sapi-ampoule-addon__select" name="sapi_ampoule_choice" aria-label="<?php esc_attr_e("Choix de l'ampoule", 'theme-sapi-maison'); ?>"<?php echo count($amps) > 1 ? '' : ' hidden'; ?>>
         <?php foreach ($amps as $i => $amp) :
           $p = (float) wc_get_price_to_display($amp); ?>
-          <option value="<?php echo esc_attr($amp->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($p, $dec)); ?>" data-price-html="<?php echo esc_attr(html_entity_decode(wp_strip_all_tags(wc_price($p)), ENT_QUOTES, 'UTF-8')); ?>"<?php selected($i, 0); ?>><?php echo esc_html(sapi_ampoule_short_name($amp)); ?></option>
+          <option value="<?php echo esc_attr($amp->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($p, $dec)); ?>" data-price-html="<?php echo esc_attr(sapi_amp_price_short($p)); ?>"<?php selected($i, 0); ?>><?php echo esc_html(sapi_ampoule_short_name($amp)); ?></option>
         <?php endforeach; ?>
       </select>
-      <?php /* 25/11/2026 : avec JS, la liste est masquée et ce bouton la remplace.
-         Il affiche l'ampoule choisie et ouvre le panneau de comparaison. */ ?>
-      <button type="button" class="sapi-ampoule-addon__choose" hidden aria-haspopup="dialog">
-        <span class="screen-reader-text"><?php esc_html_e("Changer d'ampoule :", 'theme-sapi-maison'); ?> </span><span class="sapi-ampoule-addon__choose-name"></span>
-        <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-      </button>
-      <span class="sapi-ampoule-addon__price">+<?php echo wp_kses_post(wc_price($default_price)); ?></span>
+      <span class="sapi-ampoule-addon__price">+<?php echo esc_html(sapi_amp_price_short($default_price)); ?></span>
     </label>
+    <button type="button" class="sapi-amp-compare sapi-ampoule-addon__compare" hidden aria-haspopup="dialog"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 5h10l-3-3M14 11H4l3 3"/></svg><?php esc_html_e('Comparer', 'theme-sapi-maison'); ?></button>
   </div>
   <?php
 });

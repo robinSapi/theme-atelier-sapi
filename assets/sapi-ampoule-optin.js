@@ -6,9 +6,10 @@
  * 3. Avec plusieurs ampoules, garde la case alignée sur le choix de la liste.
  * 4. (25/11/2026) La liste suit la variation : data-by-var donne la liste des
  *    variations qui ont la leur, data-default celle du produit.
- * 5. Avec plusieurs ampoules, la liste est masquée : le nom de l'ampoule devient
- *    un bouton qui ouvre le panneau partagé (assets/sapi-amp-picker.js). La
- *    liste reste dans le formulaire, c'est elle qui porte le choix.
+ * 5. Avec plusieurs ampoules, la liste est masquée : la pastille affiche le nom
+ *    (+ « Reco » pour la recommandée) et « Comparer », à côté, ouvre le panneau
+ *    partagé (assets/sapi-amp-picker.js). La liste reste dans le formulaire,
+ *    c'est elle qui porte le choix.
  *
  * Le sous-total est calculé et réécrit par Product Add-Ons à chaque changement
  * (variation, add-on, quantité). On ne le recalcule pas : on repasse derrière
@@ -27,8 +28,15 @@
   var ampPrice = parseFloat(checkbox.getAttribute('data-price')) || 0;
 
   var model = block.querySelector('.sapi-ampoule-addon__model');
-  var choose = block.querySelector('.sapi-ampoule-addon__choose');
-  var chooseName = choose && choose.querySelector('.sapi-ampoule-addon__choose-name');
+  var compare = block.querySelector('.sapi-ampoule-addon__compare');
+  var recoTag = block.querySelector('.sapi-amp-reco');
+  // Nom de l'ampoule dans la pastille, et l'étiquette « Reco » si c'est la
+  // recommandée parmi plusieurs.
+  function showName(id) {
+    if (model && DATA[id]) { model.textContent = DATA[id].name; model.hidden = false; }
+    if (recoTag) recoTag.hidden = !(currentIds.length > 1 && id === currentIds[0]);
+  }
+  function short(txt) { return String(txt).replace(/[,.]00(?=\D*$)/, ''); }
   var DATA = window.SAPI_AMPOULES || {};
   function parse(attr, fallback) {
     try { return JSON.parse(block.getAttribute(attr) || '') || fallback; } catch (e) { return fallback; }
@@ -65,10 +73,9 @@
         return '<option value="' + id + '" data-price="' + a.price + '" data-price-html="' + String(a.priceHtml).replace(/"/g, '&quot;') + '"' + (id === keep ? ' selected' : '') + '>' +
           String(a.name).replace(/</g, '&lt;') + '</option>';
       }).join('');
-      select.hidden = choose ? true : ids.length < 2;
+      select.hidden = compare ? true : ids.length < 2;
     }
-    if (model) { model.textContent = DATA[keep].name; model.hidden = ids.length > 1; }
-    if (choose) choose.hidden = ids.length < 2;
+    if (compare) compare.hidden = ids.length < 2;
     syncChoice();
     schedule();
   }
@@ -81,7 +88,8 @@
         checkbox.value = one;
         ampPrice = DATA[one].price || 0;
         var pe = block.querySelector('.sapi-ampoule-addon__price');
-        if (pe) pe.textContent = '+' + DATA[one].priceHtml;
+        if (pe) pe.textContent = '+' + short(DATA[one].priceHtml);
+        showName(one);
       }
       return;
     }
@@ -90,8 +98,8 @@
     checkbox.value = opt.value;
     ampPrice = parseFloat(opt.getAttribute('data-price')) || 0;
     var priceEl = block.querySelector('.sapi-ampoule-addon__price');
-    if (priceEl && opt.getAttribute('data-price-html')) priceEl.textContent = '+' + opt.getAttribute('data-price-html');
-    if (chooseName) chooseName.textContent = opt.textContent;
+    if (priceEl && opt.getAttribute('data-price-html')) priceEl.textContent = '+' + short(opt.getAttribute('data-price-html'));
+    showName(parseInt(opt.value, 10));
   }
   syncChoice();
 
@@ -189,15 +197,14 @@
     });
     $(form).on('reset_data', function () { applyList(defaultIds); });
   }
-  if (choose) {
-    choose.addEventListener('click', function (e) {
-      // Le bouton est dans le <label> de la case : le clic ne doit pas la cocher.
+  if (compare) {
+    compare.addEventListener('click', function (e) {
       e.preventDefault();
-      e.stopPropagation();
       // Panneau absent : on rend la liste, pour que le choix reste possible.
       if (!window.sapiAmpPicker) {
         if (select) select.hidden = false;
-        choose.hidden = true;
+        compare.hidden = true;
+        if (model) model.hidden = true;
         return;
       }
       window.sapiAmpPicker.open({

@@ -111,15 +111,19 @@
       '<button type="button" class="sapi-amp-act" data-act="set" data-key="' + esc(ampItem.key) + '" data-qty="' + (ampItem.quantity + miss) + '">Ajouter ' +
       miss + ' ampoule' + pl + '</button></span>';
   }
+  var CMP_ICON = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 5h10l-3-3M14 11H4l3 3"/></svg>';
+  function shortPrice(t) { return String(t || '').replace(/[,.]00(?=\D*$)/, ''); }
   function tabHtml(key, a) {
+    var multi = (a.ids || []).length > 1;
     return '<td colspan="3"><div class="sapi-amp-tab">' +
       (a.img ? '<img class="sapi-amp-tab__img" src="' + esc(a.img) + '" alt="" width="40" height="40" loading="lazy">' : '') +
-      '<p class="sapi-amp-tab__text"><strong>Ampoule non incluse.</strong> ' +
-      '<span class="sapi-amp-tab__long">Celle que je recommande pour ' + esc(a.first) + ' : </span>' +
-      esc(a.name) + ', ' + esc(a.price) +
-      ((a.ids || []).length > 1 ? '<br><button type="button" class="sapi-amp-compare" data-key="' + esc(key) + '">Comparer les ' + a.ids.length + ' ampoules</button>' : '') +
-      '</p>' +
-      '<button type="button" class="sapi-amp-tab__add" data-key="' + esc(key) + '">+ Ajouter</button>' +
+      '<strong class="sapi-amp-tab__title">Ampoule non incluse</strong>' +
+      '<span class="sapi-amp-tab__acts">' +
+        '<button type="button" class="sapi-amp-tab__add" data-key="' + esc(key) + '">+ ' + esc(decode(a.name)) +
+          (multi ? ' <span class="sapi-amp-reco">Reco</span>' : '') +
+          ' <span class="sapi-amp-tab__price">' + esc(shortPrice(a.price)) + '</span></button>' +
+        (multi ? '<button type="button" class="sapi-amp-compare" data-key="' + esc(key) + '" aria-haspopup="dialog">' + CMP_ICON + 'Comparer</button>' : '') +
+      '</span>' +
       '</div></td>';
   }
   function subHtml(lumItem, a) {
@@ -248,9 +252,15 @@
     // En-tête et mini-panier (fragments classiques) : compteur et vitrine à jour
     if (window.jQuery) window.jQuery(document.body).trigger('wc_fragment_refresh');
   }
+  /* Bloque (ou débloque) tous les boutons de la languette d'ampoule : « + Globe »
+     et « Comparer » ne doivent pas lancer deux ajouts en même temps. */
+  function lockTab(btn, on) {
+    var tab = btn.closest && btn.closest('.sapi-amp-tab');
+    (tab ? Array.prototype.slice.call(tab.querySelectorAll('button')) : [btn]).forEach(function (b) { b.disabled = on; });
+  }
   function fail(btn, label) {
     btn.textContent = 'Erreur';
-    setTimeout(function () { btn.textContent = label; btn.disabled = false; }, 2000);
+    setTimeout(function () { btn.innerHTML = label; lockTab(btn, false); }, 2000);
   }
   function done() { working = false; schedule(); refreshHeader(); }
   // Filet : une réponse qui ne revient jamais ne doit pas figer l'affichage
@@ -267,8 +277,9 @@
 
   /* Ajoute une ampoule (par ID) en quantité qty, via le store Blocks ; `btn` affiche l'état. */
   function ajouterAmpoule(btn, ampId, qty) {
-    var label = btn.textContent;
-    btn.disabled = true;
+    if (btn.disabled || working) return; // un ajout est déjà en cours
+    var label = btn.innerHTML; // la languette contient des balises (« Reco », prix)
+    lockTab(btn, true);
     btn.textContent = 'Ajout…';
     var store = dispatcher();
     if (store && typeof store.addItemToCart === 'function') {

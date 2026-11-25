@@ -28312,23 +28312,54 @@ html.sapi-amp-picker-open { overflow: hidden; }
   font-family: var(--font-body); font-size: .78rem; font-weight: 700;
   color: var(--color-wood); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
 }
-/* Fiche produit : le nom de l'ampoule ouvre le panneau (25/11/2026) */
-.sapi-ampoule-addon__choose {
-  display: inline-flex; align-items: center; gap: 4px;
-  margin: 0; padding: 2px 8px 2px 9px; border: 0; border-radius: 999px;
-  background: rgba(147, 125, 104, 0.14); color: inherit;
-  font: inherit; font-weight: 700; line-height: 1.3; cursor: pointer;
-  text-transform: none; letter-spacing: normal; min-height: 0; box-shadow: none; overflow: visible;
-  transition: background-color 0.2s ease;
+/* « Comparer » : fiche produit, volet, page panier. Remise à zéro du style
+   global des boutons (majuscules, fond orange, effet d'onde). */
+.sapi-amp-compare {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin: 0; min-height: 0; box-shadow: none; overflow: visible;
+  text-transform: none; letter-spacing: normal; border-radius: 0;
 }
-.sapi-ampoule-addon__choose::after { display: none; } /* pas d'effet d'onde des boutons globaux */
-.sapi-ampoule-addon .screen-reader-text {
-  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+.sapi-amp-compare::after { display: none; }
+.sapi-amp-compare:hover { background: none; color: var(--color-dark); }
+.sapi-amp-compare svg { flex: none; }
+
+/* Étiquette « Reco » : l'ampoule que Robin recommande pour ce luminaire */
+.sapi-amp-reco {
+  display: inline-block; padding: 1px 6px; border-radius: 999px;
+  background: #F1ECE5; color: var(--color-wood);
+  font-size: 0.62rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1.5;
+  vertical-align: 1px;
 }
-.sapi-ampoule-addon__choose:hover { background: rgba(147, 125, 104, 0.26); }
-.sapi-ampoule-addon__choose:focus-visible { outline: 2px solid var(--color-orange, #E35B24); outline-offset: 2px; }
-.sapi-ampoule-addon__choose svg { flex: none; }
-.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:checked) .sapi-ampoule-addon__choose { background: rgba(255, 255, 255, 0.16); }
-.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:checked) .sapi-ampoule-addon__choose:hover { background: rgba(255, 255, 255, 0.28); }
-.sapi-amp-tab .sapi-amp-compare { display: inline-block; margin-top: 2px; }
+.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:checked) .sapi-amp-reco { background: rgba(255, 255, 255, 0.18); color: #fff; }
+.sapi-amp-tab__add .sapi-amp-reco { background: #E4EFE0; color: var(--color-green, #018501); }
+.sapi-amp-tab__add:hover:not(:disabled) .sapi-amp-reco { background: rgba(255, 255, 255, 0.2); color: #fff; }
+
+/* Languette « Ampoule non incluse » : titre, puis « + Globe Reco 10 € » et « Comparer » */
+.sapi-amp-tab__title { flex: 0 1 auto; color: var(--color-dark); font-weight: 700; }
+.sapi-amp-tab__acts { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem 0.9rem; }
+.sapi-amp-tab__add { display: inline-flex; align-items: center; gap: 6px; padding: 0.3rem 0.8rem; text-transform: none; letter-spacing: normal; }
+.sapi-amp-tab__price { font-weight: 600; opacity: 0.85; }
+/* Page panier (desktop) : une ligne fine, le fond suit le contenu */
+@media (min-width: 601px) {
+  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row .sapi-amp-tab { width: fit-content; max-width: 100%; padding: 0.4rem 0.8rem; gap: 0.8rem; }
+  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row .sapi-amp-tab__img { width: 28px !important; height: 28px !important; }
+}
+/* Fiche produit : « Comparer » sur la même ligne que la pastille (3e colonne de la
+   grille des options). Carte étroite : il passe sous la pastille, sans déborder. */
+.sapi-opts-ready .sapi-opts .sapi-ampoule-addon:has(.sapi-ampoule-addon__compare:not([hidden])) {
+  grid-template-columns: var(--opt-label) auto minmax(0, 1fr);
+}
+.sapi-ampoule-addon__compare { justify-self: start; }
+/* Selon la largeur de la carte des options, pas de l'écran (tablette, colonne étroite). */
+.sapi-opts-ready .sapi-opts { container-type: inline-size; }
+@container (max-width: 440px) {
+  .sapi-opts-ready .sapi-opts .sapi-ampoule-addon:has(.sapi-ampoule-addon__compare:not([hidden])) {
+    grid-template-columns: var(--opt-label) minmax(0, 1fr);
+  }
+  .sapi-opts-ready .sapi-opts .sapi-ampoule-addon__compare { grid-column: 2; margin-top: -4px; }
+}
+/* Volet : titre sur la première ligne, boutons dessous, alignés sur le titre */
+.sapi-amp-tab--mini { flex-wrap: wrap; row-gap: 0.4rem; }
+.sapi-amp-tab--mini .sapi-amp-tab__title { flex: 1; }
+.sapi-amp-tab--mini .sapi-amp-tab__acts { flex-basis: 100%; padding-left: calc(34px + 0.6rem); }
+.sapi-amp-tab--mini .sapi-amp-tab__add { padding: 0.25rem 0.7rem; }

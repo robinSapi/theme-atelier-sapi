@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette : ampoule recommandée + comparer</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root { --wood:#937D68; --dark:#323232; --gray:#717171; --line:#E8E2D9; --green:#018501; --orange:#D2633A; --tab:#F1ECE5; --page:#FAF9F7; --body:'Montserrat',sans-serif; --display:'Square Peg',cursive; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); font-family: var(--body); color: var(--dark); }
+  button { font-family: inherit; cursor: pointer; }
+  .wrap { max-width: 1180px; margin: 28px auto 60px; padding: 0 20px; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: 2.6rem; margin: 0; line-height: 1; }
+  .intro { margin: 6px 0 24px; color: var(--gray); font-size: .85rem; line-height: 1.55; max-width: 780px; }
+  .cap { margin: 0 0 10px; font-weight: 800; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--wood); }
+  section { margin-bottom: 34px; }
+  .grid { display: grid; grid-template-columns: 380px 1fr; gap: 34px; align-items: start; }
+
+  .fn { font-weight: 900; text-transform: uppercase; font-size: .95rem; }
+  .rn { font-family: var(--display); font-size: 2rem; line-height: .9; }
+  .meta { margin: 8px 0 0; font-size: .82rem; line-height: 1.6; }
+  .qty { display: inline-flex; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .qty span { width: 32px; height: 32px; display: grid; place-items: center; font-weight: 700; }
+  .qty span + span { border-left: 1.5px solid var(--line); }
+
+  /* ——— Éléments communs ——— */
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 13px; border: 1.5px dashed var(--wood); border-radius: 999px; background: #fff; font-size: .8rem; font-weight: 600; white-space: nowrap; cursor: pointer; user-select: none; }
+  .pill .box { width: 15px; height: 15px; border: 1.5px solid var(--wood); border-radius: 3px; display: grid; place-items: center; font-size: .6rem; }
+  .pill .lbl b { font-weight: 700; }
+  .pill .pr { color: var(--gray); }
+  .pill.on { border-style: solid; border-color: var(--dark); background: var(--dark); color: #fff; }
+  .pill.on .box { background: var(--orange); border-color: #fff; }
+  .pill.on .box::after { content: "✓"; color: #fff; }
+  .pill.on .pr { color: #ddd; }
+  .cmp { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: var(--wood); font-size: .78rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+  .cmp:hover { color: var(--dark); }
+  .cmp svg { flex: none; }
+
+  .addbtn { display: inline-flex; align-items: center; gap: 7px; padding: 6px 13px; border: 1.5px solid var(--green); border-radius: 999px; background: #fff; color: var(--green); font-size: .78rem; font-weight: 700; white-space: nowrap; }
+  .addbtn:hover { background: var(--green); color: #fff; }
+  .addbtn .pr { font-weight: 600; opacity: .85; }
+
+  /* ——— Fiche produit ——— */
+  .opts { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 0 22px; max-width: 640px; }
+  .orow { display: flex; align-items: center; gap: 22px; padding: 16px 0; }
+  .orow + .orow { border-top: 1px solid var(--line); }
+  .lab { display: flex; align-items: center; gap: 10px; width: 110px; flex: none; font-weight: 800; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; }
+  .lab::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); }
+  .ctl { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .sw { padding: 6px 13px; border: 1.5px solid var(--line); border-radius: 999px; font-size: .78rem; font-weight: 600; }
+  .sw.on { border-color: var(--dark); }
+  .mobile { width: 358px; margin-top: 14px; padding: 0 12px; } /* écran de 390 px, marges de page déduites */
+  .mobile .pill { gap: 6px; padding: 5px 10px; }
+  .mobile .ctl { gap: 10px; }
+  .mobile .orow { flex-wrap: wrap; gap: 8px; }
+  .mobile .lab { width: 100%; }
+
+  /* ——— Volet ——— */
+  .drawer { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 10px 40px rgba(0,0,0,.08); }
+  .item { border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; background: #FDFCFB; position: relative; z-index: 1; }
+  .item .ph { height: 100px; border-radius: 10px; background: radial-gradient(circle at 50% 55%, #e9dccb 0 32%, #fff 33%); margin-bottom: 10px; }
+  .row-end { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .price { font-weight: 800; color: var(--wood); font-size: 1.05rem; }
+  .drawer .slot { margin: -6px 14px 18px; }
+  .tab { padding: 16px 14px 12px; border-radius: 0 0 12px 12px; background: var(--tab); font-size: .8rem; }
+  .tab .head { display: flex; align-items: center; gap: 10px; color: var(--gray); }
+  .tab .head strong { color: var(--dark); }
+  .tab .acts { display: flex; align-items: center; gap: 14px; margin-top: 9px; padding-left: 38px; flex-wrap: wrap; }
+  .thumb { width: 28px; height: 28px; flex: none; border-radius: 5px; background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 38"><circle cx="19" cy="16" r="8" fill="%23f4d58d"/><rect x="16" y="24" width="6" height="6" fill="%23bbb"/></svg>') center/contain no-repeat; }
+
+  /* ——— Panier ——— */
+  .cart { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 6px 30px; }
+  .line { display: grid; grid-template-columns: 140px 1fr auto; gap: 24px; padding: 24px 0; }
+  .line + .line { border-top: 1px solid var(--line); }
+  .line .ph { width: 140px; height: 120px; border-radius: 12px; background: radial-gradient(circle at 50% 55%, #e9dccb 0 34%, #fff 35%); }
+  .line .total { font-weight: 900; font-size: 1.3rem; }
+  .line .slot { grid-column: 2 / 4; margin-top: -6px; }
+  .cart .tab { display: inline-flex; align-items: center; gap: 14px; padding: 7px 12px; border-radius: 10px; }
+  .cart .tab .acts { margin: 0; padding: 0; }
+
+  /* Ajoutée */
+  .sub { display: flex; align-items: center; gap: 10px; padding: 16px 14px 12px; border-radius: 0 0 12px 12px; background: #EEF4EA; font-size: .8rem; }
+  .cart .sub { display: inline-flex; padding: 7px 12px; border-radius: 10px; }
+  .sub strong { color: var(--green); }
+  .sub a { color: var(--wood); font-weight: 700; font-size: .75rem; text-decoration: underline; cursor: pointer; margin-left: 6px; }
+
+  .notes { font-size: .82rem; line-height: 1.6; color: var(--gray); max-width: 780px; padding-left: 18px; }
+
+  /* Panneau simplifié */
+  .veil { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(30,26,22,.5); backdrop-filter: blur(5px); }
+  .veil[hidden] { display: none; }
+  .panel { width: min(760px, 100%); background: #fff; border-radius: 20px; padding: 24px 26px; }
+  .panel h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 2.2rem; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+  .c { position: relative; border: 1.5px solid var(--line); border-radius: 14px; padding: 80px 14px 14px; background: linear-gradient(#f0c97a, #c98a3a) top/100% 66px no-repeat; }
+  .c.sel { border-color: var(--green); }
+  .c b { display: block; }
+  .c small { color: var(--gray); }
+  .c button { width: 100%; margin-top: 10px; padding: 8px; border: 1.5px solid var(--dark); border-radius: 999px; background: #fff; font-weight: 700; font-size: .75rem; text-transform: uppercase; }
+  .c.sel button { background: var(--green); border-color: var(--green); color: #fff; }
+  .c .badge { position: absolute; top: 8px; left: 8px; padding: 3px 9px; border-radius: 999px; background: var(--dark); color: #fff; font-size: .65rem; font-weight: 700; }
+  .close { float: right; border: 0; background: none; font-size: 1.4rem; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .line { grid-template-columns: 1fr; } .line .slot { grid-column: auto; } .cards { grid-template-columns: 1fr; } }
+
+  /* Version compacte (v2) */
+  .tag { display: inline-block; padding: 1px 6px; border-radius: 999px; background: var(--tab); color: var(--wood); font-size: .62rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+  .pill.on .tag { background: rgba(255,255,255,.18); color: #fff; }
+  .addbtn .tag { background: #E4EFE0; color: var(--green); }
+  .addbtn:hover .tag { background: rgba(255,255,255,.2); color: #fff; }
+  .ctl { flex-wrap: wrap; row-gap: 8px; }
+  .tab { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+  .tab .ttl { font-size: .78rem; margin-right: auto; }
+  .cart .tab { display: inline-flex; flex-wrap: nowrap; }
+  .cart .tab .ttl { margin-right: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Ampoule recommandée + comparer</h1>
+  <p class="intro">Version compacte : le bouton dit seulement le nom de l'ampoule et son prix, avec une petite étiquette « reco » quand c'est celle que je recommande. « Comparer » reste sur la même ligne. Dans le volet, si la largeur manque, « Comparer » passe à la ligne au lieu de déborder.</p>
+
+  <section>
+    <p class="cap">Fiche produit — desktop</p>
+    <div class="opts">
+      <div class="orow"><span class="lab">Taille</span><div class="ctl"><span class="sw">25 cm</span><span class="sw">35 cm</span><span class="sw on">45 cm</span></div></div>
+      <div class="orow"><span class="lab">Ampoule</span><div class="ctl" data-kind="fiche" data-first="Alban" data-ids="Globe,Poire,Edison"></div></div>
+    </div>
+    <p class="cap" style="margin-top:20px">Fiche produit — mobile</p>
+    <div class="opts mobile">
+      <div class="orow"><span class="lab">Ampoule</span><div class="ctl" data-kind="fiche" data-first="Alban" data-ids="Globe,Poire,Edison"></div></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div>
+      <p class="cap">Volet</p>
+      <div class="drawer">
+        <div class="item">
+          <div class="ph"></div>
+          <span class="fn">Suze</span> <span class="rn">La Méduse</span>
+          <p class="meta"><b>Matériau :</b> Peuplier<br><b>Taille :</b> 60 cm</p>
+          <div class="row-end"><span class="price">110,00 €</span><span class="qty"><span>−</span><span>1</span><span>+</span></span></div>
+        </div>
+        <div class="slot" data-kind="tab" data-first="Suze" data-ids="Globe,Poire,Edison"></div>
+        <div class="item">
+          <div class="ph"></div>
+          <span class="fn">Morane</span> <span class="rn">La Gogane</span>
+          <p class="meta"><b>Matériau :</b> Okoumé<br><b>Taille :</b> 35 × 30 cm</p>
+          <div class="row-end"><span class="price">95,00 €</span><span class="qty"><span>−</span><span>1</span><span>+</span></span></div>
+        </div>
+        <div class="slot" data-kind="tab" data-first="Morane" data-ids="Poire"></div>
+      </div>
+    </div>
+
+    <div>
+      <p class="cap">Page panier</p>
+      <div class="cart">
+        <div class="line">
+          <div class="ph"></div>
+          <div><span class="fn">Suze</span> <span class="rn">La Méduse</span><p class="meta">Matériau : Peuplier &nbsp; Taille : 60 cm</p><span class="qty" style="margin-top:10px"><span>−</span><span>1</span><span>+</span></span></div>
+          <div class="total">110,00 €</div>
+          <div class="slot" data-kind="tab" data-first="Suze" data-ids="Globe,Poire,Edison"></div>
+        </div>
+        <div class="line">
+          <div class="ph"></div>
+          <div><span class="fn">Alban</span> <span class="rn">Le Virevoltant</span><p class="meta">Matériau : Peuplier &nbsp; Taille : 45 cm</p><span class="qty" style="margin-top:10px"><span>−</span><span>1</span><span>+</span></span></div>
+          <div class="total">105,00 €</div>
+          <div class="slot" data-kind="tab" data-first="Alban" data-ids="Globe,Poire,Edison"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <ul class="notes">
+    <li>Fiche produit : « ☐ Ajouter Globe [reco] +10 € » puis « Comparer ». La case reste (option payante, jamais pré-cochée).</li>
+    <li>Volet et panier : « Ampoule non incluse » · « + Globe [reco] 10 € » · « Comparer ».</li>
+    <li>Une seule ampoule compatible (Morane) : ni étiquette, ni « Comparer ».</li>
+    <li>Dans le comparateur, choisir une ampoule l'ajoute directement dans le volet et le panier ; sur la fiche, elle coche la case.</li>
+  </ul>
+</div>
+
+<div class="veil" hidden>
+  <div class="panel">
+    <button class="close" data-close>×</button>
+    <h2>Quelle ampoule pour <span class="pf"></span> ?</h2>
+    <div class="cards"></div>
+  </div>
+</div>
+
+<script>
+  const A = { Poire: ['9,00', '8,5 W – 1055 lm'], Globe: ['10,00', '8 W – 1000 lm'], Edison: ['8,00', '8 W – 1000 lm'] };
+  const veil = document.querySelector('.veil');
+  const icon = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 5h10l-3-3M14 11H4l3 3"/></svg>';
+
+  // Petite étiquette « reco » quand c'est l'ampoule recommandée parmi plusieurs.
+  function reco(slot, cur) {
+    const ids = slot.dataset.ids.split(',');
+    return cur === ids[0] && ids.length > 1 ? '<span class="tag">reco</span>' : '';
+  }
+  function render(slot) {
+    const ids = slot.dataset.ids.split(','), cur = slot.dataset.cur || ids[0], multi = ids.length > 1;
+    const cmp = multi ? '<button class="cmp">' + icon + 'Comparer</button>' : '';
+    if (slot.dataset.kind === 'fiche') {
+      const on = slot.dataset.on === '1';
+      slot.innerHTML = '<span class="pill' + (on ? ' on' : '') + '"><span class="box"></span><span class="lbl">Ajouter <b>' + cur + '</b></span>' + reco(slot, cur) +
+        '<span class="pr">+' + A[cur][0].replace(',00', '') + ' €</span></span>' + cmp;
+      slot.querySelector('.pill').onclick = () => { slot.dataset.on = on ? '' : '1'; render(slot); };
+    } else {
+      slot.innerHTML = '<div class="tab"><span class="thumb"></span><strong class="ttl">Ampoule non incluse</strong>' +
+        '<button class="addbtn">+ ' + cur + reco(slot, cur) + ' <span class="pr">' + A[cur][0].replace(',00', '') + ' €</span></button>' + cmp + '</div>';
+      slot.querySelector('.addbtn').onclick = () => added(slot, cur);
+    }
+    if (multi) slot.querySelector('.cmp').onclick = () => openPanel(slot, cur);
+  }
+  function added(slot, n) {
+    slot.innerHTML = '<div class="sub"><span class="thumb"></span><span><strong>✓ Ampoule ' + n + '</strong> · ' + A[n][0] + ' €</span><a>Retirer</a></div>';
+    slot.querySelector('a').onclick = () => { slot.dataset.cur = n; render(slot); };
+  }
+  function openPanel(slot, cur) {
+    const ids = slot.dataset.ids.split(',');
+    veil.querySelector('.pf').textContent = slot.dataset.first;
+    veil.querySelector('.cards').innerHTML = ids.map((n, i) =>
+      '<div class="c' + (n === cur && slot.dataset.on === '1' ? ' sel' : '') + '" data-n="' + n + '">' + (i === 0 ? '<span class="badge">Mon choix pour ' + slot.dataset.first + '</span>' : '') +
+      '<b>' + n + ' · ' + A[n][0] + ' €</b><small>E27 – ' + A[n][1] + '</small><button>Choisir celle-ci</button></div>').join('');
+    veil.querySelectorAll('.c button').forEach(b => b.onclick = () => {
+      const n = b.closest('.c').dataset.n;
+      veil.hidden = true;
+      if (slot.dataset.kind === 'fiche') { slot.dataset.cur = n; slot.dataset.on = '1'; render(slot); }
+      else added(slot, n);
+    });
+    veil.hidden = false;
+  }
+  veil.addEventListener('click', e => { if (e.target === veil || e.target.hasAttribute('data-close')) veil.hidden = true; });
+  document.querySelectorAll('[data-kind]').forEach(render);
+</script>
+</body>
+</html>

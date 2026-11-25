@@ -431,13 +431,16 @@ function sapi_mini_cart_amp_tab($cart_item) {
   if (!$amp || sapi_cart_has_ampoule_for($vid)) return;
   $ids = array_map(function ($a) { return $a->get_id(); }, $amps);
   $img = $amp->get_image_id() ? wp_get_attachment_image_url($amp->get_image_id(), 'thumbnail') : '';
-  $price = wp_strip_all_tags(wc_price(wc_get_price_to_display($amp)));
+  $price = function_exists('sapi_amp_price_short') ? sapi_amp_price_short(wc_get_price_to_display($amp)) : html_entity_decode(wp_strip_all_tags(wc_price(wc_get_price_to_display($amp))), ENT_QUOTES, 'UTF-8');
+  $qty = max(1, (int) $cart_item['quantity']);
   ?>
   <div class="sapi-amp-tab sapi-amp-tab--mini">
     <?php if ($img) : ?><img class="sapi-amp-tab__img" src="<?php echo esc_url($img); ?>" alt="" width="40" height="40" loading="lazy"><?php endif; ?>
-    <p class="sapi-amp-tab__text"><strong><?php esc_html_e('Ampoule non incluse.', 'theme-sapi-maison'); ?></strong> <?php echo esc_html(sapi_ampoule_short_name($amp) . ', ' . html_entity_decode($price, ENT_QUOTES, 'UTF-8')); ?>
-      <?php if (count($ids) > 1) : ?><br><button type="button" class="sapi-amp-compare" data-ids="<?php echo esc_attr(implode(',', $ids)); ?>" data-first="<?php echo esc_attr(sapi_cart_line_first_name($cart_item)); ?>" data-qty="<?php echo esc_attr(max(1, (int) $cart_item['quantity'])); ?>"><?php echo esc_html(sprintf(__('Comparer les %d ampoules', 'theme-sapi-maison'), count($ids))); ?></button><?php endif; ?></p>
-    <button type="button" class="sapi-amp-tab__add sapi-mc-amp__add" data-product-id="<?php echo esc_attr($amp->get_id()); ?>" data-qty="<?php echo esc_attr(max(1, (int) $cart_item['quantity'])); ?>"><?php esc_html_e('+ Ajouter', 'theme-sapi-maison'); ?></button>
+    <strong class="sapi-amp-tab__title"><?php esc_html_e('Ampoule non incluse', 'theme-sapi-maison'); ?></strong>
+    <span class="sapi-amp-tab__acts">
+      <button type="button" class="sapi-amp-tab__add sapi-mc-amp__add" data-product-id="<?php echo esc_attr($amp->get_id()); ?>" data-qty="<?php echo esc_attr($qty); ?>">+ <?php echo esc_html(sapi_ampoule_short_name($amp)); ?><?php if (count($ids) > 1) : ?> <span class="sapi-amp-reco"><?php esc_html_e('Reco', 'theme-sapi-maison'); ?></span><?php endif; ?> <span class="sapi-amp-tab__price"><?php echo esc_html($price); ?></span></button>
+      <?php if (count($ids) > 1) : ?><button type="button" class="sapi-amp-compare" data-ids="<?php echo esc_attr(implode(',', $ids)); ?>" data-first="<?php echo esc_attr(sapi_cart_line_first_name($cart_item)); ?>" data-qty="<?php echo esc_attr($qty); ?>" aria-haspopup="dialog"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 5h10l-3-3M14 11H4l3 3"/></svg><?php esc_html_e('Comparer', 'theme-sapi-maison'); ?></button><?php endif; ?>
+    </span>
   </div>
   <?php
 }

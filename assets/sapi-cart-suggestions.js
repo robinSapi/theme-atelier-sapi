@@ -47,10 +47,15 @@
     ajouter(btn, btn.getAttribute('data-product-id'), parseInt(btn.getAttribute('data-qty'), 10) || 1);
   });
 
+  // « + Globe » et « Comparer » d'une même languette se bloquent l'un l'autre.
+  function lockTab(btn, on) {
+    var tab = btn.closest && btn.closest('.sapi-amp-tab');
+    (tab ? Array.prototype.slice.call(tab.querySelectorAll('button')) : [btn]).forEach(function (b) { b.disabled = on; });
+  }
   function ajouter(btn, productId, qty) {
-    if (!window.sapiSuggest || !$) return;
-    btn.disabled = true;
-    var label = btn.textContent;
+    if (!window.sapiSuggest || !$ || btn.disabled) return;
+    lockTab(btn, true);
+    var label = btn.innerHTML; // la languette contient des balises (« Reco », prix)
     btn.textContent = 'Ajout…';
     $.post(sapiSuggest.addUrl, {
       action: 'sapi_add_to_cart',
@@ -66,12 +71,12 @@
         // Sur la page panier (React), le panier affiché ne lit pas les fragments
         if (document.body.classList.contains('woocommerce-cart')) location.reload();
       } else {
-        btn.disabled = false;
-        btn.textContent = label;
+        lockTab(btn, false);
+        btn.innerHTML = label;
       }
     }).fail(function () {
-      btn.disabled = false;
-      btn.textContent = label;
+      lockTab(btn, false);
+      btn.innerHTML = label;
     });
   }
 
