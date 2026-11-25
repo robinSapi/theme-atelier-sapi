@@ -2350,17 +2350,35 @@
        ajoute ou retire une question du mode court — et ce jour-là, la fiche
        produit afficherait une pastille de moins ou de trop, sans rien casser.
        `SHORT_STEPS` vient de PHP (`shortSteps`), qui est la source. */
-    var chipsProjet = SHORT_STEPS;
-    var MOTS_CLES_PRODUIT = { taille: 'Taille de la pièce' };
+    /* 25/11/2026 : plus de pastilles, une phrase discrète
+       « Ton projet : Bureau / Atelier · Standard · 15 m² · Moderne… ».
+       Chaque réponse reste un bouton `data-step-edit` (même écouteur que les
+       anciennes pastilles, même retour sur cet écran). Les pastilles avaient
+       presque le poids de la recommandation et se lisaient comme des choix. */
     if (els.productRecapProject) {
       els.productRecapProject.innerHTML = '';
-      var nbChips = 0;
-      chipsProjet.forEach(function (sid) {
-        var chip = buildProjectChip(sid, { cliquable: true, empile: true, motCle: MOTS_CLES_PRODUIT[sid] });
-        if (chip) { els.productRecapProject.appendChild(chip); nbChips++; }
+      var nbRep = 0;
+      SHORT_STEPS.forEach(function (sid) {
+        var slug = state.answers[sid];
+        if (!slug) return;
+        var txt = state.labels[sid] || getChoiceLabel(sid, slug) || slug;
+        if (nbRep) els.productRecapProject.appendChild(document.createTextNode(' · '));
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'recap-projet__rep';
+        b.setAttribute('data-step-edit', sid);
+        b.setAttribute('aria-label', 'Modifier : ' + txt);
+        b.textContent = txt;
+        els.productRecapProject.appendChild(b);
+        nbRep++;
       });
-      els.productRecapProject.hidden = !nbChips;
-      if (els.productRecapProjectLabel) els.productRecapProjectLabel.hidden = !nbChips;
+      if (nbRep) {
+        var lead = document.createElement('span');
+        lead.className = 'recap-projet__lead';
+        lead.textContent = 'Ton projet : ';
+        els.productRecapProject.insertBefore(lead, els.productRecapProject.firstChild);
+      }
+      els.productRecapProject.hidden = !nbRep;
     }
 
     // Récap card : Essence + Taille (chacune masquée si non disponible)
@@ -2413,7 +2431,48 @@
       els.productRecapConseilTaille.hidden = !conseilTaille;
     }
 
+    /* Titre de la carte : « Morane en peuplier, taille 45x20cm. » */
+    var titreEl = els.modal && els.modal.querySelector('[data-product-recap-title]');
+    if (titreEl) {
+      var prenomEl = document.querySelector('.product-title-v2 .product-firstname, .product-title-mobile .product-firstname');
+      var prenom = prenomEl ? (prenomEl.textContent || '').trim() : '';
+      if (prenom) prenom = prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase();
+      titreEl.innerHTML = '';
+      /* Morane en <b>peuplier</b>, taille <b>45x20cm</b>. — chaque morceau seulement s'il existe */
+      var ajoute = function (txt, gras) {
+        var n = gras ? document.createElement('b') : document.createTextNode(txt);
+        if (gras) n.textContent = txt;
+        titreEl.appendChild(n);
+      };
+      if (prenom) ajoute(prenom);
+      if (hasEssence) { ajoute(prenom ? ' en ' : 'En '); ajoute(essenceLabel.toLowerCase(), true); }
+      if (hasTaille) { ajoute(prenom || hasEssence ? ', taille ' : 'Taille '); ajoute(tailleLabel, true); }
+      ajoute('.');
+      titreEl.hidden = !aReco;
+    }
+
+    /* Bouton : « Sélection appliquée » quand la fiche montre déjà la recommandation */
+    var applyBtn = els.modal && els.modal.querySelector('[data-action="product-apply"]');
+    var applyTxt = applyBtn && applyBtn.querySelector('[data-product-apply-text]');
+    if (applyBtn && applyTxt) {
+      var deja = selectionDejaAppliquee();
+      applyBtn.classList.toggle('is-done', deja);
+      applyTxt.textContent = deja ? 'Sélection appliquée' : 'Appliquer ma sélection';
+    }
+
     showScreen('s-product-recap');
+  }
+
+  /* Même règle que la pastille de la fiche (sapi-help-pill.js) : chaque menu
+     de variation porte la valeur déclarée dans data-sapi-recommandation. */
+  function selectionDejaAppliquee() {
+    var form = document.querySelector('form.variations_form');
+    if (!form) return false;
+    var reco;
+    try { reco = JSON.parse(form.getAttribute('data-sapi-recommandation') || '{}') || {}; } catch (e) { return false; }
+    var menus = [].slice.call(form.querySelectorAll('.variations select'));
+    if (!menus.length) return false;
+    return menus.every(function (m) { return m.name && reco[m.name] && m.value === reco[m.name]; });
   }
 
   // CTA "Appliquer cette sélection" : ferme la modale, dispatch un event pour
@@ -3544,7 +3603,6 @@
     els.recapChips    = els.modal.querySelector('[data-recap-chips]');
     // s-product-recap (F2b Phase 2 — récap statique sans IA)
     els.productRecapProject      = els.modal.querySelector('[data-product-recap-project]');
-    els.productRecapProjectLabel = els.modal.querySelector('[data-product-recap-project-label]');
     els.productRecapRecoLabel    = els.modal.querySelector('[data-product-recap-reco-label]');
     els.productRecapCard         = els.modal.querySelector('[data-product-recap-card]');
     els.productRecapEssence      = els.modal.querySelector('[data-product-recap-essence]');

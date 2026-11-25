@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette panier : lignes compactes + ampoule rattachée</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wood: #937D68; --cream: #FEFDFB; --warm: #FBF6EA; --dark: #323232;
+    --gray: #717171; --line: #E8E2D9; --green: #018501; --orange: #E35B24;
+    --tab: #F3EEE6; --page: #FAF9F7;
+    --body: 'Montserrat', sans-serif; --display: 'Square Peg', cursive;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); font-family: var(--body); color: var(--dark); }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* Barre de la maquette */
+  .mk-bar { position: sticky; top: 0; z-index: 50; display: flex; gap: 8px; align-items: center; padding: 10px 20px; background: var(--dark); color: #fff; font-size: 13px; }
+  .mk-bar strong { margin-right: 12px; }
+  .mk-bar button { padding: 6px 14px; border: 1px solid #fff5; border-radius: 999px; background: transparent; color: #fff; font-size: 12px; font-weight: 600; }
+  .mk-bar button.on { background: #fff; color: var(--dark); }
+  .mk-bar .sp { flex: 1; }
+
+  /* Nom au format de la charte */
+  .fn { font-weight: 800; text-transform: uppercase; font-size: .78em; letter-spacing: .01em; }
+  .rn { font-family: var(--display); font-weight: 400; font-size: 1.6em; line-height: .9; }
+
+  /* ============ PAGE PANIER ============ */
+  .page { max-width: 1400px; margin: 0 auto; padding: 24px 48px 64px; }
+  .logo { display: flex; justify-content: center; padding: 8px 0 18px; }
+  .logo span { width: 56px; height: 56px; border-radius: 50%; background: #000; color: #fff; font-family: var(--display); font-size: 28px; display: grid; place-items: center; }
+  .subtitle { text-align: center; color: #555; margin: 0 0 22px; font-size: 1.05rem; }
+  .layout { display: grid; grid-template-columns: minmax(0, 65fr) minmax(0, 35fr); gap: 32px; align-items: start; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; }
+  .items { padding: 4px 28px; }
+
+  .row { display: grid; grid-template-columns: 132px minmax(0, 1fr) auto auto; gap: 24px; align-items: center; padding: 22px 0; border-top: 1px solid var(--line); }
+  .item:first-child .row { border-top: 0; }
+  .row img { width: 132px; height: 132px; object-fit: cover; border-radius: 10px; display: block; background: var(--tab); }
+  .row .name { font-size: 1.05rem; margin: 0 0 6px; }
+  .row .opts { color: var(--gray); font-size: .85rem; margin: 0; }
+  .row .remove { margin-top: 10px; padding: 0; border: 0; background: none; color: var(--gray); font-size: .78rem; text-decoration: underline; }
+  .qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .qty button { width: 32px; height: 34px; border: 0; background: #fff; font-size: 1rem; color: var(--dark); }
+  .qty button:hover { background: var(--tab); }
+  .qty span { min-width: 30px; text-align: center; font-weight: 600; font-size: .9rem; }
+  .price { text-align: right; min-width: 96px; }
+  .price strong { display: block; font-size: 1.2rem; font-weight: 800; }
+  .price small { display: block; color: var(--gray); font-size: .75rem; margin-top: 2px; }
+
+  /* Languette, alignée sur la colonne de texte */
+  .tab { display: flex; align-items: center; gap: 12px; margin: -10px 0 18px 156px; padding: 9px 14px; border-radius: 10px; background: var(--tab); font-size: .85rem; color: var(--gray); transition: background .25s; }
+  .tab img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; mix-blend-mode: multiply; }
+  .tab p { flex: 1; margin: 0; }
+  .tab p strong { color: var(--dark); }
+  .tab .add { padding: 6px 14px; border: 1.5px solid var(--green); border-radius: 999px; background: transparent; color: var(--green); font-weight: 700; font-size: .8rem; white-space: nowrap; }
+  .tab .add:hover { background: var(--green); color: #fff; }
+  .tab.is-added { background: #EEF4EA; }
+  .tab.is-added .check { width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff; display: grid; place-items: center; font-size: .75rem; font-weight: 800; flex: 0 0 auto; }
+  .tab.is-added p strong { color: var(--green); }
+  .tab .amp-price { font-weight: 700; color: var(--dark); white-space: nowrap; }
+  .tab .undo { padding: 0; border: 0; background: none; color: var(--gray); font-size: .78rem; text-decoration: underline; }
+  .tab.is-busy { opacity: .6; pointer-events: none; }
+
+  /* Totaux */
+  .totals { padding: 26px 28px; position: sticky; top: 64px; }
+  .totals h2 { margin: 0 0 16px; font-size: 1.3rem; font-weight: 600; text-transform: uppercase; }
+  .tline { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: .9rem; }
+  .tline small { display: block; color: var(--gray); font-size: .75rem; }
+  .tline.total { font-size: 1.25rem; font-weight: 600; padding-top: 16px; }
+  .tline.total small { font-weight: 500; }
+  .pay { margin-top: 18px; width: 100%; padding: 16px; border: 0; border-radius: 12px; background: linear-gradient(180deg, #018501, #026B02); color: #fff; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: .95rem; box-shadow: 0 4px 15px rgba(1,133,1,.25); }
+
+  /* Suggestions */
+  .suggest { margin-top: 32px; }
+  .eyebrow { margin: 0 0 4px; color: var(--wood); font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+  .stitle { margin: 0 0 16px; font-family: var(--display); font-size: 2.2rem; line-height: 1; }
+  .scards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .scard { background: var(--tab); border-radius: 16px; overflow: hidden; }
+  .scard img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+  .scard div { padding: 12px 14px 14px; font-size: .95rem; }
+  .scard .cat { color: var(--gray); font-size: .8rem; margin: 2px 0 8px; }
+  .scard .from { font-size: .7rem; text-transform: uppercase; color: var(--gray); }
+  .scard .go { display: block; margin-top: 8px; color: var(--orange); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+
+  .empty { padding: 48px 0; text-align: center; color: var(--gray); }
+
+  /* ============ VOLET ============ */
+  .stage { display: flex; justify-content: center; gap: 40px; padding: 40px 20px; min-height: calc(100vh - 46px); background: linear-gradient(135deg, #5a5148, #2f2a25); }
+  .drawer { width: 400px; max-width: 92vw; background: #fff; display: flex; flex-direction: column; border-radius: 6px; overflow: hidden; height: 820px; box-shadow: 0 20px 60px #0006; }
+  .dhead { display: flex; justify-content: space-between; align-items: center; padding: 20px 22px; border-bottom: 1px solid var(--line); }
+  .dhead h3 { margin: 0; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
+  .dhead span { width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--wood); display: grid; place-items: center; color: var(--wood); }
+  .dbody { flex: 1; overflow-y: auto; padding: 18px 20px; }
+  .ditem { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; padding: 12px; background: var(--cream); border: 1px solid rgba(147,125,104,.15); border-radius: 10px; margin-bottom: 14px; position: relative; z-index: 1; }
+  .ditem.has-tab { margin-bottom: 0; }
+  .ditem img { width: 76px; height: 76px; object-fit: cover; border-radius: 8px; }
+  .ditem .name { font-size: .9rem; margin: 2px 0 4px; }
+  .ditem .opts { font-size: .72rem; color: var(--gray); margin: 0 0 8px; }
+  .ditem .bottom { display: flex; justify-content: space-between; align-items: center; }
+  .ditem .bottom strong { color: var(--wood); font-weight: 800; }
+  .ditem .qty button { width: 26px; height: 26px; font-size: .85rem; }
+  .ditem .qty span { min-width: 24px; font-size: .8rem; }
+  .ditem .x { position: absolute; top: 8px; right: 8px; border: 0; background: none; color: var(--gray); font-size: 1rem; }
+  .drawer .tab { margin: 0 10px 14px; padding: 8px 10px; font-size: .74rem; gap: 8px; border-radius: 0 0 10px 10px; }
+  .drawer .tab img { width: 30px; height: 30px; }
+  .drawer .tab .add { padding: 4px 10px; font-size: .72rem; }
+  .drawer .tab .check { width: 18px !important; height: 18px !important; font-size: .65rem !important; }
+  .dsug { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .dsug .stitle { font-size: 1.6rem; margin-bottom: 10px; }
+  .dstrip { display: grid; grid-auto-flow: column; grid-auto-columns: 42%; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+  .dstrip img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; display: block; margin-bottom: 6px; }
+  .dstrip .name { font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dstrip small { display: block; color: var(--gray); font-size: .7rem; }
+  .dstrip b { color: var(--wood); font-size: .78rem; }
+  .dfoot { padding: 16px 20px 20px; border-top: 1px solid var(--line); background: var(--cream); }
+  .dfoot .t { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .dfoot .t strong { font-size: 1.5rem; font-weight: 800; }
+  .dfoot .b1, .dfoot .b2 { display: block; width: 100%; padding: 12px; border-radius: 12px; font-weight: 700; font-size: .95rem; }
+  .dfoot .b1 { background: #fff; border: 1.5px solid var(--wood); color: var(--wood); margin-bottom: 8px; }
+  .dfoot .b2 { background: var(--orange); border: 0; color: #fff; }
+
+  /* Notes */
+  .notes { max-width: 1400px; margin: 0 auto; padding: 0 48px 48px; font-size: .82rem; color: var(--gray); }
+  .notes ul { margin: 6px 0 0; padding-left: 18px; line-height: 1.7; }
+  .stage + .notes { padding-top: 20px; }
+  [hidden] { display: none !important; }
+
+  /* Sous-ligne : la vraie ligne de l'ampoule, rangée sous son luminaire */
+  .sub { display: flex; align-items: center; gap: 12px; margin: -10px 0 18px 156px; padding: 9px 14px; border-radius: 10px; background: #EEF4EA; font-size: .85rem; color: var(--gray); }
+  .sub .check { width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff; display: grid; place-items: center; font-size: .75rem; font-weight: 800; flex: 0 0 auto; }
+  .sub p { flex: 1; margin: 0; }
+  .sub p strong { color: var(--green); }
+  .sub .qty { background: #fff; }
+  .sub .qty button { width: 26px; height: 26px; font-size: .85rem; }
+  .sub .qty span { min-width: 22px; font-size: .8rem; }
+  .sub .amp-price { font-weight: 700; color: var(--dark); white-space: nowrap; min-width: 64px; text-align: right; }
+  .sub .undo, .hint button { padding: 0; border: 0; background: none; color: var(--gray); font-size: .78rem; text-decoration: underline; }
+  .hint { display: block; margin-top: 4px; font-size: .75rem; color: var(--orange); }
+  .hint button { color: var(--orange); font-weight: 700; }
+  .drawer .sub { margin: 0 10px 14px; padding: 8px 10px; font-size: .74rem; gap: 8px; border-radius: 0 0 10px 10px; flex-wrap: wrap; }
+  .drawer .sub .check { width: 18px; height: 18px; font-size: .65rem; }
+  .drawer .sub .amp-price { min-width: 0; }
+  .row .shared { display: block; margin-top: 6px; font-size: .78rem; color: var(--gray); }
+  .mk-bar .label { opacity: .7; margin-left: 10px; }
+</style>
+</head>
+<body>
+
+<div class="mk-bar">
+  <strong>Maquette panier</strong>
+  <button data-view="page" class="on">Page panier (desktop)</button>
+  <button data-view="drawer">Volet</button>
+  <span class="label">Scénario :</span>
+  <button data-scn="base" class="on">Ampoule sous son luminaire</button>
+  <button data-scn="shared">Ampoule partagée</button>
+  <span class="sp"></span>
+  <button data-reset>Réinitialiser</button>
+</div>
+
+<main id="view-page" class="page"></main>
+<section id="view-drawer" class="stage" hidden></section>
+
+<div class="notes" id="notes">
+  <strong>Option A : chaque ampoule reste une vraie ligne WooCommerce, seul l'affichage change</strong> (tout est cliquable)
+  <ul>
+    <li>« + Ajouter » ajoute la ligne Ampoule au panier (même quantité que le luminaire). Elle s'affiche sous le luminaire, avec ses propres − / + et Retirer.</li>
+    <li>Pas de synchronisation automatique : passez Gaston à 2, un rappel « + 1 » apparaît.</li>
+    <li>Retirer le luminaire : l'ampoule reste au panier et redevient une ligne normale.</li>
+    <li>Scénario « Ampoule partagée » : Gaston et Timothée utilisent la Poire. L'ampoule reste une ligne seule, qui indique pour qui elle est et propose de compléter s'il en manque. Retirez un des deux luminaires : elle se range sous l'autre.</li>
+    <li>Une ampoule sans luminaire compatible (Globe, achetée seule) reste une ligne normale.</li>
+  </ul>
+</div>
+
+<script>
+var IMG = 'https://test.atelier-sapi.fr/wp-content/uploads/';
+var AMP = {
+  poire:  { first: 'Ampoule', rest: 'Poire',  price: 9,  img: IMG + '2025/03/O_NLS_R-1.jpg', opts: 'E27 · LED filament 4 W · 2700 K' },
+  edison: { first: 'Ampoule', rest: 'Edison', price: 14, img: IMG + '2025/04/O_NLS_XL_R.jpg', opts: 'E27 · LED filament 6 W · 2700 K' },
+  globe:  { first: 'Ampoule', rest: 'Globe',  price: 12, img: IMG + '2025/04/A_GLOBE_R.jpg', opts: 'E27 · LED filament 4 W · 2700 K' }
+};
+var LUM = {
+  gaston:   { first: 'Gaston', rest: 'Le Chardon', img: IMG + '2025/10/Large-1-1024x729.jpg', opts: 'Okoumé · 50 cm · Câble et pavillon noirs', price: 90 },
+  timothee: { first: 'Timothée', rest: "L'araignée", img: IMG + '2025/10/Large-5-1024x683.jpg', opts: 'Peuplier · 90 cm · Câble et pavillon noirs', price: 160 }
+};
+var SCN = {
+  base: [
+    { key: 'l1', kind: 'lum', id: 'gaston', amp: 'poire', qty: 1 },
+    { key: 'l2', kind: 'lum', id: 'timothee', amp: 'edison', qty: 2 },
+    { key: 'a1', kind: 'amp', id: 'edison', qty: 2 },
+    { key: 'a2', kind: 'amp', id: 'globe', qty: 1 }
+  ],
+  shared: [
+    { key: 'l1', kind: 'lum', id: 'gaston', amp: 'poire', qty: 1 },
+    { key: 'l2', kind: 'lum', id: 'timothee', amp: 'poire', qty: 2 },
+    { key: 'a1', kind: 'amp', id: 'poire', qty: 2 }
+  ]
+};
+var SUGGEST = [
+  { first: 'Bertrand', rest: 'Le Volcan', cat: 'Lampe à poser', price: 65, img: IMG + '2025/09/Bertrand-Ambiance2-1-1024x687.jpg' },
+  { first: 'Claudine', rest: 'La Turbine', cat: 'Applique', price: 80, img: IMG + '2025/05/ambiance--768x1024.jpg' },
+  { first: 'Olivia', rest: 'La Gardiena', cat: 'Lampadaire', price: 189, img: IMG + '2025/12/Olivia-La-gardiena-1024x682.jpg' }
+];
+var lines, view = 'page', scn = 'base', seq = 10;
+function reset() { lines = SCN[scn].map(function (l) { return Object.assign({}, l); }); render(); }
+
+function eur(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
+function nm(o) { return '<span class="fn">' + o.first + '</span> <span class="rn">' + o.rest + '</span>'; }
+function info(l) { return l.kind === 'lum' ? LUM[l.id] : AMP[l.id]; }
+function total() { return lines.reduce(function (s, l) { return s + info(l).price * l.qty; }, 0); }
+function count() { return lines.reduce(function (s, l) { return s + l.qty; }, 0); }
+function ampLine(id) { return lines.filter(function (l) { return l.kind === 'amp' && l.id === id; })[0]; }
+function lumsFor(id) { return lines.filter(function (l) { return l.kind === 'lum' && l.amp === id; }); }
+function need(id) { return lumsFor(id).reduce(function (s, l) { return s + l.qty; }, 0); }
+/* Règle d'affichage : une ligne d'ampoule se range sous un luminaire seulement
+   si UN SEUL luminaire du panier l'utilise. Sinon, ligne normale. */
+function attachedTo(a) { var ls = lumsFor(a.id); return ls.length === 1 ? ls[0] : null; }
+
+function qty(l) {
+  return '<div class="qty"><button data-act="minus" data-key="' + l.key + '">−</button><span>' + l.qty + '</span><button data-act="plus" data-key="' + l.key + '">+</button></div>';
+}
+function missingHint(id, label) {
+  var a = ampLine(id), miss = need(id) - (a ? a.qty : 0);
+  if (!a || miss <= 0) return '';
+  return '<span class="hint">' + label(miss) + ' · <button data-act="complete" data-amp="' + id + '">+ ' + miss + '</button></span>';
+}
+/* Sous le luminaire : proposition, sous-ligne de l'ampoule, ou rien */
+function under(l) {
+  var amp = AMP[l.amp], a = ampLine(l.amp);
+  if (a && attachedTo(a) === l) {
+    return '<div class="sub"><span class="check">✓</span>' +
+      '<p><strong>Ampoule ' + amp.rest + '</strong>' +
+      missingHint(l.amp, function (m) { return l.qty + ' luminaires, ' + a.qty + ' ampoule' + (a.qty > 1 ? 's' : ''); }) + '</p>' +
+      qty(a) + '<span class="amp-price">' + eur(amp.price * a.qty) + '</span>' +
+      '<button class="undo" data-act="del" data-key="' + a.key + '">Retirer</button></div>';
+  }
+  if (a) return ''; // ampoule partagée : elle est sur sa propre ligne
+  return '<div class="tab"><img src="' + amp.img + '" alt="">' +
+    '<p><strong>Ampoule non incluse.</strong> Celle que je recommande pour ' + LUM[l.id].first + ' : ' + amp.rest + ', ' + eur(amp.price) + '</p>' +
+    '<button class="add" data-act="add-amp" data-key="' + l.key + '">+ Ajouter</button></div>';
+}
+function visible() { return lines.filter(function (l) { return l.kind === 'lum' || !attachedTo(l); }); }
+function sharedNote(l) {
+  if (l.kind !== 'amp') return '';
+  var ls = lumsFor(l.id);
+  if (ls.length < 2) return '';
+  var names = ls.map(function (x) { return LUM[x.id].first; }).join(' et ');
+  return '<span class="shared">Pour ' + names + '</span>' +
+    missingHint(l.id, function (m) { return need(l.id) + ' luminaires, ' + l.qty + ' ampoules'; });
+}
+
+function renderPage() {
+  var rows = visible().map(function (l) {
+    var o = info(l);
+    return '<div class="item"><div class="row"><img src="' + o.img + '" alt="">' +
+      '<div><p class="name">' + nm(o) + '</p><p class="opts">' + o.opts + '</p>' + sharedNote(l) +
+      '<button class="remove" data-act="del" data-key="' + l.key + '">Retirer</button></div>' +
+      qty(l) +
+      '<div class="price"><strong>' + eur(o.price * l.qty) + '</strong>' + (l.qty > 1 ? '<small>' + l.qty + ' × ' + eur(o.price) + '</small>' : '') + '</div>' +
+      '</div>' + (l.kind === 'lum' ? under(l) : '') + '</div>';
+  }).join('');
+  var lum = lines.filter(function (l) { return l.kind === 'lum'; }).slice(-1)[0];
+  document.getElementById('view-page').innerHTML =
+    '<div class="logo"><span>Sâpi</span></div>' +
+    '<p class="subtitle">Plus que quelques clics avant de recevoir votre luminaire !</p>' +
+    '<div class="layout"><div>' +
+      '<div class="card items">' + (rows || '<p class="empty">Votre panier est vide</p>') + '</div>' +
+      (lum ? '<section class="suggest"><p class="eyebrow">Pour compléter votre commande</p><p class="stitle">Ça irait bien avec ' + LUM[lum.id].first + '</p><div class="scards">' +
+        SUGGEST.map(function (s) {
+          return '<div class="scard"><img src="' + s.img + '" alt=""><div><span>' + nm(s) + '</span><p class="cat">' + s.cat + '</p><span class="from">À partir de </span><strong>' + eur(s.price) + '</strong><span class="go">Découvrir ⇾</span></div></div>';
+        }).join('') + '</div></section>' : '') +
+    '</div>' +
+    '<aside class="card totals"><h2>Total panier</h2>' +
+      '<div class="tline"><span>Sous-total<small>' + count() + ' article' + (count() > 1 ? 's' : '') + '</small></span><span>' + eur(total()) + '</span></div>' +
+      '<div class="tline"><span>Expédition<small>Choisissez votre mode de livraison à la prochaine étape</small></span><strong>GRATUIT</strong></div>' +
+      '<div class="tline total"><span>Total estimé<small>Dont ' + eur(total() / 6) + ' de TVA</small></span><span>' + eur(total()) + '</span></div>' +
+      '<button class="pay">Valider la commande</button></aside></div>';
+}
+
+function renderDrawer() {
+  var body = visible().map(function (l) {
+    var o = info(l), u = l.kind === 'lum' ? under(l) : '';
+    return '<div class="ditem' + (u ? ' has-tab' : '') + '"><img src="' + o.img + '" alt=""><div>' +
+      '<p class="name">' + nm(o) + '</p><p class="opts">' + o.opts + '</p>' + sharedNote(l) +
+      '<div class="bottom"><strong>' + eur(o.price) + '</strong>' + qty(l) + '</div></div>' +
+      '<button class="x" data-act="del" data-key="' + l.key + '">×</button></div>' + u;
+  }).join('');
+  var lum = lines.filter(function (l) { return l.kind === 'lum'; }).slice(-1)[0];
+  document.getElementById('view-drawer').innerHTML =
+    '<div class="drawer"><div class="dhead"><h3>Votre panier</h3><span>✕</span></div>' +
+    '<div class="dbody">' + (body || '<p class="empty">Votre panier est vide</p>') +
+    (lum ? '<div class="dsug"><p class="eyebrow">Pour compléter votre commande</p><p class="stitle">Ça irait bien avec ' + LUM[lum.id].first + '</p><div class="dstrip">' +
+      SUGGEST.map(function (s) { return '<div><img src="' + s.img + '" alt=""><div class="name">' + nm(s) + '</div><small>' + s.cat + '</small><b>dès ' + eur(s.price) + '</b></div>'; }).join('') +
+      '</div></div>' : '') +
+    '</div><div class="dfoot"><div class="t"><span>Total</span><strong>' + eur(total()) + '</strong></div>' +
+    '<button class="b1">Voir le panier</button><button class="b2">Commander →</button></div></div>';
+}
+
+function render() {
+  document.getElementById('view-page').hidden = view !== 'page';
+  document.getElementById('view-drawer').hidden = view !== 'drawer';
+  renderPage();
+  renderDrawer();
+}
+
+/* Ajout d'ampoule : comme WooCommerce, on augmente la ligne existante ou on en crée une */
+function addAmp(id, n) {
+  var a = ampLine(id);
+  if (a) a.qty += n; else lines.push({ key: 'a' + (seq++), kind: 'amp', id: id, qty: n });
+}
+
+document.addEventListener('click', function (e) {
+  var v = e.target.closest('[data-view]');
+  if (v) {
+    view = v.getAttribute('data-view');
+    document.querySelectorAll('[data-view]').forEach(function (b) { b.classList.toggle('on', b === v); });
+    render(); return;
+  }
+  var sc = e.target.closest('[data-scn]');
+  if (sc) {
+    scn = sc.getAttribute('data-scn');
+    document.querySelectorAll('[data-scn]').forEach(function (b) { b.classList.toggle('on', b === sc); });
+    reset(); return;
+  }
+  if (e.target.closest('[data-reset]')) { reset(); return; }
+  var b = e.target.closest('[data-act]');
+  if (!b) return;
+  var act = b.getAttribute('data-act');
+  if (act === 'complete') {
+    var id = b.getAttribute('data-amp'), a = ampLine(id);
+    addAmp(id, need(id) - a.qty); render(); return;
+  }
+  var key = b.getAttribute('data-key');
+  var l = lines.filter(function (x) { return x.key === key; })[0];
+  if (!l) return;
+  if (act === 'add-amp') {
+    // Simule l'aller-retour serveur
+    var t = b.closest('.tab'); t.classList.add('is-busy'); b.textContent = 'Ajout…';
+    setTimeout(function () { addAmp(l.amp, l.qty); render(); }, 450);
+    return;
+  }
+  if (act === 'plus') l.qty++;
+  if (act === 'minus') { l.qty--; if (l.qty < 1) act = 'del'; }
+  if (act === 'del') lines = lines.filter(function (x) { return x !== l; });
+  render();
+});
+
+reset();
+</script>
+</body>
+</html>

@@ -20,6 +20,44 @@
 
   try { if (sessionStorage.getItem(KEY) === '1') document.documentElement.classList.add('sapi-suggest-off'); } catch (e) {}
 
+  // Écouteur avant le return : la languette du volet existe aussi sans vitrine
+  document.addEventListener('click', function (e) {
+    var close = e.target.closest('.sapi-cart-suggest .sapi-suggest__close');
+    if (close) {
+      try { sessionStorage.setItem(KEY, '1'); } catch (err) {}
+      document.documentElement.classList.add('sapi-suggest-off');
+      return;
+    }
+    // Carte ampoule de la vitrine, ou languette ampoule du volet (même quantité que le luminaire)
+    var btn = e.target.closest('.sapi-cart-suggest .sapi-suggest__add, .mini-cart .sapi-mc-amp__add');
+    if (!btn || btn.disabled || !window.sapiSuggest || !$) return;
+    e.preventDefault();
+    btn.disabled = true;
+    var label = btn.textContent;
+    btn.textContent = 'Ajout…';
+    $.post(sapiSuggest.addUrl, {
+      action: 'sapi_add_to_cart',
+      product_id: btn.getAttribute('data-product-id'),
+      quantity: parseInt(btn.getAttribute('data-qty'), 10) || 1,
+      nonce: sapiSuggest.nonce
+    }).done(function (res) {
+      if (res && res.success && res.data && res.data.fragments) {
+        $.each(res.data.fragments, function (sel, html) { $(sel).replaceWith(html); });
+        // added_to_cart : GTM / GA4 voient l'ajout comme les autres.
+        $(document.body).trigger('added_to_cart', [res.data.fragments, res.data.cart_hash, $(btn)]);
+        $(document.body).trigger('wc_fragments_refreshed');
+        // Sur la page panier (React), le panier affiché ne lit pas les fragments
+        if (document.body.classList.contains('woocommerce-cart')) location.reload();
+      } else {
+        btn.disabled = false;
+        btn.textContent = label;
+      }
+    }).fail(function () {
+      btn.disabled = false;
+      btn.textContent = label;
+    });
+  });
+
   var view = document.querySelector('.sapi-cart-suggest');
   if (!view) return;
 
@@ -115,37 +153,4 @@
     }).observe(src0.parentNode, { childList: true });
   }
 
-  document.addEventListener('click', function (e) {
-    var close = e.target.closest('.sapi-cart-suggest .sapi-suggest__close');
-    if (close) {
-      try { sessionStorage.setItem(KEY, '1'); } catch (err) {}
-      document.documentElement.classList.add('sapi-suggest-off');
-      return;
-    }
-    var btn = e.target.closest('.sapi-cart-suggest .sapi-suggest__add');
-    if (!btn || btn.disabled || !window.sapiSuggest || !$) return;
-    e.preventDefault();
-    btn.disabled = true;
-    var label = btn.textContent;
-    btn.textContent = 'Ajout…';
-    $.post(sapiSuggest.addUrl, {
-      action: 'sapi_add_to_cart',
-      product_id: btn.getAttribute('data-product-id'),
-      quantity: 1,
-      nonce: sapiSuggest.nonce
-    }).done(function (res) {
-      if (res && res.success && res.data && res.data.fragments) {
-        $.each(res.data.fragments, function (sel, html) { $(sel).replaceWith(html); });
-        // added_to_cart : GTM / GA4 voient l'ajout comme les autres.
-        $(document.body).trigger('added_to_cart', [res.data.fragments, res.data.cart_hash, $(btn)]);
-        $(document.body).trigger('wc_fragments_refreshed');
-      } else {
-        btn.disabled = false;
-        btn.textContent = label;
-      }
-    }).fail(function () {
-      btn.disabled = false;
-      btn.textContent = label;
-    });
-  });
 })(window.jQuery);

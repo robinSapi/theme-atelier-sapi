@@ -836,18 +836,8 @@ add_action('woocommerce_after_cart', function () {
 add_action('wp_footer', function () {
   if (!function_exists('is_cart') || !is_cart()) return;
 
-  // Mapping slug → product_id pour les cross-sells (utilisé par le JS ci-dessous)
-  $cross_sell_ids = WC()->cart->get_cross_sells();
-  $slug_map = [];
-  foreach ($cross_sell_ids as $pid) {
-    $p = wc_get_product($pid);
-    if ($p) {
-      $slug_map[$p->get_slug()] = $pid;
-    }
-  }
   ?>
   <script>
-  var sapiCrossSellMap = <?php echo wp_json_encode($slug_map); ?>;
   (function () {
     function replaceCartTexts() {
       // "Supprimer l'élément" → "Supprimer"
@@ -856,79 +846,10 @@ add_action('wp_footer', function () {
           el.textContent = 'Supprimer';
         }
       });
-      // Titre cross-sell → texte personnalisé
-      document.querySelectorAll('.wp-block-heading').forEach(function (el) {
-        if (el.textContent.trim().indexOf('peut vous int') !== -1) {
-          el.textContent = 'Avez-vous d\u00e9j\u00e0 la bonne ampoule\u00a0?';
-        }
-      });
-    }
-    // Cross-sell: ajout direct au panier en AJAX (un clic = produit ajouté)
-    function fixCrossSellButtons() {
-      document.querySelectorAll('.wc-block-cart__main .wc-block-components-product-button__button').forEach(function (btn) {
-        if (btn.dataset.fixedAjax) return;
-        btn.dataset.fixedAjax = 'true';
-
-        var li = btn.closest('li') || btn.closest('.wc-block-grid__product');
-        if (!li) return;
-        var productLink = li.querySelector('a[href]');
-        if (!productLink) return;
-        var url = productLink.getAttribute('href');
-
-        // Extraire le slug depuis l'URL du produit
-        var slug = url.replace(/\/$/, '').split('/').pop();
-        var productId = (window.sapiCrossSellMap || {})[slug];
-        if (!productId) return;
-
-        var originalText = btn.textContent;
-
-        btn.addEventListener('click', function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-
-          if (btn.disabled) return;
-          btn.disabled = true;
-          btn.textContent = 'Ajout\u2026';
-
-          var formData = new FormData();
-          formData.append('product_id', productId);
-          formData.append('quantity', 1);
-
-          fetch('/?wc-ajax=add_to_cart', {
-            method: 'POST',
-            body: formData
-          })
-          .then(function (r) { return r.json(); })
-          .then(function (data) {
-            if (data.error) {
-              btn.textContent = 'Erreur';
-              setTimeout(function () {
-                btn.textContent = originalText;
-                btn.disabled = false;
-              }, 2000);
-            } else {
-              btn.textContent = 'Ajout\u00e9 \u2713';
-              setTimeout(function () { location.reload(); }, 800);
-            }
-          })
-          .catch(function () {
-            btn.textContent = 'Erreur';
-            setTimeout(function () {
-              btn.textContent = originalText;
-              btn.disabled = false;
-            }, 2000);
-          });
-        }, true);
-      });
     }
 
     replaceCartTexts();
-    fixCrossSellButtons();
-    new MutationObserver(function () {
-      replaceCartTexts();
-      fixCrossSellButtons();
-    }).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(replaceCartTexts).observe(document.body, { childList: true, subtree: true });
   })();
   </script>
   <?php
@@ -2216,9 +2137,12 @@ function sapi_render_mini_cart_contents() {
     return;
   }
   ?>
+  <?php $sapi_amp_g = function_exists('sapi_cart_amp_groups') ? sapi_cart_amp_groups() : ['hidden' => []]; ?>
   <div class="mini-cart-body">
     <div class="mini-cart-items">
       <?php foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) :
+        // Ampoule rangée sous son luminaire (inc/sapi-cart-suggestions.php)
+        if (isset($sapi_amp_g['hidden'][$cart_item_key])) continue;
         $product = $cart_item['data'];
         $product_id = $cart_item['product_id'];
         $quantity = $cart_item['quantity'];
@@ -2284,6 +2208,7 @@ function sapi_render_mini_cart_contents() {
                   </div>
               <?php endif; endforeach; endif; endif; ?>
             </div>
+            <?php if (function_exists('sapi_mini_cart_shared_note')) sapi_mini_cart_shared_note($cart_item_key, $sapi_amp_g); ?>
             <div class="mini-cart-item-bottom">
               <span class="mini-cart-item-price">
                 <?php echo WC()->cart->get_product_price($product); ?>
@@ -2302,8 +2227,10 @@ function sapi_render_mini_cart_contents() {
             </svg>
           </button>
         </div>
+        <?php if (function_exists('sapi_mini_cart_under_luminaire')) sapi_mini_cart_under_luminaire($cart_item_key, $cart_item, $sapi_amp_g); ?>
       <?php endforeach; ?>
     </div>
+    <?php if (function_exists('sapi_render_mini_cart_suggest')) sapi_render_mini_cart_suggest(); ?>
   </div>
   <?php
 }
@@ -4176,10 +4103,11 @@ function sapi_render_conseiller_modal() {
                      La phrase d'intro « Pour ton bureau, Robin recommande : » a
                      été retirée : la pastille dit la pièce mieux qu'elle, et sa
                      place finance les pastilles sur mobile. */ ?>
-            <span class="chips-label" data-product-recap-project-label hidden><?php esc_html_e('Ton projet', 'theme-sapi-maison'); ?></span>
-            <div class="recap-group__chips" data-product-recap-project hidden></div>
-
-            <span class="chips-label" data-product-recap-reco-label hidden><?php esc_html_e('Ce que je te recommande sur ce modèle', 'theme-sapi-maison'); ?></span>
+            <?php /* 25/11/2026 (maquette conseiller-fin-et-pastille) : le projet
+                     tient en une phrase discrète, dont chaque réponse reste
+                     cliquable (data-step-edit) ; la recommandation passe en
+                     vedette dans la carte blanche, avec un titre. */ ?>
+            <p class="recap-projet" data-product-recap-project hidden></p>
             <?php /* ⚠️ CHAQUE EXPLICATION EST DANS LA CARTE, SOUS SA PROPRE LIGNE.
                      Les deux phrases flottaient auparavant sous l'encart, à la
                      suite l'une de l'autre : rien ne disait laquelle expliquait
@@ -4188,6 +4116,8 @@ function sapi_render_conseiller_modal() {
                      qu'elles commentent, et elles se masquent avec elle.
                      Demande de Robin en recette. */ ?>
             <div class="recap-card" data-product-recap-card hidden>
+              <p class="recap-card__eyebrow" data-product-recap-reco-label><?php esc_html_e('Ce que je te recommande', 'theme-sapi-maison'); ?></p>
+              <p class="recap-card__title" data-product-recap-title></p>
               <span class="recap-card__item-label" data-product-recap-essence hidden><?php esc_html_e('Essence', 'theme-sapi-maison'); ?></span>
               <span class="recap-card__item-value" data-product-recap-essence-value></span>
               <p class="recap-card__note" data-product-recap-conseil hidden></p>
@@ -4199,19 +4129,17 @@ function sapi_render_conseiller_modal() {
             <div class="actions-3">
               <button type="button" class="action-btn action-btn--primary" data-action="product-apply">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-                <?php esc_html_e('Appliquer cette sélection', 'theme-sapi-maison'); ?>
-              </button>
-              <button type="button" class="action-btn action-btn--secondary" data-action="product-modify">
-                <?php /* ⚠️ Libellé corrigé : ce bouton EFFACE tout le projet et
-                         repart de la première question (`modifyProductAnswers`).
-                         « Modifier » laissait attendre une retouche. */ ?>
-                <?php esc_html_e('Recommencer mon projet', 'theme-sapi-maison'); ?>
+                <span data-product-apply-text><?php esc_html_e('Appliquer ma sélection', 'theme-sapi-maison'); ?></span>
               </button>
             </div>
           </div>
         </div>
 
-        <footer class="modal__foot">
+        <footer class="modal__foot modal__foot--recap">
+          <?php /* ⚠️ Ce bouton EFFACE tout le projet et repart de la première
+                   question (`modifyProductAnswers`). « Modifier » laissait
+                   attendre une retouche. Passé en lien discret le 25/11. */ ?>
+          <button type="button" class="footer-link footer-link--btn" data-action="product-modify"><?php esc_html_e('Recommencer mon projet', 'theme-sapi-maison'); ?></button>
           <a class="footer-link" href="<?php echo esc_url(home_url('/contact/')); ?>">
             <?php esc_html_e('Contacter Robin', 'theme-sapi-maison'); ?>
           </a>
