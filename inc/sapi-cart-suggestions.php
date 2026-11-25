@@ -170,7 +170,8 @@ function sapi_render_cart_suggestions() {
 }
 
 /** Une carte, au même gabarit que les cartes produit du site (woocommerce/content-product.php). */
-function sapi_suggest_card_html($s, $index, $first) {
+/** $sizes : largeur affichée de la carte, pour que le navigateur choisisse la bonne image. */
+function sapi_suggest_card_html($s, $index, $first, $sizes = '(min-width: 1100px) 360px, 220px') {
   $p = $s['product'];
   $id = $p->get_id();
   $is_amp = $s['kind'] === 'ampoule';
@@ -198,9 +199,9 @@ function sapi_suggest_card_html($s, $index, $first) {
   <li class="product-card-cinetique sapi-suggest__card" data-product-id="<?php echo esc_attr($id); ?>" data-product-cat="<?php echo esc_attr($is_amp ? 'accessoires' : $s['type']); ?>">
     <?php echo $tag_open; ?>
       <div class="product-media<?php echo $hover_id ? ' has-hover-image' : ''; ?>">
-        <span class="product-image-main"><?php echo $main_id ? wp_get_attachment_image($main_id, 'woocommerce_thumbnail', false, ['alt' => $p->get_name(), 'loading' => 'lazy']) : wc_placeholder_img('woocommerce_thumbnail'); ?></span>
+        <span class="product-image-main"><?php echo $main_id ? wp_get_attachment_image($main_id, 'woocommerce_single', false, ['alt' => $p->get_name(), 'loading' => 'lazy', 'sizes' => $sizes]) : wc_placeholder_img('woocommerce_thumbnail'); ?></span>
         <?php if ($hover_id) : ?>
-          <span class="product-image-hover"><?php echo wp_get_attachment_image($hover_id, 'woocommerce_thumbnail', false, ['alt' => $p->get_name(), 'loading' => 'lazy']); ?></span>
+          <span class="product-image-hover"><?php echo wp_get_attachment_image($hover_id, 'woocommerce_single', false, ['alt' => $p->get_name(), 'loading' => 'lazy', 'sizes' => $sizes]); ?></span>
         <?php endif; ?>
       </div>
       <div class="product-info">

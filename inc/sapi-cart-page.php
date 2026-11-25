@@ -78,7 +78,7 @@ add_filter('render_block', function ($content, $block) {
       ? esc_html(sprintf(__('Ça irait bien avec %s', 'theme-sapi-maison'), $first))
       : esc_html__('Nos meilleures ventes', 'theme-sapi-maison'); ?></p>
     <ul class="sapi-suggest__cards">
-      <?php foreach ($data['items'] as $i => $s) echo sapi_suggest_card_html($s, $i, $first); ?>
+      <?php foreach ($data['items'] as $i => $s) echo sapi_suggest_card_html($s, $i, $first, '220px'); ?>
     </ul>
   </section>
   <?php

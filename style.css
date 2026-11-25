@@ -27155,7 +27155,8 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: safe center;
+    overflow-y: auto;
     padding: 32px;
     color: var(--color-white);
     font-family: var(--font-body);
@@ -27163,8 +27164,11 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     pointer-events: none;
     transition: visibility 0s linear 0.35s;
   }
+  /* Largeur : jusqu'à 1100 px, bornée par la hauteur de l'écran
+     (cartes carrées + ~380 px de titres et de textes) ;
+     au-delà, la vitrine défile au lieu d'être coupée */
   .sapi-cart-suggest:not(:empty) > * {
-    width: min(780px, 100%);
+    width: min(1100px, 100%, calc((100vh - 380px) * 3 + 48px));
   }
   .mini-cart-overlay.is-visible ~ .sapi-cart-suggest:not(:empty) {
     visibility: visible;
@@ -27260,6 +27264,12 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   list-style: none;
 }
 
+/* Vitrine du volet : titres et écarts à l'échelle des grandes cartes */
+.sapi-cart-suggest .sapi-suggest__eyebrow { font-size: 0.85rem; margin-bottom: 6px; }
+.sapi-cart-suggest .sapi-suggest__title { font-size: clamp(2.4rem, 3vw, 3.2rem); margin-bottom: 24px; }
+.sapi-cart-suggest .sapi-suggest__cards { gap: 24px; }
+.sapi-cart-suggest .sapi-suggest__close { margin-top: 20px; font-size: 0.85rem; }
+
 /* Gabarit .product-card-cinetique, à l'échelle de la vitrine */
 .sapi-cart-suggest .product-card-cinetique {
   display: flex;
@@ -27275,23 +27285,23 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   text-decoration: none;
 }
 .sapi-cart-suggest .product-card-cinetique .product-info {
-  padding: 1rem 1.15rem 0.5rem;
+  padding: 1.15rem 1.35rem 0.6rem;
 }
 .sapi-cart-suggest .product-card-cinetique .product-name {
-  font-size: 1.1rem !important;
+  font-size: 1.3rem !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .sapi-cart-suggest .product-card-cinetique .product-category {
-  font-size: 0.85rem;
-  margin: 0.25rem 0 0.75rem;
+  font-size: 0.95rem;
+  margin: 0.3rem 0 0.85rem;
 }
 .sapi-cart-suggest .product-card-cinetique .price-value {
-  font-size: 1rem;
+  font-size: 1.15rem;
 }
 .sapi-cart-suggest .product-card-cinetique .product-actions {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.9rem;
 }
 .sapi-cart-suggest button.btn-view {
   font-family: var(--font-body);
