@@ -151,7 +151,7 @@
         '<button type="button" class="sapi-amp-act" data-act="set" data-key="' + esc(a.key) + '" data-qty="' + (a.quantity + 1) + '" aria-label="Augmenter">+</button>' +
       '</div>' +
       '<span class="sapi-amp-sub__price">' + esc(money(a, a.quantity)) + '</span>' +
-      '<button type="button" class="sapi-amp-sub__remove sapi-amp-act" data-act="set" data-key="' + esc(a.key) + '" data-qty="0" aria-label="Retirer l\'ampoule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>' +
+      '<button type="button" class="sapi-amp-sub__remove sapi-amp-act" data-act="set" data-key="' + esc(a.key) + '" data-qty="0" aria-label="Retirer l\'ampoule"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 5.5A2.25 2.25 0 0 0 9.878 7h4.244A2.251 2.251 0 0 0 12 5.5ZM12 4a3.751 3.751 0 0 0-3.675 3H5v1.5h1.27l.818 8.997a2.75 2.75 0 0 0 2.739 2.501h4.347a2.75 2.75 0 0 0 2.738-2.5L17.73 8.5H19V7h-3.325A3.751 3.751 0 0 0 12 4Zm4.224 4.5H7.776l.806 8.861a1.25 1.25 0 0 0 1.245 1.137h4.347a1.25 1.25 0 0 0 1.245-1.137l.805-8.861Z"/></svg></button>' +
       '</div></td>';
   }
   function sharedHtml(ampItem, users, g) {
