@@ -1,10 +1,17 @@
 /**
  * Sapi Help Pill — la pill de Robin sur la fiche produit.
  *
- * UNE SEULE RÈGLE :
- *   La pill dit « C'est le mieux pour ton projet » quand CHAQUE menu de
- *   variation affiche exactement la valeur que le site a recommandée.
- *   Sinon elle dit « Je t'aide à choisir la bonne version ».
+ * TROIS ÉTATS (25/11/2026, maquette conseiller-fin-et-pastille) :
+ *   - pas de projet, ou pas de recommandation sur ce produit :
+ *     « Je t'aide à choisir la bonne version » ;
+ *   - projet + CHAQUE menu de variation sur la valeur recommandée :
+ *     « Idéal pour ton bureau » (pastille pleine) ;
+ *   - projet + une option s'en écarte : « Ma recommandation pour ton bureau »
+ *     (pastille claire, classe .is-reco). Le clic rouvre le conseil, comme
+ *     dans les deux autres états.
+ *   « ton bureau » vient de SAPI_PROJECT.possessifs (repli : « ton projet »).
+ *   Les valeurs recommandées portent aussi un point orange sur les pastilles
+ *   d'options (classe .is-sapi-reco sur .variable-item), tant qu'un projet existe.
  *
  * C'est un message d'ÉTAT, pas d'action. Conséquence voulue par Robin le
  * 26/08 : la pill REVIENT si le visiteur s'éloigne puis retombe sur la version
@@ -48,7 +55,14 @@
 (function () {
   'use strict';
 
-  var TEXTE_ANNONCE = 'C\'est le mieux pour ton projet';
+  /* « ton bureau », « ta chambre »… : la table partagée avec PHP, jamais recopiée ici. */
+  function possessifProjet() {
+    try {
+      var piece = window.sapiProject && window.sapiProject.getAnswer ? window.sapiProject.getAnswer('piece') : null;
+      var table = (window.SAPI_PROJECT || {}).possessifs || {};
+      return (piece && table[piece]) || 'ton projet';
+    } catch (e) { return 'ton projet'; }
+  }
 
   /* Le même délai que WooCommerce s'impose avant de réafficher le bloc de
      variation. Trois effets : le texte de la pill et le prix juste en dessous
@@ -132,8 +146,41 @@
     var texteActuel = TEXTE_NORMAL;
     var minuteur = null;
 
+    /* Recommandation COMPLÈTE : chaque menu de variation en a une. Sinon
+       (taille non résolue…), « Ma recommandation » resterait affichée à vie,
+       puisque « Idéal » exige tous les menus : on garde le texte normal. */
+    function aUneReco() {
+      var reco = recommandation();
+      var menus = menusDeVariation();
+      return menus.length > 0 && menus.every(function (s) { return s.name && reco[s.name]; });
+    }
+
+    /* Point orange sur les pastilles d'options recommandées (plugin de pastilles :
+       ul.variable-items-wrapper[data-attribute_name] > li.variable-item[data-value]).
+       Markup absent ou différent : aucun point, rien d'autre ne change. */
+    function marquerRecommandees(actif) {
+      [].slice.call(form.querySelectorAll('.variable-item.is-sapi-reco')).forEach(function (li) { li.classList.remove('is-sapi-reco'); });
+      if (!actif) return;
+      var reco = recommandation();
+      Object.keys(reco).forEach(function (name) {
+        var val = String(reco[name]);
+        [].slice.call(form.querySelectorAll('.variable-items-wrapper')).forEach(function (ul) {
+          if (ul.getAttribute('data-attribute_name') !== name) return;
+          [].slice.call(ul.querySelectorAll('.variable-item')).forEach(function (li) {
+            if (li.getAttribute('data-value') === val) li.classList.add('is-sapi-reco');
+          });
+        });
+      });
+    }
+
     function rendre() {
-      var voulu = (projetExiste() && cestLeMieux()) ? TEXTE_ANNONCE : TEXTE_NORMAL;
+      var avecProjet = projetExiste() && aUneReco();
+      var ideal = avecProjet && cestLeMieux();
+      var voulu = !avecProjet ? TEXTE_NORMAL
+        : (ideal ? 'Idéal pour ' : 'Ma recommandation pour ') + possessifProjet();
+      pill.classList.toggle('is-ideal', avecProjet && ideal);
+      pill.classList.toggle('is-reco', avecProjet && !ideal);
+      marquerRecommandees(avecProjet);
       if (voulu === texteActuel) return; // indispensable : found_variation arrive en double
       texteActuel = voulu;
       textEl.style.transition = 'opacity .18s ease';

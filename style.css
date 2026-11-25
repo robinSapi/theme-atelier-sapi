@@ -23510,8 +23510,9 @@ button.chip--project:focus-visible {
    Financées par la sortie des deux phrases de conseil, passées DANS la carte :
    elles ne coûtent plus deux écarts de bloc. Le contenu tient avec de la marge,
    la place existe. */
+/* Le surtitre est dans la carte depuis le 25/11 : plus de marge au-dessus. */
 [data-screen="s-product-recap"] [data-product-recap-reco-label] {
-  margin-top: 20px;
+  margin-top: 0;
 }
 [data-screen="s-product-recap"] .actions-3 {
   margin-top: 18px;
@@ -28113,4 +28114,114 @@ body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
 }
 .accueil-projet .screen-reader-text {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CONSEILLER, ÉCRAN DE FIN SUR LA FICHE PRODUIT + PASTILLE (25/11/2026)
+   Maquette mockups/conseiller-fin-et-pastille.html.
+   Le projet en une phrase discrète, la recommandation en vedette,
+   un seul gros bouton ; « Recommencer » passe en lien dans le pied.
+   ═══════════════════════════════════════════════════════════════════ */
+[data-screen="s-product-recap"] .recap-projet {
+  margin: 0;
+  max-width: 440px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--cons-texte-doux, #E6D6C0);
+}
+.recap-projet__lead { opacity: .8; }
+.recap-projet__rep {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--cons-texte, #FBF6EA);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.recap-projet__rep:hover { text-decoration-style: solid; }
+
+[data-screen="s-product-recap"] .recap-card {
+  max-width: 440px;
+  padding: 20px 22px 16px;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+  border-radius: 16px;
+  text-align: left;
+}
+.recap-card__eyebrow,
+.recap-card__title { grid-column: 1 / -1; margin: 0; }
+.recap-card__eyebrow {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+}
+.recap-card__title {
+  margin-bottom: 6px;
+  font-size: 17px;
+  line-height: 1.45;
+  font-weight: 500;
+  color: var(--color-dark);
+}
+.recap-card__title b { font-weight: 800; }
+/* Une ligne par raison, séparées par un filet */
+[data-screen="s-product-recap"] .recap-card__item-label,
+[data-screen="s-product-recap"] .recap-card__item-value {
+  padding-top: 12px;
+  border-top: 1px solid var(--color-line);
+  align-self: baseline;
+}
+[data-screen="s-product-recap"] .recap-card__item-value { font-size: 14px; color: var(--color-dark); }
+[data-screen="s-product-recap"] .recap-card__note { font-style: normal; font-size: 13px; color: #5d5a56; }
+
+/* Un seul gros bouton ; « Sélection appliquée » quand c'est déjà le cas */
+/* Mobile : on garde le réglage serré de la carte (iPhone SE), plus petit titre */
+@media (max-width: 600px) {
+  [data-screen="s-product-recap"] .recap-card { padding: 10px 12px; gap: 4px 12px; }
+  .recap-card__title { font-size: 15px; margin-bottom: 2px; }
+  [data-screen="s-product-recap"] .recap-card__item-label,
+  [data-screen="s-product-recap"] .recap-card__item-value { padding-top: 8px; }
+}
+
+[data-screen="s-product-recap"] .action-btn--primary.is-done {
+  background: rgba(255, 255, 255, .12);
+  color: var(--cons-texte, #FBF6EA);
+  box-shadow: none;
+}
+.modal__foot--recap { gap: 28px; flex-wrap: wrap; }
+
+/* Pastille de la fiche, état « Ma recommandation pour ton bureau » */
+.conseiller-pill-secondary.is-reco {
+  background: #fff;
+  box-shadow: inset 0 0 0 1.5px var(--color-wood-dark);
+}
+.conseiller-pill-secondary.is-reco [data-help-pill-text] { color: var(--color-wood-dark); }
+.conseiller-pill-secondary.is-reco::after {
+  content: '›';
+  margin-left: -4px;
+  font-size: 1.1rem;
+  color: var(--color-wood-dark);
+}
+.conseiller-pill-secondary.is-reco:hover { background: var(--color-wood-dark); }
+.conseiller-pill-secondary.is-reco:hover [data-help-pill-text],
+.conseiller-pill-secondary.is-reco:hover::after { color: #fff; }
+
+/* Point orange sur les options recommandées (pastilles du plugin) */
+.variable-item.is-sapi-reco { position: relative; }
+.variable-item.is-sapi-reco::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-orange, #E35B24);
+  box-shadow: 0 0 0 2px #fff;
+  pointer-events: none;
 }

@@ -4103,10 +4103,11 @@ function sapi_render_conseiller_modal() {
                      La phrase d'intro « Pour ton bureau, Robin recommande : » a
                      été retirée : la pastille dit la pièce mieux qu'elle, et sa
                      place finance les pastilles sur mobile. */ ?>
-            <span class="chips-label" data-product-recap-project-label hidden><?php esc_html_e('Ton projet', 'theme-sapi-maison'); ?></span>
-            <div class="recap-group__chips" data-product-recap-project hidden></div>
-
-            <span class="chips-label" data-product-recap-reco-label hidden><?php esc_html_e('Ce que je te recommande sur ce modèle', 'theme-sapi-maison'); ?></span>
+            <?php /* 25/11/2026 (maquette conseiller-fin-et-pastille) : le projet
+                     tient en une phrase discrète, dont chaque réponse reste
+                     cliquable (data-step-edit) ; la recommandation passe en
+                     vedette dans la carte blanche, avec un titre. */ ?>
+            <p class="recap-projet" data-product-recap-project hidden></p>
             <?php /* ⚠️ CHAQUE EXPLICATION EST DANS LA CARTE, SOUS SA PROPRE LIGNE.
                      Les deux phrases flottaient auparavant sous l'encart, à la
                      suite l'une de l'autre : rien ne disait laquelle expliquait
@@ -4115,6 +4116,8 @@ function sapi_render_conseiller_modal() {
                      qu'elles commentent, et elles se masquent avec elle.
                      Demande de Robin en recette. */ ?>
             <div class="recap-card" data-product-recap-card hidden>
+              <p class="recap-card__eyebrow" data-product-recap-reco-label><?php esc_html_e('Ce que je te recommande', 'theme-sapi-maison'); ?></p>
+              <p class="recap-card__title" data-product-recap-title></p>
               <span class="recap-card__item-label" data-product-recap-essence hidden><?php esc_html_e('Essence', 'theme-sapi-maison'); ?></span>
               <span class="recap-card__item-value" data-product-recap-essence-value></span>
               <p class="recap-card__note" data-product-recap-conseil hidden></p>
@@ -4126,19 +4129,17 @@ function sapi_render_conseiller_modal() {
             <div class="actions-3">
               <button type="button" class="action-btn action-btn--primary" data-action="product-apply">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-                <?php esc_html_e('Appliquer cette sélection', 'theme-sapi-maison'); ?>
-              </button>
-              <button type="button" class="action-btn action-btn--secondary" data-action="product-modify">
-                <?php /* ⚠️ Libellé corrigé : ce bouton EFFACE tout le projet et
-                         repart de la première question (`modifyProductAnswers`).
-                         « Modifier » laissait attendre une retouche. */ ?>
-                <?php esc_html_e('Recommencer mon projet', 'theme-sapi-maison'); ?>
+                <span data-product-apply-text><?php esc_html_e('Appliquer ma sélection', 'theme-sapi-maison'); ?></span>
               </button>
             </div>
           </div>
         </div>
 
-        <footer class="modal__foot">
+        <footer class="modal__foot modal__foot--recap">
+          <?php /* ⚠️ Ce bouton EFFACE tout le projet et repart de la première
+                   question (`modifyProductAnswers`). « Modifier » laissait
+                   attendre une retouche. Passé en lien discret le 25/11. */ ?>
+          <button type="button" class="footer-link footer-link--btn" data-action="product-modify"><?php esc_html_e('Recommencer mon projet', 'theme-sapi-maison'); ?></button>
           <a class="footer-link" href="<?php echo esc_url(home_url('/contact/')); ?>">
             <?php esc_html_e('Contacter Robin', 'theme-sapi-maison'); ?>
           </a>

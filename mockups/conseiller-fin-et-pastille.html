@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette Conseiller : écran de fin + pastille de la fiche</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wood: #937D68; --dark: #323232; --gray: #717171; --line: #E8E2D9;
+    --green: #018501; --orange: #D2633A; --tab: #F3EEE6; --page: #FAF9F7;
+    --cream: #F4EDE3; --cream-2: rgba(244, 237, 227, .62);
+    --body: 'Montserrat', sans-serif; --display: 'Square Peg', cursive;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); font-family: var(--body); color: var(--dark); }
+  button { font-family: inherit; cursor: pointer; }
+
+  .mk-bar { position: sticky; top: 0; z-index: 60; display: flex; gap: 8px; align-items: center; padding: 10px 20px; background: var(--dark); color: #fff; font-size: 13px; }
+  .mk-bar strong { margin-right: 12px; }
+  .mk-bar button { padding: 6px 14px; border: 1px solid #fff5; border-radius: 999px; background: transparent; color: #fff; font-size: 12px; font-weight: 600; }
+  .mk-bar .sp { flex: 1; }
+
+  /* ===== Fiche produit (extrait) ===== */
+  .fiche { max-width: 1180px; margin: 0 auto; padding: 40px 32px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+  .fiche img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 16px; display: block; }
+  .name { margin: 0 0 6px; font-size: 1.6rem; }
+  .fn { font-weight: 800; text-transform: uppercase; font-size: .78em; }
+  .rn { font-family: var(--display); font-weight: 400; font-size: 1.7em; line-height: .9; }
+  .price { font-size: 1.5rem; font-weight: 800; margin: 6px 0 22px; }
+  .opts { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 6px 20px; }
+  .opt { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .opt:first-child { border-top: 0; }
+  .opt > span { width: 110px; font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+  .opt > span::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { padding: 8px 16px; border: 1.5px solid var(--line); border-radius: 999px; background: #fff; font-size: .85rem; font-weight: 600; color: var(--dark); }
+  .chip.on { background: var(--dark); border-color: var(--dark); color: #fff; }
+  .chip .reco { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); margin-left: 6px; vertical-align: middle; }
+  .amp { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: var(--dark); color: #fff; font-size: .85rem; font-weight: 700; }
+  .amp i { width: 16px; height: 16px; border-radius: 4px; background: var(--orange); display: grid; place-items: center; font-style: normal; font-size: .7rem; }
+
+  /* La pastille, dans ses deux états */
+  .pill { margin: 22px 0 0; display: inline-flex; align-items: center; gap: 12px; padding: 6px 22px 6px 6px; border-radius: 999px; border: 0; background: #4A3F35; color: var(--cream); box-shadow: 0 8px 24px rgba(74, 63, 53, .18); text-align: left; cursor: default; transition: background .25s, box-shadow .25s; }
+  .pill img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+  .pill .txt { font-family: var(--display); font-size: 1.75rem; line-height: 1; }
+  .pill .more { font-family: var(--body); font-size: 1rem; margin-left: 2px; opacity: .8; }
+  .pill.is-changed { background: #fff; color: #4A3F35; border: 1.5px solid #4A3F35; box-shadow: none; cursor: pointer; }
+  .pill.is-changed:hover { background: #4A3F35; color: var(--cream); }
+  .state { display: block; margin-top: 10px; font-size: .72rem; color: var(--gray); }
+  .add { margin-top: 28px; width: 100%; padding: 18px; border: 0; border-radius: 12px; background: linear-gradient(180deg, #018501, #026B02); color: #fff; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+
+  /* ===== Modale : écran de fin ===== */
+  .veil { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 24px; background: rgba(30, 26, 22, .55); backdrop-filter: blur(6px); }
+  .veil[hidden] { display: none; }
+  .modal { position: relative; width: min(560px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; padding: 36px 44px 30px; border-radius: 22px; color: var(--cream);
+    background: radial-gradient(120% 70% at 50% 0%, #6a5848 0%, #463a30 38%, #2c2520 100%); box-shadow: 0 30px 80px rgba(0,0,0,.45); text-align: center; }
+  .close { position: absolute; top: 18px; right: 20px; border: 0; background: none; color: var(--cream); font-size: 1.6rem; line-height: 1; }
+  .sig { display: inline-flex; align-items: center; gap: 12px; padding: 5px 22px 5px 5px; border-radius: 999px; border: 1px solid rgba(244,237,227,.35); background: rgba(0,0,0,.18); box-shadow: 0 0 30px rgba(255, 214, 160, .18); }
+  .sig img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+  .sig span { font-family: var(--display); font-size: 1.75rem; line-height: 1; }
+
+  /* 1. Le projet : une phrase discrète */
+  .projet { margin: 22px 0 0; font-size: .9rem; line-height: 1.5; color: var(--cream-2); }
+  .projet strong { color: var(--cream); font-weight: 600; }
+  .projet button { padding: 0; border: 0; background: none; color: var(--cream-2); font-size: .82rem; text-decoration: underline; margin-left: 4px; }
+
+  /* 2. La recommandation : en vedette */
+  .reco-card { margin: 22px 0 0; padding: 24px 26px 8px; border-radius: 16px; background: #fff; color: var(--dark); text-align: left; }
+  .reco-eyebrow { margin: 0 0 6px; color: var(--wood); font-size: .7rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .reco-title { margin: 0 0 14px; font-size: 1.15rem; line-height: 1.45; font-weight: 500; }
+  .reco-title b { font-weight: 800; }
+  .reason { display: grid; grid-template-columns: 38px 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+  .reason .ico { width: 38px; height: 38px; border-radius: 10px; background: var(--tab); display: grid; place-items: center; font-size: 1.05rem; }
+  .reason h4 { margin: 2px 0 3px; font-size: .9rem; }
+  .reason h4 small { font-weight: 600; color: var(--gray); font-size: .78rem; margin-left: 6px; }
+  .reason p { margin: 0; font-size: .85rem; line-height: 1.5; color: #5d5a56; }
+
+  /* 3. L'action */
+  .apply { margin: 24px 0 0; width: 100%; padding: 16px; border: 0; border-radius: 999px; background: var(--orange); color: #fff; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; font-size: .9rem; box-shadow: 0 8px 22px rgba(210, 99, 58, .35); }
+  .apply.is-done { background: rgba(255,255,255,.12); box-shadow: none; color: var(--cream); }
+  .links { display: flex; justify-content: center; gap: 26px; margin: 22px 0 0; padding-top: 18px; border-top: 1px solid rgba(244,237,227,.15); }
+  .links button { padding: 0; border: 0; background: none; color: var(--cream); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 4px; }
+
+  .notes { max-width: 1180px; margin: 0 auto; padding: 0 32px 48px; font-size: .82rem; color: var(--gray); }
+  .notes ul { margin: 6px 0 0; padding-left: 18px; line-height: 1.7; }
+  @media (max-width: 800px) { .fiche { grid-template-columns: 1fr; } .modal { padding: 30px 22px 24px; } }
+</style>
+</head>
+<body>
+
+<div class="mk-bar">
+  <strong>Maquette Conseiller</strong>
+  <button data-open>Ouvrir l'écran de fin</button>
+  <span class="sp"></span>
+  <button data-reset>Réinitialiser</button>
+</div>
+
+<main class="fiche">
+  <img src="https://test.atelier-sapi.fr/wp-content/uploads/2026/05/Morane-Ambiance-Salon2-e1778081076446-1024x808.jpg" alt="">
+  <div>
+    <h1 class="name"><span class="fn">Morane</span> <span class="rn">La Gogane</span></h1>
+    <p class="price" id="price"></p>
+    <div class="opts">
+      <div class="opt"><span>Essence</span><div class="chips" data-group="essence"></div></div>
+      <div class="opt"><span>Taille</span><div class="chips" data-group="taille"></div></div>
+      <div class="opt"><span>Ampoule</span><span class="amp"><i>✓</i> Ajouter Poire +9,00 €</span></div>
+    </div>
+    <div id="pill-zone"></div>
+    <button class="add">Ajouter au panier</button>
+  </div>
+</main>
+
+<div class="notes">
+  <strong>À essayer</strong>
+  <ul>
+    <li>Réglage = recommandation : la pastille pleine « Idéal pour ton bureau » (non cliquable).</li>
+    <li>Changez l'essence ou la taille : elle devient « Ma recommandation pour ton bureau ›», cliquable, et rouvre l'écran de fin.</li>
+    <li>Écran de fin : le projet en une phrase discrète en haut, la recommandation en vedette dans la carte blanche, un seul bouton. « Appliquer » remet le réglage recommandé.</li>
+    <li>Les petits points orange sur les options marquent ce que Robin recommande (piste optionnelle).</li>
+  </ul>
+</div>
+
+<div class="veil" id="veil" hidden>
+  <div class="modal" role="dialog" aria-label="Mon conseil pour toi">
+    <button class="close" data-close aria-label="Fermer">×</button>
+    <div class="sig"><img src="https://test.atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice-150x150.jpg" alt=""><span>Mon conseil pour toi</span></div>
+
+    <p class="projet">Pour ton <strong>bureau de 15 m²</strong>, <strong>moderne et clair</strong>.<button>Modifier</button></p>
+
+    <div class="reco-card">
+      <p class="reco-eyebrow">Ce que je te recommande</p>
+      <p class="reco-title">Morane en <b>peuplier</b>, taille <b>45 × 20 cm</b>.</p>
+      <div class="reason"><span class="ico">🌳</span><div><h4>Peuplier</h4><p>Clair et lumineux, il s'accordera parfaitement avec ton intérieur moderne.</p></div></div>
+      <div class="reason"><span class="ico">📏</span><div><h4>45 × 20 cm<small>taille standard</small></h4><p>La bonne échelle pour une pièce de 15 m² : présente sans écraser.</p></div></div>
+    </div>
+
+    <button class="apply" data-apply>✓ Appliquer ma sélection</button>
+    <div class="links"><button>Recommencer mon projet</button><button>Contacter Robin</button></div>
+  </div>
+</div>
+
+<script>
+var AVATAR = 'https://test.atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice-150x150.jpg';
+var OPTS = {
+  essence: [['peuplier', 'Peuplier'], ['okoume', 'Okoumé']],
+  taille: [['30', '30 × 15 cm'], ['45', '45 × 20 cm'], ['60', '60 × 25 cm']]
+};
+var PRICES = { '30': 65, '45': 75, '60': 95 };
+var RECO = { essence: 'peuplier', taille: '45' };
+var cur;
+function reset() { cur = { essence: 'peuplier', taille: '45' }; render(); }
+function matches() { return cur.essence === RECO.essence && cur.taille === RECO.taille; }
+
+function render() {
+  Object.keys(OPTS).forEach(function (g) {
+    document.querySelector('[data-group="' + g + '"]').innerHTML = OPTS[g].map(function (o) {
+      return '<button class="chip' + (cur[g] === o[0] ? ' on' : '') + '" data-g="' + g + '" data-v="' + o[0] + '">' + o[1] +
+        (RECO[g] === o[0] ? '<span class="reco" title="Recommandé par Robin"></span>' : '') + '</button>';
+    }).join('');
+  });
+  document.getElementById('price').textContent = PRICES[cur.taille] + ',00 €';
+  var ok = matches();
+  document.getElementById('pill-zone').innerHTML =
+    '<button class="pill' + (ok ? '' : ' is-changed') + '"' + (ok ? ' tabindex="-1" aria-disabled="true"' : ' data-open') + '>' +
+      '<img src="' + AVATAR + '" alt="">' +
+      '<span class="txt">' + (ok ? 'Idéal pour ton bureau' : 'Ma recommandation pour ton bureau') + '</span>' +
+      (ok ? '' : '<span class="more">›</span>') +
+    '</button>' +
+    '<span class="state">' + (ok ? 'État 1 : le réglage correspond à la recommandation' : 'État 2 : une option a changé, la pastille rouvre le conseil') + '</span>';
+  var apply = document.querySelector('[data-apply]');
+  apply.classList.toggle('is-done', ok);
+  apply.textContent = ok ? '✓ Sélection appliquée' : '✓ Appliquer ma sélection';
+}
+
+document.addEventListener('click', function (e) {
+  var c = e.target.closest('.chip');
+  if (c) { cur[c.getAttribute('data-g')] = c.getAttribute('data-v'); render(); return; }
+  if (e.target.closest('[data-open]')) { document.getElementById('veil').hidden = false; return; }
+  if (e.target.closest('[data-close]') || e.target.id === 'veil') { document.getElementById('veil').hidden = true; return; }
+  if (e.target.closest('[data-apply]')) {
+    cur = { essence: RECO.essence, taille: RECO.taille }; render();
+    setTimeout(function () { document.getElementById('veil').hidden = true; }, 350);
+    return;
+  }
+  if (e.target.closest('[data-reset]')) { document.getElementById('veil').hidden = true; reset(); }
+});
+reset();
+</script>
+</body>
+</html>
