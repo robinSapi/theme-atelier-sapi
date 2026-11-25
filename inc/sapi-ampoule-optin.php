@@ -218,9 +218,9 @@ function sapi_ampoule_for($product) {
  * la prenne pas pour une des siennes.
  *
  * La case reste toujours décochée par défaut : une option payante ne peut pas
- * être pré-cochée (droit de la consommation UE). Avec plusieurs ampoules, le nom
- * de l'ampoule devient un bouton qui ouvre le panneau de comparaison, la
- * recommandée présélectionnée (sans JS : une liste).
+ * être pré-cochée (droit de la consommation UE). Dans la pastille « Ajouter
+ * l'ampoule », une bulle « Globe · 10 € ▾ » ouvre le panneau des ampoules ; elle
+ * est verte quand c'est la recommandée (présélectionnée).
  * La case porte l'ID de l'ampoule choisie (le JS le tient à jour) : c'est ce que
  * lisent le bouton principal et la barre sticky. `sapi_ampoule_choice` sert de
  * secours sans JS.
@@ -263,20 +263,21 @@ add_action('woocommerce_before_add_to_cart_button', function () {
     <label class="sapi-ampoule-addon__pill">
       <input type="checkbox" class="sapi-ampoule-addon__input" name="sapi_add_ampoule" value="<?php echo esc_attr($default->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($default_price, $dec)); ?>">
       <span class="sapi-ampoule-addon__box" aria-hidden="true"></span>
-      <span class="sapi-ampoule-addon__text"><?php esc_html_e('Ajouter', 'theme-sapi-maison'); ?></span>
-      <span class="sapi-ampoule-addon__model"<?php echo count($amps) > 1 ? ' hidden' : ''; ?>><?php echo esc_html(sapi_ampoule_short_name($default)); ?></span>
-      <span class="sapi-amp-reco" hidden><?php esc_html_e('Reco', 'theme-sapi-maison'); ?></span>
-      <?php /* Sans JS : la liste permet de choisir. Avec JS, elle est masquée et
-         le choix se fait dans le panneau « Comparer ». */ ?>
-      <select class="sapi-ampoule-addon__select" name="sapi_ampoule_choice" aria-label="<?php esc_attr_e("Choix de l'ampoule", 'theme-sapi-maison'); ?>"<?php echo count($amps) > 1 ? '' : ' hidden'; ?>>
+      <span class="sapi-ampoule-addon__text"><?php esc_html_e("Ajouter l'ampoule", 'theme-sapi-maison'); ?></span>
+      <?php /* Le choix se fait dans le panneau, ouvert par la bulle. La liste reste
+         dans le formulaire (masquée) : c'est elle qui porte le choix envoyé. */ ?>
+      <select class="sapi-ampoule-addon__select" name="sapi_ampoule_choice" hidden aria-hidden="true" tabindex="-1">
         <?php foreach ($amps as $i => $amp) :
           $p = (float) wc_get_price_to_display($amp); ?>
           <option value="<?php echo esc_attr($amp->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($p, $dec)); ?>" data-price-html="<?php echo esc_attr(sapi_amp_price_short($p)); ?>"<?php selected($i, 0); ?>><?php echo esc_html(sapi_ampoule_short_name($amp)); ?></option>
         <?php endforeach; ?>
       </select>
-      <span class="sapi-ampoule-addon__price">+<?php echo esc_html(sapi_amp_price_short($default_price)); ?></span>
+      <button type="button" class="sapi-amp-bubble is-reco<?php echo count($amps) > 1 ? '' : ' is-solo'; ?>"<?php echo count($amps) > 1 ? ' aria-haspopup="dialog"' : ' tabindex="-1"'; ?>>
+        <span class="screen-reader-text"><?php esc_html_e("Choisir l'ampoule :", 'theme-sapi-maison'); ?> </span><span class="sapi-ampoule-addon__model"><?php echo esc_html(sapi_ampoule_short_name($default)); ?></span>
+        <span class="sapi-amp-bubble__price">· <span class="sapi-ampoule-addon__price"><?php echo esc_html(sapi_amp_price_short($default_price)); ?></span></span>
+        <svg class="sapi-amp-bubble__chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
     </label>
-    <button type="button" class="sapi-amp-compare sapi-ampoule-addon__compare" hidden aria-haspopup="dialog"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 5h10l-3-3M14 11H4l3 3"/></svg><?php esc_html_e('Comparer', 'theme-sapi-maison'); ?></button>
   </div>
   <?php
 });
@@ -361,7 +362,10 @@ add_action('woocommerce_add_to_cart', function ($cart_item_key, $product_id, $qu
   foreach (sapi_ampoules_for($variation_id ? (int) $variation_id : $product_id) as $candidate) {
     if ($candidate->get_id() === $requested) { $amp = $candidate; break; }
   }
-  if (!$amp) return;
+  if (!$amp) {
+    wc_add_notice(__("L'ampoule choisie n'est plus disponible pour ce luminaire : il a été ajouté seul.", 'theme-sapi-maison'), 'notice');
+    return;
+  }
 
   $running = true;
   WC()->cart->add_to_cart($amp->get_id(), max(1, (int) $quantity));

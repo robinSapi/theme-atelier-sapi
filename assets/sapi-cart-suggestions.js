@@ -29,15 +29,30 @@
       return;
     }
     // Carte ampoule de la vitrine, ou languette ampoule du volet (même quantité que le luminaire)
-    // « Comparer les ampoules » du volet : le panneau partagé, puis le même ajout
-    var cmp = e.target.closest('.mini-cart .sapi-amp-compare');
-    if (cmp && window.sapiAmpPicker) {
+    // Bulle « Globe · 10 € ▾ » de la languette du volet : ouvre le panneau. Le
+    // choix change la bulle et l'ampoule que « + Ajouter l'ampoule » ajoutera.
+    var bub = e.target.closest('.mini-cart .sapi-amp-bubble');
+    if (bub) {
       e.preventDefault();
-      var ids = (cmp.getAttribute('data-ids') || '').split(',').map(Number).filter(Boolean);
-      var qty = parseInt(cmp.getAttribute('data-qty'), 10) || 1;
+      if (bub.classList.contains('is-solo') || bub.disabled || !window.sapiAmpPicker) return;
+      var ids = (bub.getAttribute('data-ids') || '').split(',').map(Number).filter(Boolean);
+      var tab = bub.closest('.sapi-amp-tab');
+      var addBtn = tab && tab.querySelector('.sapi-mc-amp__add');
       window.sapiAmpPicker.open({
-        ids: ids, recoId: ids[0], pickedId: null, first: cmp.getAttribute('data-first') || '',
-        onPick: function (id) { ajouter(cmp, id, qty); }
+        ids: ids, recoId: ids[0], first: bub.getAttribute('data-first') || '',
+        pickedId: addBtn ? parseInt(addBtn.getAttribute('data-product-id'), 10) : ids[0],
+        onPick: function (id) {
+          var a = window.sapiAmpPicker.data && window.sapiAmpPicker.data[id];
+          if (!a || !addBtn) return;
+          addBtn.setAttribute('data-product-id', id);
+          var n = bub.querySelector('.sapi-amp-bubble__name');
+          var pr = bub.querySelector('.sapi-amp-bubble__price');
+          if (n) n.textContent = a.name;
+          if (pr) pr.textContent = '· ' + String(a.priceHtml).replace(/[,.]00(?=\D*$)/, '');
+          bub.classList.toggle('is-reco', id === ids[0]);
+          var im = tab.querySelector('.sapi-amp-tab__img');
+          if (im && a.img) im.src = a.img;
+        }
       });
       return;
     }
@@ -47,7 +62,7 @@
     ajouter(btn, btn.getAttribute('data-product-id'), parseInt(btn.getAttribute('data-qty'), 10) || 1);
   });
 
-  // « + Globe » et « Comparer » d'une même languette se bloquent l'un l'autre.
+  // « + Ajouter l'ampoule » et la bulle d'une même languette se bloquent l'un l'autre.
   function lockTab(btn, on) {
     var tab = btn.closest && btn.closest('.sapi-amp-tab');
     (tab ? Array.prototype.slice.call(tab.querySelectorAll('button')) : [btn]).forEach(function (b) { b.disabled = on; });
@@ -71,13 +86,14 @@
         // Sur la page panier (React), le panier affiché ne lit pas les fragments
         if (document.body.classList.contains('woocommerce-cart')) location.reload();
       } else {
-        lockTab(btn, false);
-        btn.innerHTML = label;
+        echec();
       }
-    }).fail(function () {
-      lockTab(btn, false);
-      btn.innerHTML = label;
-    });
+    }).fail(echec);
+    // Échec : « Erreur » 2 s, puis le bouton revient (comme à la page panier).
+    function echec() {
+      btn.textContent = 'Erreur';
+      setTimeout(function () { btn.innerHTML = label; lockTab(btn, false); }, 2000);
+    }
   }
 
   var view = document.querySelector('.sapi-cart-suggest');

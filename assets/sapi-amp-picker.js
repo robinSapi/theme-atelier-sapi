@@ -58,7 +58,7 @@
     }).join('');
     var photo = a.amb || a.img;
     return '<div class="sapi-amp-card' + (reco ? ' is-reco' : '') + (picked ? ' is-picked' : '') + '">' +
-      (reco ? '<span class="sapi-amp-card__badge">Mon choix pour ' + esc(first) + '</span>' : '') +
+      (reco ? '<span class="sapi-amp-card__band"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5l1.9 4 4.4.5-3.3 3 .9 4.4L8 11.2 4.1 13.4l.9-4.4-3.3-3 4.4-.5z" fill="currentColor"/></svg>Ma recommandation pour ' + esc(first) + '</span>' : '') +
       '<div class="sapi-amp-card__photos">' +
         (photo ? '<img src="' + esc(photo) + '" alt="" loading="lazy">' : '') +
         (a.amb && a.img ? '<img class="sapi-amp-card__pk" src="' + esc(a.img) + '" alt="" loading="lazy">' : '') +
@@ -67,7 +67,7 @@
         '<div class="sapi-amp-card__name"><b>' + esc(a.name) + '</b><span>' + esc(a.priceHtml) + '</span></div>' +
         (a.why ? '<p class="sapi-amp-card__why">' + esc(a.why) + '</p>' : '') +
         (specs ? '<ul class="sapi-amp-card__specs">' + specs + '</ul>' : '') +
-        '<button type="button" class="sapi-amp-card__pick" data-amp-pick="' + a.id + '">' + (picked ? '✓ Choisie' : 'Choisir celle-ci') + '</button>' +
+        '<button type="button" class="sapi-amp-card__pick" data-amp-pick="' + a.id + '">' + (picked ? '✓ Sélectionnée' : (reco ? 'Prendre celle-ci' : 'Choisir celle-ci')) + '</button>' +
       '</div></div>';
   }
 

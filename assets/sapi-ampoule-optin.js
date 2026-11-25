@@ -6,10 +6,9 @@
  * 3. Avec plusieurs ampoules, garde la case alignée sur le choix de la liste.
  * 4. (25/11/2026) La liste suit la variation : data-by-var donne la liste des
  *    variations qui ont la leur, data-default celle du produit.
- * 5. Avec plusieurs ampoules, la liste est masquée : la pastille affiche le nom
- *    (+ « Reco » pour la recommandée) et « Comparer », à côté, ouvre le panneau
- *    partagé (assets/sapi-amp-picker.js). La liste reste dans le formulaire,
- *    c'est elle qui porte le choix.
+ * 5. La bulle « Globe · 10 € ▾ » dans la pastille ouvre le panneau partagé
+ *    (assets/sapi-amp-picker.js). Verte = l'ampoule recommandée. Le choix fait
+ *    dans le panneau change la bulle, pas la case. La liste (masquée) porte le choix.
  *
  * Le sous-total est calculé et réécrit par Product Add-Ons à chaque changement
  * (variation, add-on, quantité). On ne le recalcule pas : on repasse derrière
@@ -28,13 +27,18 @@
   var ampPrice = parseFloat(checkbox.getAttribute('data-price')) || 0;
 
   var model = block.querySelector('.sapi-ampoule-addon__model');
-  var compare = block.querySelector('.sapi-ampoule-addon__compare');
-  var recoTag = block.querySelector('.sapi-amp-reco');
-  // Nom de l'ampoule dans la pastille, et l'étiquette « Reco » si c'est la
-  // recommandée parmi plusieurs.
+  var bubble = block.querySelector('.sapi-amp-bubble');
+  var userPicked = false; // le client a choisi une ampoule dans le panneau
+  // Nom dans la bulle ; bulle verte quand c'est la recommandée (ou la seule).
   function showName(id) {
-    if (model && DATA[id]) { model.textContent = DATA[id].name; model.hidden = false; }
-    if (recoTag) recoTag.hidden = !(currentIds.length > 1 && id === currentIds[0]);
+    if (model && DATA[id]) model.textContent = DATA[id].name;
+    if (bubble) {
+      bubble.classList.toggle('is-reco', currentIds.length < 2 || id === currentIds[0]);
+      bubble.classList.toggle('is-solo', currentIds.length < 2);
+      // Une seule ampoule : la bulle n'ouvre rien, elle se comporte comme le reste de la pastille.
+      if (currentIds.length < 2) { bubble.setAttribute('tabindex', '-1'); bubble.removeAttribute('aria-haspopup'); }
+      else { bubble.removeAttribute('tabindex'); bubble.setAttribute('aria-haspopup', 'dialog'); }
+    }
   }
   function short(txt) { return String(txt).replace(/[,.]00(?=\D*$)/, ''); }
   var DATA = window.SAPI_AMPOULES || {};
@@ -60,7 +64,7 @@
     // On garde l'ampoule que le client a cochée si la nouvelle liste la contient,
     // sinon on prend la recommandée de la variation (la première).
     var cur = parseInt(checkbox.value, 10);
-    var keep = checkbox.checked && ids.indexOf(cur) !== -1 ? cur : ids[0];
+    var keep = (checkbox.checked || userPicked) && ids.indexOf(cur) !== -1 ? cur : ids[0];
     // Ampoule cochée absente de la nouvelle variation : on décoche plutôt que de
     // laisser cochée une autre ampoule, à un autre prix, sans que le client le voie.
     if (checkbox.checked && keep !== cur) {
@@ -73,9 +77,7 @@
         return '<option value="' + id + '" data-price="' + a.price + '" data-price-html="' + String(a.priceHtml).replace(/"/g, '&quot;') + '"' + (id === keep ? ' selected' : '') + '>' +
           String(a.name).replace(/</g, '&lt;') + '</option>';
       }).join('');
-      select.hidden = compare ? true : ids.length < 2;
     }
-    if (compare) compare.hidden = ids.length < 2;
     syncChoice();
     schedule();
   }
@@ -88,7 +90,7 @@
         checkbox.value = one;
         ampPrice = DATA[one].price || 0;
         var pe = block.querySelector('.sapi-ampoule-addon__price');
-        if (pe) pe.textContent = '+' + short(DATA[one].priceHtml);
+        if (pe) pe.textContent = short(DATA[one].priceHtml);
         showName(one);
       }
       return;
@@ -98,7 +100,7 @@
     checkbox.value = opt.value;
     ampPrice = parseFloat(opt.getAttribute('data-price')) || 0;
     var priceEl = block.querySelector('.sapi-ampoule-addon__price');
-    if (priceEl && opt.getAttribute('data-price-html')) priceEl.textContent = '+' + short(opt.getAttribute('data-price-html'));
+    if (priceEl && opt.getAttribute('data-price-html')) priceEl.textContent = short(opt.getAttribute('data-price-html'));
     showName(parseInt(opt.value, 10));
   }
   syncChoice();
@@ -197,23 +199,31 @@
     });
     $(form).on('reset_data', function () { applyList(defaultIds); });
   }
-  if (compare) {
-    compare.addEventListener('click', function (e) {
+  if (bubble) {
+    bubble.addEventListener('click', function (e) {
+      // La bulle est dans le <label> de la case : le clic ne doit pas la cocher.
       e.preventDefault();
-      // Panneau absent : on rend la liste, pour que le choix reste possible.
+      e.stopPropagation();
+      if (currentIds.length < 2) { checkbox.click(); return; }
+      // Panneau absent : on montre la liste, pour que le choix reste possible.
       if (!window.sapiAmpPicker) {
-        if (select) select.hidden = false;
-        compare.hidden = true;
-        if (model) model.hidden = true;
+        if (select) { select.hidden = false; select.removeAttribute('aria-hidden'); select.removeAttribute('tabindex'); }
+        bubble.hidden = true;
         return;
       }
       window.sapiAmpPicker.open({
         ids: currentIds,
         recoId: currentIds[0],
-        pickedId: checkbox.checked ? parseInt(checkbox.value, 10) : null,
+        pickedId: parseInt(checkbox.value, 10),
         first: block.getAttribute('data-first') || '',
+        // Choisir dans le panneau change seulement la bulle : l'ajout reste la case.
         onPick: function (id) {
-          if (select) { select.value = String(id); select.dispatchEvent(new Event('change', { bubbles: true })); }
+          if (!select) return;
+          select.value = String(id);
+          userPicked = true;
+          syncChoice();
+          if (checkbox.checked && paoContainer && $) $(form).trigger('woocommerce-product-addons-update');
+          schedule();
         }
       });
     });

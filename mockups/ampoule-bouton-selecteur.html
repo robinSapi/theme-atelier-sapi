@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette : « Ajouter l'ampoule » + sélecteur</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root { --wood:#937D68; --dark:#323232; --gray:#717171; --line:#E8E2D9; --green:#018501; --orange:#D2633A; --tab:#F1ECE5; --page:#FAF9F7; --body:'Montserrat',sans-serif; --display:'Square Peg',cursive; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); font-family: var(--body); color: var(--dark); }
+  button { font-family: inherit; cursor: pointer; }
+  .wrap { max-width: 1180px; margin: 28px auto 60px; padding: 0 20px; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: 2.6rem; margin: 0; line-height: 1; }
+  .intro { margin: 6px 0 24px; color: var(--gray); font-size: .85rem; line-height: 1.55; max-width: 780px; }
+  .cap { margin: 0 0 10px; font-weight: 800; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; color: var(--wood); }
+  section { margin-bottom: 34px; }
+  .grid { display: grid; grid-template-columns: 380px 1fr; gap: 34px; align-items: start; }
+  .fn { font-weight: 900; text-transform: uppercase; font-size: .95rem; }
+  .rn { font-family: var(--display); font-size: 2rem; line-height: .9; }
+  .meta { margin: 8px 0 0; font-size: .82rem; line-height: 1.6; }
+  .qty { display: inline-flex; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .qty span { width: 32px; height: 32px; display: grid; place-items: center; font-weight: 700; }
+  .qty span + span { border-left: 1.5px solid var(--line); }
+
+  /* ——— Les trois éléments ——— */
+  .acts { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
+  /* 1. Ajouter (fiche : case ; volet/panier : bouton) */
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 13px; border: 1.5px dashed var(--wood); border-radius: 999px; background: #fff; font-size: .8rem; font-weight: 700; white-space: nowrap; cursor: pointer; user-select: none; }
+  .pill .box { width: 15px; height: 15px; border: 1.5px solid var(--wood); border-radius: 3px; display: grid; place-items: center; font-size: .6rem; }
+  .pill.on { border-style: solid; border-color: var(--dark); background: var(--dark); color: #fff; }
+  .pill.on .box { background: var(--orange); border-color: #fff; }
+  .pill.on .box::after { content: "✓"; color: #fff; }
+  .addbtn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; border: 1.5px solid var(--green); border-radius: 999px; background: #fff; color: var(--green); font-size: .78rem; font-weight: 700; white-space: nowrap; }
+  .addbtn:hover { background: var(--green); color: #fff; }
+  /* 2. Sélecteur : ouvre le panneau */
+  .sel { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px 5px 12px; border: 1.5px solid var(--line); border-radius: 8px; background: #fff; color: var(--dark); font-size: .8rem; font-weight: 700; white-space: nowrap; }
+  .sel:hover { border-color: var(--wood); }
+  .sel .pr { color: var(--gray); font-weight: 600; }
+  .sel svg { color: var(--wood); }
+  .sel.solo { cursor: default; border-color: transparent; background: none; padding-left: 2px; }
+  /* 3. Modèle recommandé */
+  .rec { display: inline-flex; align-items: center; gap: 5px; color: var(--green); font-size: .72rem; font-weight: 700; white-space: nowrap; }
+  .rec::before { content: "✓"; display: grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; background: #E4EFE0; font-size: .6rem; }
+
+  /* ——— Fiche produit ——— */
+  .opts { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 0 22px; max-width: 640px; }
+  .orow { display: flex; align-items: center; gap: 22px; padding: 16px 0; }
+  .orow + .orow { border-top: 1px solid var(--line); }
+  .lab { display: flex; align-items: center; gap: 10px; width: 96px; flex: none; font-weight: 800; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+  .lab::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); }
+  .sw { padding: 6px 13px; border: 1.5px solid var(--line); border-radius: 999px; font-size: .78rem; font-weight: 600; }
+  .sw.on { border-color: var(--dark); }
+  .mobile { width: 358px; padding: 0 12px; }
+  .mobile .orow { gap: 10px; }
+  .mobile .lab { width: 74px; font-size: .6rem; }
+  .mobile .acts { gap: 6px 6px; }
+  .mobile .pill, .mobile .sel { font-size: .7rem; }
+  .mobile .pill { padding: 4px 8px; gap: 5px; }
+  .mobile .pill .box { width: 13px; height: 13px; }
+  .mobile .sel { padding: 3px 6px 3px 8px; gap: 4px; }
+
+  /* ——— Volet ——— */
+  .drawer { max-width: 380px; background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 10px 40px rgba(0,0,0,.08); }
+  .item { border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; background: #FDFCFB; position: relative; z-index: 1; }
+  .item .ph { height: 90px; border-radius: 10px; background: radial-gradient(circle at 50% 55%, #e9dccb 0 32%, #fff 33%); margin-bottom: 10px; }
+  .row-end { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+  .price { font-weight: 800; color: var(--wood); font-size: 1.05rem; }
+  .drawer .slot { margin: -6px 14px 18px; }
+  .tab { padding: 16px 14px 12px; border-radius: 0 0 12px 12px; background: var(--tab); font-size: .8rem; }
+  .tab .head { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .tab .head strong { font-size: .8rem; }
+  .thumb { width: 28px; height: 28px; flex: none; border-radius: 5px; background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 38 38"><circle cx="19" cy="16" r="8" fill="%23f4d58d"/><rect x="16" y="24" width="6" height="6" fill="%23bbb"/></svg>') center/contain no-repeat; }
+
+  /* ——— Panier ——— */
+  .cart { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 6px 30px; }
+  .line { display: grid; grid-template-columns: 140px 1fr auto; gap: 24px; padding: 24px 0; }
+  .line + .line { border-top: 1px solid var(--line); }
+  .line .ph { width: 140px; height: 120px; border-radius: 12px; background: radial-gradient(circle at 50% 55%, #e9dccb 0 34%, #fff 35%); }
+  .line .total { font-weight: 900; font-size: 1.3rem; }
+  .line .slot { grid-column: 2 / 4; margin-top: -6px; }
+  .cart .tab { display: inline-flex; align-items: center; gap: 14px; padding: 7px 12px; border-radius: 10px; }
+  .cart .tab .head { margin: 0; white-space: nowrap; }
+  .cart .tab .acts { flex-wrap: nowrap; }
+
+  .sub { display: flex; align-items: center; gap: 10px; padding: 16px 14px 12px; border-radius: 0 0 12px 12px; background: #EEF4EA; font-size: .8rem; }
+  .cart .sub { display: inline-flex; padding: 7px 12px; border-radius: 10px; }
+  .sub strong { color: var(--green); }
+  .sub a { color: var(--wood); font-weight: 700; font-size: .75rem; text-decoration: underline; cursor: pointer; margin-left: 6px; }
+
+  .notes { font-size: .82rem; line-height: 1.6; color: var(--gray); max-width: 780px; padding-left: 18px; }
+
+  /* Panneau simplifié */
+  .veil { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(30,26,22,.5); backdrop-filter: blur(5px); }
+  .veil[hidden] { display: none; }
+  .panel { width: min(760px, 100%); background: #fff; border-radius: 20px; padding: 24px 26px; }
+  .panel h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 2.2rem; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+  .c { position: relative; border: 1.5px solid var(--line); border-radius: 14px; padding: 80px 14px 14px; background: linear-gradient(#f0c97a, #c98a3a) top/100% 66px no-repeat; }
+  .c.cur { border-color: var(--green); }
+  .c b { display: block; }
+  .c small { color: var(--gray); }
+  .c button { width: 100%; margin-top: 10px; padding: 8px; border: 1.5px solid var(--dark); border-radius: 999px; background: #fff; font-weight: 700; font-size: .75rem; text-transform: uppercase; }
+  .c.cur button { background: var(--green); border-color: var(--green); color: #fff; }
+  .c .badge { position: absolute; top: 8px; left: 8px; padding: 3px 9px; border-radius: 999px; background: var(--dark); color: #fff; font-size: .65rem; font-weight: 700; }
+  .close { float: right; border: 0; background: none; font-size: 1.4rem; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .line { grid-template-columns: 1fr; } .line .slot { grid-column: auto; } .cards { grid-template-columns: 1fr; } }
+
+  /* v2 : le sélecteur est dans le bouton (bouton à deux zones) */
+  .split { display: inline-flex; align-items: stretch; border-radius: 999px; background: #fff; white-space: nowrap; font-size: .8rem; }
+  .split > * { display: inline-flex; align-items: center; gap: 7px; border: 0; background: none; font: inherit; font-weight: 700; color: inherit; }
+  .split .go { padding: 6px 12px 6px 13px; cursor: pointer; }
+  .split .pick { gap: 5px; padding: 6px 12px 6px 11px; border-left: 1.5px solid currentColor; border-left-color: inherit; font-weight: 700; }
+  .split .pick .pr { font-weight: 600; opacity: .75; }
+  .split .pick svg { opacity: .7; }
+  .split .pick.solo { cursor: default; }
+  /* fiche : case, pointillés bois */
+  .split.fiche { border: 1.5px dashed var(--wood); color: var(--dark); }
+  .split.fiche .pick { border-left: 1.5px dashed var(--wood); }
+  .split.fiche .go .box { width: 15px; height: 15px; border: 1.5px solid var(--wood); border-radius: 3px; display: grid; place-items: center; font-size: .6rem; }
+  .split.fiche.on { border-style: solid; border-color: var(--dark); background: var(--dark); color: #fff; }
+  .split.fiche.on .pick { border-left: 1.5px solid rgba(255,255,255,.3); }
+  .split.fiche.on .box { background: var(--orange); border-color: #fff; }
+  .split.fiche.on .box::after { content: "✓"; color: #fff; }
+  .split .pick:hover { background: rgba(147,125,104,.1); border-radius: 0 999px 999px 0; }
+  .split.fiche.on .pick:hover { background: rgba(255,255,255,.12); }
+  /* volet / panier : vert */
+  .split.cta { border: 1.5px solid var(--green); color: var(--green); }
+  .split.cta .pick { border-left: 1.5px solid rgba(1,133,1,.35); color: var(--dark); }
+  .split.cta .go:hover { background: var(--green); color: #fff; border-radius: 999px 0 0 999px; }
+  /* recommandé : discret */
+  .rec2 { color: var(--gray); font-size: .68rem; font-weight: 500; font-style: italic; white-space: nowrap; }
+  .mobile .split { font-size: .7rem; }
+  .mobile .split .go { padding: 4px 8px; gap: 5px; }
+  .mobile .split .pick { padding: 4px 9px 4px 8px; }
+  .mobile .split .box { width: 13px !important; height: 13px !important; }
+
+  /* v3 : une bulle dans le bouton ; verte quand c'est l'ampoule recommandée */
+  .split { gap: 6px; padding: 3px 3px 3px 0; }
+  .split .go { padding: 3px 4px 3px 12px; }
+  .split .pick, .split.fiche .pick, .split.cta .pick, .split.fiche.on .pick { border: 0; border-radius: 999px; padding: 4px 10px 4px 11px; background: #F1ECE5; color: var(--dark); }
+  .split .pick:hover { background: #E6DDD1; border-radius: 999px; }
+  .split .pick.is-reco { background: #E1EFDC; color: var(--green); }
+  .split .pick.is-reco:hover { background: #D2E8CB; }
+  .split.fiche.on .pick { background: rgba(255,255,255,.16); color: #fff; }
+  .split.fiche.on .pick.is-reco { background: #E1EFDC; color: var(--green); }
+  .split.cta .go:hover { background: none; color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+  .split.cta:has(.go:hover) { background: #F4FAF2; }
+  .mobile .split .go { padding: 2px 3px 2px 8px; }
+  .mobile .split .pick { padding: 3px 8px 3px 9px !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>« Ajouter l'ampoule » + sélecteur</h1>
+  <p class="intro">Le sélecteur est une bulle à l'intérieur du bouton « Ajouter l'ampoule ». La bulle est verte quand c'est l'ampoule recommandée (le choix par défaut), beige sinon. Plus de mention « recommandée ». Choisir une autre ampoule change seulement le sélecteur : l'ajout se fait toujours avec le bouton (ou la case sur la fiche).</p>
+
+  <section>
+    <p class="cap">Fiche produit — desktop</p>
+    <div class="opts">
+      <div class="orow"><span class="lab">Taille</span><div class="acts"><span class="sw">25 cm</span><span class="sw">35 cm</span><span class="sw on">45 cm</span></div></div>
+      <div class="orow"><span class="lab">Ampoule</span><div class="acts" data-kind="fiche" data-first="Alban" data-ids="Globe,Poire,Edison"></div></div>
+    </div>
+    <p class="cap" style="margin-top:20px">Fiche produit — mobile (écran de 390 px)</p>
+    <div class="opts mobile">
+      <div class="orow"><span class="lab">Ampoule</span><div class="acts" data-kind="fiche" data-first="Alban" data-ids="Globe,Poire,Edison"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div>
+      <p class="cap">Volet</p>
+      <div class="drawer">
+        <div class="item">
+          <div class="ph"></div>
+          <span class="fn">Suze</span> <span class="rn">La Méduse</span>
+          <p class="meta"><b>Matériau :</b> Peuplier<br><b>Taille :</b> 60 cm</p>
+          <div class="row-end"><span class="price">110,00 €</span><span class="qty"><span>−</span><span>1</span><span>+</span></span></div>
+        </div>
+        <div class="slot" data-kind="tab" data-first="Suze" data-ids="Globe,Poire,Edison"></div>
+        <div class="item">
+          <div class="ph"></div>
+          <span class="fn">Morane</span> <span class="rn">La Gogane</span>
+          <p class="meta"><b>Matériau :</b> Okoumé<br><b>Taille :</b> 35 × 30 cm</p>
+          <div class="row-end"><span class="price">95,00 €</span><span class="qty"><span>−</span><span>1</span><span>+</span></span></div>
+        </div>
+        <div class="slot" data-kind="tab" data-first="Morane" data-ids="Poire"></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div>
+      <p class="cap">Page panier (desktop)</p>
+      <div class="cart">
+        <div class="line">
+          <div class="ph"></div>
+          <div><span class="fn">Suze</span> <span class="rn">La Méduse</span><p class="meta">Matériau : Peuplier &nbsp; Taille : 60 cm</p><span class="qty" style="margin-top:10px"><span>−</span><span>1</span><span>+</span></span></div>
+          <div class="total">110,00 €</div>
+          <div class="slot" data-kind="tab" data-first="Suze" data-ids="Globe,Poire,Edison"></div>
+        </div>
+        <div class="line">
+          <div class="ph"></div>
+          <div><span class="fn">Alban</span> <span class="rn">Le Virevoltant</span><p class="meta">Matériau : Peuplier &nbsp; Taille : 45 cm</p><span class="qty" style="margin-top:10px"><span>−</span><span>1</span><span>+</span></span></div>
+          <div class="total">105,00 €</div>
+          <div class="slot" data-kind="tab" data-first="Alban" data-ids="Globe,Poire,Edison"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <ul class="notes">
+    <li>Le prix est dans le sélecteur (« Globe · 10 € »), il suit l'ampoule choisie.</li>
+    <li>Bulle verte = ampoule recommandée. Choisis Poire dans le panneau : la bulle devient beige.</li>
+    <li>Une seule ampoule compatible (Morane) : le sélecteur devient un simple texte, sans flèche, et le panneau ne s'ouvre pas.</li>
+    <li>Sur la fiche, la case reste décochée par défaut (option payante). Dans le volet et le panier, le bouton ajoute en un clic.</li>
+  </ul>
+</div>
+
+<div class="veil" hidden>
+  <div class="panel">
+    <button class="close" data-close>×</button>
+    <h2>Quelle ampoule pour <span class="pf"></span> ?</h2>
+    <div class="cards"></div>
+  </div>
+</div>
+
+<script>
+  const A = { Poire: ['9', '8,5 W – 1055 lm'], Globe: ['10', '8 W – 1000 lm'], Edison: ['8', '8 W – 1000 lm'] };
+  const veil = document.querySelector('.veil');
+  const chev = '<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
+
+  function render(slot) {
+    const ids = slot.dataset.ids.split(','), cur = slot.dataset.cur || ids[0], multi = ids.length > 1;
+    const pick = multi
+      ? '<button class="pick' + (cur === ids[0] ? ' is-reco' : '') + '">' + cur + ' <span class="pr">· ' + A[cur][0] + ' €</span>' + chev + '</button>'
+      : '<span class="pick solo">' + cur + ' <span class="pr">· ' + A[cur][0] + ' €</span></span>';
+    const rec = '';
+    if (slot.dataset.kind === 'fiche') {
+      const on = slot.dataset.on === '1';
+      slot.innerHTML = '<span class="split fiche' + (on ? ' on' : '') + '"><span class="go"><span class="box"></span>Ajouter l\'ampoule</span>' + pick + '</span>' + rec;
+      slot.querySelector('.go').onclick = () => { slot.dataset.on = on ? '' : '1'; render(slot); };
+    } else {
+      slot.innerHTML = '<div class="tab"><div class="head"><span class="thumb"></span><strong>Ampoule non incluse</strong></div>' +
+        '<div class="acts"><span class="split cta"><button class="go">+ Ajouter l\'ampoule</button>' + pick + '</span>' + rec + '</div></div>';
+      slot.querySelector('.go').onclick = () => added(slot, cur);
+    }
+    if (multi) slot.querySelector('.pick').onclick = () => openPanel(slot, cur);
+  }
+  function added(slot, n) {
+    slot.innerHTML = '<div class="sub"><span class="thumb"></span><span><strong>✓ Ampoule ' + n + '</strong> · ' + A[n][0] + ' €</span><a>Retirer</a></div>';
+    slot.querySelector('a').onclick = () => { slot.dataset.cur = n; render(slot); };
+  }
+  function openPanel(slot, cur) {
+    const ids = slot.dataset.ids.split(',');
+    veil.querySelector('.pf').textContent = slot.dataset.first;
+    veil.querySelector('.cards').innerHTML = ids.map((n, i) =>
+      '<div class="c' + (n === cur ? ' cur' : '') + '" data-n="' + n + '">' + (i === 0 ? '<span class="badge">Mon choix pour ' + slot.dataset.first + '</span>' : '') +
+      '<b>' + n + ' · ' + A[n][0] + ' €</b><small>E27 – ' + A[n][1] + '</small><button>' + (n === cur ? '✓ Sélectionnée' : 'Choisir celle-ci') + '</button></div>').join('');
+    veil.querySelectorAll('.c button').forEach(b => b.onclick = () => { slot.dataset.cur = b.closest('.c').dataset.n; veil.hidden = true; render(slot); });
+    veil.hidden = false;
+  }
+  veil.addEventListener('click', e => { if (e.target === veil || e.target.hasAttribute('data-close')) veil.hidden = true; });
+  document.querySelectorAll('[data-kind]').forEach(render);
+</script>
+</body>
+</html>

@@ -437,9 +437,15 @@ function sapi_mini_cart_amp_tab($cart_item) {
   <div class="sapi-amp-tab sapi-amp-tab--mini">
     <?php if ($img) : ?><img class="sapi-amp-tab__img" src="<?php echo esc_url($img); ?>" alt="" width="40" height="40" loading="lazy"><?php endif; ?>
     <strong class="sapi-amp-tab__title"><?php esc_html_e('Ampoule non incluse', 'theme-sapi-maison'); ?></strong>
-    <span class="sapi-amp-tab__acts">
-      <button type="button" class="sapi-amp-tab__add sapi-mc-amp__add" data-product-id="<?php echo esc_attr($amp->get_id()); ?>" data-qty="<?php echo esc_attr($qty); ?>">+ <?php echo esc_html(sapi_ampoule_short_name($amp)); ?><?php if (count($ids) > 1) : ?> <span class="sapi-amp-reco"><?php esc_html_e('Reco', 'theme-sapi-maison'); ?></span><?php endif; ?> <span class="sapi-amp-tab__price"><?php echo esc_html($price); ?></span></button>
-      <?php if (count($ids) > 1) : ?><button type="button" class="sapi-amp-compare" data-ids="<?php echo esc_attr(implode(',', $ids)); ?>" data-first="<?php echo esc_attr(sapi_cart_line_first_name($cart_item)); ?>" data-qty="<?php echo esc_attr($qty); ?>" aria-haspopup="dialog"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 5h10l-3-3M14 11H4l3 3"/></svg><?php esc_html_e('Comparer', 'theme-sapi-maison'); ?></button><?php endif; ?>
+    <?php /* Bouton « + Ajouter l'ampoule » avec la bulle de choix dedans. Choisir
+       dans le panneau change la bulle et l'ampoule que le bouton ajoutera. */ ?>
+    <span class="sapi-amp-split">
+      <button type="button" class="sapi-amp-tab__add sapi-mc-amp__add" data-product-id="<?php echo esc_attr($amp->get_id()); ?>" data-qty="<?php echo esc_attr($qty); ?>"><?php esc_html_e("+ Ajouter l'ampoule", 'theme-sapi-maison'); ?></button>
+      <button type="button" class="sapi-amp-bubble is-reco<?php echo count($ids) > 1 ? '' : ' is-solo'; ?>" data-ids="<?php echo esc_attr(implode(',', $ids)); ?>" data-reco="<?php echo esc_attr($amp->get_id()); ?>" data-first="<?php echo esc_attr(sapi_cart_line_first_name($cart_item)); ?>"<?php echo count($ids) > 1 ? ' aria-haspopup="dialog"' : ' tabindex="-1"'; ?>>
+        <span class="sapi-amp-bubble__name"><?php echo esc_html(sapi_ampoule_short_name($amp)); ?></span>
+        <span class="sapi-amp-bubble__price">· <?php echo esc_html($price); ?></span>
+        <svg class="sapi-amp-bubble__chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
     </span>
   </div>
   <?php

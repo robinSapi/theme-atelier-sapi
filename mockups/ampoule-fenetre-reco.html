@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette : l'ampoule recommandée dans la fenêtre</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root { --wood:#937D68; --dark:#323232; --gray:#717171; --line:#E8E2D9; --green:#018501; --greenbg:#E1EFDC; --page:#FAF9F7; --body:'Montserrat',sans-serif; --display:'Square Peg',cursive; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #8a8178; font-family: var(--body); color: var(--dark); min-height: 100vh; display: grid; place-items: center; padding: 30px 16px; }
+  button { font-family: inherit; cursor: pointer; }
+  .note { max-width: 920px; margin: 0 auto 16px; padding: 10px 14px; border-radius: 10px; background: #FFF6E5; font-size: .8rem; line-height: 1.5; color: #7a5a1e; }
+  .panel { width: min(920px, 100%); background: #fff; border-radius: 20px; padding: 26px 28px 28px; box-shadow: 0 30px 80px rgba(0,0,0,.3); }
+  .head { display: flex; align-items: center; }
+  h2 { flex: 1; margin: 0; font-family: var(--display); font-weight: 400; font-size: 2.3rem; line-height: 1; }
+  .x { border: 0; background: none; font-size: 1.8rem; color: var(--gray); }
+  .sub { margin: 6px 0 20px; font-size: .88rem; color: var(--gray); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: stretch; }
+
+  .card { position: relative; display: flex; flex-direction: column; border: 1.5px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff; }
+  .ph { aspect-ratio: 4 / 3; }
+  .ph.globe { background: radial-gradient(circle at 50% 48%, #fff7d6 0 12%, #f3c56b 26%, #8a5a26 62%, #3d2a17 100%); }
+  .ph.poire { background: repeating-linear-gradient(100deg, #6b3e12 0 10px, #f4b44a 10px 26px); }
+  .ph.edison { background: radial-gradient(circle at 60% 40%, #ffffff 0 14%, #e7e1d8 34%, #9b8f80 70%); }
+  .body { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 16px; }
+  .name { display: flex; justify-content: space-between; align-items: baseline; }
+  .name b { font-size: 1.05rem; }
+  .name span { font-weight: 800; }
+  .why { margin: 0; font-size: .82rem; line-height: 1.5; font-style: italic; color: #5d5a56; }
+  .specs { margin: 0; font-size: .78rem; color: var(--gray); }
+  .pick { margin-top: auto; padding: 11px; border: 1.5px solid var(--dark); border-radius: 999px; background: #fff; font-weight: 700; font-size: .82rem; text-transform: uppercase; }
+
+  /* ——— L'ampoule recommandée ——— */
+  .card.reco { border: 2px solid var(--green); box-shadow: 0 8px 24px rgba(1,133,1,.14); }
+  .card.reco .band { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 10px; background: var(--green); color: #fff; font-size: .78rem; font-weight: 800; letter-spacing: .02em; }
+  .card.reco .band svg { flex: none; }
+  .card.reco .body { background: linear-gradient(#F4FAF2, #fff 70%); }
+  .card.reco .pick { background: var(--green); border-color: var(--green); color: #fff; }
+  .card:not(.reco) { margin-top: 33px; } /* les autres s'alignent sous le bandeau */
+
+  /* Ampoule déjà choisie (celle du sélecteur) */
+  .card .cur { display: none; }
+  .card.is-cur .pick { background: #fff !important; color: var(--dark) !important; border-color: var(--line) !important; cursor: default; }
+  .card.is-cur .pick::before { content: "✓ "; }
+
+  @media (max-width: 720px) {
+    body { place-items: end center; padding: 0; }
+    .panel { border-radius: 20px 20px 0 0; padding: 20px 16px; }
+    .grid { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 80%; overflow-x: auto; scroll-snap-type: x mandatory; }
+    .card { scroll-snap-align: start; }
+  }
+</style>
+</head>
+<body>
+<div>
+  <p class="note">L'ampoule recommandée est mise en avant : bandeau vert en haut de la carte, contour vert, bouton vert plein. Les autres gardent leur bouton blanc. L'ampoule déjà dans le sélecteur affiche « ✓ Sélectionnée ». Clique sur les boutons pour voir.</p>
+  <div class="panel">
+    <div class="head"><h2>Quelle ampoule pour Alban ?</h2><button class="x">×</button></div>
+    <p class="sub">Elles vont toutes avec Alban. Elles changent surtout l'effet de la lumière à travers le bois.</p>
+    <div class="grid">
+      <div class="card reco is-cur" data-n="Globe">
+        <div class="band"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 1.5l1.9 4 4.4.5-3.3 3 .9 4.4L8 11.2 4.1 13.4l.9-4.4-3.3-3 4.4-.5z" fill="currentColor"/></svg>Ma recommandation pour Alban</div>
+        <div class="ph globe"></div>
+        <div class="body">
+          <div class="name"><b>Globe</b><span>10,00 €</span></div>
+          <p class="why">Une lumière diffuse et ronde, qui dessine les lames d'Alban sans éblouir.</p>
+          <p class="specs">E27 – 8 W – 1000 lm – 2700 K</p>
+          <button class="pick">Sélectionnée</button>
+        </div>
+      </div>
+      <div class="card" data-n="Poire">
+        <div class="ph poire"></div>
+        <div class="body">
+          <div class="name"><b>Poire</b><span>9,00 €</span></div>
+          <p class="why">Un filament visible, pour une lumière plus chaude et plus marquée.</p>
+          <p class="specs">E27 – 8,5 W – 1055 lm – 2700 K</p>
+          <button class="pick">Choisir celle-ci</button>
+        </div>
+      </div>
+      <div class="card" data-n="Edison">
+        <div class="ph edison"></div>
+        <div class="body">
+          <div class="name"><b>Edison</b><span>8,00 €</span></div>
+          <p class="why">Allongée et fine, elle reste discrète dans l'abat-jour.</p>
+          <p class="specs">E27 – 8 W – 1000 lm – 2700 K</p>
+          <button class="pick">Choisir celle-ci</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(c => c.querySelector('.pick').onclick = () => {
+    cards.forEach(o => { o.classList.toggle('is-cur', o === c); o.querySelector('.pick').textContent = o === c ? 'Sélectionnée' : (o.classList.contains('reco') ? 'Prendre celle-ci' : 'Choisir celle-ci'); });
+  });
+</script>
+</body>
+</html>

@@ -111,18 +111,33 @@
       '<button type="button" class="sapi-amp-act" data-act="set" data-key="' + esc(ampItem.key) + '" data-qty="' + (ampItem.quantity + miss) + '">Ajouter ' +
       miss + ' ampoule' + pl + '</button></span>';
   }
-  var CMP_ICON = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 5h10l-3-3M14 11H4l3 3"/></svg>';
+  var CHEV = '<svg class="sapi-amp-bubble__chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
   function shortPrice(t) { return String(t || '').replace(/[,.]00(?=\D*$)/, ''); }
+  // Ampoule choisie dans le panneau, par ligne luminaire (sinon la recommandée).
+  var chosen = {};
+  function chosenOf(key) {
+    var a = amp[key], ids = (a && a.ids) || [];
+    var c = chosen[key];
+    return c && ids.indexOf(c) !== -1 ? c : a.id;
+  }
   function tabHtml(key, a) {
-    var multi = (a.ids || []).length > 1;
+    var ids = a.ids || [];
+    var multi = ids.length > 1;
+    var cur = chosenOf(key);
+    var D = (window.sapiAmpPicker && window.sapiAmpPicker.data) || {};
+    var name = cur !== a.id && D[cur] ? D[cur].name : decode(a.name);
+    var price = cur !== a.id && D[cur] ? D[cur].priceHtml : a.price;
+    var reco = !multi || cur === ids[0];
+    var img = cur !== a.id && D[cur] && D[cur].img ? D[cur].img : a.img;
     return '<td colspan="3"><div class="sapi-amp-tab">' +
-      (a.img ? '<img class="sapi-amp-tab__img" src="' + esc(a.img) + '" alt="" width="40" height="40" loading="lazy">' : '') +
+      (img ? '<img class="sapi-amp-tab__img" src="' + esc(img) + '" alt="" width="40" height="40" loading="lazy">' : '') +
       '<strong class="sapi-amp-tab__title">Ampoule non incluse</strong>' +
-      '<span class="sapi-amp-tab__acts">' +
-        '<button type="button" class="sapi-amp-tab__add" data-key="' + esc(key) + '">+ ' + esc(decode(a.name)) +
-          (multi ? ' <span class="sapi-amp-reco">Reco</span>' : '') +
-          ' <span class="sapi-amp-tab__price">' + esc(shortPrice(a.price)) + '</span></button>' +
-        (multi ? '<button type="button" class="sapi-amp-compare" data-key="' + esc(key) + '" aria-haspopup="dialog">' + CMP_ICON + 'Comparer</button>' : '') +
+      '<span class="sapi-amp-split">' +
+        '<button type="button" class="sapi-amp-tab__add" data-key="' + esc(key) + '">+ Ajouter l\'ampoule</button>' +
+        '<button type="button" class="sapi-amp-bubble' + (reco ? ' is-reco' : '') + (multi ? '' : ' is-solo') + '" data-key="' + esc(key) + '"' + (multi ? ' aria-haspopup="dialog"' : ' tabindex="-1"') + '>' +
+          '<span class="sapi-amp-bubble__name">' + esc(name) + '</span> ' +
+          '<span class="sapi-amp-bubble__price">· ' + esc(shortPrice(price)) + '</span>' + CHEV +
+        '</button>' +
       '</span>' +
       '</div></td>';
   }
@@ -252,8 +267,8 @@
     // En-tête et mini-panier (fragments classiques) : compteur et vitrine à jour
     if (window.jQuery) window.jQuery(document.body).trigger('wc_fragment_refresh');
   }
-  /* Bloque (ou débloque) tous les boutons de la languette d'ampoule : « + Globe »
-     et « Comparer » ne doivent pas lancer deux ajouts en même temps. */
+  /* Bloque (ou débloque) tous les boutons de la languette d'ampoule : « + Ajouter l'ampoule »
+     et la bulle ne doivent pas lancer deux ajouts en même temps. */
   function lockTab(btn, on) {
     var tab = btn.closest && btn.closest('.sapi-amp-tab');
     (tab ? Array.prototype.slice.call(tab.querySelectorAll('button')) : [btn]).forEach(function (b) { b.disabled = on; });
@@ -262,10 +277,14 @@
     btn.textContent = 'Erreur';
     setTimeout(function () { btn.innerHTML = label; lockTab(btn, false); }, 2000);
   }
-  function done() { working = false; schedule(); refreshHeader(); }
-  // Filet : une réponse qui ne revient jamais ne doit pas figer l'affichage
+  var guardTimer = null;
+  function done() { working = false; clearTimeout(guardTimer); schedule(); refreshHeader(); }
+  // Filet : une réponse qui ne revient jamais ne doit pas figer l'affichage.
+  // Un seul filet à la fois : celui d'une action terminée ne doit pas jouer
+  // pendant la suivante.
   function guard() {
-    setTimeout(function () {
+    clearTimeout(guardTimer);
+    guardTimer = setTimeout(function () {
       if (!working) return;
       working = false;
       // Débloque les boutons et force le redessin des lignes ajoutées
@@ -284,7 +303,7 @@
     var store = dispatcher();
     if (store && typeof store.addItemToCart === 'function') {
       working = true; guard();
-      Promise.resolve(store.addItemToCart(ampId, qty)).then(done, function () { working = false; fail(btn, label); });
+      Promise.resolve(store.addItemToCart(ampId, qty)).then(done, function () { working = false; clearTimeout(guardTimer); fail(btn, label); });
       return;
     }
     if (!cfg.ajaxUrl) return fail(btn, label);
@@ -303,18 +322,32 @@
   }
 
   document.addEventListener('click', function (e) {
-    // « Comparer les ampoules » : panneau partagé, puis ajout de celle choisie
-    var cmp = e.target.closest && e.target.closest('.sapi-amp-compare[data-key]');
-    if (cmp && window.sapiAmpPicker) {
+    // Bulle « Globe · 10 € ▾ » : panneau partagé. Le choix change la bulle et
+    // l'ampoule que « + Ajouter l'ampoule » ajoutera, sans l'ajouter.
+    var bub = e.target.closest && e.target.closest('.sapi-amp-bubble[data-key]');
+    if (bub) {
       e.preventDefault();
-      var ck = cmp.getAttribute('data-key');
+      if (bub.classList.contains('is-solo') || bub.disabled || working || !window.sapiAmpPicker) return;
+      var ck = bub.getAttribute('data-key');
       var ca = amp[ck];
       if (!ca) return;
       window.sapiAmpPicker.open({
-        ids: ca.ids || [], recoId: (ca.ids || [])[0], pickedId: null, first: ca.first,
+        ids: ca.ids || [], recoId: (ca.ids || [])[0], pickedId: chosenOf(ck), first: ca.first,
         onPick: function (id) {
-          var addBtn = cmp.closest('.sapi-amp-tab') && cmp.closest('.sapi-amp-tab').querySelector('.sapi-amp-tab__add');
-          ajouterAmpoule(addBtn || cmp, id, qtyOf(ck));
+          chosen[ck] = id;
+          // La ligne a pu être redessinée pendant que le panneau était ouvert :
+          // on la retrouve par la clé du luminaire, pas par l'élément cliqué.
+          var lum = rowFor(ck);
+          var row = lum && lum.nextElementSibling;
+          if (row && row.classList.contains('sapi-amp-row') && row.getAttribute('data-kind') === 'tab') {
+            var html = tabHtml(ck, ca);
+            row.innerHTML = html;
+            row.setAttribute('data-sig', 'tab|' + html);
+            var nb = row.querySelector('.sapi-amp-bubble');
+            if (nb) nb.focus();
+          } else {
+            schedule();
+          }
         }
       });
       return;
@@ -326,7 +359,7 @@
       var key = add.getAttribute('data-key');
       var a = amp[key];
       if (!a) return;
-      ajouterAmpoule(add, a.id, qtyOf(key));
+      ajouterAmpoule(add, chosenOf(key), qtyOf(key));
       return;
     }
     // − / + / Retirer / « + n » : agissent sur la ligne de l'ampoule elle-même
@@ -346,6 +379,7 @@
     var p = q <= 0 ? store2.removeItemFromCart(ampKey) : store2.changeCartItemQuantity(ampKey, q);
     Promise.resolve(p).then(done, function () {
       working = false;
+      clearTimeout(guardTimer);
       if (box) box.classList.remove('is-busy');
       fail(btn, label);
     });
