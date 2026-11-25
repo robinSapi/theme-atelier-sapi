@@ -212,8 +212,9 @@ function sapi_ampoule_for($product) {
  * la prenne pas pour une des siennes.
  *
  * La case reste toujours décochée par défaut : une option payante ne peut pas
- * être pré-cochée (droit de la consommation UE). Avec plusieurs ampoules, une
- * liste à côté de la case permet de choisir, Poire présélectionnée.
+ * être pré-cochée (droit de la consommation UE). Avec plusieurs ampoules, le nom
+ * de l'ampoule devient un bouton qui ouvre le panneau de comparaison, la
+ * recommandée présélectionnée (sans JS : une liste).
  * La case porte l'ID de l'ampoule choisie (le JS le tient à jour) : c'est ce que
  * lisent le bouton principal et la barre sticky. `sapi_ampoule_choice` sert de
  * secours sans JS.
@@ -264,9 +265,14 @@ add_action('woocommerce_before_add_to_cart_button', function () {
           <option value="<?php echo esc_attr($amp->get_id()); ?>" data-price="<?php echo esc_attr(wc_format_decimal($p, $dec)); ?>" data-price-html="<?php echo esc_attr(html_entity_decode(wp_strip_all_tags(wc_price($p)), ENT_QUOTES, 'UTF-8')); ?>"<?php selected($i, 0); ?>><?php echo esc_html(sapi_ampoule_short_name($amp)); ?></option>
         <?php endforeach; ?>
       </select>
+      <?php /* 25/11/2026 : avec JS, la liste est masquée et ce bouton la remplace.
+         Il affiche l'ampoule choisie et ouvre le panneau de comparaison. */ ?>
+      <button type="button" class="sapi-ampoule-addon__choose" hidden aria-haspopup="dialog">
+        <span class="screen-reader-text"><?php esc_html_e("Changer d'ampoule :", 'theme-sapi-maison'); ?> </span><span class="sapi-ampoule-addon__choose-name"></span>
+        <svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
       <span class="sapi-ampoule-addon__price">+<?php echo wp_kses_post(wc_price($default_price)); ?></span>
     </label>
-    <button type="button" class="sapi-ampoule-addon__compare"<?php echo count($amps) > 1 ? '' : ' hidden'; ?>><?php esc_html_e('Comparer', 'theme-sapi-maison'); ?></button>
   </div>
   <?php
 });

@@ -5,8 +5,10 @@
  * 2. Ajoute le prix de l'ampoule au sous-total affiché quand la case est cochée.
  * 3. Avec plusieurs ampoules, garde la case alignée sur le choix de la liste.
  * 4. (25/11/2026) La liste suit la variation : data-by-var donne la liste des
- *    variations qui ont la leur, data-default celle du produit. Le lien
- *    « Comparer » ouvre le panneau partagé (assets/sapi-amp-picker.js).
+ *    variations qui ont la leur, data-default celle du produit.
+ * 5. Avec plusieurs ampoules, la liste est masquée : le nom de l'ampoule devient
+ *    un bouton qui ouvre le panneau partagé (assets/sapi-amp-picker.js). La
+ *    liste reste dans le formulaire, c'est elle qui porte le choix.
  *
  * Le sous-total est calculé et réécrit par Product Add-Ons à chaque changement
  * (variation, add-on, quantité). On ne le recalcule pas : on repasse derrière
@@ -25,7 +27,8 @@
   var ampPrice = parseFloat(checkbox.getAttribute('data-price')) || 0;
 
   var model = block.querySelector('.sapi-ampoule-addon__model');
-  var compare = block.querySelector('.sapi-ampoule-addon__compare');
+  var choose = block.querySelector('.sapi-ampoule-addon__choose');
+  var chooseName = choose && choose.querySelector('.sapi-ampoule-addon__choose-name');
   var DATA = window.SAPI_AMPOULES || {};
   function parse(attr, fallback) {
     try { return JSON.parse(block.getAttribute(attr) || '') || fallback; } catch (e) { return fallback; }
@@ -46,24 +49,33 @@
       return;
     }
     block.hidden = false;
-    var keep = ids.indexOf(parseInt(checkbox.value, 10)) !== -1 ? parseInt(checkbox.value, 10) : ids[0];
+    // On garde l'ampoule que le client a cochée si la nouvelle liste la contient,
+    // sinon on prend la recommandée de la variation (la première).
+    var cur = parseInt(checkbox.value, 10);
+    var keep = checkbox.checked && ids.indexOf(cur) !== -1 ? cur : ids[0];
+    // Ampoule cochée absente de la nouvelle variation : on décoche plutôt que de
+    // laisser cochée une autre ampoule, à un autre prix, sans que le client le voie.
+    if (checkbox.checked && keep !== cur) {
+      checkbox.checked = false;
+      if (paoContainer && $) $(form).trigger('woocommerce-product-addons-update');
+    }
     if (select) {
       select.innerHTML = ids.map(function (id) {
         var a = DATA[id];
         return '<option value="' + id + '" data-price="' + a.price + '" data-price-html="' + String(a.priceHtml).replace(/"/g, '&quot;') + '"' + (id === keep ? ' selected' : '') + '>' +
           String(a.name).replace(/</g, '&lt;') + '</option>';
       }).join('');
-      select.hidden = ids.length < 2;
+      select.hidden = choose ? true : ids.length < 2;
     }
     if (model) { model.textContent = DATA[keep].name; model.hidden = ids.length > 1; }
-    if (compare) compare.hidden = ids.length < 2;
+    if (choose) choose.hidden = ids.length < 2;
     syncChoice();
     schedule();
   }
 
   // Plusieurs ampoules : la case porte l'ID et le prix de celle choisie dans la liste.
   function syncChoice() {
-    if (!select || select.hidden) {
+    if (!select || currentIds.length < 2) {
       var one = currentIds[0];
       if (one && DATA[one]) {
         checkbox.value = one;
@@ -79,6 +91,7 @@
     ampPrice = parseFloat(opt.getAttribute('data-price')) || 0;
     var priceEl = block.querySelector('.sapi-ampoule-addon__price');
     if (priceEl && opt.getAttribute('data-price-html')) priceEl.textContent = '+' + opt.getAttribute('data-price-html');
+    if (chooseName) chooseName.textContent = opt.textContent;
   }
   syncChoice();
 
@@ -176,9 +189,17 @@
     });
     $(form).on('reset_data', function () { applyList(defaultIds); });
   }
-  if (compare) {
-    compare.addEventListener('click', function () {
-      if (!window.sapiAmpPicker) return;
+  if (choose) {
+    choose.addEventListener('click', function (e) {
+      // Le bouton est dans le <label> de la case : le clic ne doit pas la cocher.
+      e.preventDefault();
+      e.stopPropagation();
+      // Panneau absent : on rend la liste, pour que le choix reste possible.
+      if (!window.sapiAmpPicker) {
+        if (select) select.hidden = false;
+        choose.hidden = true;
+        return;
+      }
       window.sapiAmpPicker.open({
         ids: currentIds,
         recoId: currentIds[0],
@@ -205,5 +226,12 @@
     if (e.target && e.target.matches('input.qty')) schedule();
   });
 
+  // État de départ : liste de la variation déjà choisie (sinon du produit),
+  // bouton ou nom selon le nombre d'ampoules. Si aucune de ces ampoules n'est
+  // dans SAPI_AMPOULES, on garde le rendu du serveur plutôt que masquer la ligne.
+  var vidInput = form.querySelector('input.variation_id');
+  var vid0 = vidInput ? parseInt(vidInput.value, 10) : 0;
+  var startIds = (vid0 && byVar[vid0]) || defaultIds;
+  if (startIds.filter(function (id) { return DATA[id]; }).length) applyList(startIds);
   refresh();
 })(window.jQuery);

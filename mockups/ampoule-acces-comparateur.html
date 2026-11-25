@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette : accès au comparateur d'ampoules</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root { --wood:#937D68; --dark:#323232; --gray:#717171; --line:#E8E2D9; --green:#018501; --orange:#D2633A; --page:#FAF9F7; --body:'Montserrat',sans-serif; --display:'Square Peg',cursive; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); font-family: var(--body); color: var(--dark); }
+  button { font-family: inherit; cursor: pointer; }
+  .wrap { max-width: 640px; margin: 30px auto 60px; padding: 0 20px; display: grid; gap: 26px; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: 2.6rem; margin: 0; line-height: 1; }
+  .intro { margin: 6px 0 0; color: var(--gray); font-size: .85rem; line-height: 1.5; }
+  .opt-title { margin: 0 0 4px; font-weight: 800; font-size: .95rem; }
+  .opt-desc { margin: 0 0 12px; color: var(--gray); font-size: .8rem; line-height: 1.5; }
+  .reco { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: var(--dark); color: #fff; font-size: .65rem; font-weight: 700; vertical-align: 2px; }
+
+  /* Reproduction de la zone d'options de la fiche */
+  .box { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 0 22px; }
+  .row { display: flex; align-items: center; gap: 22px; padding: 18px 0; }
+  .row + .row { border-top: 1px solid var(--line); }
+  .lab { display: flex; align-items: center; gap: 10px; width: 120px; flex: none; font-weight: 800; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; }
+  .lab::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); }
+  .swatches { display: flex; gap: 8px; }
+  .sw { padding: 7px 14px; border: 1.5px solid var(--line); border-radius: 999px; font-size: .8rem; font-weight: 600; }
+  .sw.on { border-color: var(--dark); }
+
+  .pill { display: inline-flex; align-items: center; gap: 9px; padding: 7px 14px; border: 1.5px dashed #A4927F; border-radius: 999px; font-size: .9rem; font-weight: 600; user-select: none; }
+  .pill.on { border-style: solid; border-color: var(--dark); background: var(--dark); color: #fff; }
+  .pill .chk { width: 18px; height: 18px; border: 1.5px solid currentColor; border-radius: 4px; display: grid; place-items: center; font-size: .7rem; cursor: pointer; }
+  .pill.on .chk::after { content: "✓"; }
+  .pill .add { cursor: pointer; }
+  .price { color: var(--gray); font-weight: 700; font-size: .85rem; }
+  .pill.on .price { color: #ddd; }
+
+  /* A — le nom ouvre le comparateur */
+  .name-btn { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px 2px 10px; border: 0; border-radius: 999px; background: #F3EEE6; color: inherit; font-size: inherit; font-weight: 700; }
+  .name-btn:hover { background: #E8DFD3; }
+  .pill.on .name-btn { background: rgba(255,255,255,.16); }
+  .name-btn svg { width: 10px; height: 10px; }
+
+  /* B — lien sur la ligne */
+  .name { font-weight: 700; }
+  .see { padding: 0; border: 0; background: none; color: var(--wood); font-size: .8rem; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+  .see:hover { color: var(--dark); }
+
+  /* C — icône */
+  .info { width: 20px; height: 20px; padding: 0; border: 1.5px solid currentColor; border-radius: 50%; background: none; color: var(--wood); font-size: .7rem; font-weight: 800; font-style: italic; font-family: Georgia, serif; display: grid; place-items: center; }
+  .pill.on .info { color: #ddd; }
+
+  /* Panneau (simplifié) */
+  .veil { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(30,26,22,.5); backdrop-filter: blur(5px); }
+  .veil[hidden] { display: none; }
+  .panel { width: min(760px, 100%); background: #fff; border-radius: 20px; padding: 24px 26px; }
+  .panel h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 2.2rem; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 16px; }
+  .c { position: relative; border: 1.5px solid var(--line); border-radius: 14px; padding: 80px 14px 14px; background: linear-gradient(#f0c97a, #c98a3a) top/100% 66px no-repeat; }
+  .c.sel { border-color: var(--green); }
+  .c b { display: block; font-size: 1rem; }
+  .c small { color: var(--gray); }
+  .c button { width: 100%; margin-top: 10px; padding: 8px; border: 1.5px solid var(--dark); border-radius: 999px; background: #fff; font-weight: 700; font-size: .75rem; text-transform: uppercase; }
+  .c.sel button { background: var(--green); border-color: var(--green); color: #fff; }
+  .c .badge { position: absolute; top: 8px; left: 8px; padding: 3px 9px; border-radius: 999px; background: var(--dark); color: #fff; font-size: .65rem; font-weight: 700; }
+  .close { float: right; border: 0; background: none; font-size: 1.4rem; }
+
+  @media (max-width: 560px) {
+    .row { flex-wrap: wrap; gap: 10px; }
+    .lab { width: 100%; }
+    .cards { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <h1>Ouvrir le comparateur d'ampoules</h1>
+    <p class="intro">Trois façons de remplacer le bouton « Comparer ». Coche la case pour voir l'état « ajoutée », et clique sur l'élément de chaque option pour ouvrir le panneau. Le panneau ne change pas.</p>
+  </div>
+
+  <section>
+    <p class="opt-title">A. Le nom de l'ampoule ouvre le panneau <span class="reco">ma préférée</span></p>
+    <p class="opt-desc">Le menu déroulant disparaît et « Poire ▾ » devient un bouton qui ouvre le comparateur. Il ne reste qu'un seul élément, et changer d'ampoule passe toujours par les photos.</p>
+    <div class="box">
+      <div class="row"><span class="lab">Taille</span><div class="swatches"><span class="sw">25 cm</span><span class="sw on">35 cm</span><span class="sw">45 cm</span></div></div>
+      <div class="row"><span class="lab">Ampoule</span>
+        <span class="pill"><span class="chk" role="checkbox"></span><span class="add">Ajouter</span>
+          <button class="name-btn" data-open>Poire <svg viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+          <span class="price">+9,00 €</span></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="opt-title">B. Un lien sur la même ligne</p>
+    <p class="opt-desc">La pastille reste telle quelle (sans menu). Un lien discret à droite ouvre le panneau, et il n'y a plus rien sous l'étiquette.</p>
+    <div class="box">
+      <div class="row"><span class="lab">Taille</span><div class="swatches"><span class="sw">25 cm</span><span class="sw on">35 cm</span><span class="sw">45 cm</span></div></div>
+      <div class="row"><span class="lab">Ampoule</span>
+        <span class="pill"><span class="chk" role="checkbox"></span><span class="add">Ajouter <span class="name">Poire</span></span><span class="price">+9,00 €</span></span>
+        <button class="see" data-open>voir les 3 ampoules</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="opt-title">C. Une icône dans la pastille</p>
+    <p class="opt-desc">La plus discrète : un « i » après le prix ouvre le panneau. Le risque est que peu de clients le remarquent.</p>
+    <div class="box">
+      <div class="row"><span class="lab">Taille</span><div class="swatches"><span class="sw">25 cm</span><span class="sw on">35 cm</span><span class="sw">45 cm</span></div></div>
+      <div class="row"><span class="lab">Ampoule</span>
+        <span class="pill"><span class="chk" role="checkbox"></span><span class="add">Ajouter <span class="name">Poire</span></span><span class="price">+9,00 €</span>
+          <button class="info" data-open aria-label="Comparer les ampoules">i</button></span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="veil" hidden>
+  <div class="panel">
+    <button class="close" data-close>×</button>
+    <h2>Quelle ampoule pour Alban ?</h2>
+    <div class="cards">
+      <div class="c sel" data-n="Poire"><span class="badge">Mon choix pour Alban</span><b>Poire · 9,00 €</b><small>E27 – 8,5 W – 1055 lm</small><button>✓ Choisie</button></div>
+      <div class="c" data-n="Globe"><b>Globe · 10,00 €</b><small>E27 – 8 W – 1000 lm</small><button>Choisir celle-ci</button></div>
+      <div class="c" data-n="Edison"><b>Edison · 8,00 €</b><small>E27 – 8 W – 1000 lm</small><button>Choisir celle-ci</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const prix = { Poire: '9,00', Globe: '10,00', Edison: '8,00' };
+  const veil = document.querySelector('.veil');
+  let current = null;
+  document.querySelectorAll('.pill .chk, .pill .add').forEach(el => el.addEventListener('click', () => el.closest('.pill').classList.toggle('on')));
+  document.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    current = b.closest('.row').querySelector('.pill');
+    const nom = (current.querySelector('.name, .name-btn').firstChild.textContent || '').trim();
+    document.querySelectorAll('.c').forEach(c => { const s = c.dataset.n === nom; c.classList.toggle('sel', s); c.querySelector('button').textContent = s ? '✓ Choisie' : 'Choisir celle-ci'; });
+    veil.hidden = false;
+  }));
+  document.querySelectorAll('.c button').forEach(b => b.addEventListener('click', () => {
+    const n = b.closest('.c').dataset.n;
+    const nameEl = current.querySelector('.name, .name-btn');
+    nameEl.firstChild.textContent = n + (nameEl.classList.contains('name-btn') ? ' ' : '');
+    current.querySelector('.price').textContent = '+' + prix[n] + ' €';
+    current.classList.add('on');
+    veil.hidden = true;
+  }));
+  veil.addEventListener('click', e => { if (e.target === veil || e.target.hasAttribute('data-close')) veil.hidden = true; });
+</script>
+</body>
+</html>

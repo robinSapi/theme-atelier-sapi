@@ -28307,11 +28307,28 @@ html.sapi-amp-picker-open { overflow: hidden; }
 .sapi-ampoule-addon[hidden],
 .sapi-ampoule-addon [hidden],
 .sapi-opts-ready .sapi-opts .sapi-ampoule-addon[hidden] { display: none !important; }
-.sapi-ampoule-addon__compare,
 .sapi-amp-compare {
   padding: 0; border: 0; background: none; cursor: pointer;
   font-family: var(--font-body); font-size: .78rem; font-weight: 700;
   color: var(--color-wood); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
 }
-.sapi-ampoule-addon__compare { margin-left: 10px; }
+/* Fiche produit : le nom de l'ampoule ouvre le panneau (25/11/2026) */
+.sapi-ampoule-addon__choose {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin: 0; padding: 2px 8px 2px 9px; border: 0; border-radius: 999px;
+  background: rgba(147, 125, 104, 0.14); color: inherit;
+  font: inherit; font-weight: 700; line-height: 1.3; cursor: pointer;
+  text-transform: none; letter-spacing: normal; min-height: 0; box-shadow: none; overflow: visible;
+  transition: background-color 0.2s ease;
+}
+.sapi-ampoule-addon__choose::after { display: none; } /* pas d'effet d'onde des boutons globaux */
+.sapi-ampoule-addon .screen-reader-text {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+.sapi-ampoule-addon__choose:hover { background: rgba(147, 125, 104, 0.26); }
+.sapi-ampoule-addon__choose:focus-visible { outline: 2px solid var(--color-orange, #E35B24); outline-offset: 2px; }
+.sapi-ampoule-addon__choose svg { flex: none; }
+.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:checked) .sapi-ampoule-addon__choose { background: rgba(255, 255, 255, 0.16); }
+.sapi-ampoule-addon__pill:has(.sapi-ampoule-addon__input:checked) .sapi-ampoule-addon__choose:hover { background: rgba(255, 255, 255, 0.28); }
 .sapi-amp-tab .sapi-amp-compare { display: inline-block; margin-top: 2px; }
