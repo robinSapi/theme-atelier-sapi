@@ -28067,10 +28067,10 @@ body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
 .home-projet-section.has-projet .home-projet { display: none; }
 .accueil-projet {
   position: relative; z-index: 1;
-  max-width: 1000px; margin: 0 auto; padding: 0 16px;
+  max-width: 1280px; margin: 0 auto; padding: 0 24px;
   display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center;
 }
-.accueil-projet__phrase { margin: 0; max-width: 640px; font-size: 17px; line-height: 1.55; color: var(--cons-texte); }
+.accueil-projet__phrase { margin: 0; max-width: 720px; font-size: 17px; line-height: 1.55; color: var(--cons-texte); }
 .accueil-projet__phrase:empty { display: none; }
 .accueil-projet__cartes {
   width: 100%; display: flex; justify-content: flex-start; gap: 18px;
@@ -28082,10 +28082,11 @@ body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
    débordent (justify-content: center rognait la gauche, hors d'atteinte). */
 .accueil-projet__cartes > :first-child { margin-left: auto; }
 .accueil-projet__cartes > :last-child { margin-right: auto; }
-.accueil-projet__cartes .product-card-cinetique { flex: 0 0 220px; scroll-snap-align: start; background: #fff; border-radius: 14px; overflow: hidden; }
+/* Cartes élargies (25/11) : elles se partagent la largeur, entre 220 et 300 px */
+.accueil-projet__cartes .product-card-cinetique { flex: 1 1 0; min-width: 220px; max-width: 300px; scroll-snap-align: start; background: #fff; border-radius: 14px; overflow: hidden; }
 .accueil-projet__cartes .product-price { justify-content: center; }
 .accueil-projet__vide {
-  flex: 0 0 220px; height: 320px; border-radius: 14px; background: rgba(255, 255, 255, .08);
+  flex: 1 1 0; min-width: 220px; max-width: 300px; height: 400px; border-radius: 14px; background: rgba(255, 255, 255, .08);
   animation: accueil-vide 1.2s ease-in-out infinite alternate;
 }
 @keyframes accueil-vide { from { opacity: .5; } to { opacity: 1; } }
@@ -28106,7 +28107,7 @@ body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
   .accueil-projet { padding: 0; gap: 18px; }
   .accueil-projet__phrase { font-size: 15px; padding: 0 20px; }
   .accueil-projet__cartes { justify-content: flex-start; padding-left: 20px; padding-right: 20px; scroll-padding-left: 20px; }
-  .accueil-projet__cartes .product-card-cinetique, .accueil-projet__vide { flex-basis: 62%; }
+  .accueil-projet__cartes .product-card-cinetique, .accueil-projet__vide { flex: 0 0 62%; min-width: 0; max-width: none; }
   .accueil-projet__actions { flex-direction: column; gap: 16px; width: 100%; padding: 0 20px; box-sizing: border-box; }
   .accueil-projet__completer { width: 100%; justify-content: center; box-sizing: border-box; }
 }
