@@ -343,12 +343,13 @@ function sapi_cart_line_first_name($cart_item) {
   return $parts[0];
 }
 
-/** Bouton « + n » quand il manque des ampoules. */
-function sapi_amp_missing_html($amp_item, $need, $label) {
-  $have = (int) $amp_item['quantity'];
-  $miss = (int) $need - $have;
+/** « Il manque 1 ampoule pour vos 2 luminaires. » + bouton « Ajouter 1 ampoule ». */
+function sapi_amp_missing_html($amp_item, $need) {
+  $miss = (int) $need - (int) $amp_item['quantity'];
   if ($miss <= 0) return '';
-  return '<span class="sapi-amp-hint">' . esc_html($label) . ' <button type="button" class="sapi-mc-amp__add" data-product-id="' . esc_attr($amp_item['product_id']) . '" data-qty="' . esc_attr($miss) . '">+ ' . esc_html($miss) . '</button></span>';
+  $msg = sprintf(_n('Il manque %1$d ampoule pour vos %2$d luminaires.', 'Il manque %1$d ampoules pour vos %2$d luminaires.', $miss, 'theme-sapi-maison'), $miss, (int) $need);
+  $btn = sprintf(_n('Ajouter %d ampoule', 'Ajouter %d ampoules', $miss, 'theme-sapi-maison'), $miss);
+  return '<span class="sapi-amp-hint">' . esc_html($msg) . ' <button type="button" class="sapi-mc-amp__add" data-product-id="' . esc_attr($amp_item['product_id']) . '" data-qty="' . esc_attr($miss) . '">' . esc_html($btn) . '</button></span>';
 }
 
 /** Ce qui s'affiche sous une ligne de luminaire du volet. */
@@ -358,12 +359,10 @@ function sapi_mini_cart_under_luminaire($cart_item_key, $cart_item, $g) {
     $ak = $g['attached'][$cart_item_key];
     $a = $cart[$ak];
     $ap = $a['data'];
-    $lq = (int) $cart_item['quantity'];
-    $label = sprintf(_n('%1$d luminaire, %2$d ampoule', '%1$d luminaires, %2$d ampoules', $lq, 'theme-sapi-maison'), $lq, (int) $a['quantity']);
     ?>
     <div class="sapi-amp-sub sapi-amp-sub--mini">
       <span class="sapi-amp-sub__check" aria-hidden="true">✓</span>
-      <p class="sapi-amp-sub__text"><strong><?php echo esc_html($ap->get_name()); ?></strong><?php echo sapi_amp_missing_html($a, $g['need'][$ak], $label); ?></p>
+      <p class="sapi-amp-sub__text"><strong><?php echo esc_html($ap->get_name()); ?></strong><?php echo sapi_amp_missing_html($a, $g['need'][$ak]); ?></p>
       <div class="mini-cart-qty-selector sapi-amp-sub__qty" data-cart-item-key="<?php echo esc_attr($ak); ?>">
         <button class="mini-cart-qty-btn mini-cart-qty-minus" aria-label="<?php esc_attr_e('Diminuer la quantité', 'theme-sapi-maison'); ?>">−</button>
         <span class="mini-cart-qty-value"><?php echo esc_html($a['quantity']); ?></span>
@@ -387,9 +386,8 @@ function sapi_mini_cart_shared_note($cart_item_key, $g) {
   foreach ($g['shared'][$cart_item_key] as $lk) $names[] = sapi_cart_line_first_name($cart[$lk]);
   $names = array_values(array_unique($names)); // deux tailles du même modèle : « Pour Gaston »
   $need = $g['need'][$cart_item_key];
-  $label = sprintf(__('%1$d luminaires, %2$d ampoules', 'theme-sapi-maison'), $need, (int) $cart[$cart_item_key]['quantity']);
   echo '<span class="sapi-amp-shared">' . esc_html(sprintf(__('Pour %s', 'theme-sapi-maison'), wp_sprintf('%l', $names))) . '</span>';
-  echo sapi_amp_missing_html($cart[$cart_item_key], $need, $label);
+  echo sapi_amp_missing_html($cart[$cart_item_key], $need);
 }
 
 /** Languette « Ampoule non incluse » sous une ligne du volet. */

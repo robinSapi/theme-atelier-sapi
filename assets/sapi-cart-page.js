@@ -78,11 +78,14 @@
     return g;
   }
 
-  function hintHtml(ampItem, need, label) {
+  /** « Il manque 1 ampoule pour vos 2 luminaires. » + bouton « Ajouter 1 ampoule ». */
+  function hintHtml(ampItem, need) {
     var miss = need - ampItem.quantity;
     if (miss <= 0) return '';
-    return '<span class="sapi-amp-hint">' + esc(label) + ' <button type="button" class="sapi-amp-act" data-act="set" data-key="' +
-      esc(ampItem.key) + '" data-qty="' + need + '">+ ' + miss + '</button></span>';
+    var pl = miss > 1 ? 's' : '';
+    return '<span class="sapi-amp-hint">Il manque ' + miss + ' ampoule' + pl + ' pour vos ' + need + ' luminaires. ' +
+      '<button type="button" class="sapi-amp-act" data-act="set" data-key="' + esc(ampItem.key) + '" data-qty="' + need + '">Ajouter ' +
+      miss + ' ampoule' + pl + '</button></span>';
   }
   function tabHtml(key, a) {
     return '<td colspan="3"><div class="sapi-amp-tab">' +
@@ -94,11 +97,9 @@
       '</div></td>';
   }
   function subHtml(lumItem, a) {
-    var lq = lumItem.quantity;
-    var label = lq + (lq > 1 ? ' luminaires, ' : ' luminaire, ') + a.quantity + (a.quantity > 1 ? ' ampoules' : ' ampoule');
     return '<td colspan="3"><div class="sapi-amp-sub">' +
       '<span class="sapi-amp-sub__check" aria-hidden="true">✓</span>' +
-      '<p class="sapi-amp-sub__text"><strong>' + esc(decode(a.name)) + '</strong>' + hintHtml(a, lq, label) + '</p>' +
+      '<p class="sapi-amp-sub__text"><strong>' + esc(decode(a.name)) + '</strong>' + hintHtml(a, lumItem.quantity) + '</p>' +
       '<div class="sapi-amp-sub__qty">' +
         '<button type="button" class="sapi-amp-act" data-act="set" data-key="' + esc(a.key) + '" data-qty="' + (a.quantity - 1) + '" aria-label="Diminuer">−</button>' +
         '<span>' + a.quantity + '</span>' +
@@ -110,9 +111,8 @@
   }
   function sharedHtml(ampItem, users, g) {
     var list = users.map(function (k) { return amp[k].first; });
-    var label = g.need[ampItem.key] + ' luminaires, ' + ampItem.quantity + (ampItem.quantity > 1 ? ' ampoules' : ' ampoule');
     return '<td colspan="3"><div class="sapi-amp-shared-row">' +
-      '<span class="sapi-amp-shared">Pour ' + esc(names(list)) + '</span>' + hintHtml(ampItem, g.need[ampItem.key], label) +
+      '<span class="sapi-amp-shared">Pour ' + esc(names(list)) + '</span>' + hintHtml(ampItem, g.need[ampItem.key]) +
       '</div></td>';
   }
 

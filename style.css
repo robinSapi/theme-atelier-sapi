@@ -27425,13 +27425,30 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   cursor: pointer;
 }
 .sapi-amp-sub__remove { color: var(--color-gray, #717171); }
-.sapi-amp-hint { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--color-orange, #E35B24); }
-.sapi-amp-hint button { color: var(--color-orange, #E35B24); font-weight: 700; }
+.sapi-amp-hint { display: block; margin-top: 4px; font-size: 0.78rem; font-weight: 600; color: var(--color-orange, #E35B24); }
+/* Bouton « Ajouter n ampoule(s) » : pastille, pour qu'on voie que c'est cliquable */
+.sapi-amp-hint button {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0.2rem 0.7rem;
+  border: 1.5px solid var(--color-orange, #E35B24);
+  border-radius: 999px;
+  color: var(--color-orange, #E35B24);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sapi-amp-hint button:hover { background: var(--color-orange, #E35B24); color: #fff; }
 .sapi-amp-shared { display: block; font-size: 0.78rem; color: var(--color-gray, #717171); }
 
 /* Page panier : lignes ajoutées (languette, sous-ligne, mention partagée) */
 .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row[data-kind="shared"] > td { padding: 0 !important; }
 .sapi-amp-shared-row { padding: 0 0.9rem 0.6rem; }
+
+/* Volet desktop : vignette plus grande */
+@media (min-width: 1100px) {
+  .mini-cart-item-image { width: 180px; height: 180px; }
+}
 
 /* Volet : sous-ligne et mention sous l'article */
 .mini-cart-item:has(+ .sapi-amp-sub--mini) {
@@ -27464,7 +27481,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 /* ========================================
    PAGE PANIER DESKTOP : LIGNES COMPACTES (25/11/2026, maquette panier-ampoule-rattachee)
    Un seul cadre (la carte blanche), un filet entre les articles,
-   photo 132 px | nom, options, quantité | prix à droite.
+   photo 176 px | nom, options, quantité | prix à droite.
    À partir de 1000 px : en dessous, la colonne des articles est trop étroite.
    ======================================== */
 @media (min-width: 1000px) {
@@ -27474,7 +27491,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 
   .sapi-cart-outer .wc-block-cart-items tr.wc-block-cart-items__row {
     display: grid !important;
-    grid-template-columns: 132px minmax(0, 1fr) auto !important;
+    grid-template-columns: 176px minmax(0, 1fr) auto !important;
     grid-template-areas: none !important;
     column-gap: 24px !important;
     align-items: center !important;
@@ -27497,9 +27514,9 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .sapi-cart-outer .wc-block-cart-items .wc-block-cart-item__total { grid-column: 3 !important; text-align: right !important; }
   .sapi-cart-outer .wc-block-cart-item__image img,
   .sapi-cart-outer .wc-block-cart-items .wc-block-components-product-image img {
-    width: 132px !important;
-    height: 132px !important;
-    border-radius: 10px !important;
+    width: 176px !important;
+    height: 176px !important;
+    border-radius: 12px !important;
   }
   .sapi-cart-outer .wc-block-cart-items .wc-block-components-product-name { font-size: 1.1rem !important; }
 
@@ -27523,7 +27540,7 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
 
   /* Lignes ajoutées : alignées sous la colonne de texte, sans cadre */
   .sapi-cart-outer .wc-block-cart-items tr.wc-block-cart-items__row:has(+ tr.sapi-amp-row) { background: transparent !important; }
-  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row { margin: -0.55rem 0 1.1rem 156px !important; }
+  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row { margin: -0.55rem 0 1.1rem 200px !important; }
   .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row .sapi-amp-tab { border-radius: 10px; }
   .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row .sapi-amp-tab::before { display: none; }
   .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row[data-kind="shared"] { margin-top: -1rem !important; }
