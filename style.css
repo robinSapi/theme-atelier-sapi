@@ -27512,9 +27512,10 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
     height: 100% !important;
     object-fit: cover;
   }
+  /* Prénom + surnom au format de la charte (assets/product-name-formatter.js) */
   .mini-cart-suggest__name {
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.25;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

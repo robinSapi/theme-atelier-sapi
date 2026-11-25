@@ -171,7 +171,9 @@ function sapi_render_cart_suggestions() {
 
 /** Une carte, au même gabarit que les cartes produit du site (woocommerce/content-product.php). */
 /** $sizes : largeur affichée de la carte, pour que le navigateur choisisse la bonne image. */
-function sapi_suggest_card_html($s, $index, $first, $sizes = '(min-width: 1100px) 360px, 220px') {
+function sapi_suggest_card_html($s, $index, $first, $sizes = '(min-width: 1100px) 360px, 220px', $img_size = 'woocommerce_single', $lazy = true) {
+  $img_attr = ['alt' => $s['product']->get_name(), 'sizes' => $sizes];
+  if ($lazy) $img_attr['loading'] = 'lazy';
   $p = $s['product'];
   $id = $p->get_id();
   $is_amp = $s['kind'] === 'ampoule';
@@ -199,9 +201,9 @@ function sapi_suggest_card_html($s, $index, $first, $sizes = '(min-width: 1100px
   <li class="product-card-cinetique sapi-suggest__card" data-product-id="<?php echo esc_attr($id); ?>" data-product-cat="<?php echo esc_attr($is_amp ? 'accessoires' : $s['type']); ?>">
     <?php echo $tag_open; ?>
       <div class="product-media<?php echo $hover_id ? ' has-hover-image' : ''; ?>">
-        <span class="product-image-main"><?php echo $main_id ? wp_get_attachment_image($main_id, 'woocommerce_single', false, ['alt' => $p->get_name(), 'loading' => 'lazy', 'sizes' => $sizes]) : wc_placeholder_img('woocommerce_thumbnail'); ?></span>
+        <span class="product-image-main"><?php echo $main_id ? wp_get_attachment_image($main_id, $img_size, false, $img_attr) : wc_placeholder_img($img_size); ?></span>
         <?php if ($hover_id) : ?>
-          <span class="product-image-hover"><?php echo wp_get_attachment_image($hover_id, 'woocommerce_single', false, ['alt' => $p->get_name(), 'loading' => 'lazy', 'sizes' => $sizes]); ?></span>
+          <span class="product-image-hover"><?php echo wp_get_attachment_image($hover_id, $img_size, false, $img_attr); ?></span>
         <?php endif; ?>
       </div>
       <div class="product-info">
@@ -323,7 +325,7 @@ function sapi_render_mini_cart_suggest() {
         $from = $p->is_type('variable');
         $price = wc_price($from ? $p->get_variation_price('min', true) : wc_get_price_to_display($p));
       ?>
-        <li>
+        <li data-product-cat="<?php echo esc_attr($s['type']); ?>">
           <a class="mini-cart-suggest__card" href="<?php echo esc_url($p->get_permalink()); ?>">
             <span class="mini-cart-suggest__img"><?php echo $img_id ? wp_get_attachment_image($img_id, 'woocommerce_thumbnail', false, ['alt' => $p->get_name(), 'loading' => 'lazy', 'sizes' => '150px']) : wc_placeholder_img('woocommerce_thumbnail'); ?></span>
             <span class="mini-cart-suggest__name"><?php echo esc_html($p->get_name()); ?></span>
