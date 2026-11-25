@@ -14825,67 +14825,6 @@ body.woocommerce-checkout .sapi-checkout-outer .wc-block-components-title {
   color: var(--color-dark);
 }
 
-/* Cross-sells classiques */
-.sapi-cart-outer .cross-sells {
-  margin-top: 2rem;
-}
-
-.sapi-cart-outer .cross-sells > h2 {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-dark);
-  margin-bottom: 1rem;
-}
-
-.sapi-cart-outer .cross-sells .products {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sapi-cart-outer .cross-sells .products li.product {
-  background: var(--color-white, #fff);
-  border: 1px solid var(--color-gray-light, #e8e2d9);
-  border-radius: 12px;
-  padding: 1rem;
-  text-align: center;
-}
-
-.sapi-cart-outer .cross-sells .products li.product img {
-  border-radius: 8px;
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-}
-
-.sapi-cart-outer .cross-sells .products li.product a.button {
-  display: inline-block;
-  margin-top: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: transparent;
-  color: var(--color-orange, #E35B24);
-  border: 1.5px solid var(--color-orange, #E35B24);
-  border-radius: 12px;
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
-}
-
-@media (hover: hover) {
-  .sapi-cart-outer .cross-sells .products li.product a.button:hover {
-    background: var(--color-orange, #E35B24);
-    color: #fff;
-  }
-}
-
 /* Responsive panier classique */
 @media (max-width: 768px) {
   .sapi-cart-outer .woocommerce {
@@ -27328,11 +27267,6 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
    Variante B : ce qui n'est pas au panier n'a ni cadre blanc ni contrôles.
    La languette est accrochée sous la carte du luminaire, sur fond beige.
    ======================================== */
-
-/* Le bloc natif des ventes croisées est remplacé par la languette */
-.sapi-cart-outer .wc-block-cart__main > .wp-block-woocommerce-product-collection {
-  display: none !important;
-}
 
 /* La carte du luminaire se colle à sa languette */
 .sapi-cart-outer .wc-block-cart-items tr.wc-block-cart-items__row:has(+ tr.sapi-amp-row) {

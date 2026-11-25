@@ -12,8 +12,8 @@
  * 2. VITRINE « ÇA IRAIT BIEN AVEC… » (desktop) : sous le panier, avant la
  *    réassurance, trois luminaires choisis comme dans le mini-panier mais
  *    sans l'ampoule. Masquée en mobile.
- * Le bloc natif des ventes croisées (« Avez-vous déjà la bonne ampoule ? »)
- * est masqué en CSS : la languette le remplace.
+ * Le bloc natif des ventes croisées a été retiré de la page Panier (éditeur,
+ * 25/11/2026) : la languette le remplace.
  *
  * Aucun prix ni remise n'est calculé ici : tout vient de WooCommerce.
  *
