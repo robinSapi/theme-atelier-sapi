@@ -5,13 +5,13 @@
  *   - pas de projet, ou pas de recommandation sur ce produit :
  *     « Je t'aide à choisir la bonne version » ;
  *   - projet + CHAQUE menu de variation sur la valeur recommandée :
- *     « Idéal pour ton bureau » (pastille pleine) ;
- *   - projet + une option s'en écarte : « Ma recommandation pour ton bureau »
- *     (pastille claire, classe .is-reco). Le clic rouvre le conseil, comme
- *     dans les deux autres états.
+ *     « Idéal pour ton bureau », fond blanc + coche verte (.is-ideal) ;
+ *   - projet + une option s'en écarte : « Ma recommandation pour ton bureau »,
+ *     fond sombre, sans coche, avec un petit bouton « Appliquer » (.is-reco)
+ *     qui remet la variante recommandée sans ouvrir la modale.
+ *   Le clic sur la pastille ouvre le conseil dans les trois états.
+ *   Les classes sont posées sur l'enveloppe [data-help-pill-wrap].
  *   « ton bureau » vient de SAPI_PROJECT.possessifs (repli : « ton projet »).
- *   Les valeurs recommandées portent aussi un point orange sur les pastilles
- *   d'options (classe .is-sapi-reco sur .variable-item), tant qu'un projet existe.
  *
  * C'est un message d'ÉTAT, pas d'action. Conséquence voulue par Robin le
  * 26/08 : la pill REVIENT si le visiteur s'éloigne puis retombe sur la version
@@ -92,6 +92,17 @@
       }));
     });
 
+    /* « Appliquer » : le MÊME événement que le bouton de la modale, donc la
+       même présélection (sapi-product-preselect.js), sans ouvrir la modale. */
+    var applyBtn = document.querySelector('[data-help-pill-apply]');
+    if (applyBtn) {
+      applyBtn.addEventListener('click', function () {
+        var answers = {};
+        try { answers = (window.sapiProject && window.sapiProject.get().answers) || {}; } catch (e) { /* swallow */ }
+        document.dispatchEvent(new CustomEvent('sapi:apply-product-selection', { detail: { answers: answers } }));
+      });
+    }
+
     var textEl = pill.querySelector('[data-help-pill-text]');
     var form = document.querySelector('form.variations_form');
     if (!textEl || !form) return;
@@ -155,32 +166,15 @@
       return menus.length > 0 && menus.every(function (s) { return s.name && reco[s.name]; });
     }
 
-    /* Point orange sur les pastilles d'options recommandées (plugin de pastilles :
-       ul.variable-items-wrapper[data-attribute_name] > li.variable-item[data-value]).
-       Markup absent ou différent : aucun point, rien d'autre ne change. */
-    function marquerRecommandees(actif) {
-      [].slice.call(form.querySelectorAll('.variable-item.is-sapi-reco')).forEach(function (li) { li.classList.remove('is-sapi-reco'); });
-      if (!actif) return;
-      var reco = recommandation();
-      Object.keys(reco).forEach(function (name) {
-        var val = String(reco[name]);
-        [].slice.call(form.querySelectorAll('.variable-items-wrapper')).forEach(function (ul) {
-          if (ul.getAttribute('data-attribute_name') !== name) return;
-          [].slice.call(ul.querySelectorAll('.variable-item')).forEach(function (li) {
-            if (li.getAttribute('data-value') === val) li.classList.add('is-sapi-reco');
-          });
-        });
-      });
-    }
-
     function rendre() {
       var avecProjet = projetExiste() && aUneReco();
       var ideal = avecProjet && cestLeMieux();
       var voulu = !avecProjet ? TEXTE_NORMAL
         : (ideal ? 'Idéal pour ' : 'Ma recommandation pour ') + possessifProjet();
-      pill.classList.toggle('is-ideal', avecProjet && ideal);
-      pill.classList.toggle('is-reco', avecProjet && !ideal);
-      marquerRecommandees(avecProjet);
+      var wrap = pill.closest('[data-help-pill-wrap]') || pill;
+      wrap.classList.toggle('is-ideal', avecProjet && ideal);
+      wrap.classList.toggle('is-reco', avecProjet && !ideal);
+      if (applyBtn) applyBtn.hidden = !(avecProjet && !ideal);
       if (voulu === texteActuel) return; // indispensable : found_variation arrive en double
       texteActuel = voulu;
       textEl.style.transition = 'opacity .18s ease';

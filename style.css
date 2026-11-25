@@ -28195,33 +28195,47 @@ body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
 }
 .modal__foot--recap { gap: 28px; flex-wrap: wrap; }
 
-/* Pastille de la fiche, état « Ma recommandation pour ton bureau » */
-.conseiller-pill-secondary.is-reco {
+/* Pastille de la fiche : deux états posés sur l'enveloppe (sapi-help-pill.js) */
+.conseiller-pill-wrap { display: inline-flex; align-items: center; gap: 6px; border-radius: 60px; transition: background .25s, box-shadow .25s; }
+.conseiller-pill-check { display: none; }
+/* Bonne variante : fond blanc + coche verte */
+.conseiller-pill-wrap.is-ideal .conseiller-pill-secondary {
   background: #fff;
-  box-shadow: inset 0 0 0 1.5px var(--color-wood-dark);
+  box-shadow: inset 0 0 0 1.5px var(--color-line), var(--shadow-card);
 }
-.conseiller-pill-secondary.is-reco [data-help-pill-text] { color: var(--color-wood-dark); }
-.conseiller-pill-secondary.is-reco::after {
-  content: '›';
+.conseiller-pill-wrap.is-ideal [data-help-pill-text] { color: var(--color-wood-dark); }
+.conseiller-pill-wrap.is-ideal .conseiller-pill-check {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
   margin-left: -4px;
-  font-size: 1.1rem;
-  color: var(--color-wood-dark);
-}
-.conseiller-pill-secondary.is-reco:hover { background: var(--color-wood-dark); }
-.conseiller-pill-secondary.is-reco:hover [data-help-pill-text],
-.conseiller-pill-secondary.is-reco:hover::after { color: #fff; }
-
-/* Point orange sur les options recommandées (pastilles du plugin) */
-.variable-item.is-sapi-reco { position: relative; }
-.variable-item.is-sapi-reco::after {
-  content: '';
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  width: 9px;
-  height: 9px;
   border-radius: 50%;
-  background: var(--color-orange, #E35B24);
-  box-shadow: 0 0 0 2px #fff;
-  pointer-events: none;
+  background: var(--color-green, #018501);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
 }
+/* Autre variante : fond sombre (style habituel) + petit bouton Appliquer collé */
+.conseiller-pill-wrap.is-reco {
+  padding-right: 6px;
+  background: var(--color-wood-dark);
+}
+.conseiller-pill-apply {
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-orange, #E35B24);
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.conseiller-pill-apply:hover { filter: brightness(1.08); }
+.conseiller-pill-apply[hidden] { display: none; }

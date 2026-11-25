@@ -20,6 +20,8 @@
   .mk-bar strong { margin-right: 12px; }
   .mk-bar button { padding: 6px 14px; border: 1px solid #fff5; border-radius: 999px; background: transparent; color: #fff; font-size: 12px; font-weight: 600; }
   .mk-bar .sp { flex: 1; }
+  .mk-bar .label { opacity: .7; margin-left: 10px; }
+  .mk-bar button.on { background: #fff; color: var(--dark); }
 
   /* ===== Fiche produit (extrait) ===== */
   .fiche { max-width: 1180px; margin: 0 auto; padding: 40px 32px 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
@@ -41,12 +43,18 @@
   .amp i { width: 16px; height: 16px; border-radius: 4px; background: var(--orange); display: grid; place-items: center; font-style: normal; font-size: .7rem; }
 
   /* La pastille, dans ses deux états */
-  .pill { margin: 22px 0 0; display: inline-flex; align-items: center; gap: 12px; padding: 6px 22px 6px 6px; border-radius: 999px; border: 0; background: #4A3F35; color: var(--cream); box-shadow: 0 8px 24px rgba(74, 63, 53, .18); text-align: left; cursor: default; transition: background .25s, box-shadow .25s; }
+  .pill-wrap { margin: 22px 0 0; display: inline-flex; align-items: center; gap: 6px; padding: 5px; border-radius: 999px; transition: background .25s, box-shadow .25s; }
+  .pill { display: inline-flex; align-items: center; gap: 12px; padding: 1px 16px 1px 1px; border: 0; border-radius: 999px; background: none; color: inherit; text-align: left; cursor: pointer; }
   .pill img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
   .pill .txt { font-family: var(--display); font-size: 1.75rem; line-height: 1; }
-  .pill .more { font-family: var(--body); font-size: 1rem; margin-left: 2px; opacity: .8; }
-  .pill.is-changed { background: #fff; color: #4A3F35; border: 1.5px solid #4A3F35; box-shadow: none; cursor: pointer; }
-  .pill.is-changed:hover { background: #4A3F35; color: var(--cream); }
+  .check { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: .8rem; font-weight: 800; margin-left: -4px; }
+  /* Bonne variante : fond blanc + coche */
+  .pill-wrap.is-ideal { background: #fff; color: #4A3F35; box-shadow: inset 0 0 0 1.5px var(--line), 0 8px 24px rgba(74, 63, 53, .10); }
+  .pill-wrap.is-ideal .check { background: var(--check, #018501); }
+  /* Autre variante : fond sombre, sans coche, + petit bouton Appliquer */
+  .pill-wrap.is-reco { background: #4A3F35; color: var(--cream); box-shadow: 0 8px 24px rgba(74, 63, 53, .18); }
+  .apply-mini { padding: 9px 16px; border: 0; border-radius: 999px; background: var(--orange); color: #fff; font-size: .75rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  .apply-mini:hover { filter: brightness(1.08); }
   .state { display: block; margin-top: 10px; font-size: .72rem; color: var(--gray); }
   .add { margin-top: 28px; width: 100%; padding: 18px; border: 0; border-radius: 12px; background: linear-gradient(180deg, #018501, #026B02); color: #fff; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 
@@ -92,6 +100,9 @@
 <div class="mk-bar">
   <strong>Maquette Conseiller</strong>
   <button data-open>Ouvrir l'écran de fin</button>
+  <span class="label">Coche :</span>
+  <button data-check="#018501" class="on">Verte</button>
+  <button data-check="#D2633A">Orange</button>
   <span class="sp"></span>
   <button data-reset>Réinitialiser</button>
 </div>
@@ -114,10 +125,10 @@
 <div class="notes">
   <strong>À essayer</strong>
   <ul>
-    <li>Réglage = recommandation : la pastille pleine « Idéal pour ton bureau » (non cliquable).</li>
-    <li>Changez l'essence ou la taille : elle devient « Ma recommandation pour ton bureau ›», cliquable, et rouvre l'écran de fin.</li>
-    <li>Écran de fin : le projet en une phrase discrète en haut, la recommandation en vedette dans la carte blanche, un seul bouton. « Appliquer » remet le réglage recommandé.</li>
-    <li>Les petits points orange sur les options marquent ce que Robin recommande (piste optionnelle).</li>
+    <li>Bonne variante : pastille blanche avec coche (verte ou orange, à choisir dans la barre), « Idéal pour ton bureau ».</li>
+    <li>Changez l'essence ou la taille : pastille sombre sans coche, « Ma recommandation pour ton bureau », avec le petit bouton « Appliquer ».</li>
+    <li>Clic sur le texte : ouvre le conseil. « Appliquer » : remet directement la variante recommandée.</li>
+    <li>Plus de points orange sur les options.</li>
   </ul>
 </div>
 
@@ -156,18 +167,19 @@ function render() {
   Object.keys(OPTS).forEach(function (g) {
     document.querySelector('[data-group="' + g + '"]').innerHTML = OPTS[g].map(function (o) {
       return '<button class="chip' + (cur[g] === o[0] ? ' on' : '') + '" data-g="' + g + '" data-v="' + o[0] + '">' + o[1] +
-        (RECO[g] === o[0] ? '<span class="reco" title="Recommandé par Robin"></span>' : '') + '</button>';
+        '</button>';
     }).join('');
   });
   document.getElementById('price').textContent = PRICES[cur.taille] + ',00 €';
   var ok = matches();
   document.getElementById('pill-zone').innerHTML =
-    '<button class="pill' + (ok ? '' : ' is-changed') + '"' + (ok ? ' tabindex="-1" aria-disabled="true"' : ' data-open') + '>' +
-      '<img src="' + AVATAR + '" alt="">' +
-      '<span class="txt">' + (ok ? 'Idéal pour ton bureau' : 'Ma recommandation pour ton bureau') + '</span>' +
-      (ok ? '' : '<span class="more">›</span>') +
-    '</button>' +
-    '<span class="state">' + (ok ? 'État 1 : le réglage correspond à la recommandation' : 'État 2 : une option a changé, la pastille rouvre le conseil') + '</span>';
+    '<div class="pill-wrap ' + (ok ? 'is-ideal' : 'is-reco') + '">' +
+      '<button class="pill" data-open><img src="' + AVATAR + '" alt="">' +
+        (ok ? '<span class="check">✓</span>' : '') +
+        '<span class="txt">' + (ok ? 'Idéal pour ton bureau' : 'Ma recommandation pour ton bureau') + '</span></button>' +
+      (ok ? '' : '<button class="apply-mini" data-apply-direct>Appliquer</button>') +
+    '</div>' +
+    '<span class="state">' + (ok ? 'Bonne variante : fond blanc + coche. Clic = revoir le conseil.' : 'Autre variante : fond sombre. Clic sur le texte = voir le conseil · « Appliquer » = remettre la variante recommandée directement.') + '</span>';
   var apply = document.querySelector('[data-apply]');
   apply.classList.toggle('is-done', ok);
   apply.textContent = ok ? '✓ Sélection appliquée' : '✓ Appliquer ma sélection';
@@ -176,6 +188,13 @@ function render() {
 document.addEventListener('click', function (e) {
   var c = e.target.closest('.chip');
   if (c) { cur[c.getAttribute('data-g')] = c.getAttribute('data-v'); render(); return; }
+  if (e.target.closest('[data-apply-direct]')) { cur = { essence: RECO.essence, taille: RECO.taille }; render(); return; }
+  var ck = e.target.closest('[data-check]');
+  if (ck) {
+    document.documentElement.style.setProperty('--check', ck.getAttribute('data-check'));
+    document.querySelectorAll('[data-check]').forEach(function (b) { b.classList.toggle('on', b === ck); });
+    return;
+  }
   if (e.target.closest('[data-open]')) { document.getElementById('veil').hidden = false; return; }
   if (e.target.closest('[data-close]') || e.target.id === 'veil') { document.getElementById('veil').hidden = true; return; }
   if (e.target.closest('[data-apply]')) {
