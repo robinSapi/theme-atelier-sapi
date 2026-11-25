@@ -3,12 +3,12 @@
  * Page panier (WooCommerce Blocks) : ampoule et suggestions.
  * Variante B de la maquette, validée par Robin le 15/10/2026.
  *
- * 1. LANGUETTE AMPOULE : sous chaque luminaire du panier, une languette beige
- *    accrochée à sa carte propose l'ampoule recommandée (sapi_ampoule_for).
- *    Elle n'a ni cadre blanc ni contrôles, pour qu'on voie qu'elle n'est pas
- *    au panier. Ajout en un clic via le store WooCommerce Blocks (le panier se
- *    met à jour sans recharger). La languette d'un luminaire disparaît dès
- *    qu'une de SES ampoules est au panier. Rendu par assets/sapi-cart-page.js.
+ * 1. AMPOULES (option A, 25/11/2026) : une ampoule reste une ligne de panier
+ *    ordinaire ; assets/sapi-cart-page.js la range sous son luminaire quand
+ *    un seul luminaire du panier l'utilise (sous-ligne avec − / + / Retirer),
+ *    la laisse en ligne normale avec « Pour Gaston et Olivia » quand elle est
+ *    partagée, et propose « Ampoule non incluse · + Ajouter » sinon. Même règle
+ *    que le volet (sapi_cart_amp_groups dans sapi-cart-suggestions.php).
  * 2. VITRINE « ÇA IRAIT BIEN AVEC… » : trois luminaires choisis comme dans le
  *    mini-panier. Rendue après le panier, puis déplacée en JS dans la mise en
  *    page du panier : sous la carte des articles en desktop (grille, la
@@ -46,6 +46,7 @@ function sapi_cart_page_amp_data() {
     $out[$key] = [
       'id'    => $amp->get_id(),
       'ids'   => $ids,
+      'has'   => function_exists('sapi_cart_has_ampoule_for') ? sapi_cart_has_ampoule_for($pid) : false,
       'names' => $names,
       'first' => html_entity_decode($parts[0], ENT_QUOTES, 'UTF-8'),
       'name'  => html_entity_decode(sapi_ampoule_short_name($amp), ENT_QUOTES, 'UTF-8'),

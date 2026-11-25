@@ -27357,6 +27357,179 @@ body.mescreations-immersion-on #mes-creations-catalogue { scroll-margin-top: 90p
   .sapi-amp-tab__long { display: none; }
 }
 
+/* ========================================
+   AMPOULES RANGÉES SOUS LEUR LUMINAIRE (option A, 25/11/2026)
+   Page panier : assets/sapi-cart-page.js · Volet : inc/sapi-cart-suggestions.php
+   L'ampoule reste une vraie ligne : ici, seul son emplacement change.
+   ======================================== */
+.sapi-cart-outer .wc-block-cart-items tr.wc-block-cart-items__row.sapi-amp-hidden { display: none !important; }
+
+.sapi-amp-sub,
+.sapi-amp-shared-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.75rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--color-gray, #717171);
+}
+.sapi-amp-sub { background: #EEF4EA; }
+.sapi-amp-sub.is-busy,
+.sapi-amp-shared-row.is-busy { opacity: 0.6; pointer-events: none; }
+.sapi-amp-sub__check {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-green, #018501);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.sapi-amp-sub__text { flex: 1 1 140px; margin: 0 !important; }
+.sapi-amp-sub__text strong { color: var(--color-green, #018501); font-weight: 700; }
+.sapi-amp-sub__qty {
+  display: inline-flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--color-gray-light, #e8e2d9);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.sapi-amp-sub__qty button {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: #fff;
+  color: var(--color-dark);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.sapi-amp-sub__qty span { min-width: 24px; text-align: center; font-weight: 600; font-size: 0.8rem; color: var(--color-dark); }
+.sapi-amp-sub__price { min-width: 60px; text-align: right; font-weight: 700; color: var(--color-dark); white-space: nowrap; }
+.sapi-amp-sub__remove,
+.sapi-amp-hint button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.sapi-amp-sub__remove { color: var(--color-gray, #717171); }
+.sapi-amp-hint { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--color-orange, #E35B24); }
+.sapi-amp-hint button { color: var(--color-orange, #E35B24); font-weight: 700; }
+.sapi-amp-shared { display: block; font-size: 0.78rem; color: var(--color-gray, #717171); }
+
+/* Page panier : lignes ajoutées (languette, sous-ligne, mention partagée) */
+.sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row[data-kind="shared"] > td { padding: 0 !important; }
+.sapi-amp-shared-row { padding: 0 0.9rem 0.6rem; }
+
+/* Volet : sous-ligne et mention sous l'article */
+.mini-cart-item:has(+ .sapi-amp-sub--mini) {
+  margin-bottom: 0;
+  position: relative;
+  z-index: 1;
+}
+.sapi-amp-sub--mini {
+  margin: 0 0.75rem 1rem;
+  padding: 0.5rem 0.7rem;
+  gap: 0.45rem 0.6rem;
+  font-size: 0.78rem;
+  border-radius: 0 0 10px 10px;
+}
+.sapi-amp-sub--mini .sapi-amp-sub__check { width: 18px; height: 18px; font-size: 0.62rem; }
+.sapi-amp-sub--mini .sapi-amp-sub__text { flex-basis: 100px; }
+.sapi-amp-sub--mini.mini-cart-qty-selector,
+.sapi-amp-sub--mini .mini-cart-qty-selector { margin: 0; }
+.sapi-amp-sub--mini .mini-cart-qty-btn { width: 26px; height: 26px; }
+.sapi-amp-sub--mini .sapi-amp-sub__price { min-width: 0; }
+.sapi-amp-sub--mini .sapi-amp-sub__price .woocommerce-Price-amount { font-weight: 700; }
+.mini-cart-item-remove.sapi-amp-sub__remove {
+  position: static;
+  padding: 0;
+  color: var(--color-gray, #717171);
+}
+.mini-cart-item .sapi-amp-shared,
+.mini-cart-item .sapi-amp-hint { margin: 0 0 6px; }
+
+/* ========================================
+   PAGE PANIER DESKTOP : LIGNES COMPACTES (25/11/2026, maquette panier-ampoule-rattachee)
+   Un seul cadre (la carte blanche), un filet entre les articles,
+   photo 132 px | nom, options, quantité | prix à droite.
+   À partir de 1000 px : en dessous, la colonne des articles est trop étroite.
+   ======================================== */
+@media (min-width: 1000px) {
+  .sapi-cart-outer .wc-block-components-main { padding: 0.5rem 1.75rem !important; }
+  .sapi-cart-outer .wc-block-components-sidebar { padding: 1.6rem 1.75rem !important; }
+  .sapi-cart-outer .wc-block-cart-items { margin: 0 !important; }
+
+  .sapi-cart-outer .wc-block-cart-items tr.wc-block-cart-items__row {
+    display: grid !important;
+    grid-template-columns: 132px minmax(0, 1fr) auto !important;
+    grid-template-areas: none !important;
+    column-gap: 24px !important;
+    align-items: center !important;
+    padding: 1.35rem 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-top: 1px solid var(--color-gray-light, #e8e2d9) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+  .sapi-cart-outer .wc-block-cart-items tbody > tr.wc-block-cart-items__row:first-child { border-top: 0 !important; }
+  .sapi-cart-outer .wc-block-cart-items tr.wc-block-cart-items__row > td {
+    display: block !important;
+    width: auto !important;
+    padding: 0 !important;
+    grid-row: 1 !important;
+  }
+  .sapi-cart-outer .wc-block-cart-items .wc-block-cart-item__image { grid-column: 1 !important; }
+  .sapi-cart-outer .wc-block-cart-items .wc-block-cart-item__product { grid-column: 2 !important; }
+  .sapi-cart-outer .wc-block-cart-items .wc-block-cart-item__total { grid-column: 3 !important; text-align: right !important; }
+  .sapi-cart-outer .wc-block-cart-item__image img,
+  .sapi-cart-outer .wc-block-cart-items .wc-block-components-product-image img {
+    width: 132px !important;
+    height: 132px !important;
+    border-radius: 10px !important;
+  }
+  .sapi-cart-outer .wc-block-cart-items .wc-block-components-product-name { font-size: 1.1rem !important; }
+
+  /* Options sur deux lignes au plus, en petit */
+  .sapi-cart-outer .wc-block-cart-items .wc-block-components-product-details {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 0.1rem 1rem !important;
+    margin: 0.35rem 0 0.7rem !important;
+  }
+  .sapi-cart-outer .wc-block-cart-items .wc-block-components-product-details__name,
+  .sapi-cart-outer .wc-block-cart-items .wc-block-components-product-details__value { font-size: 0.82rem !important; }
+  .sapi-cart-outer .wc-block-cart-items .wc-block-components-product-details__name { font-weight: 500 !important; color: var(--color-gray, #717171) !important; }
+
+  /* Prix à droite, plus présent */
+  .sapi-cart-outer .wc-block-cart-item__total .wc-block-components-product-price {
+    font-size: 1.2rem !important;
+    font-weight: 800 !important;
+    color: var(--color-dark) !important;
+  }
+
+  /* Lignes ajoutées : alignées sous la colonne de texte, sans cadre */
+  .sapi-cart-outer .wc-block-cart-items tr.wc-block-cart-items__row:has(+ tr.sapi-amp-row) { background: transparent !important; }
+  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row { margin: -0.55rem 0 1.1rem 156px !important; }
+  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row .sapi-amp-tab { border-radius: 10px; }
+  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row .sapi-amp-tab::before { display: none; }
+  .sapi-cart-outer .wc-block-cart-items tr.sapi-amp-row[data-kind="shared"] { margin-top: -1rem !important; }
+  .sapi-amp-shared-row { padding: 0 0 0.4rem; }
+}
+
 /* Vitrine : déplacée en JS dans .wc-block-components-sidebar-layout.
    Cachée tant qu'elle n'est pas à sa place, pour ne pas la voir sauter. */
 .sapi-cart-page-suggest:not(.is-placed) { display: none; }

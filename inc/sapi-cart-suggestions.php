@@ -264,14 +264,22 @@ add_action('wp_enqueue_scripts', function () {
 });
 
 /* ========================================================================
- * VOLET PANIER (25/11/2026)
- * 1. Languette ampoule sous chaque luminaire, comme sur la page panier.
- *    Masquée pour un luminaire dès qu'une de SES ampoules est au panier.
- *    Bouton « + Ajouter » : assets/sapi-cart-suggestions.js (ajax
- *    sapi_add_to_cart, même quantité que le luminaire).
- * 2. Bandeau de suggestions sous les articles, sous 1100 px (là où la
- *    vitrine latérale n'a pas la place) : mêmes luminaires que la vitrine.
- * Les deux vivent dans .mini-cart-body : le fragment AJAX les met à jour.
+ * VOLET PANIER : AMPOULES RANGÉES SOUS LEUR LUMINAIRE (25/11/2026, option A)
+ *
+ * Une ampoule reste TOUJOURS une ligne de panier WooCommerce ordinaire (prix,
+ * quantité, stock, commande). Seul son emplacement à l'affichage change :
+ *  - si UN SEUL luminaire du panier l'a parmi ses ampoules (ventes croisées
+ *    « accessoires » nommées « ampoule »), sa ligne s'affiche sous lui en
+ *    sous-ligne, avec ses propres − / + et Retirer ;
+ *  - si plusieurs luminaires la partagent, elle reste une ligne normale, avec
+ *    « Pour Gaston et Olivia » ;
+ *  - un luminaire sans ampoule compatible au panier garde la languette
+ *    « Ampoule non incluse » avec « + Ajouter ».
+ * Rien n'est synchronisé automatiquement : s'il manque des ampoules, un bouton
+ * « + n » le propose. Les boutons − / + / Retirer réutilisent ceux du volet
+ * (assets/menu.js) ; « + Ajouter » et « + n » : assets/sapi-cart-suggestions.js.
+ * Une ampoule n'est masquée de la liste que si sa sous-ligne est affichée.
+ * Le bandeau de suggestions vit aussi dans .mini-cart-body (fragment AJAX).
  * ======================================================================== */
 
 /** Une des ampoules compatibles avec ce luminaire est-elle au panier ? */
@@ -285,7 +293,106 @@ function sapi_cart_has_ampoule_for($product_id) {
   return false;
 }
 
-/** Languette ampoule sous une ligne du volet. */
+/**
+ * Répartition des ampoules du panier, calculée une fois par requête :
+ *  attached[lum_key] = amp_key   ampoule rangée sous ce luminaire
+ *  hidden[amp_key]   = true      ligne d'ampoule affichée en sous-ligne
+ *  shared[amp_key]   = [lum_key] ampoule partagée (ligne normale)
+ *  covered[lum_key]  = amp_key   luminaire servi par une ampoule partagée
+ *  need[amp_key]     = n         quantité de luminaires concernés
+ */
+function sapi_cart_amp_groups() {
+  $g = ['attached' => [], 'hidden' => [], 'shared' => [], 'covered' => [], 'need' => []];
+  if (!function_exists('WC') || !WC()->cart || !function_exists('sapi_ampoules_for') || !function_exists('sapi_suggest_type')) return $g;
+  $cart = WC()->cart->get_cart();
+  $lum_ids = [];
+  foreach ($cart as $key => $item) {
+    $pid = (int) $item['product_id'];
+    if (!sapi_suggest_type($pid)) continue;
+    $ids = [];
+    foreach (sapi_ampoules_for($pid) as $a) $ids[] = $a->get_id();
+    if ($ids) $lum_ids[$key] = $ids;
+  }
+  foreach ($cart as $key => $item) {
+    $pid = (int) $item['product_id'];
+    if (isset($lum_ids[$key])) continue;
+    $users = [];
+    foreach ($lum_ids as $lk => $ids) if (in_array($pid, $ids, true)) $users[] = $lk;
+    if (!$users) continue;
+    $need = 0;
+    foreach ($users as $lk) $need += (int) $cart[$lk]['quantity'];
+    $g['need'][$key] = $need;
+    if (count($users) === 1 && !isset($g['attached'][$users[0]])) {
+      $g['attached'][$users[0]] = $key;
+      $g['hidden'][$key] = true;
+    } elseif (count($users) > 1) {
+      $g['shared'][$key] = $users;
+      foreach ($users as $lk) $g['covered'][$lk] = $key;
+    } else {
+      // 2e ampoule compatible avec un luminaire déjà servi : ligne normale
+      foreach ($users as $lk) $g['covered'][$lk] = $key;
+    }
+  }
+  return $g;
+}
+
+/** Prénom d'un luminaire du panier (« Gaston »). */
+function sapi_cart_line_first_name($cart_item) {
+  $p = wc_get_product((int) $cart_item['product_id']);
+  $parts = $p ? preg_split('/\s+/', trim($p->get_name())) : [''];
+  return $parts[0];
+}
+
+/** Bouton « + n » quand il manque des ampoules. */
+function sapi_amp_missing_html($amp_item, $need, $label) {
+  $have = (int) $amp_item['quantity'];
+  $miss = (int) $need - $have;
+  if ($miss <= 0) return '';
+  return '<span class="sapi-amp-hint">' . esc_html($label) . ' <button type="button" class="sapi-mc-amp__add" data-product-id="' . esc_attr($amp_item['product_id']) . '" data-qty="' . esc_attr($miss) . '">+ ' . esc_html($miss) . '</button></span>';
+}
+
+/** Ce qui s'affiche sous une ligne de luminaire du volet. */
+function sapi_mini_cart_under_luminaire($cart_item_key, $cart_item, $g) {
+  $cart = WC()->cart->get_cart();
+  if (isset($g['attached'][$cart_item_key])) {
+    $ak = $g['attached'][$cart_item_key];
+    $a = $cart[$ak];
+    $ap = $a['data'];
+    $lq = (int) $cart_item['quantity'];
+    $label = sprintf(_n('%1$d luminaire, %2$d ampoule', '%1$d luminaires, %2$d ampoules', $lq, 'theme-sapi-maison'), $lq, (int) $a['quantity']);
+    ?>
+    <div class="sapi-amp-sub sapi-amp-sub--mini">
+      <span class="sapi-amp-sub__check" aria-hidden="true">✓</span>
+      <p class="sapi-amp-sub__text"><strong><?php echo esc_html($ap->get_name()); ?></strong><?php echo sapi_amp_missing_html($a, $g['need'][$ak], $label); ?></p>
+      <div class="mini-cart-qty-selector sapi-amp-sub__qty" data-cart-item-key="<?php echo esc_attr($ak); ?>">
+        <button class="mini-cart-qty-btn mini-cart-qty-minus" aria-label="<?php esc_attr_e('Diminuer la quantité', 'theme-sapi-maison'); ?>">−</button>
+        <span class="mini-cart-qty-value"><?php echo esc_html($a['quantity']); ?></span>
+        <button class="mini-cart-qty-btn mini-cart-qty-plus" aria-label="<?php esc_attr_e('Augmenter la quantité', 'theme-sapi-maison'); ?>">+</button>
+      </div>
+      <span class="sapi-amp-sub__price"><?php echo WC()->cart->get_product_price($ap); // prix unitaire, comme les lignes du volet ?></span>
+      <button class="mini-cart-item-remove sapi-amp-sub__remove" data-cart-item-key="<?php echo esc_attr($ak); ?>"><?php esc_html_e('Retirer', 'theme-sapi-maison'); ?></button>
+    </div>
+    <?php
+    return;
+  }
+  if (isset($g['covered'][$cart_item_key])) return; // ampoule partagée, sur sa propre ligne
+  sapi_mini_cart_amp_tab($cart_item);
+}
+
+/** Sous le nom d'une ampoule partagée : pour qui, et s'il en manque. */
+function sapi_mini_cart_shared_note($cart_item_key, $g) {
+  if (!isset($g['shared'][$cart_item_key])) return;
+  $cart = WC()->cart->get_cart();
+  $names = [];
+  foreach ($g['shared'][$cart_item_key] as $lk) $names[] = sapi_cart_line_first_name($cart[$lk]);
+  $names = array_values(array_unique($names)); // deux tailles du même modèle : « Pour Gaston »
+  $need = $g['need'][$cart_item_key];
+  $label = sprintf(__('%1$d luminaires, %2$d ampoules', 'theme-sapi-maison'), $need, (int) $cart[$cart_item_key]['quantity']);
+  echo '<span class="sapi-amp-shared">' . esc_html(sprintf(__('Pour %s', 'theme-sapi-maison'), wp_sprintf('%l', $names))) . '</span>';
+  echo sapi_amp_missing_html($cart[$cart_item_key], $need, $label);
+}
+
+/** Languette « Ampoule non incluse » sous une ligne du volet. */
 function sapi_mini_cart_amp_tab($cart_item) {
   if (!function_exists('sapi_ampoule_for') || !function_exists('sapi_suggest_type')) return;
   $pid = (int) $cart_item['product_id'];

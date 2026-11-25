@@ -2137,9 +2137,12 @@ function sapi_render_mini_cart_contents() {
     return;
   }
   ?>
+  <?php $sapi_amp_g = function_exists('sapi_cart_amp_groups') ? sapi_cart_amp_groups() : ['hidden' => []]; ?>
   <div class="mini-cart-body">
     <div class="mini-cart-items">
       <?php foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) :
+        // Ampoule rangée sous son luminaire (inc/sapi-cart-suggestions.php)
+        if (isset($sapi_amp_g['hidden'][$cart_item_key])) continue;
         $product = $cart_item['data'];
         $product_id = $cart_item['product_id'];
         $quantity = $cart_item['quantity'];
@@ -2205,6 +2208,7 @@ function sapi_render_mini_cart_contents() {
                   </div>
               <?php endif; endforeach; endif; endif; ?>
             </div>
+            <?php if (function_exists('sapi_mini_cart_shared_note')) sapi_mini_cart_shared_note($cart_item_key, $sapi_amp_g); ?>
             <div class="mini-cart-item-bottom">
               <span class="mini-cart-item-price">
                 <?php echo WC()->cart->get_product_price($product); ?>
@@ -2223,7 +2227,7 @@ function sapi_render_mini_cart_contents() {
             </svg>
           </button>
         </div>
-        <?php if (function_exists('sapi_mini_cart_amp_tab')) sapi_mini_cart_amp_tab($cart_item); ?>
+        <?php if (function_exists('sapi_mini_cart_under_luminaire')) sapi_mini_cart_under_luminaire($cart_item_key, $cart_item, $sapi_amp_g); ?>
       <?php endforeach; ?>
     </div>
     <?php if (function_exists('sapi_render_mini_cart_suggest')) sapi_render_mini_cart_suggest(); ?>
