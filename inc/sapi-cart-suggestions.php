@@ -256,7 +256,7 @@ add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
 add_action('wp_enqueue_scripts', function () {
   $path = get_template_directory() . '/assets/sapi-cart-suggestions.js';
   if (!file_exists($path)) return;
-  wp_enqueue_script('sapi-cart-suggestions', get_template_directory_uri() . '/assets/sapi-cart-suggestions.js', ['jquery'], filemtime($path), true);
+  wp_enqueue_script('sapi-cart-suggestions', get_template_directory_uri() . '/assets/sapi-cart-suggestions.js', ['jquery', 'sapi-amp-picker'], filemtime($path), true);
   wp_localize_script('sapi-cart-suggestions', 'sapiSuggest', [
     'addUrl' => home_url('/?wc-ajax=sapi_add_to_cart'),
     'nonce'  => wp_create_nonce('sapi-add-to-cart'),
@@ -302,7 +302,7 @@ function sapi_cart_has_ampoule_for($product_id) {
  *  need[amp_key]     = n         quantité de luminaires concernés
  */
 function sapi_cart_amp_groups() {
-  $g = ['attached' => [], 'hidden' => [], 'shared' => [], 'covered' => [], 'need' => []];
+  $g = ['attached' => [], 'hidden' => [], 'shared' => [], 'covered' => [], 'need' => [], 'missing' => []];
   if (!function_exists('WC') || !WC()->cart || !function_exists('sapi_ampoules_for') || !function_exists('sapi_suggest_type')) return $g;
   $cart = WC()->cart->get_cart();
   $lum_ids = [];
@@ -310,28 +310,56 @@ function sapi_cart_amp_groups() {
     $pid = (int) $item['product_id'];
     if (!sapi_suggest_type($pid)) continue;
     $ids = [];
-    foreach (sapi_ampoules_for($pid) as $a) $ids[] = $a->get_id();
+    // Ampoules de LA VARIATION au panier (sa liste si elle en a une, sinon celle du produit)
+    $vid = !empty($item['variation_id']) ? (int) $item['variation_id'] : $pid;
+    foreach (sapi_ampoules_for($vid) as $a) $ids[] = $a->get_id();
     if ($ids) $lum_ids[$key] = $ids;
   }
+  /* Chaque ampoule du panier et les luminaires qui l'acceptent. */
+  $users = [];
   foreach ($cart as $key => $item) {
-    $pid = (int) $item['product_id'];
     if (isset($lum_ids[$key])) continue;
-    $users = [];
-    foreach ($lum_ids as $lk => $ids) if (in_array($pid, $ids, true)) $users[] = $lk;
-    if (!$users) continue;
-    $need = 0;
-    foreach ($users as $lk) $need += (int) $cart[$lk]['quantity'];
-    $g['need'][$key] = $need;
-    if (count($users) === 1 && !isset($g['attached'][$users[0]])) {
-      $g['attached'][$users[0]] = $key;
-      $g['hidden'][$key] = true;
-    } elseif (count($users) > 1) {
-      $g['shared'][$key] = $users;
-      foreach ($users as $lk) $g['covered'][$lk] = $key;
-    } else {
-      // 2e ampoule compatible avec un luminaire déjà servi : ligne normale
-      foreach ($users as $lk) $g['covered'][$lk] = $key;
+    $pid = (int) $item['product_id'];
+    $u = [];
+    foreach ($lum_ids as $lk => $ids) if (in_array($pid, $ids, true)) $u[] = $lk;
+    if ($u) $users[$key] = $u;
+  }
+  /* Rattachement par élimination : une ampoule se range sous un luminaire quand
+     il est le SEUL encore libre à l'accepter. On recommence tant que ça avance
+     (ranger la Globe sous Olivia peut laisser Gaston seul pour la Poire). */
+  $done = [];
+  do {
+    $progress = false;
+    foreach ($users as $ak => $u) {
+      if (isset($done[$ak])) continue;
+      $free = array_values(array_filter($u, function ($lk) use ($g) { return !isset($g['attached'][$lk]); }));
+      if (count($free) === 1) {
+        $g['attached'][$free[0]] = $ak;
+        $g['hidden'][$ak] = true;
+        $g['need'][$ak] = (int) $cart[$free[0]]['quantity'];
+        $done[$ak] = true;
+        $progress = true;
+      } elseif (!$free) {
+        $done[$ak] = true; // ampoule en plus d'un luminaire déjà servi : ligne normale, sans mention
+      }
     }
+  } while ($progress);
+  /* Le reste est partagé : ligne normale « Pour Gaston et Olivia ». Le manque se
+     calcule sur l'ensemble (luminaires libres concernés contre ampoules
+     partagées) et ne s'affiche qu'une fois, sur la première ligne partagée. */
+  $lums = []; $have = 0; $firstShared = null;
+  foreach ($users as $ak => $u) {
+    if (isset($done[$ak])) continue;
+    $free = array_values(array_filter($u, function ($lk) use ($g) { return !isset($g['attached'][$lk]); }));
+    $g['shared'][$ak] = $free;
+    foreach ($free as $lk) { $g['covered'][$lk] = $ak; $lums[$lk] = true; }
+    $have += (int) $cart[$ak]['quantity'];
+    if ($firstShared === null) $firstShared = $ak;
+  }
+  if ($firstShared !== null) {
+    $total = 0;
+    foreach (array_keys($lums) as $lk) $total += (int) $cart[$lk]['quantity'];
+    $g['missing'][$firstShared] = ['miss' => $total - $have, 'total' => $total];
   }
   return $g;
 }
@@ -344,10 +372,10 @@ function sapi_cart_line_first_name($cart_item) {
 }
 
 /** « Il manque 1 ampoule pour vos 2 luminaires. » + bouton « Ajouter 1 ampoule ». */
-function sapi_amp_missing_html($amp_item, $need) {
-  $miss = (int) $need - (int) $amp_item['quantity'];
+function sapi_amp_missing_html($amp_item, $miss, $total) {
+  $miss = (int) $miss;
   if ($miss <= 0) return '';
-  $msg = sprintf(_n('Il manque %1$d ampoule pour vos %2$d luminaires.', 'Il manque %1$d ampoules pour vos %2$d luminaires.', $miss, 'theme-sapi-maison'), $miss, (int) $need);
+  $msg = sprintf(_n('Il manque %1$d ampoule pour vos %2$d luminaires.', 'Il manque %1$d ampoules pour vos %2$d luminaires.', $miss, 'theme-sapi-maison'), $miss, (int) $total);
   $btn = sprintf(_n('Ajouter %d ampoule', 'Ajouter %d ampoules', $miss, 'theme-sapi-maison'), $miss);
   return '<span class="sapi-amp-hint">' . esc_html($msg) . ' <button type="button" class="sapi-mc-amp__add" data-product-id="' . esc_attr($amp_item['product_id']) . '" data-qty="' . esc_attr($miss) . '">' . esc_html($btn) . '</button></span>';
 }
@@ -362,7 +390,7 @@ function sapi_mini_cart_under_luminaire($cart_item_key, $cart_item, $g) {
     ?>
     <div class="sapi-amp-sub sapi-amp-sub--mini">
       <span class="sapi-amp-sub__check" aria-hidden="true">✓</span>
-      <p class="sapi-amp-sub__text"><strong><?php echo esc_html($ap->get_name()); ?></strong><?php echo sapi_amp_missing_html($a, $g['need'][$ak]); ?></p>
+      <p class="sapi-amp-sub__text"><strong><?php echo esc_html($ap->get_name()); ?></strong><?php echo sapi_amp_missing_html($a, $g['need'][$ak] - (int) $a['quantity'], $g['need'][$ak]); ?></p>
       <div class="mini-cart-qty-selector sapi-amp-sub__qty" data-cart-item-key="<?php echo esc_attr($ak); ?>">
         <button class="mini-cart-qty-btn mini-cart-qty-minus" aria-label="<?php esc_attr_e('Diminuer la quantité', 'theme-sapi-maison'); ?>">−</button>
         <span class="mini-cart-qty-value"><?php echo esc_html($a['quantity']); ?></span>
@@ -385,9 +413,11 @@ function sapi_mini_cart_shared_note($cart_item_key, $g) {
   $names = [];
   foreach ($g['shared'][$cart_item_key] as $lk) $names[] = sapi_cart_line_first_name($cart[$lk]);
   $names = array_values(array_unique($names)); // deux tailles du même modèle : « Pour Gaston »
-  $need = $g['need'][$cart_item_key];
   echo '<span class="sapi-amp-shared">' . esc_html(sprintf(__('Pour %s', 'theme-sapi-maison'), wp_sprintf('%l', $names))) . '</span>';
-  echo sapi_amp_missing_html($cart[$cart_item_key], $need);
+  if (isset($g['missing'][$cart_item_key])) {
+    $m = $g['missing'][$cart_item_key];
+    echo sapi_amp_missing_html($cart[$cart_item_key], $m['miss'], $m['total']);
+  }
 }
 
 /** Languette « Ampoule non incluse » sous une ligne du volet. */
@@ -395,14 +425,18 @@ function sapi_mini_cart_amp_tab($cart_item) {
   if (!function_exists('sapi_ampoule_for') || !function_exists('sapi_suggest_type')) return;
   $pid = (int) $cart_item['product_id'];
   if (!sapi_suggest_type($pid)) return;
-  $amp = sapi_ampoule_for($pid);
-  if (!$amp || sapi_cart_has_ampoule_for($pid)) return;
+  $vid = !empty($cart_item['variation_id']) ? (int) $cart_item['variation_id'] : $pid;
+  $amps = sapi_ampoules_for($vid);
+  $amp = $amps ? $amps[0] : null;
+  if (!$amp || sapi_cart_has_ampoule_for($vid)) return;
+  $ids = array_map(function ($a) { return $a->get_id(); }, $amps);
   $img = $amp->get_image_id() ? wp_get_attachment_image_url($amp->get_image_id(), 'thumbnail') : '';
   $price = wp_strip_all_tags(wc_price(wc_get_price_to_display($amp)));
   ?>
   <div class="sapi-amp-tab sapi-amp-tab--mini">
     <?php if ($img) : ?><img class="sapi-amp-tab__img" src="<?php echo esc_url($img); ?>" alt="" width="40" height="40" loading="lazy"><?php endif; ?>
-    <p class="sapi-amp-tab__text"><strong><?php esc_html_e('Ampoule non incluse.', 'theme-sapi-maison'); ?></strong> <?php echo esc_html(sapi_ampoule_short_name($amp) . ', ' . html_entity_decode($price, ENT_QUOTES, 'UTF-8')); ?></p>
+    <p class="sapi-amp-tab__text"><strong><?php esc_html_e('Ampoule non incluse.', 'theme-sapi-maison'); ?></strong> <?php echo esc_html(sapi_ampoule_short_name($amp) . ', ' . html_entity_decode($price, ENT_QUOTES, 'UTF-8')); ?>
+      <?php if (count($ids) > 1) : ?><br><button type="button" class="sapi-amp-compare" data-ids="<?php echo esc_attr(implode(',', $ids)); ?>" data-first="<?php echo esc_attr(sapi_cart_line_first_name($cart_item)); ?>" data-qty="<?php echo esc_attr(max(1, (int) $cart_item['quantity'])); ?>"><?php echo esc_html(sprintf(__('Comparer les %d ampoules', 'theme-sapi-maison'), count($ids))); ?></button><?php endif; ?></p>
     <button type="button" class="sapi-amp-tab__add sapi-mc-amp__add" data-product-id="<?php echo esc_attr($amp->get_id()); ?>" data-qty="<?php echo esc_attr(max(1, (int) $cart_item['quantity'])); ?>"><?php esc_html_e('+ Ajouter', 'theme-sapi-maison'); ?></button>
   </div>
   <?php

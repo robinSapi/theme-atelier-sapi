@@ -31,14 +31,16 @@ function sapi_cart_page_amp_data() {
   foreach (WC()->cart->get_cart() as $key => $item) {
     $pid = (int) $item['product_id'];
     if (!sapi_suggest_type($pid)) continue;
-    $amp = sapi_ampoule_for($pid);
+    // Ampoules de LA VARIATION au panier (sa liste, sinon celle du produit)
+    $vid = !empty($item['variation_id']) ? (int) $item['variation_id'] : $pid;
+    $amp = sapi_ampoule_for($vid);
     if (!$amp) continue;
     $lum = wc_get_product($pid);
     $parts = preg_split('/\s+/', trim($lum ? $lum->get_name() : ''));
     // Ampoules compatibles : ids (store du panier Blocks) et noms décodés (repli)
     $ids = [];
     $names = [];
-    $list = function_exists('sapi_ampoules_for') ? sapi_ampoules_for($pid) : [$amp];
+    $list = function_exists('sapi_ampoules_for') ? sapi_ampoules_for($vid) : [$amp];
     foreach ($list as $a) {
       $ids[] = $a->get_id();
       $names[] = html_entity_decode($a->get_name(), ENT_QUOTES, 'UTF-8');
@@ -46,7 +48,7 @@ function sapi_cart_page_amp_data() {
     $out[$key] = [
       'id'    => $amp->get_id(),
       'ids'   => $ids,
-      'has'   => function_exists('sapi_cart_has_ampoule_for') ? sapi_cart_has_ampoule_for($pid) : false,
+      'has'   => function_exists('sapi_cart_has_ampoule_for') ? sapi_cart_has_ampoule_for($vid) : false,
       'names' => $names,
       'first' => html_entity_decode($parts[0], ENT_QUOTES, 'UTF-8'),
       'name'  => html_entity_decode(sapi_ampoule_short_name($amp), ENT_QUOTES, 'UTF-8'),
@@ -61,7 +63,7 @@ add_action('wp_enqueue_scripts', function () {
   if (!function_exists('is_cart') || !is_cart()) return;
   $path = get_template_directory() . '/assets/sapi-cart-page.js';
   if (!file_exists($path)) return;
-  wp_enqueue_script('sapi-cart-page', get_template_directory_uri() . '/assets/sapi-cart-page.js', [], filemtime($path), true);
+  wp_enqueue_script('sapi-cart-page', get_template_directory_uri() . '/assets/sapi-cart-page.js', ['sapi-amp-picker'], filemtime($path), true);
   wp_localize_script('sapi-cart-page', 'sapiCartPage', [
     'amp'     => (object) sapi_cart_page_amp_data(),
     'ajaxUrl' => class_exists('WC_AJAX') ? WC_AJAX::get_endpoint('add_to_cart') : '',

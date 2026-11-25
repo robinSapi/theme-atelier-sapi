@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette : sélecteur d'ampoules</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Square+Peg&display=swap" rel="stylesheet">
+<style>
+  :root { --wood:#937D68; --dark:#323232; --gray:#717171; --line:#E8E2D9; --green:#018501; --orange:#D2633A; --tab:#F3EEE6; --page:#FAF9F7; --body:'Montserrat',sans-serif; --display:'Square Peg',cursive; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); font-family: var(--body); color: var(--dark); }
+  button { font-family: inherit; cursor: pointer; }
+  .note { max-width: 820px; margin: 18px auto 0; padding: 10px 14px; border-radius: 10px; background: #FFF6E5; font-size: .8rem; color: #7a5a1e; }
+  .wrap { max-width: 820px; margin: 18px auto 60px; padding: 0 20px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 4px 26px; }
+  .row { display: grid; grid-template-columns: 150px 1fr auto; gap: 22px; align-items: center; padding: 22px 0; }
+  .row img { width: 150px; height: 150px; object-fit: cover; border-radius: 12px; }
+  .fn { font-weight: 800; text-transform: uppercase; font-size: .82em; }
+  .rn { font-family: var(--display); font-size: 1.7em; line-height: .9; }
+  .opts { color: var(--gray); font-size: .84rem; margin: 6px 0 0; }
+  .price { font-weight: 800; font-size: 1.2rem; }
+
+  .tab { display: flex; align-items: center; gap: 12px; margin: -8px 0 20px 172px; padding: 10px 14px; border-radius: 10px; background: var(--tab); font-size: .85rem; color: var(--gray); }
+  .tab img { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; mix-blend-mode: multiply; }
+  .tab p { flex: 1; margin: 0; line-height: 1.45; }
+  .tab p strong { color: var(--dark); }
+  .tab .cmp { padding: 0; border: 0; background: none; color: var(--wood); font-size: .8rem; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+  .add { padding: 6px 14px; border: 1.5px solid var(--green); border-radius: 999px; background: transparent; color: var(--green); font-weight: 700; font-size: .8rem; white-space: nowrap; }
+  .add:hover { background: var(--green); color: #fff; }
+  .tab.is-added { background: #EEF4EA; }
+  .tab.is-added p strong { color: var(--green); }
+
+  /* Panneau de comparaison */
+  .veil { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(30,26,22,.5); backdrop-filter: blur(5px); }
+  .veil[hidden] { display: none; }
+  .panel { width: min(860px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; background: #fff; border-radius: 20px; padding: 26px 28px 24px; box-shadow: 0 30px 80px rgba(0,0,0,.3); }
+  .phead { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .phead img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .phead h2 { margin: 0; flex: 1; font-family: var(--display); font-weight: 400; font-size: 2rem; line-height: 1; }
+  .phead button { border: 0; background: none; font-size: 1.6rem; color: var(--gray); }
+  .psub { margin: 0 0 18px 52px; color: var(--gray); font-size: .85rem; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  .amp { position: relative; display: flex; flex-direction: column; border: 1.5px solid var(--line); border-radius: 16px; overflow: hidden; background: #fff; transition: border-color .2s, box-shadow .2s; }
+  .amp.is-reco { border-color: var(--wood); }
+  .amp.is-picked { border-color: var(--green); box-shadow: 0 0 0 3px rgba(1,133,1,.12); }
+  .badge { position: absolute; top: 10px; left: 10px; z-index: 1; padding: 4px 10px; border-radius: 999px; background: #4A3F35; color: #fff; font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
+  .photos { position: relative; aspect-ratio: 4 / 3; background: var(--tab); }
+  .photos img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .3s; }
+  .photos .pk { opacity: 0; }
+  .amp:hover .photos .pk { opacity: 1; }
+  .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .name { display: flex; justify-content: space-between; align-items: baseline; }
+  .name b { font-size: 1.05rem; }
+  .name span { font-weight: 800; }
+  .why { margin: 0; font-size: .82rem; line-height: 1.5; color: #5d5a56; font-style: italic; }
+  .specs { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; font-size: .78rem; }
+  .specs li { display: flex; gap: 8px; }
+  .specs li span:first-child { width: 18px; text-align: center; }
+  .pick { margin-top: auto; padding: 10px; border: 1.5px solid var(--dark); border-radius: 999px; background: #fff; color: var(--dark); font-weight: 700; font-size: .82rem; }
+  .amp.is-picked .pick { background: var(--green); border-color: var(--green); color: #fff; }
+  .pfoot { margin: 16px 0 0; font-size: .75rem; color: var(--gray); text-align: center; }
+
+  @media (max-width: 720px) {
+    .row { grid-template-columns: 90px 1fr; } .row img { width: 90px; height: 90px; } .row .price { grid-column: 2; }
+    .tab { margin-left: 0; flex-wrap: wrap; }
+    .veil { place-items: end center; padding: 0; }
+    .panel { border-radius: 20px 20px 0 0; max-height: 88vh; padding: 20px 16px; }
+    .grid { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 82%; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+    .amp { scroll-snap-align: start; }
+    .psub { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<p class="note">Maquette : les caractéristiques des ampoules sont des <b>exemples à remplacer</b> par les vraies (elles viendront des fiches ampoules dans WooCommerce). Survolez une carte pour voir la photo produit.</p>
+
+<div class="wrap">
+  <div class="card">
+    <div class="row">
+      <img src="https://test.atelier-sapi.fr/wp-content/uploads/2026/05/img-8681-fin--681x1024.jpg" alt="">
+      <div><div><span class="fn">Léon</span> <span class="rn">L'accordéon</span></div><p class="opts">Okoumé · 33 × 40 cm · Câble et pavillon noirs</p></div>
+      <div class="price">130,00 €</div>
+    </div>
+    <div id="tab"></div>
+  </div>
+</div>
+
+<div class="veil" id="veil" hidden>
+  <div class="panel" role="dialog" aria-label="Comparer les ampoules">
+    <div class="phead">
+      <img src="https://test.atelier-sapi.fr/wp-content/uploads/2026/03/Robin-face-avec-Alice-lhelice-150x150.jpg" alt="">
+      <h2>Quelle ampoule pour Léon ?</h2>
+      <button data-close aria-label="Fermer">×</button>
+    </div>
+    <p class="psub">Les trois vont avec Léon. Elles changent surtout l'effet de la lumière à travers le bois.</p>
+    <div class="grid" id="grid"></div>
+    <p class="pfoot">Culot E27 · Ampoules LED · L'ampoule n'est pas incluse avec le luminaire</p>
+  </div>
+</div>
+
+<script>
+var IMG = 'https://test.atelier-sapi.fr/wp-content/uploads/';
+var AMPS = [
+  { id: 'poire', name: 'Poire', price: 9, reco: true,
+    amb: IMG + '2025/03/O_NLS_det2.jpg', pk: IMG + '2025/03/O_NLS_R-1.jpg',
+    why: '« Le filament se devine à travers les lamelles : c\'est l\'effet que je préfère sur Léon. »',
+    specs: [['💡', 'Forme poire classique, 6 × 11 cm'], ['🔥', 'Lumière chaude, 2700 K'], ['⚡', 'Éclaire comme une 40 W (4 W LED)'], ['🎚️', 'Compatible variateur']] },
+  { id: 'globe', name: 'Globe', price: 10,
+    amb: IMG + '2025/04/A_GLOBE_det2.jpg', pk: IMG + '2025/04/A_GLOBE_R.jpg',
+    why: '« Plus grosse et plus douce : une lumière plus diffuse, idéale si l\'ampoule se voit. »',
+    specs: [['💡', 'Grosse boule, 12,5 × 17 cm'], ['🔥', 'Lumière chaude, 2700 K'], ['⚡', 'Éclaire comme une 40 W (4 W LED)'], ['🎚️', 'Compatible variateur']] },
+  { id: 'edison', name: 'Edison', price: 8,
+    amb: IMG + '2025/04/O_NLS_XL_det2.jpg', pk: IMG + '2025/04/O_NLS_XL_R.jpg',
+    why: '« Allongée, style vintage : pour un rendu plus rétro et une lumière plus ambrée. »',
+    specs: [['💡', 'Forme allongée, 6,4 × 14 cm'], ['🔥', 'Lumière très chaude, 2200 K'], ['⚡', 'Éclaire comme une 35 W (4 W LED)'], ['🎚️', 'Compatible variateur']] }
+];
+var picked = 'poire', added = false;
+function eur(n) { return n.toFixed(2).replace('.', ',') + ' €'; }
+function cur() { return AMPS.filter(function (a) { return a.id === picked; })[0]; }
+
+function renderTab() {
+  var a = cur();
+  document.getElementById('tab').innerHTML = added
+    ? '<div class="tab is-added"><img src="' + a.pk + '" alt=""><p><strong>✓ Ampoule ' + a.name + ' ajoutée</strong> · ' + eur(a.price) + '</p><button class="cmp" data-open>Changer</button></div>'
+    : '<div class="tab"><img src="' + a.pk + '" alt=""><p><strong>Ampoule non incluse.</strong> ' + (a.reco ? 'Celle que je recommande pour Léon' : 'Ton choix') + ' : ' + a.name + ', ' + eur(a.price) +
+      '<br><button class="cmp" data-open>Comparer les 3 ampoules</button></p><button class="add" data-add>+ Ajouter</button></div>';
+}
+function renderGrid() {
+  document.getElementById('grid').innerHTML = AMPS.map(function (a) {
+    return '<div class="amp' + (a.reco ? ' is-reco' : '') + (a.id === picked ? ' is-picked' : '') + '">' +
+      (a.reco ? '<span class="badge">Mon choix pour Léon</span>' : '') +
+      '<div class="photos"><img src="' + a.amb + '" alt=""><img class="pk" src="' + a.pk + '" alt=""></div>' +
+      '<div class="body"><div class="name"><b>' + a.name + '</b><span>' + eur(a.price) + '</span></div>' +
+      '<p class="why">' + a.why + '</p>' +
+      '<ul class="specs">' + a.specs.map(function (s) { return '<li><span>' + s[0] + '</span><span>' + s[1] + '</span></li>'; }).join('') + '</ul>' +
+      '<button class="pick" data-pick="' + a.id + '">' + (a.id === picked ? (added ? '✓ Dans le panier' : '✓ Choisie') : 'Choisir celle-ci') + '</button></div></div>';
+  }).join('');
+}
+function render() { renderTab(); renderGrid(); }
+
+document.addEventListener('click', function (e) {
+  if (e.target.closest('[data-open]')) { document.getElementById('veil').hidden = false; return; }
+  if (e.target.closest('[data-close]') || e.target.id === 'veil') { document.getElementById('veil').hidden = true; return; }
+  if (e.target.closest('[data-add]')) { added = true; render(); return; }
+  var p = e.target.closest('[data-pick]');
+  if (p) { picked = p.getAttribute('data-pick'); added = true; render(); setTimeout(function () { document.getElementById('veil').hidden = true; }, 400); }
+});
+render();
+</script>
+</body>
+</html>

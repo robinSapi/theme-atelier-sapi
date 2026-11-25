@@ -29,16 +29,33 @@
       return;
     }
     // Carte ampoule de la vitrine, ou languette ampoule du volet (même quantité que le luminaire)
+    // « Comparer les ampoules » du volet : le panneau partagé, puis le même ajout
+    var cmp = e.target.closest('.mini-cart .sapi-amp-compare');
+    if (cmp && window.sapiAmpPicker) {
+      e.preventDefault();
+      var ids = (cmp.getAttribute('data-ids') || '').split(',').map(Number).filter(Boolean);
+      var qty = parseInt(cmp.getAttribute('data-qty'), 10) || 1;
+      window.sapiAmpPicker.open({
+        ids: ids, recoId: ids[0], pickedId: null, first: cmp.getAttribute('data-first') || '',
+        onPick: function (id) { ajouter(cmp, id, qty); }
+      });
+      return;
+    }
     var btn = e.target.closest('.sapi-cart-suggest .sapi-suggest__add, .mini-cart .sapi-mc-amp__add');
     if (!btn || btn.disabled || !window.sapiSuggest || !$) return;
     e.preventDefault();
+    ajouter(btn, btn.getAttribute('data-product-id'), parseInt(btn.getAttribute('data-qty'), 10) || 1);
+  });
+
+  function ajouter(btn, productId, qty) {
+    if (!window.sapiSuggest || !$) return;
     btn.disabled = true;
     var label = btn.textContent;
     btn.textContent = 'Ajout…';
     $.post(sapiSuggest.addUrl, {
       action: 'sapi_add_to_cart',
-      product_id: btn.getAttribute('data-product-id'),
-      quantity: parseInt(btn.getAttribute('data-qty'), 10) || 1,
+      product_id: productId,
+      quantity: qty,
       nonce: sapiSuggest.nonce
     }).done(function (res) {
       if (res && res.success && res.data && res.data.fragments) {
@@ -56,7 +73,7 @@
       btn.disabled = false;
       btn.textContent = label;
     });
-  });
+  }
 
   var view = document.querySelector('.sapi-cart-suggest');
   if (!view) return;

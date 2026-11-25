@@ -59,32 +59,56 @@
    * covered[lumKey], need[ampKey] = quantité de luminaires concernés.
    */
   function groups(items) {
-    var g = { attached: {}, hidden: {}, shared: {}, covered: {}, need: {}, byKey: {} };
+    /* Même règle que sapi_cart_amp_groups() (volet, PHP) : rattachement par
+       élimination, puis le reste partagé, avec un seul manque global. */
+    var g = { attached: {}, hidden: {}, shared: {}, covered: {}, need: {}, missing: {}, byKey: {} };
     var lums = Object.keys(amp).filter(function (k) { return items.some(function (it) { return it.key === k; }); });
     items.forEach(function (it) { g.byKey[it.key] = it; });
+    var users = {};
     items.forEach(function (it) {
       if (amp[it.key]) return; // c'est un luminaire
-      var users = lums.filter(function (k) { return (amp[k].ids || []).map(Number).indexOf(Number(it.id)) !== -1; });
-      if (!users.length) return;
-      g.need[it.key] = users.reduce(function (s, k) { return s + (g.byKey[k] ? g.byKey[k].quantity : 0); }, 0);
-      if (users.length === 1 && !g.attached[users[0]]) {
-        g.attached[users[0]] = it;
-        g.hidden[it.key] = true;
-      } else {
-        if (users.length > 1) g.shared[it.key] = users;
-        users.forEach(function (k) { g.covered[k] = true; });
-      }
+      var u = lums.filter(function (k) { return (amp[k].ids || []).map(Number).indexOf(Number(it.id)) !== -1; });
+      if (u.length) users[it.key] = u;
     });
+    function libres(u) { return u.filter(function (k) { return !g.attached[k]; }); }
+    var done = {}, progress;
+    do {
+      progress = false;
+      Object.keys(users).forEach(function (ak) {
+        if (done[ak]) return;
+        var free = libres(users[ak]);
+        if (free.length === 1) {
+          g.attached[free[0]] = g.byKey[ak];
+          g.hidden[ak] = true;
+          g.need[ak] = g.byKey[free[0]].quantity;
+          done[ak] = true; progress = true;
+        } else if (!free.length) {
+          done[ak] = true; // ampoule en plus : ligne normale, sans mention
+        }
+      });
+    } while (progress);
+    var lumsPartages = {}, have = 0, first = null;
+    Object.keys(users).forEach(function (ak) {
+      if (done[ak]) return;
+      var free = libres(users[ak]);
+      g.shared[ak] = free;
+      free.forEach(function (k) { g.covered[k] = true; lumsPartages[k] = true; });
+      have += g.byKey[ak].quantity;
+      if (first === null) first = ak;
+    });
+    if (first !== null) {
+      var total = Object.keys(lumsPartages).reduce(function (s, k) { return s + g.byKey[k].quantity; }, 0);
+      g.missing[first] = { miss: total - have, total: total };
+    }
     return g;
   }
 
   /** « Il manque 1 ampoule pour vos 2 luminaires. » + bouton « Ajouter 1 ampoule ». */
-  function hintHtml(ampItem, need) {
-    var miss = need - ampItem.quantity;
-    if (miss <= 0) return '';
+  function hintHtml(ampItem, miss, total) {
+    if (!(miss > 0)) return '';
     var pl = miss > 1 ? 's' : '';
-    return '<span class="sapi-amp-hint">Il manque ' + miss + ' ampoule' + pl + ' pour vos ' + need + ' luminaires. ' +
-      '<button type="button" class="sapi-amp-act" data-act="set" data-key="' + esc(ampItem.key) + '" data-qty="' + need + '">Ajouter ' +
+    return '<span class="sapi-amp-hint">Il manque ' + miss + ' ampoule' + pl + ' pour vos ' + total + ' luminaires. ' +
+      '<button type="button" class="sapi-amp-act" data-act="set" data-key="' + esc(ampItem.key) + '" data-qty="' + (ampItem.quantity + miss) + '">Ajouter ' +
       miss + ' ampoule' + pl + '</button></span>';
   }
   function tabHtml(key, a) {
@@ -92,14 +116,16 @@
       (a.img ? '<img class="sapi-amp-tab__img" src="' + esc(a.img) + '" alt="" width="40" height="40" loading="lazy">' : '') +
       '<p class="sapi-amp-tab__text"><strong>Ampoule non incluse.</strong> ' +
       '<span class="sapi-amp-tab__long">Celle que je recommande pour ' + esc(a.first) + ' : </span>' +
-      esc(a.name) + ', ' + esc(a.price) + '</p>' +
+      esc(a.name) + ', ' + esc(a.price) +
+      ((a.ids || []).length > 1 ? '<br><button type="button" class="sapi-amp-compare" data-key="' + esc(key) + '">Comparer les ' + a.ids.length + ' ampoules</button>' : '') +
+      '</p>' +
       '<button type="button" class="sapi-amp-tab__add" data-key="' + esc(key) + '">+ Ajouter</button>' +
       '</div></td>';
   }
   function subHtml(lumItem, a) {
     return '<td colspan="3"><div class="sapi-amp-sub">' +
       '<span class="sapi-amp-sub__check" aria-hidden="true">✓</span>' +
-      '<p class="sapi-amp-sub__text"><strong>' + esc(decode(a.name)) + '</strong>' + hintHtml(a, lumItem.quantity) + '</p>' +
+      '<p class="sapi-amp-sub__text"><strong>' + esc(decode(a.name)) + '</strong>' + hintHtml(a, lumItem.quantity - a.quantity, lumItem.quantity) + '</p>' +
       '<div class="sapi-amp-sub__qty">' +
         '<button type="button" class="sapi-amp-act" data-act="set" data-key="' + esc(a.key) + '" data-qty="' + (a.quantity - 1) + '" aria-label="Diminuer">−</button>' +
         '<span>' + a.quantity + '</span>' +
@@ -112,7 +138,7 @@
   function sharedHtml(ampItem, users, g) {
     var list = users.map(function (k) { return amp[k].first; });
     return '<td colspan="3"><div class="sapi-amp-shared-row">' +
-      '<span class="sapi-amp-shared">Pour ' + esc(names(list)) + '</span>' + hintHtml(ampItem, g.need[ampItem.key]) +
+      '<span class="sapi-amp-shared">Pour ' + esc(names(list)) + '</span>' + (g.missing[ampItem.key] ? hintHtml(ampItem, g.missing[ampItem.key].miss, g.missing[ampItem.key].total) : '') +
       '</div></td>';
   }
 
@@ -239,7 +265,49 @@
     }, 8000);
   }
 
+  /* Ajoute une ampoule (par ID) en quantité qty, via le store Blocks ; `btn` affiche l'état. */
+  function ajouterAmpoule(btn, ampId, qty) {
+    var label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Ajout…';
+    var store = dispatcher();
+    if (store && typeof store.addItemToCart === 'function') {
+      working = true; guard();
+      Promise.resolve(store.addItemToCart(ampId, qty)).then(done, function () { working = false; fail(btn, label); });
+      return;
+    }
+    if (!cfg.ajaxUrl) return fail(btn, label);
+    var fd = new FormData();
+    fd.append('product_id', ampId);
+    fd.append('quantity', qty);
+    fetch(cfg.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (d && d.error) fail(btn, label); else location.reload(); })
+      .catch(function () { fail(btn, label); });
+  }
+  function qtyOf(key) {
+    var items = storeItems();
+    var lum = items && items.filter(function (it) { return it.key === key; })[0];
+    return lum ? lum.quantity : 1;
+  }
+
   document.addEventListener('click', function (e) {
+    // « Comparer les ampoules » : panneau partagé, puis ajout de celle choisie
+    var cmp = e.target.closest && e.target.closest('.sapi-amp-compare[data-key]');
+    if (cmp && window.sapiAmpPicker) {
+      e.preventDefault();
+      var ck = cmp.getAttribute('data-key');
+      var ca = amp[ck];
+      if (!ca) return;
+      window.sapiAmpPicker.open({
+        ids: ca.ids || [], recoId: (ca.ids || [])[0], pickedId: null, first: ca.first,
+        onPick: function (id) {
+          var addBtn = cmp.closest('.sapi-amp-tab') && cmp.closest('.sapi-amp-tab').querySelector('.sapi-amp-tab__add');
+          ajouterAmpoule(addBtn || cmp, id, qtyOf(ck));
+        }
+      });
+      return;
+    }
     // « + Ajouter » de la languette
     var add = e.target.closest && e.target.closest('.sapi-amp-tab__add[data-key]');
     if (add && !add.disabled) {
@@ -247,25 +315,7 @@
       var key = add.getAttribute('data-key');
       var a = amp[key];
       if (!a) return;
-      var items = storeItems();
-      var lum = items && items.filter(function (it) { return it.key === key; })[0];
-      var qty = lum ? lum.quantity : 1;
-      add.disabled = true;
-      add.textContent = 'Ajout…';
-      var store = dispatcher();
-      if (store && typeof store.addItemToCart === 'function') {
-        working = true; guard();
-        Promise.resolve(store.addItemToCart(a.id, qty)).then(done, function () { working = false; fail(add, '+ Ajouter'); });
-        return;
-      }
-      if (!cfg.ajaxUrl) return fail(add, '+ Ajouter');
-      var fd = new FormData();
-      fd.append('product_id', a.id);
-      fd.append('quantity', qty);
-      fetch(cfg.ajaxUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
-        .then(function (r) { return r.json(); })
-        .then(function (d) { if (d && d.error) fail(add, '+ Ajouter'); else location.reload(); })
-        .catch(function () { fail(add, '+ Ajouter'); });
+      ajouterAmpoule(add, a.id, qtyOf(key));
       return;
     }
     // − / + / Retirer / « + n » : agissent sur la ligne de l'ampoule elle-même

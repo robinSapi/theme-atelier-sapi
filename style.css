@@ -28243,3 +28243,75 @@ body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
 }
 .conseiller-pill-apply:hover { filter: brightness(1.08); }
 .conseiller-pill-apply[hidden] { display: none; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PANNEAU « QUELLE AMPOULE POUR LÉON ? » (25/11/2026)
+   assets/sapi-amp-picker.js — maquette mockups/selecteur-ampoules.html
+   ═══════════════════════════════════════════════════════════════════ */
+.sapi-amp-picker {
+  position: fixed; inset: 0; z-index: 100000;
+  display: grid; place-items: center; padding: 20px;
+  background: rgba(30, 26, 22, .5);
+  -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+  font-family: var(--font-body);
+}
+.sapi-amp-picker[hidden] { display: none; }
+html.sapi-amp-picker-open { overflow: hidden; }
+.sapi-amp-picker__panel {
+  width: min(880px, 100%); max-height: calc(100vh - 40px); overflow-y: auto;
+  padding: 26px 28px 24px; border-radius: 20px; background: #fff; color: var(--color-dark);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .3);
+}
+.sapi-amp-picker__head { display: flex; align-items: center; gap: 12px; }
+.sapi-amp-picker__title { flex: 1; margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 2.1rem; line-height: 1; text-transform: none; }
+.sapi-amp-picker__close { padding: 0 4px; border: 0; background: none; font-size: 1.8rem; line-height: 1; color: var(--color-gray, #717171); cursor: pointer; }
+.sapi-amp-picker__sub { margin: 6px 0 18px; font-size: .88rem; color: var(--color-gray, #717171); }
+.sapi-amp-picker__sub:empty { margin-bottom: 12px; }
+.sapi-amp-picker__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.sapi-amp-card {
+  position: relative; display: flex; flex-direction: column; overflow: hidden;
+  border: 1.5px solid var(--color-line, #E8E2D9); border-radius: 16px; background: #fff;
+}
+.sapi-amp-card.is-reco { border-color: var(--color-wood); }
+.sapi-amp-card.is-picked { border-color: var(--color-green, #018501); box-shadow: 0 0 0 3px rgba(1, 133, 1, .12); }
+.sapi-amp-card__badge {
+  position: absolute; top: 10px; left: 10px; z-index: 1;
+  padding: 4px 10px; border-radius: 999px; background: var(--color-wood-dark); color: #fff;
+  font-size: .68rem; font-weight: 700; letter-spacing: .04em;
+}
+.sapi-amp-card__photos { position: relative; aspect-ratio: 4 / 3; background: #F3EEE6; }
+.sapi-amp-card__photos img { position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover; transition: opacity .3s; }
+.sapi-amp-card__pk { opacity: 0; }
+@media (hover: hover) { .sapi-amp-card:hover .sapi-amp-card__pk { opacity: 1; } }
+.sapi-amp-card__body { flex: 1; display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 16px; }
+.sapi-amp-card__name { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sapi-amp-card__name b { font-size: 1.05rem; }
+.sapi-amp-card__name span { font-weight: 800; white-space: nowrap; }
+.sapi-amp-card__why { margin: 0; font-size: .82rem; line-height: 1.5; font-style: italic; color: #5d5a56; }
+.sapi-amp-card__specs { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: .78rem; line-height: 1.4; }
+.sapi-amp-picker__k { font-weight: 700; color: var(--color-wood); }
+.sapi-amp-card__pick {
+  margin-top: auto; padding: 10px; border: 1.5px solid var(--color-dark); border-radius: 999px;
+  background: #fff; color: var(--color-dark); font-family: var(--font-body); font-weight: 700; font-size: .82rem; cursor: pointer;
+}
+.sapi-amp-card.is-picked .sapi-amp-card__pick { background: var(--color-green, #018501); border-color: var(--color-green, #018501); color: #fff; }
+@media (max-width: 720px) {
+  .sapi-amp-picker { place-items: end center; padding: 0; }
+  .sapi-amp-picker__panel { max-height: 88vh; padding: 20px 16px; border-radius: 20px 20px 0 0; }
+  .sapi-amp-picker__title { font-size: 1.8rem; }
+  .sapi-amp-picker__grid { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 82%; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+  .sapi-amp-card { scroll-snap-align: start; }
+}
+
+/* Lien « Comparer » : fiche produit, volet, page panier */
+.sapi-ampoule-addon[hidden],
+.sapi-ampoule-addon [hidden],
+.sapi-opts-ready .sapi-opts .sapi-ampoule-addon[hidden] { display: none !important; }
+.sapi-ampoule-addon__compare,
+.sapi-amp-compare {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-body); font-size: .78rem; font-weight: 700;
+  color: var(--color-wood); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
+}
+.sapi-ampoule-addon__compare { margin-left: 10px; }
+.sapi-amp-tab .sapi-amp-compare { display: inline-block; margin-top: 2px; }
