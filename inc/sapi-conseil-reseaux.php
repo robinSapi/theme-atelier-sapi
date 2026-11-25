@@ -455,6 +455,7 @@ function sapi_ajax_conseil_lead() {
     'Content-Type: text/plain; charset=UTF-8',
     // Adresse seule : un prénom avec virgule casserait l'en-tête.
     'Reply-To: ' . $email,
+    'X-Sapi-Origine: Page « Conseil de Robin » (réseaux sociaux)',
   ]);
   if (!$sent) {
     error_log('[sapi-conseil] wp_mail vers Robin échoué pour la demande ' . $demande_id);

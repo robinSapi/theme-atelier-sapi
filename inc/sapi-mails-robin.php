@@ -45,6 +45,14 @@ add_filter('wp_mail', function ($args) {
   $entetes = $args['headers'] ?? [];
   if (!is_array($entetes)) $entetes = $entetes === '' ? [] : preg_split("/\r\n|\n/", (string) $entetes);
   $reply_to = '';
+  /* `X-Sapi-Origine` : chaque formulaire dit d'où il part, en clair. Lu ici,
+     affiché en tête du mail, puis retiré (il n'a rien à faire dans l'envoi). */
+  $origine = '';
+  foreach ($entetes as $i => $e) {
+    if (stripos($e, 'x-sapi-origine:') === 0) { $origine = trim(substr($e, 15)); unset($entetes[$i]); }
+  }
+  $entetes = array_values($entetes);
+  $args['headers'] = $entetes;
   foreach ($entetes as $e) {
     if (stripos($e, 'content-type:') === 0 && stripos($e, 'text/plain') === false) return $args;
     if (stripos($e, 'reply-to:') === 0) {
@@ -57,7 +65,7 @@ add_filter('wp_mail', function ($args) {
   if (preg_match('~</[a-z][a-z0-9]*\s*>~i', $args['message'])) return $args;
   if (!preg_grep('/^content-type:/i', $entetes) && apply_filters('wp_mail_content_type', 'text/plain') !== 'text/plain') return $args;
 
-  $html = sapi_mails_robin_html((string) $args['message'], (string) ($args['subject'] ?? ''), sanitize_email($reply_to));
+  $html = sapi_mails_robin_html((string) $args['message'], (string) ($args['subject'] ?? ''), sanitize_email($reply_to), $origine);
 
   $entetes = array_values(array_filter($entetes, function ($e) { return stripos($e, 'content-type:') !== 0; }));
   $entetes[] = 'Content-Type: text/html; charset=UTF-8';
@@ -115,7 +123,7 @@ function sapi_mails_robin_corps($texte) {
   return $out;
 }
 
-function sapi_mails_robin_html($texte, $sujet, $reply_to) {
+function sapi_mails_robin_html($texte, $sujet, $reply_to, $origine = '') {
   $f     = "font-family:'Montserrat',Arial,Helvetica,sans-serif;";
   $logo  = 'https://atelier-sapi.fr/wp-content/uploads/2024/12/logo_sapi.png';
   $badge = '';
@@ -135,6 +143,7 @@ function sapi_mails_robin_html($texte, $sujet, $reply_to) {
     . '<tr><td align="center" style="padding:24px 24px 8px;"><img src="' . esc_url($logo) . '" alt="Atelier Sâpi" width="70" style="display:block;width:70px;height:auto;"></td></tr>'
     . ($badge !== '' ? '<tr><td align="center" style="padding:6px 24px 0;"><span style="display:inline-block;background-color:#F3EADC;color:#937D68;' . $f . 'font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:20px;">' . esc_html($badge) . '</span></td></tr>' : '')
     . '<tr><td align="center" style="padding:12px 32px 4px;' . $f . 'font-size:20px;font-weight:700;line-height:1.3;color:#4A3F35;">' . esc_html($titre) . '</td></tr>'
+    . ($origine !== '' ? '<tr><td align="center" style="padding:10px 32px 4px;"><table cellpadding="0" cellspacing="0" border="0" style="background-color:#FBF3E6;border:1px solid #EAD9BE;border-radius:10px;"><tr><td style="padding:10px 16px;' . $f . 'font-size:13px;line-height:1.5;color:#4A3F35;text-align:center;"><span style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#937D68;">Envoyé depuis</span><br><strong>' . esc_html($origine) . '</strong></td></tr></table></td></tr>' : '')
     . '<tr><td style="padding:8px 32px 20px;">' . sapi_mails_robin_corps($texte) . '</td></tr>'
     . $bouton
     . '</table>'

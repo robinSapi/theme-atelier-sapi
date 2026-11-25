@@ -2699,8 +2699,7 @@ function sapi_ajax_robin_contact() {
   }
 
   // 2. Email de notification à Robin
-  $body  = "Demande de contact depuis « Contacter Robin »\n";
-  $body .= "=============================================\n\n";
+  $body  = '';
   $body .= "EMAIL : " . esc_html($email) . "\n";
   if ($phone) {
     $body .= "TÉLÉPHONE : " . esc_html($phone) . "\n";
@@ -2716,11 +2715,12 @@ function sapi_ajax_robin_contact() {
 
   wp_mail(
     'contact@atelier-sapi.fr',
-    '[Mon Projet] Demande de contact',
+    '[Fiche produit] Question' . ($page ? ' sur ' . wp_strip_all_tags($page) : ''),
     $body,
     [
       'Content-Type: text/plain; charset=UTF-8',
       'Reply-To: ' . $email,
+      'X-Sapi-Origine: Fiche produit' . ($page ? ' ' . wp_strip_all_tags($page) : '') . ' · bandeau « Échanger avec Robin »',
     ]
   );
 
@@ -4732,6 +4732,9 @@ function sapi_ajax_megafilter_surmesure() {
   $headers = [
     'Content-Type: text/plain; charset=UTF-8',
     'Reply-To: ' . $email,
+    'X-Sapi-Origine: ' . ($source === 'conseiller-modal'
+      ? 'Le Conseiller (fenêtre « Le conseil de Robin »), écran de contact'
+      : 'Carte « Créons ensemble » de la page Mes créations'),
   ];
 
   $sent = wp_mail($to, $subject, $body, $headers);
@@ -6527,6 +6530,7 @@ function sapi_handle_surmesure_form() {
     'Content-Type: text/plain; charset=UTF-8',
     'From: ' . get_bloginfo('name') . ' <noreply@' . wp_parse_url(home_url(), PHP_URL_HOST) . '>',
     'Reply-To: ' . $name . ' <' . $email . '>',
+    'X-Sapi-Origine: Formulaire de la page Sur-mesure',
   ];
 
   if (wp_mail($to, $subject, $body, $headers)) {

@@ -317,7 +317,7 @@ add_action('sapi_conseil_cron', function () {
         . admin_url('admin.php?page=sapi-conseil-reseaux&demande=' . (int) $r->id) . "\n";
     }
     $body .= "\nSi tu as déjà répondu depuis ta boîte mail, clique « Marquer comme répondu » pour ne plus recevoir ce rappel.\n";
-    if (wp_mail('robin@atelier-sapi.fr', '[Conseil réseaux] ' . count($rows) . ' demande(s) à traiter', $body)) {
+    if (wp_mail('robin@atelier-sapi.fr', '[Conseil réseaux] ' . count($rows) . ' demande(s) à traiter', $body, ['X-Sapi-Origine: Rappel automatique des demandes réseaux (48 h)'])) {
       foreach ($rows as $r) sapi_conseil_maj((int) $r->id, ['relance_le' => $now]);
     }
   }

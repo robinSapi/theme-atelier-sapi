@@ -58,7 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sapi_contact_nonce'])
       $headers = array(
         'Content-Type: text/plain; charset=UTF-8',
         'From: ' . get_bloginfo('name') . ' <noreply@' . parse_url(home_url(), PHP_URL_HOST) . '>',
-        'Reply-To: ' . $name . ' <' . $email . '>'
+        'Reply-To: ' . $name . ' <' . $email . '>',
+        'X-Sapi-Origine: Formulaire de la page Contact'
       );
 
       // Send email
