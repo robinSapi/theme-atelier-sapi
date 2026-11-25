@@ -397,7 +397,7 @@ function sapi_mini_cart_under_luminaire($cart_item_key, $cart_item, $g) {
         <button class="mini-cart-qty-btn mini-cart-qty-plus" aria-label="<?php esc_attr_e('Augmenter la quantité', 'theme-sapi-maison'); ?>">+</button>
       </div>
       <span class="sapi-amp-sub__price"><?php echo WC()->cart->get_product_price($ap); // prix unitaire, comme les lignes du volet ?></span>
-      <button class="mini-cart-item-remove sapi-amp-sub__remove" data-cart-item-key="<?php echo esc_attr($ak); ?>"><?php esc_html_e('Retirer', 'theme-sapi-maison'); ?></button>
+      <button class="mini-cart-item-remove sapi-amp-sub__remove" data-cart-item-key="<?php echo esc_attr($ak); ?>" aria-label="<?php esc_attr_e("Retirer l'ampoule", 'theme-sapi-maison'); ?>"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>
     </div>
     <?php
     return;

@@ -151,7 +151,7 @@
         '<button type="button" class="sapi-amp-act" data-act="set" data-key="' + esc(a.key) + '" data-qty="' + (a.quantity + 1) + '" aria-label="Augmenter">+</button>' +
       '</div>' +
       '<span class="sapi-amp-sub__price">' + esc(money(a, a.quantity)) + '</span>' +
-      '<button type="button" class="sapi-amp-sub__remove sapi-amp-act" data-act="set" data-key="' + esc(a.key) + '" data-qty="0">Retirer</button>' +
+      '<button type="button" class="sapi-amp-sub__remove sapi-amp-act" data-act="set" data-key="' + esc(a.key) + '" data-qty="0" aria-label="Retirer l\'ampoule"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>' +
       '</div></td>';
   }
   function sharedHtml(ampItem, users, g) {
@@ -371,7 +371,7 @@
     var ampKey = btn.getAttribute('data-key');
     var q = parseInt(btn.getAttribute('data-qty'), 10);
     if (isNaN(q)) return;
-    var label = btn.textContent;
+    var label = btn.innerHTML; // la corbeille est une icône
     var box = btn.closest('.sapi-amp-sub, .sapi-amp-shared-row');
     if (box) box.classList.add('is-busy');
     btn.disabled = true;

@@ -28361,13 +28361,13 @@ html.sapi-amp-picker-open { overflow: hidden; }
   padding: 3px 3px 3px 0; border: 1.5px solid var(--color-green, #018501); border-radius: 999px;
   background: #fff; font-size: 0.78rem; white-space: nowrap; transition: background-color 0.2s ease;
 }
-.sapi-amp-split:has(.sapi-amp-tab__add:hover:not(:disabled)) { background: #F4FAF2; }
 .sapi-amp-split .sapi-amp-tab__add,
 .sapi-amp-tab--mini .sapi-amp-split .sapi-amp-tab__add {
-  display: inline-flex; align-items: center; padding: 3px 4px 3px 12px; border: 0; border-radius: 999px;
+  display: inline-flex; align-items: center; padding: 3px 10px 3px 12px; margin-left: 3px; border: 0; border-radius: 999px;
   background: none; color: var(--color-green, #018501); font-size: inherit; text-transform: none; letter-spacing: normal;
 }
-.sapi-amp-split .sapi-amp-tab__add:hover:not(:disabled) { background: none; color: var(--color-green, #018501); text-decoration: underline; text-underline-offset: 3px; }
+/* Survol : la zone « + Ajouter » se remplit de vert, comme un bouton (pas de soulignement, qui fait lien) */
+.sapi-amp-split .sapi-amp-tab__add:hover:not(:disabled) { background: var(--color-green, #018501); color: #fff; text-decoration: none; }
 .sapi-amp-split .sapi-amp-tab__add::after { display: none; }
 /* Page panier (desktop) : une ligne fine, le fond suit le contenu */
 @media (min-width: 601px) {
@@ -28381,7 +28381,17 @@ html.sapi-amp-picker-open { overflow: hidden; }
 .sapi-amp-tab--mini { container-type: inline-size; padding-right: 0.55rem; padding-left: 1.3rem; }
 .sapi-amp-tab--mini::before { left: 0.45rem; width: 0.45rem; }
 .sapi-amp-tab--mini .sapi-amp-split { margin-left: 0; gap: 4px; font-size: 0.72rem; }
-.sapi-amp-tab--mini .sapi-amp-split .sapi-amp-tab__add { padding-left: 10px; }
+.sapi-amp-tab--mini .sapi-amp-split .sapi-amp-tab__add { padding-left: 10px; padding-right: 8px; }
 .sapi-amp-tab--mini .sapi-amp-bubble { padding: 3px 8px 3px 9px; }
 /* Languette trop étroite pour « + Ajouter l'ampoule » + la bulle : « + Ajouter » suffit */
 @container (max-width: 300px) { .sapi-amp-tab--mini .sapi-amp-split__long { display: none; } }
+
+
+/* Corbeilles (25/11/2026) : luminaire du volet, ampoule rattachée (volet et page panier).
+   L'ampoule rattachée garde tout sur une ligne : le nom passe à la ligne si besoin. */
+.sapi-amp-sub__remove { display: inline-flex; align-items: center; justify-content: center; padding: 4px !important; text-decoration: none; border-radius: 6px; }
+.sapi-amp-sub__remove svg { display: block; }
+.sapi-amp-sub__remove:hover { color: var(--color-error, #c0392b) !important; background: none; }
+.sapi-amp-sub__text { min-width: 0; }
+.sapi-amp-sub--mini .sapi-amp-sub__text { flex: 1 1 0; }
+.sapi-amp-sub__remove::after { display: none; }
