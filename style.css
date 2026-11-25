@@ -28197,6 +28197,10 @@ body.has-landing-cookies .conseiller-modal.is-landing .conseiller-card--modal {
 
 /* Pastille de la fiche : deux états posés sur l'enveloppe (sapi-help-pill.js) */
 .conseiller-pill-wrap { display: inline-flex; align-items: center; gap: 6px; border-radius: 60px; transition: background .25s, box-shadow .25s; }
+/* La marge de la pastille passe sur l'enveloppe : restée sur la pastille, elle
+   gonflait le fond sombre de l'état « Ma recommandation » (haut ≠ bas). */
+.conseiller-pill-wrap { margin: 0.5rem 0 1rem; }
+.conseiller-pill-wrap #robin-product-pill { margin: 0; }
 .conseiller-pill-check { display: none; }
 /* Bonne variante : fond blanc + coche verte */
 .conseiller-pill-wrap.is-ideal .conseiller-pill-secondary {
