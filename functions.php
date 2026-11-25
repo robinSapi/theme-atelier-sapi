@@ -94,8 +94,6 @@ if (is_admin()) {
   require_once get_template_directory() . '/inc/sapi-migrate-galerie.php';
   // Tâche 5 — page admin « Règles de filtrage » du Conseiller.
   require_once get_template_directory() . '/inc/conseiller-rules-admin.php';
-  // Import ponctuel des ampoules par variation (25/11/2026) — à retirer après passage test + prod.
-  require_once get_template_directory() . '/inc/sapi-import-ampoules.php';
 }
 
 /* ═══ Ex-snippets rapatriés dans le thème le 09/09/2026 ═══════════════════════
