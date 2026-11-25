@@ -234,10 +234,10 @@ function sapi_render_cart_suggestions_src() {
   if (!empty($data['items'])) {
     $source = $data['source'];
     $first = $source ? preg_split('/\s+/', trim($source->get_name()))[0] : '';
-    echo '<p class="sapi-suggest__eyebrow">' . esc_html__('Pour compléter votre commande', 'theme-sapi-maison') . '</p>';
+    echo '<p class="sapi-suggest__eyebrow">' . esc_html__('Et pourquoi pas…', 'theme-sapi-maison') . '</p>';
     echo '<p class="sapi-suggest__title">' . ($first
       ? esc_html(sprintf(__('Ça irait bien avec %s', 'theme-sapi-maison'), $first))
-      : esc_html__('Nos meilleures ventes', 'theme-sapi-maison')) . '</p>';
+      : esc_html__("Quelques créations de l'atelier", 'theme-sapi-maison')) . '</p>';
     echo '<ul class="sapi-suggest__cards">';
     foreach ($data['items'] as $i => $s) echo sapi_suggest_card_html($s, $i, $first);
     echo '</ul>';
@@ -460,10 +460,10 @@ function sapi_render_mini_cart_suggest() {
   $first = $source ? preg_split('/\s+/', trim($source->get_name()))[0] : '';
   ?>
   <div class="mini-cart-suggest">
-    <p class="sapi-suggest__eyebrow"><?php esc_html_e('Pour compléter votre commande', 'theme-sapi-maison'); ?></p>
+    <p class="sapi-suggest__eyebrow"><?php esc_html_e('Et pourquoi pas…', 'theme-sapi-maison'); ?></p>
     <p class="mini-cart-suggest__title"><?php echo $first
       ? esc_html(sprintf(__('Ça irait bien avec %s', 'theme-sapi-maison'), $first))
-      : esc_html__('Nos meilleures ventes', 'theme-sapi-maison'); ?></p>
+      : esc_html__("Quelques créations de l'atelier", 'theme-sapi-maison'); ?></p>
     <ul class="mini-cart-suggest__list">
       <?php foreach ($data['items'] as $s) :
         $p = $s['product'];

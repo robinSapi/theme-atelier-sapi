@@ -88,10 +88,10 @@ add_filter('render_block', function ($content, $block) {
   ob_start();
   ?>
   <section class="sapi-cart-page-suggest" data-source-key="<?php echo esc_attr($source_key); ?>" aria-label="<?php esc_attr_e('Suggestions', 'theme-sapi-maison'); ?>">
-    <p class="sapi-suggest__eyebrow"><?php esc_html_e('Pour compléter votre commande', 'theme-sapi-maison'); ?></p>
+    <p class="sapi-suggest__eyebrow"><?php esc_html_e('Et pourquoi pas…', 'theme-sapi-maison'); ?></p>
     <p class="sapi-suggest__title"><?php echo $first
       ? esc_html(sprintf(__('Ça irait bien avec %s', 'theme-sapi-maison'), $first))
-      : esc_html__('Nos meilleures ventes', 'theme-sapi-maison'); ?></p>
+      : esc_html__("Quelques créations de l'atelier", 'theme-sapi-maison'); ?></p>
     <ul class="sapi-suggest__cards">
       <?php foreach ($data['items'] as $i => $s) echo sapi_suggest_card_html($s, $i, $first, '(max-width: 768px) 60vw, 280px', 'woocommerce_thumbnail', false); ?>
     </ul>
