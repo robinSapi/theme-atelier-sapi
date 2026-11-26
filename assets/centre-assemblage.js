@@ -77,7 +77,7 @@
   function refreshAction(phase) {
     var a = phase.querySelector('.sapi-phase__action');
     if (!a) return;
-    a.textContent = phase.classList.contains('is-open') ? '' : (phase.classList.contains('is-done') ? 'Revoir' : 'Ouvrir');
+    a.textContent = ''; // chevron dessiné en CSS, tourné quand l'étape est ouverte
   }
   phases.forEach(function (p, i) {
     refreshAction(p);

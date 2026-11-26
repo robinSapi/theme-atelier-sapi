@@ -574,13 +574,10 @@ function sapi_notice_meta_line($nid) {
 function sapi_notice_textes_def() {
   return [
     'retour'        => ['En-tête', 'Lien retour', '← Centre d\'assemblage', 'text'],
-    'kicker'        => ['En-tête', 'Petit titre au-dessus du nom', 'Notice de montage', 'text'],
-    'versions'      => ['En-tête', 'Choix de la version', 'Votre version', 'text'],
     'e1_titre'      => ['Étape 1', 'Titre', 'Installer le système électrique', 'text'],
     'e1_courant'    => ['Étape 1', 'Rappel sécurité', 'Coupez le courant au disjoncteur avant de toucher aux fils.', 'text'],
     'e1_bouton'     => ['Étape 1', 'Bouton', "C'est installé", 'text'],
     'e2_titre'      => ['Étape 2', 'Titre', 'Assembler le luminaire', 'text'],
-    'e2_sous'       => ['Étape 2', 'Sous-titre', 'En mode énigme ou guidé', 'text'],
     'e2_enigme'     => ['Étape 2', 'Onglet énigme', 'Mode énigme', 'text'],
     'e2_enigme_s'   => ['Étape 2', 'Onglet énigme, mention manuscrite', 'à vous de chercher', 'text'],
     'e2_guide'      => ['Étape 2', 'Onglet guidé', 'Mode guidé', 'text'],
@@ -594,7 +591,6 @@ function sapi_notice_textes_def() {
     'e2_voir_a'     => ['Étape 2', 'Bouton vers un moment de la vidéo (suivi du temps)', 'voir à', 'text'],
     'e2_bouton'     => ['Étape 2', 'Bouton', 'Le luminaire est assemblé', 'text'],
     'e3_titre'      => ['Étape 3', 'Titre', "Fixer l'abat-jour", 'text'],
-    'e3_sous'       => ['Étape 3', 'Sous-titre', 'Sur le système électrique', 'text'],
     'e3_bouton'     => ['Étape 3', 'Bouton', "C'est fixé, j'allume", 'text'],
     'fin_slogan'    => ['Fin', 'Slogan (manuscrit)', 'Assemblez, Éclairez, Admirez !', 'text'],
     'fin_texte'     => ['Fin', 'Texte', "Il est allumé ? Envoyez-moi une photo, ou laissez un avis : ça aide d'autres personnes à choisir.", 'textarea'],

@@ -32,7 +32,9 @@
 .sapi-phase__titles { flex: 1; min-width: 0; }
 .sapi-phase__title { display: block; font-size: 19px; font-weight: 600; color: var(--color-dark, #323232); }
 .sapi-phase__sub { font-size: 14px; color: var(--color-gray-mid, #717171); }
-.sapi-phase__action { font-size: 14px; color: var(--color-wood, #937D68); }
+.sapi-phase__action { width: 10px; height: 10px; margin-right: 6px; border-right: 2px solid var(--color-wood, #937D68); border-bottom: 2px solid var(--color-wood, #937D68); transform: rotate(45deg); transition: transform .2s; }
+.sapi-phase.is-open .sapi-phase__action { transform: rotate(-135deg); }
+.sapi-notice:not(.js-phases) .sapi-phase__action { display: none; }
 .sapi-phase__panel { padding: 0 24px 24px; }
 .js-phases .sapi-phase:not(.is-open) .sapi-phase__panel { display: none; }
 .sapi-phase__split { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }

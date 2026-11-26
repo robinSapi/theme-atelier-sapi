@@ -35,15 +35,13 @@ while (have_posts()) : the_post();
 
     <header class="sapi-notice__head">
       <div>
-        <p class="sapi-notice__kicker"><?php echo esc_html(sapi_notice_txt('kicker')); ?></p>
         <h1 class="sapi-notice__title"><?php echo sapi_notice_format_name(get_the_title()); ?></h1>
         <?php if ($meta_line) : ?><p class="sapi-notice__meta"><?php echo esc_html($meta_line); ?></p><?php endif; ?>
       </div>
 
       <?php if (count($versions) > 1) : ?>
       <div class="sapi-notice__versions">
-        <p class="sapi-notice__label" id="sapi-notice-versions-label"><?php echo esc_html(sapi_notice_txt('versions')); ?></p>
-        <div class="sapi-notice__pills" role="group" aria-labelledby="sapi-notice-versions-label">
+        <div class="sapi-notice__pills" role="group" aria-label="Version de votre luminaire">
           <?php foreach ($versions as $i => $v) :
             $vign = (int) ($v['vignette'] ?? 0) ?: $first_thumb; ?>
             <button type="button" class="sapi-notice__pill<?php echo $i === 0 ? ' is-active' : ''; ?>" data-version="<?php echo (int) $i; ?>" aria-pressed="<?php echo $i === 0 ? 'true' : 'false'; ?>">
@@ -66,7 +64,7 @@ while (have_posts()) : the_post();
             <span class="sapi-phase__title"><?php echo esc_html(sapi_notice_txt('e1_titre')); ?></span>
             <span class="sapi-phase__sub" data-version-lieu><?php echo esc_html(sapi_notice_lieu_label($versions[0]['lieu'] ?? '')); ?></span>
           </span>
-          <span class="sapi-phase__action"></span>
+          <span class="sapi-phase__action" aria-hidden="true"></span>
         </button>
         <div class="sapi-phase__panel" id="sapi-phase-1">
           <?php foreach ($versions as $i => $v) : ?>
@@ -92,9 +90,8 @@ while (have_posts()) : the_post();
           <span class="sapi-phase__badge">2</span>
           <span class="sapi-phase__titles">
             <span class="sapi-phase__title"><?php echo esc_html(sapi_notice_txt('e2_titre')); ?></span>
-            <span class="sapi-phase__sub"><?php echo esc_html(sapi_notice_txt('e2_sous')); ?></span>
           </span>
-          <span class="sapi-phase__action"></span>
+          <span class="sapi-phase__action" aria-hidden="true"></span>
         </button>
         <div class="sapi-phase__panel" id="sapi-phase-2">
           <div class="sapi-tabs" role="tablist" aria-label="Mode d'assemblage">
@@ -175,9 +172,8 @@ while (have_posts()) : the_post();
           <span class="sapi-phase__badge">3</span>
           <span class="sapi-phase__titles">
             <span class="sapi-phase__title"><?php echo esc_html(sapi_notice_txt('e3_titre')); ?></span>
-            <span class="sapi-phase__sub"><?php echo esc_html(sapi_notice_txt('e3_sous')); ?></span>
           </span>
-          <span class="sapi-phase__action"></span>
+          <span class="sapi-phase__action" aria-hidden="true"></span>
         </button>
         <div class="sapi-phase__panel" id="sapi-phase-3">
           <div class="sapi-phase__split">
