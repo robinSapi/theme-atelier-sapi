@@ -37,7 +37,9 @@ function sapi_register_cpt_notice_montage() {
     'menu_position' => 26,
     'menu_icon'     => 'dashicons-hammer',
     'supports'      => ['title', 'revisions'],
-    'has_archive'   => 'assemblage',
+    // Pas d'archive : /assemblage/ est une vraie page WordPress, éditable dans
+    // Gutenberg, qui affiche la liste avec le bloc « Code court » [centre_assemblage].
+    'has_archive'   => false,
     'rewrite'       => ['slug' => 'assemblage', 'with_front' => false],
   ]);
 }
@@ -46,7 +48,7 @@ add_action('init', 'sapi_register_cpt_notice_montage');
 // Les règles de réécriture ne connaissent le nouveau type qu'après un flush.
 // On le fait une seule fois par version de ce fichier, pas à chaque requête.
 add_action('init', function () {
-  $v = 'notice-montage-1';
+  $v = 'notice-montage-2';
   if (get_option('sapi_notice_rewrite_v') !== $v) {
     flush_rewrite_rules(false);
     update_option('sapi_notice_rewrite_v', $v, true);
@@ -557,6 +559,71 @@ function sapi_notice_meta_line($nid) {
   return implode(' · ', array_filter([trim((string) get_field('difficulte', $nid)), trim((string) get_field('duree', $nid)), $o]));
 }
 
+/* ── Page « Centre d'assemblage » ─────────────────────────────────────────── */
+/** Adresse de l'accueil du centre : la page /assemblage/ (repli sur l'URL brute). */
+function sapi_centre_url() {
+  $page = get_page_by_path('assemblage');
+  return ($page && $page->post_status === 'publish') ? get_permalink($page) : home_url('/assemblage/');
+}
+
+/**
+ * [centre_assemblage] : recherche + une vignette par PRODUIT relié (le client
+ * reconnaît son luminaire, pas le nom d'une notice). Le reste de la page
+ * (titre, textes, encadrés) se rédige dans l'éditeur.
+ */
+add_shortcode('centre_assemblage', function () {
+  if (!function_exists('get_field')) return '<p>Notices momentanément indisponibles. Écrivez-moi : commande@atelier-sapi.fr</p>';
+  $cards = [];
+  $seen  = [];
+  $notices = get_posts(['post_type' => 'notice_montage', 'post_status' => 'publish', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC']);
+  foreach ($notices as $n) {
+    foreach ((array) (get_field('produits', $n->ID) ?: []) as $pid) {
+      $pid = (int) $pid;
+      if (isset($seen[$pid]) || get_post_status($pid) !== 'publish') continue;
+      $seen[$pid] = true;
+      $cats = get_the_terms($pid, 'product_cat');
+      $spec = sapi_notice_specs_for_product($pid);
+      $cards[] = [
+        'name' => sapi_notice_title($pid),
+        'cat'  => ($cats && !is_wp_error($cats)) ? $cats[0]->name : '',
+        'img'  => get_post_thumbnail_id($pid),
+        'url'  => $spec ? $spec['url'] : get_permalink($n->ID), // ?version=N de ce produit
+      ];
+    }
+  }
+  usort($cards, function ($a, $b) { return strcasecmp($a['name'], $b['name']); });
+  $from_qr = (($_GET['src'] ?? '') === 'qr');
+  ob_start(); ?>
+  <div class="sapi-centre-liste">
+    <?php if ($from_qr) : ?><p class="sapi-centre__qr">Vous venez de scanner le QR code de votre colis : choisissez votre luminaire.</p><?php endif; ?>
+    <label class="sapi-centre__label" for="sapi-centre-q">Rechercher un luminaire</label>
+    <input id="sapi-centre-q" class="sapi-centre__search" type="search" placeholder="Olivia, Mireille, Alice…" autocomplete="off">
+    <?php if ($cards) : ?>
+    <ul class="sapi-centre__grid">
+      <?php foreach ($cards as $c) : ?>
+      <li data-search="<?php echo esc_attr(remove_accents(mb_strtolower($c['name'] . ' ' . $c['cat']))); ?>">
+        <a class="sapi-centre__card" href="<?php echo esc_url($c['url']); ?>">
+          <span class="sapi-centre__img"><?php if ($c['img']) echo wp_get_attachment_image($c['img'], 'woocommerce_thumbnail', false, ['alt' => '', 'loading' => 'lazy']); ?></span>
+          <span class="sapi-centre__name"><?php echo sapi_notice_format_name($c['name']); ?></span>
+          <?php if ($c['cat']) : ?><span class="sapi-centre__cat"><?php echo esc_html($c['cat']); ?></span><?php endif; ?>
+        </a>
+      </li>
+      <?php endforeach; ?>
+    </ul>
+    <?php endif; ?>
+    <p class="sapi-centre__empty"<?php echo $cards ? ' hidden' : ''; ?>><?php echo $cards ? 'Aucun luminaire ne correspond.' : 'Les notices arrivent bientôt.'; ?> Écrivez-moi, je vous envoie la notice.</p>
+  </div>
+  <?php
+  return ob_get_clean();
+});
+
+/** La page qui contient le code court charge le CSS et le JS du centre. */
+function sapi_centre_is_page() {
+  if (!is_page()) return false;
+  $post = get_post();
+  return $post && has_shortcode((string) $post->post_content, 'centre_assemblage');
+}
+
 /* ── SEO ─────────────────────────────────────────────────────────────────── */
 /**
  * Produit publié de chaque version : [index de version => id produit].
@@ -653,7 +720,7 @@ add_filter('woocommerce_rest_prepare_product_object', function ($response, $prod
 
 /* ── Assets ──────────────────────────────────────────────────────────────── */
 add_action('wp_enqueue_scripts', function () {
-  $on_centre = is_singular('notice_montage') || is_post_type_archive('notice_montage');
+  $on_centre = is_singular('notice_montage') || sapi_centre_is_page();
   $on_product = function_exists('is_product') && is_product();
   if (!$on_centre && !$on_product) return;
 

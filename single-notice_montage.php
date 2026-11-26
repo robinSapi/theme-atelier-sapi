@@ -31,7 +31,7 @@ while (have_posts()) : the_post();
 <main class="sapi-notice" data-notice="<?php echo (int) $nid; ?>">
   <div class="sapi-notice__inner">
 
-    <p class="sapi-notice__back"><a href="<?php echo esc_url(get_post_type_archive_link('notice_montage')); ?>">← Centre d'assemblage</a></p>
+    <p class="sapi-notice__back"><a href="<?php echo esc_url(sapi_centre_url()); ?>">← Centre d'assemblage</a></p>
 
     <header class="sapi-notice__head">
       <div>
