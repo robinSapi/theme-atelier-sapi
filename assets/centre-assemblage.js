@@ -69,6 +69,7 @@
   root.classList.add('js-phases');
 
   function setOpen(phase, open) {
+    if (!open) phase.querySelectorAll('.sapi-video').forEach(resetVideo);
     phase.classList.toggle('is-open', open);
     phase.querySelector('.sapi-phase__head').setAttribute('aria-expanded', open ? 'true' : 'false');
     refreshAction(phase);
@@ -100,29 +101,34 @@
     });
   });
 
-  /* ── Version : change le bloc électricité ── */
+  /* ── Version : change l'électricité, et l'énigme + la vidéo si la version a les siennes ── */
   var pills = Array.prototype.slice.call(root.querySelectorAll('.sapi-notice__pill'));
   var lieu = root.querySelector('[data-version-lieu]');
-  pills.forEach(function (pill) {
-    pill.addEventListener('click', function () {
-      var idx = pill.getAttribute('data-version');
-      pills.forEach(function (x) {
-        var on = x === pill;
-        x.classList.toggle('is-active', on);
-        x.setAttribute('aria-pressed', on ? 'true' : 'false');
-      });
-      root.querySelectorAll('[data-version-panel]').forEach(function (panel) {
-        var on = panel.getAttribute('data-version-panel') === idx;
-        panel.hidden = !on;
-        if (on && lieu) lieu.textContent = panel.getAttribute('data-lieu') || '';
-      });
+  function selectVersion(idx) {
+    pills.forEach(function (x) {
+      var on = x.getAttribute('data-version') === idx;
+      x.classList.toggle('is-active', on);
+      x.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
+    root.querySelectorAll('[data-version-panel]').forEach(function (panel) {
+      var on = panel.getAttribute('data-version-panel') === idx;
+      panel.hidden = !on;
+      if (on && lieu && panel.hasAttribute('data-lieu')) lieu.textContent = panel.getAttribute('data-lieu');
+    });
+    // Une vidéo lancée dans une version masquée continuerait de jouer : on remet l'affiche.
+    root.querySelectorAll('.sapi-video').forEach(resetVideo);
+    root.querySelectorAll('.sapi-enigme__tile[data-hint]').forEach(function (t) { t.setAttribute('aria-expanded', 'false'); t.classList.remove('is-active'); });
+    root.querySelectorAll('[data-hint-text]').forEach(function (h) { h.hidden = true; });
+  }
+  pills.forEach(function (pill) {
+    pill.addEventListener('click', function () { selectVersion(pill.getAttribute('data-version')); });
   });
 
   /* ── Onglets énigme / guidé ── */
   var tabs = Array.prototype.slice.call(root.querySelectorAll('.sapi-tabs [role="tab"]'));
   tabs.forEach(function (tab) {
     tab.addEventListener('click', function () {
+      root.querySelectorAll('.sapi-video').forEach(resetVideo);
       tabs.forEach(function (t) {
         var on = t === tab;
         t.classList.toggle('is-active', on);
@@ -134,7 +140,7 @@
   });
 
   /* ── Indices de l'énigme ── */
-  var tiles = Array.prototype.slice.call(root.querySelectorAll('.sapi-enigme__tile'));
+  var tiles = Array.prototype.slice.call(root.querySelectorAll('.sapi-enigme__tile[data-hint]'));
   tiles.forEach(function (tile) {
     tile.addEventListener('click', function () {
       var k = tile.getAttribute('data-hint');
@@ -151,19 +157,29 @@
   });
 
   /* ── Vidéo YouTube chargée au clic (pas d'iframe ni de cookie avant) ── */
-  var video = root.querySelector('.sapi-video');
-  function playAt(sec) {
+  root.querySelectorAll('.sapi-video').forEach(function (v) { v._poster = v.innerHTML; });
+  function resetVideo(v) {
+    if (v._poster && v.querySelector('iframe')) v.innerHTML = v._poster;
+  }
+  function playAt(video, sec) {
     if (!video) return;
     var id = video.getAttribute('data-yt');
     var src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0' + (sec ? '&start=' + sec : '');
     video.innerHTML = '<iframe src="' + src + '" title="Vidéo de montage" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
     video.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
-  if (video) {
-    var poster = video.querySelector('.sapi-video__poster');
-    if (poster) poster.addEventListener('click', function () { playAt(0); });
-  }
-  root.querySelectorAll('[data-seek]').forEach(function (b) {
-    b.addEventListener('click', function () { playAt(parseInt(b.getAttribute('data-seek'), 10) || 0); });
+  // Délégation : l'affiche est recréée quand on change de version.
+  root.addEventListener('click', function (e) {
+    var poster = e.target.closest('.sapi-video__poster');
+    if (poster) return playAt(poster.closest('.sapi-video'), 0);
+    var seek = e.target.closest('[data-seek]');
+    if (seek) {
+      var guide = seek.closest('.sapi-guide');
+      playAt(guide && guide.querySelector('.sapi-video'), parseInt(seek.getAttribute('data-seek'), 10) || 0);
+    }
   });
+
+  /* ── Lien depuis une fiche produit : ?version=N ouvre la bonne version ── */
+  var m = /[?&]version=(\d+)/.exec(window.location.search);
+  if (m && root.querySelector('.sapi-notice__pill[data-version="' + m[1] + '"]')) selectVersion(m[1]);
 })();

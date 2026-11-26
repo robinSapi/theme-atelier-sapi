@@ -36,7 +36,7 @@
 .sapi-phase__panel { padding: 0 24px 24px; }
 .js-phases .sapi-phase:not(.is-open) .sapi-phase__panel { display: none; }
 .sapi-phase__split { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
-.sapi-phase__split[hidden] { display: none; }
+.sapi-phase__split[hidden], .sapi-guide[hidden], .sapi-enigme-bloc[hidden] { display: none; }
 .sapi-phase__visual { flex: 0 1 320px; }
 .sapi-phase__visual img { width: 100%; height: auto; border-radius: 12px; display: block; }
 .sapi-phase__text { flex: 1 1 320px; min-width: 0; color: var(--color-dark, #323232); font-size: 16px; line-height: 1.6; }
@@ -61,6 +61,19 @@
 .sapi-enigme__sym { display: flex; align-items: center; justify-content: center; gap: 10px; line-height: 1; color: var(--color-dark, #323232); }
 .sapi-enigme__big { font-size: 52px; }
 .sapi-enigme__join { font-size: 15px; font-weight: 600; color: var(--color-wood, #937D68); }
+div.sapi-enigme__tile { cursor: default; }
+.sapi-enigme__img { width: auto; max-width: 100%; max-height: 72px; object-fit: contain; }
+.sapi-step { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.sapi-step__row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.sapi-step--double .sapi-enigme__big { font-size: 38px; }
+.sapi-step__plus, .sapi-step__fois { font-size: 18px; font-weight: 800; color: var(--color-wood, #937D68); }
+.sapi-step__fois { font-size: 20px; margin-top: 2px; }
+.sapi-step--action { gap: 6px; text-align: center; }
+.sapi-step__icon { font-size: 40px; line-height: 1; color: var(--color-wood, #937D68); }
+.sapi-step__verb { font-size: 16px; font-weight: 800; color: var(--color-dark, #323232); }
+.sapi-step__prec { font-family: var(--font-display, 'Square Peg', cursive); font-size: 24px; line-height: 1; color: var(--color-wood-dark, #4A3F35); }
+.sapi-enigme__vide { margin: 0; padding: 12px 16px; border-radius: var(--radius, 5px); background: var(--color-warm, #FBF6EA); color: var(--color-gray, #585858); }
+.sapi-guide__sym { font-weight: 700; margin-right: 4px; }
 .sapi-enigme__hint { margin: 12px 0 0; padding: 12px 16px; background: var(--color-warm, #FBF6EA); border-radius: var(--radius, 5px); color: var(--color-dark, #323232); }
 
 .sapi-guide { display: flex; flex-wrap: wrap; gap: 20px; }
@@ -136,6 +149,7 @@
   .sapi-phase__panel { padding: 0 16px 20px; }
   .sapi-enigme { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sapi-enigme__big { font-size: 44px; }
+  .sapi-step--double .sapi-enigme__big { font-size: 32px; }
   .sapi-tabs .sapi-script { display: none; }
   .sapi-phase__foot .sapi-btn-cta { width: 100%; }
   .sapi-centre__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }

@@ -25,7 +25,7 @@ foreach ($notices as $n) {
       'name' => sapi_notice_title($pid),
       'cat'  => ($cats && !is_wp_error($cats)) ? $cats[0]->name : '',
       'img'  => get_post_thumbnail_id($pid),
-      'url'  => get_permalink($n->ID),
+      'url'  => ($spec = sapi_notice_specs_for_product($pid)) ? $spec['url'] : get_permalink($n->ID), // ?version=N de ce produit
     ];
   }
 }

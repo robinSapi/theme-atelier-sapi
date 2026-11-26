@@ -17,8 +17,12 @@ while (have_posts()) : the_post();
   $nid      = get_the_ID();
   $produits = (array) (get_field('produits', $nid) ?: []);
   $versions = (array) (get_field('versions', $nid) ?: []);
-  $etapes   = (array) (get_field('etapes', $nid) ?: []);
-  $yt       = sapi_notice_youtube_id(get_field('video_youtube', $nid));
+  $asm      = sapi_notice_assemblages($nid);
+  // Une seule énigme si aucune version n'a d'assemblage propre ; sinon une par version.
+  $par_version = count($asm) > 1 && in_array(true, wp_list_pluck($asm, 'propre'), true);
+  $blocs    = $par_version ? $asm : [0 => $asm[0]];
+  $a_indice = false;
+  foreach ($blocs as $b) foreach ($b['etapes'] as $e) if (trim((string) ($e['indice'] ?? '')) !== '') $a_indice = true;
   $meta_line = sapi_notice_meta_line($nid);
   $aj_texte = get_field('abatjour_texte', $nid);
   $aj_image = (int) get_field('abatjour_image', $nid);
@@ -99,30 +103,38 @@ while (have_posts()) : the_post();
           </div>
 
           <div id="sapi-mode-enigme" role="tabpanel" aria-labelledby="sapi-tab-enigme">
-            <p>Chaque pièce porte un symbole : suivez l'ordre et trouvez les paires. Touchez une étape pour voir son indice.</p>
-            <div class="sapi-enigme">
-              <?php foreach ($etapes as $k => $e) : ?>
-              <button type="button" class="sapi-enigme__tile" data-hint="<?php echo (int) $k; ?>" aria-expanded="false">
-                <span class="sapi-enigme__n"><?php echo (int) $k + 1; ?></span>
-                <span class="sapi-enigme__sym">
-                  <span class="sapi-enigme__big"><?php echo esc_html($e['symbole_a']); ?></span>
-                  <?php if (!empty($e['symbole_b'])) : ?>
-                    <span class="sapi-enigme__join"><?php echo esc_html($e['liaison']); ?></span>
-                    <span class="sapi-enigme__big"><?php echo esc_html($e['symbole_b']); ?></span>
-                  <?php elseif (!empty($e['liaison']) && $e['liaison'] !== 'et') : ?>
-                    <span class="sapi-enigme__join"><?php echo esc_html($e['liaison']); ?></span>
-                  <?php endif; ?>
-                </span>
-              </button>
+            <p>Chaque pièce porte un symbole : suivez la plaquette dans l'ordre et trouvez les paires.<?php echo $a_indice ? ' Touchez une étape pour voir son indice.' : ''; ?></p>
+            <?php foreach ($blocs as $bi => $b) : ?>
+            <div class="sapi-enigme-bloc"<?php if ($par_version) echo ' data-version-panel="' . (int) $bi . '"' . ($bi ? ' hidden' : ''); ?>>
+              <?php if (!$b['etapes']) : ?>
+                <p class="sapi-enigme__vide">L'énigme de cette version arrive bientôt : suivez la vidéo en mode guidé.</p>
+              <?php else : ?>
+              <div class="sapi-enigme">
+                <?php foreach ($b['etapes'] as $k => $e) :
+                  $hk = $bi . '-' . $k;
+                  $indice = trim((string) ($e['indice'] ?? ''));
+                  $tag = $indice !== '' ? 'button' : 'div';
+                  $is_action = ($e['type'] ?? '') === 'action'; ?>
+                <<?php echo $tag; ?> class="sapi-enigme__tile<?php echo $is_action ? ' sapi-enigme__tile--action' : ''; ?>"<?php if ($indice !== '') echo ' type="button" data-hint="' . esc_attr($hk) . '" aria-expanded="false"'; ?>>
+                  <span class="sapi-enigme__n"><?php echo (int) $k + 1; ?></span>
+                  <?php if (!empty($e['photo'])) echo wp_get_attachment_image((int) $e['photo'], 'thumbnail', false, ['loading' => 'lazy', 'class' => 'sapi-enigme__img', 'alt' => '']); ?>
+                  <span class="sapi-enigme__sym" role="img" aria-label="<?php echo esc_attr(sapi_notice_step_text($e)); ?>"><?php echo sapi_notice_step_html($e); ?></span>
+                </<?php echo $tag; ?>>
+                <?php endforeach; ?>
+              </div>
+              <?php foreach ($b['etapes'] as $k => $e) :
+                $indice = trim((string) ($e['indice'] ?? ''));
+                if ($indice === '') continue; ?>
+                <p class="sapi-enigme__hint" data-hint-text="<?php echo esc_attr($bi . '-' . $k); ?>" hidden><strong>Indice <?php echo (int) $k + 1; ?> :</strong> <?php echo esc_html($indice); ?></p>
               <?php endforeach; ?>
+              <?php endif; ?>
             </div>
-            <?php foreach ($etapes as $k => $e) : ?>
-              <p class="sapi-enigme__hint" data-hint-text="<?php echo (int) $k; ?>" hidden><strong>Indice <?php echo (int) $k + 1; ?> :</strong> <?php echo esc_html($e['indice']); ?></p>
             <?php endforeach; ?>
           </div>
 
           <div id="sapi-mode-guide" role="tabpanel" aria-labelledby="sapi-tab-guide" hidden>
-            <div class="sapi-guide">
+            <?php foreach ($blocs as $bi => $b) : $yt = $b['yt']; ?>
+            <div class="sapi-guide"<?php if ($par_version) echo ' data-version-panel="' . (int) $bi . '"' . ($bi ? ' hidden' : ''); ?>>
               <?php if ($yt) : ?>
               <div class="sapi-video" data-yt="<?php echo esc_attr($yt); ?>">
                 <button type="button" class="sapi-video__poster" aria-label="Lire la vidéo de montage">
@@ -130,20 +142,27 @@ while (have_posts()) : the_post();
                   <svg viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="37"/><path d="M31 25 L53 38 L31 51 Z"/></svg>
                 </button>
               </div>
+              <?php else : ?>
+                <p class="sapi-enigme__vide">La vidéo de cette version arrive bientôt.</p>
               <?php endif; ?>
+              <?php if ($b['etapes']) : ?>
               <ol class="sapi-guide__steps">
-                <?php foreach ($etapes as $k => $e) :
-                  $sec = sapi_notice_seconds($e['temps_video'] ?? ''); ?>
+                <?php foreach ($b['etapes'] as $k => $e) :
+                  $sec = sapi_notice_seconds($e['temps_video'] ?? '');
+                  $indice = trim((string) ($e['indice'] ?? '')); ?>
                 <li>
                   <?php if (!empty($e['photo'])) echo wp_get_attachment_image((int) $e['photo'], 'thumbnail', false, ['loading' => 'lazy', 'class' => 'sapi-guide__photo']); ?>
                   <span>
-                    <?php echo esc_html($e['indice']); ?>
+                    <strong class="sapi-guide__sym"><?php echo esc_html(sapi_notice_step_text($e)); ?></strong>
+                    <?php if ($indice !== '') echo ' ' . esc_html($indice); ?>
                     <?php if ($yt && $sec !== '') : ?> <button type="button" class="sapi-guide__seek" data-seek="<?php echo (int) $sec; ?>">voir à <?php echo esc_html($e['temps_video']); ?></button><?php endif; ?>
                   </span>
                 </li>
                 <?php endforeach; ?>
               </ol>
+              <?php endif; ?>
             </div>
+            <?php endforeach; ?>
           </div>
 
           <div class="sapi-phase__foot"><button type="button" class="sapi-btn-cta" data-validate>Le luminaire est assemblé</button></div>
