@@ -58,7 +58,7 @@ function sapi_catalogue_canonical_cat($slug) {
  *      - label    : libellé affiché
  *      - cats     : 'all' ou tableau de slugs canoniques où la ligne s'applique
  *      - fallback : valeur par défaut si le champ est vide ('' = pas de défaut)
- *      - source   : 'acf' (défaut) | 'dimensions'
+ *      - source   : 'acf' (défaut) | 'dimensions' | 'notice' (notice de montage)
  * ========================================================================= */
 
 /**
@@ -102,9 +102,11 @@ function sapi_catalogue_specs_schema() {
       ['key' => 'materiau_cable',     'label' => 'Câble',     'cats' => 'all', 'fallback' => ''],
     ],
     'Installation' => [
-      ['key' => 'assemblage',              'label' => 'Assemblage',    'cats' => 'all',                          'fallback' => 'Notice et tuto vidéo'],
-      ['key' => 'installation_difficulte', 'label' => 'Difficulté',    'cats' => 'all',                          'fallback' => 'Facile (15-30 min)'],
-      ['key' => 'assemblage_outils',       'label' => 'Outils requis', 'cats' => 'all',                          'fallback' => 'Aucun'],
+      // Assemblage, difficulté, outils : lus dans la notice de montage du produit
+      // (Centre d'assemblage, source unique). Ligne omise si pas de notice.
+      ['key' => 'assemblage',              'label' => 'Assemblage',    'cats' => 'all',                          'fallback' => '', 'source' => 'notice'],
+      ['key' => 'difficulte',              'label' => 'Difficulté',    'cats' => 'all',                          'fallback' => '', 'source' => 'notice'],
+      ['key' => 'outils',                  'label' => 'Outils requis', 'cats' => 'all',                          'fallback' => '', 'source' => 'notice'],
       ['key' => 'entretien',               'label' => 'Entretien',     'cats' => 'all',                          'fallback' => 'Chiffon sec ou plumeau'],
       ['key' => 'interrupteur',            'label' => 'Interrupteur',  'cats' => ['lampadaires', 'lampesaposer'], 'fallback' => ''],
     ],
@@ -147,6 +149,7 @@ function sapi_catalogue_get_product_specs($product) {
 
   $has_acf = function_exists('get_field');
   $sections = [];
+  $notice_spec = function_exists('sapi_notice_specs_for_product') ? sapi_notice_specs_for_product($product_id) : null;
 
   foreach (sapi_catalogue_specs_schema() as $section_title => $rows) {
     $items = [];
@@ -156,7 +159,14 @@ function sapi_catalogue_get_product_specs($product) {
       $source = isset($row['source']) ? $row['source'] : 'acf';
       $value  = '';
 
-      if ($source === 'dimensions') {
+      if ($source === 'notice') {
+        $spec = $notice_spec;
+        if (!$spec) continue;
+        $value = $row['key'] === 'assemblage'
+          ? ($spec['yt'] ? 'Notice en ligne et tuto vidéo' : 'Notice en ligne')
+          : (string) ($spec[$row['key']] ?? '');
+        if ($value === '') continue;
+      } elseif ($source === 'dimensions') {
         // Priorité aux tailles réelles des variations ; repli sur ACF/WooCommerce.
         $sizes = sapi_catalogue_product_sizes($product);
         $value = $sizes ? implode(' · ', $sizes) : sapi_catalogue_product_dimensions($product, $has_acf);

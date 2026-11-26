@@ -771,12 +771,11 @@ get_header();
         ['label' => 'Finition',  'value' => 'Contreplaqué poncé'],
       ]],
       ['title' => 'Installation', 'icon' => $icon_installation, 'items' => [
-        ['label' => 'Assemblage',   'value' => 'Notice et tuto vidéo'],
-        ['label' => 'Difficulté',   'value' => 'Facile (15-30 min)'],
         ['label' => 'Entretien',    'value' => 'Chiffon sec ou plumeau'],
       ]],
     ];
 
+    $notice_spec = null; // rempli dans le try si une notice de montage relie ce produit
     try {
       // ── Déterminer la catégorie produit ──
       $product_cat_slugs = [];
@@ -831,9 +830,9 @@ get_header();
       $materiau_structure = ($has_acf ? (string) get_field('materiau_structure') : '')       ?: '100% bois';
       $bois               = ($has_acf ? (string) get_field('bois') : '')                     ?: 'Peuplier ou Okoumé - Au choix';
       $finition           = ($has_acf ? (string) get_field('finition') : '')                 ?: 'Contreplaqué poncé';
-      $assemblage         = ($has_acf ? (string) get_field('assemblage') : '')               ?: 'Notice et tuto vidéo';
-      $difficulte         = ($has_acf ? (string) get_field('installation_difficulte') : '')  ?: 'Facile (15-30 min)';
-      $outils_requis      = ($has_acf ? (string) get_field('assemblage_outils') : '')        ?: 'Aucun';
+      // Assemblage, difficulté et outils vivent dans la notice de montage du
+      // produit (Centre d'assemblage, source unique). Sans notice : rien d'affiché.
+      $notice_spec = function_exists('sapi_notice_specs_for_product') ? sapi_notice_specs_for_product(get_the_ID()) : null;
       $entretien          = ($has_acf ? (string) get_field('entretien') : '')                ?: 'Chiffon sec ou plumeau';
 
       // ── Champs ACF par catégorie (pas de fallback) ──
@@ -903,11 +902,14 @@ get_header();
 
       // Section 4 : Installation
       $specs_installation   = [];
-      $specs_installation[] = ['label' => 'Assemblage',  'value' => $assemblage];
-      $specs_installation[] = ['label' => 'Difficulté',  'value' => $difficulte];
-      $specs_installation[] = ['label' => 'Outils requis','value' => $outils_requis];
+      if ($notice_spec) {
+        if ($notice_spec['yt']) $specs_installation[] = ['type' => 'notice_video'];
+        if ($notice_spec['difficulte'] !== '') $specs_installation[] = ['label' => 'Difficulté',    'value' => $notice_spec['difficulte']];
+        if ($notice_spec['outils'] !== '')     $specs_installation[] = ['label' => 'Outils requis', 'value' => $notice_spec['outils']];
+      }
       $specs_installation[] = ['label' => 'Entretien',   'value' => $entretien];
       if ($interrupteur) $specs_installation[] = ['label' => 'Interrupteur', 'value' => $interrupteur];
+      if ($notice_spec)  $specs_installation[] = ['type' => 'notice_link'];
 
       $spec_sections = [
         ['title' => 'Dimensions',   'icon' => $icon_dimensions,   'items' => $specs_dimensions],
@@ -939,7 +941,11 @@ get_header();
           </summary>
           <div class="specs-accordion-content">
             <?php foreach ($section['items'] as $item) : ?>
-              <?php if (!empty($item['type']) && $item['type'] === 'ampoule_button') : ?>
+              <?php if (!empty($item['type']) && $item['type'] === 'notice_video') : ?>
+              <div class="spec-item spec-item-notice"><?php sapi_notice_render_install_video($notice_spec); ?></div>
+              <?php elseif (!empty($item['type']) && $item['type'] === 'notice_link') : ?>
+              <div class="spec-item spec-item-notice"><?php sapi_notice_render_install_link($notice_spec); ?></div>
+              <?php elseif (!empty($item['type']) && $item['type'] === 'ampoule_button') : ?>
               <div class="spec-item spec-item-ampoule">
                 <button type="button" class="add-ampoule-btn" data-product-id="<?php echo esc_attr($item['product_id']); ?>">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -970,7 +976,11 @@ get_header();
           </h3>
           <div class="specs-list">
             <?php foreach ($section['items'] as $item) : ?>
-              <?php if (!empty($item['type']) && $item['type'] === 'ampoule_button') : ?>
+              <?php if (!empty($item['type']) && $item['type'] === 'notice_video') : ?>
+              <div class="spec-item spec-item-notice"><?php sapi_notice_render_install_video($notice_spec); ?></div>
+              <?php elseif (!empty($item['type']) && $item['type'] === 'notice_link') : ?>
+              <div class="spec-item spec-item-notice"><?php sapi_notice_render_install_link($notice_spec); ?></div>
+              <?php elseif (!empty($item['type']) && $item['type'] === 'ampoule_button') : ?>
               <div class="spec-item spec-item-ampoule">
                 <button type="button" class="add-ampoule-btn" data-product-id="<?php echo esc_attr($item['product_id']); ?>">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -1017,9 +1027,6 @@ get_header();
         <span>Bois PEFC</span>
       </div>
     </div>
-
-    <?php // Centre d'assemblage : encart vidéo si une notice de montage relie ce produit.
-    if (function_exists('sapi_notice_render_encart')) sapi_notice_render_encart(get_the_ID()); ?>
   </section>
   <?php endif; // fin exclusion fiche technique accessoires ?>
 

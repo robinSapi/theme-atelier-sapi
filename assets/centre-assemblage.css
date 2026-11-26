@@ -1,10 +1,12 @@
-/* ═══ Centre d'assemblage — accueil, page de montage, encart fiche produit ═══
+/* ═══ Centre d'assemblage — accueil, page de montage, colonne Installation de la fiche produit ═══
    Charge sur /assemblage/, /assemblage/<notice>/ et les fiches produit.
    Couleurs et typos : variables de style.css uniquement. */
 
 .sapi-notice, .sapi-centre { background: var(--color-cream, #FEFDFB); color: var(--color-gray, #585858); }
 .sapi-notice__inner { max-width: 1120px; margin: 0 auto; padding: 28px 24px 56px; }
 .sapi-script { font-family: var(--font-display, 'Square Peg', cursive); font-weight: 400; }
+/* Le thème met les boutons en capitales : pas ici (titres d'étapes, pastilles, onglets, tuiles). */
+.sapi-notice button, .sapi-install-video, .sapi-video-modal button { text-transform: none; letter-spacing: normal; }
 
 /* ── En-tête de notice ── */
 .sapi-notice__back { margin: 0 0 16px; font-size: 14px; }
@@ -109,19 +111,26 @@
 .sapi-centre__info--dark { background: var(--color-wood-dark, #4A3F35); color: var(--color-cream, #FEFDFB); }
 .sapi-centre__info--dark h2, .sapi-centre__info--dark a { color: var(--color-cream, #FEFDFB); }
 
-/* ── Encart fiche produit ── */
-.sapi-notice-encart { display: flex; align-items: center; gap: 24px; max-width: 620px; margin: 28px 0 0; padding: 16px; background: #fff; border-radius: var(--radius-lg, 16px); box-shadow: var(--shadow-card); text-decoration: none; color: var(--color-gray, #585858); }
-.sapi-notice-encart:hover { box-shadow: var(--shadow-card-hover); }
-.sapi-notice-encart__thumb { position: relative; flex: 0 0 200px; height: 112px; border-radius: 10px; overflow: hidden; background: var(--color-dark, #323232); }
-.sapi-notice-encart__thumb img { width: 100%; height: 100%; object-fit: cover; opacity: .75; }
-.sapi-notice-encart .sapi-notice-encart__play { width: 44px; height: 44px; }
-.sapi-notice-encart__body { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.sapi-notice-encart__title { font-size: 17px; font-weight: 600; color: var(--color-dark, #323232); }
-.sapi-notice-encart__meta { font-size: 14px; }
-.sapi-notice-encart__link { margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--color-wood, #937D68); text-decoration: underline; }
+/* ── Fiche produit : colonne Installation (vidéo + lien notice) ── */
+.sapi-install-video { display: block; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; font-family: var(--font-body, Montserrat, sans-serif); }
+.sapi-install-video__thumb { position: relative; display: block; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: var(--color-dark, #323232); }
+.sapi-install-video__thumb img { width: 100%; height: 100%; object-fit: cover; opacity: .75; display: block; }
+.sapi-install-video .sapi-notice-encart__play { width: 44px; height: 44px; }
+.sapi-install-video:hover .sapi-install-video__thumb img { opacity: .9; }
+.sapi-install-video__label { display: block; margin-top: 8px; font-size: .9rem; font-weight: 600; color: var(--color-dark, #323232); }
+.sapi-install-link { font-size: .875rem; font-weight: 600; color: var(--color-wood, #937D68); text-decoration: underline; }
+.sapi-install-link:hover { color: var(--color-wood-mid, #6B5A4A); }
+
+/* ── Fenêtre vidéo ── */
+.sapi-video-modal { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(0,0,0,.8); }
+.sapi-video-modal__box { position: relative; width: min(960px, 100%); }
+.sapi-video-modal__frame { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; }
+.sapi-video-modal__frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.sapi-video-modal__close { position: absolute; top: -48px; right: 0; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #fff; color: var(--color-dark, #323232); font-size: 26px; line-height: 1; cursor: pointer; }
 
 /* ── Mobile ── */
 @media (max-width: 760px) {
+  .sapi-video-modal__close { top: auto; bottom: -56px; right: 50%; transform: translateX(50%); }
   .sapi-notice__title { font-size: 30px; }
   .sapi-phase__head { padding: 16px; gap: 12px; }
   .sapi-phase__panel { padding: 0 16px 20px; }
@@ -131,6 +140,4 @@
   .sapi-phase__foot .sapi-btn-cta { width: 100%; }
   .sapi-centre__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .sapi-centre__infos { grid-template-columns: 1fr; }
-  .sapi-notice-encart { gap: 14px; padding: 12px; }
-  .sapi-notice-encart__thumb { flex-basis: 120px; height: 68px; }
 }

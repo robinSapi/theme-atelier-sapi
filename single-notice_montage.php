@@ -19,7 +19,7 @@ while (have_posts()) : the_post();
   $versions = (array) (get_field('versions', $nid) ?: []);
   $etapes   = (array) (get_field('etapes', $nid) ?: []);
   $yt       = sapi_notice_youtube_id(get_field('video_youtube', $nid));
-  $meta     = array_filter([get_field('difficulte', $nid), get_field('duree', $nid), get_field('outils', $nid)]);
+  $meta_line = sapi_notice_meta_line($nid);
   $aj_texte = get_field('abatjour_texte', $nid);
   $aj_image = (int) get_field('abatjour_image', $nid);
   $first_thumb = $produits ? get_post_thumbnail_id($produits[0]) : 0;
@@ -33,7 +33,7 @@ while (have_posts()) : the_post();
       <div>
         <p class="sapi-notice__kicker">Notice de montage</p>
         <h1 class="sapi-notice__title"><?php echo sapi_notice_format_name(get_the_title()); ?></h1>
-        <?php if ($meta) : ?><p class="sapi-notice__meta"><?php echo esc_html(implode(' · ', $meta)); ?></p><?php endif; ?>
+        <?php if ($meta_line) : ?><p class="sapi-notice__meta"><?php echo esc_html($meta_line); ?></p><?php endif; ?>
       </div>
 
       <?php if (count($versions) > 1) : ?>

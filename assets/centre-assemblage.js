@@ -22,6 +22,44 @@
     });
   }
 
+  /* ── Fiche produit : la vignette ouvre la vidéo dans une fenêtre ── */
+  function openVideoModal(id, sec) {
+    var modal = document.createElement('div');
+    modal.className = 'sapi-video-modal';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Vidéo de montage');
+    modal.innerHTML = '<div class="sapi-video-modal__box"><button type="button" class="sapi-video-modal__close" aria-label="Fermer">×</button>'
+      + '<div class="sapi-video-modal__frame"><iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0' + (sec ? '&start=' + sec : '')
+      + '" title="Vidéo de montage" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div></div>';
+    var opener = document.activeElement;
+    var prevOverflow = document.documentElement.style.overflow;
+    var openedAt = Date.now(), downOnBackdrop = false;
+    function close() {
+      document.removeEventListener('keydown', onKey);
+      modal.remove();
+      document.documentElement.style.overflow = prevOverflow;
+      if (opener && opener.focus) opener.focus();
+    }
+    // Échap ne marche que tant que le focus n'est pas dans la vidéo : la croix reste visible.
+    function onKey(e) {
+      if (e.key === 'Escape') close();
+      if (e.key === 'Tab') { e.preventDefault(); modal.querySelector('.sapi-video-modal__close').focus(); }
+    }
+    modal.addEventListener('mousedown', function (e) { downOnBackdrop = e.target === modal; });
+    modal.addEventListener('click', function (e) {
+      if (e.target.classList.contains('sapi-video-modal__close')) return close();
+      if (e.target === modal && downOnBackdrop && Date.now() - openedAt > 350) close();
+    });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(modal);
+    document.documentElement.style.overflow = 'hidden';
+    modal.querySelector('.sapi-video-modal__close').focus();
+  }
+  document.querySelectorAll('.sapi-install-video[data-yt]').forEach(function (b) {
+    b.addEventListener('click', function () { openVideoModal(b.getAttribute('data-yt'), 0); });
+  });
+
   var root = document.querySelector('.sapi-notice');
   if (!root) return;
 
