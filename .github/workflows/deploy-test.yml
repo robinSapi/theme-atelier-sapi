@@ -6,6 +6,7 @@ on:
       - test-theme-sapi-maison
       - feature/photos-par-piece
       - feature/refonte-home
+      - feature/centre-assemblage
   workflow_dispatch:
 
 jobs:

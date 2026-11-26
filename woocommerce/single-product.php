@@ -1017,6 +1017,9 @@ get_header();
         <span>Bois PEFC</span>
       </div>
     </div>
+
+    <?php // Centre d'assemblage : encart vidéo si une notice de montage relie ce produit.
+    if (function_exists('sapi_notice_render_encart')) sapi_notice_render_encart(get_the_ID()); ?>
   </section>
   <?php endif; // fin exclusion fiche technique accessoires ?>
 
