@@ -828,6 +828,9 @@ add_filter('woocommerce_rest_prepare_product_object', function ($response, $prod
   // Calculé seulement si l'appelant le demande (&sapi_notice=1) : les autres
   // intégrations qui lisent l'API produits ne paient pas ce coût.
   if (!$request || !$request->get_param('sapi_notice')) return $response;
+  // Sans ACF, on ne sait rien des notices : on n'envoie pas la clé, pour que le
+  // hub garde sa dernière valeur au lieu d'enregistrer « aucune notice » partout.
+  if (!function_exists('get_field')) return $response;
   if ($response instanceof WP_REST_Response) {
     $data = $response->get_data();
     $data['sapi_notice'] = sapi_notice_hub_summary($product->get_id());
