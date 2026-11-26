@@ -57,7 +57,7 @@ add_action('woocommerce_before_add_to_cart_quantity', function () {
   $unit = $product->is_type('simple') ? (float) wc_get_price_to_display($product) : null;
   ?>
   <div class="sapi-plain-total" aria-live="polite"<?php echo $unit !== null ? ' data-unit="' . esc_attr($unit) . '"' : ' hidden'; ?>>
-    <p class="price"><span class="amount"><?php echo $unit !== null ? wp_kses_post(wc_price($unit)) : ''; ?></span></p>
+    <p class="price"><?php esc_html_e('Sous-total', 'theme-sapi-maison'); ?> <span class="amount"><?php echo $unit !== null ? wp_kses_post(wc_price($unit)) : ''; ?></span></p>
   </div>
   <?php
 });

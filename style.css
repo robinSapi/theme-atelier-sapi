@@ -20411,6 +20411,11 @@ body.woocommerce-cart div.woocommerce-wrapper {
    même rendu que la ligne Product Add-Ons des luminaires ci-dessus */
 .sapi-plain-total {
   width: 100%;
+  margin-bottom: 10px; /* même écart avec la quantité que sur un luminaire */
+}
+/* Produit variable : le conteneur a déjà son espacement (gap) */
+.woocommerce-variation-add-to-cart .sapi-plain-total {
+  margin-bottom: 0;
 }
 .sapi-plain-total[hidden] {
   display: none;
@@ -20419,6 +20424,8 @@ body.woocommerce-cart div.woocommerce-wrapper {
   color: #018501 !important;
   font-family: 'Montserrat', sans-serif;
   font-weight: 900;
+  font-size: 1.25rem;
+  line-height: 30px;
   margin: 0;
 }
 .sapi-plain-total p.price .amount {
