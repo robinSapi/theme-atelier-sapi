@@ -557,6 +557,52 @@ function sapi_notice_meta_line($nid) {
   return implode(' · ', array_filter([trim((string) get_field('difficulte', $nid)), trim((string) get_field('duree', $nid)), $o]));
 }
 
+/* ── Hub (taches.atelier-sapi.fr) ─────────────────────────────────────────── */
+/**
+ * État de la notice d'un produit, pour le hub : ajouté à la réponse
+ * /wp-json/wc/v3/products que le hub lit déjà avec sa clé WooCommerce.
+ * null si aucune notice n'est reliée (même en brouillon).
+ */
+function sapi_notice_hub_summary($product_id) {
+  if (!function_exists('get_field')) return null;
+  $nid = (int) get_post_meta($product_id, 'notice_montage', true);
+  if (!$nid || get_post_type($nid) !== 'notice_montage' || get_post_status($nid) === 'trash') $nid = 0;
+  if (!$nid) {
+    // Notice publiée reliée côté notice seulement (ancienne donnée) : on la retrouve quand même.
+    $nid = sapi_notice_for_product($product_id);
+    if (!$nid) return null;
+  }
+  $versions = (array) (get_field('versions', $nid) ?: []);
+  $vi  = sapi_notice_version_for_product($nid, $product_id);
+  $asm = sapi_notice_assemblages($nid);
+  $a   = $vi === null
+    ? ['yt' => sapi_notice_youtube_id(get_field('video_youtube', $nid)), 'etapes' => (array) (get_field('etapes', $nid) ?: []), 'propre' => false]
+    : ($asm[$vi] ?? $asm[0]);
+  $elec = $vi === null ? '' : trim((string) ($versions[$vi]['texte'] ?? ''));
+  return [
+    'id'        => $nid,
+    'title'     => sapi_notice_title($nid),
+    'status'    => get_post_status($nid),                 // publish, draft, pending…
+    'url'       => get_permalink($nid) . ($vi !== null && count($asm) > 1 ? '?version=' . $vi : ''),
+    'edit_url'  => admin_url('post.php?post=' . $nid . '&action=edit'),
+    'version'   => $vi === null ? null : (string) ($versions[$vi]['label'] ?? ''),
+    'versions'  => count($versions),
+    'video'     => $a['yt'] !== '',
+    'etapes'    => count($a['etapes']),
+    'propre'    => !empty($a['propre']),
+    'a_completer' => (bool) preg_match('/\[(à|a) (compléter|vérifier|préciser)|\[méthode/iu', $elec . ' ' . (string) get_field('abatjour_texte', $nid)),
+    'produits'  => array_values(array_map('intval', (array) (get_field('produits', $nid) ?: []))),
+  ];
+}
+add_filter('woocommerce_rest_prepare_product_object', function ($response, $product) {
+  if ($response instanceof WP_REST_Response) {
+    $data = $response->get_data();
+    $data['sapi_notice'] = sapi_notice_hub_summary($product->get_id());
+    $response->set_data($data);
+  }
+  return $response;
+}, 10, 2);
+
 /* ── Assets ──────────────────────────────────────────────────────────────── */
 add_action('wp_enqueue_scripts', function () {
   $on_centre = is_singular('notice_montage') || is_post_type_archive('notice_montage');
