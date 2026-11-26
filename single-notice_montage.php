@@ -107,7 +107,9 @@ while (have_posts()) : the_post();
             <?php foreach ($blocs as $bi => $b) : ?>
             <div class="sapi-enigme-bloc"<?php if ($par_version) echo ' data-version-panel="' . (int) $bi . '"' . ($bi ? ' hidden' : ''); ?>>
               <?php if (!$b['etapes']) : ?>
-                <p class="sapi-enigme__vide">L'énigme de cette version arrive bientôt : suivez la vidéo en mode guidé.</p>
+                <p class="sapi-enigme__vide"><?php echo $b['yt']
+                  ? 'L\'énigme de cette version arrive bientôt : suivez la vidéo en mode guidé.'
+                  : 'Le montage de cette version arrive bientôt. En attendant, écrivez-moi : je vous guide.'; ?></p>
               <?php else : ?>
               <div class="sapi-enigme">
                 <?php foreach ($b['etapes'] as $k => $e) :
