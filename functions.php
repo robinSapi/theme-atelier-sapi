@@ -1287,6 +1287,18 @@ function sapi_get_product_photo_ids_with_fallback($post_id, $type = '', $limit =
 }
 
 /**
+ * Prix de la variation toujours affiché sur la fiche produit (26/11/2026).
+ *
+ * Le thème masque le prix général de la fiche (.product-price-v2) : c'est le
+ * prix de la variation choisie, sous les sélecteurs, qui fait foi. Or
+ * WooCommerce n'envoie pas ce prix quand toutes les variations coûtent pareil
+ * (Câble et douille chevet E14/E27, Platine applique peuplier/okoumé) : la
+ * fiche n'affichait alors aucun prix. Sans effet sur les produits dont les
+ * variations ont des prix différents (déjà affichés).
+ */
+add_filter('woocommerce_show_variation_price', '__return_true');
+
+/**
  * Le prix d'un produit peut-il monter à cause d'un Product Add-On payant ?
  *
  * Sert à décider si le label « À partir de » du bloc prix est vrai. Sur un
