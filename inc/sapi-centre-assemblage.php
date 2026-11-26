@@ -61,7 +61,7 @@ add_action('template_redirect', function () {
   $base = trim((string) parse_url(home_url(), PHP_URL_PATH), '/');
   if ($base !== '' && strpos($path, $base . '/') === 0) $path = substr($path, strlen($base) + 1);
   if (strtolower($path) === 'montage') {
-    wp_redirect(home_url('/assemblage/?src=qr'), 302);
+    wp_redirect(add_query_arg('src', 'qr', sapi_centre_url()), 302);
     exit;
   }
 }, 1);
@@ -204,6 +204,7 @@ add_action('acf/init', function () {
 /** Résumé de la notice sous le champ, dans l'encadré produit. */
 add_action('add_meta_boxes_product', function () {
   add_meta_box('sapi-notice-resume', 'Résumé de la notice de montage', function ($post) {
+    if (!function_exists('get_field')) { echo '<p>ACF est désactivé : résumé indisponible.</p>'; return; }
     $nid = (int) get_post_meta($post->ID, 'notice_montage', true);
     if (!$nid || get_post_type($nid) !== 'notice_montage' || get_post_status($nid) === 'trash') $nid = sapi_notice_for_product($post->ID);
     if (!$nid) {
@@ -419,6 +420,11 @@ function sapi_notice_cat_suffix($product_id) {
  * Sans assemblage propre, une version prend l'assemblage commun de la notice.
  */
 function sapi_notice_assemblages($nid) {
+  static $cache = [];
+  if (isset($cache[$nid])) return $cache[$nid];
+  return $cache[$nid] = sapi_notice_assemblages_calc($nid);
+}
+function sapi_notice_assemblages_calc($nid) {
   $commun = [
     'yt'     => sapi_notice_youtube_id(get_field('video_youtube', $nid)),
     'etapes' => (array) (get_field('etapes', $nid) ?: []),
@@ -541,14 +547,14 @@ function sapi_notice_render_install_video($spec) {
       <img src="<?php echo esc_url('https://i.ytimg.com/vi/' . $spec['yt'] . '/hqdefault.jpg'); ?>" alt="" loading="lazy" width="320" height="180">
       <svg class="sapi-notice-encart__play" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="37"/><path d="M31 25 L53 38 L31 51 Z"/></svg>
     </span>
-    <span class="sapi-install-video__label">Le montage en vidéo</span>
+    <span class="sapi-install-video__label"><?php echo esc_html(sapi_notice_txt('fp_video')); ?></span>
   </button>
   <?php endif;
 }
 
 function sapi_notice_render_install_link($spec) {
   if (!$spec) return; ?>
-  <a class="sapi-install-link" href="<?php echo esc_url($spec['url']); ?>">Voir la notice de montage →</a>
+  <a class="sapi-install-link" href="<?php echo esc_url($spec['url']); ?>"><?php echo esc_html(sapi_notice_txt('fp_lien')); ?></a>
   <?php
 }
 
@@ -558,6 +564,100 @@ function sapi_notice_meta_line($nid) {
   $o = ($outils === '' ) ? '' : (preg_match('/^(aucun|sans)/iu', $outils) ? 'Sans outil' : 'Outils : ' . $outils);
   return implode(' · ', array_filter([trim((string) get_field('difficulte', $nid)), trim((string) get_field('duree', $nid)), $o]));
 }
+
+/* ── Textes communs à toutes les notices (Notices de montage › Textes communs) ── */
+/**
+ * Clé => [onglet, libellé, texte par défaut, type]. Le défaut s'affiche tant
+ * que le champ n'a jamais été enregistré ; un champ vidé revient au défaut
+ * (on ne laisse jamais un bouton ou un titre vide sur la page).
+ */
+function sapi_notice_textes_def() {
+  return [
+    'retour'        => ['En-tête', 'Lien retour', '← Centre d\'assemblage', 'text'],
+    'kicker'        => ['En-tête', 'Petit titre au-dessus du nom', 'Notice de montage', 'text'],
+    'versions'      => ['En-tête', 'Choix de la version', 'Votre version', 'text'],
+    'e1_titre'      => ['Étape 1', 'Titre', 'Installer le système électrique', 'text'],
+    'e1_courant'    => ['Étape 1', 'Rappel sécurité', 'Coupez le courant au disjoncteur avant de toucher aux fils.', 'text'],
+    'e1_bouton'     => ['Étape 1', 'Bouton', "C'est installé", 'text'],
+    'e2_titre'      => ['Étape 2', 'Titre', 'Assembler le luminaire', 'text'],
+    'e2_sous'       => ['Étape 2', 'Sous-titre', 'En mode énigme ou guidé', 'text'],
+    'e2_enigme'     => ['Étape 2', 'Onglet énigme', 'Mode énigme', 'text'],
+    'e2_enigme_s'   => ['Étape 2', 'Onglet énigme, mention manuscrite', 'à vous de chercher', 'text'],
+    'e2_guide'      => ['Étape 2', 'Onglet guidé', 'Mode guidé', 'text'],
+    'e2_guide_s'    => ['Étape 2', 'Onglet guidé, mention manuscrite', 'le tuto vidéo', 'text'],
+    'e2_intro'      => ['Étape 2', 'Consigne du mode énigme', "Chaque pièce porte un symbole : suivez la plaquette dans l'ordre et trouvez les paires.", 'textarea'],
+    'e2_indice'     => ['Étape 2', 'Ajout quand des indices existent', 'Touchez une étape pour voir son indice.', 'text'],
+    'e2_sans_enigme'=> ['Étape 2', 'Version sans énigme mais avec vidéo', "L'énigme de cette version arrive bientôt : suivez la vidéo en mode guidé.", 'text'],
+    'e2_sans_rien'  => ['Étape 2', 'Version sans énigme ni vidéo', 'Le montage de cette version arrive bientôt. En attendant, écrivez-moi : je vous guide.', 'text'],
+    'e2_sans_video' => ['Étape 2', 'Mode guidé sans vidéo', 'La vidéo de cette version arrive bientôt.', 'text'],
+    'e2_indice_lbl' => ['Étape 2', 'Étiquette d\'un indice (suivie du numéro)', 'Indice', 'text'],
+    'e2_voir_a'     => ['Étape 2', 'Bouton vers un moment de la vidéo (suivi du temps)', 'voir à', 'text'],
+    'e2_bouton'     => ['Étape 2', 'Bouton', 'Le luminaire est assemblé', 'text'],
+    'e3_titre'      => ['Étape 3', 'Titre', "Fixer l'abat-jour", 'text'],
+    'e3_sous'       => ['Étape 3', 'Sous-titre', 'Sur le système électrique', 'text'],
+    'e3_bouton'     => ['Étape 3', 'Bouton', "C'est fixé, j'allume", 'text'],
+    'fin_slogan'    => ['Fin', 'Slogan (manuscrit)', 'Assemblez, Éclairez, Admirez !', 'text'],
+    'fin_texte'     => ['Fin', 'Texte', "Il est allumé ? Envoyez-moi une photo, ou laissez un avis : ça aide d'autres personnes à choisir.", 'textarea'],
+    'fin_photo'     => ['Fin', 'Bouton photo', 'Envoyer une photo', 'text'],
+    'fin_atelier'   => ['Fin', 'Bouton quand aucun produit n\'est relié', 'Découvrir l\'atelier', 'text'],
+    'fin_produit'   => ['Fin', 'Bouton vers le produit', 'Revoir la fiche du luminaire', 'text'],
+    'aide'          => ['Aide', 'Phrase avant le contact', 'Ça coince ? Écrivez-moi :', 'text'],
+    'email'         => ['Aide', 'E-mail', 'commande@atelier-sapi.fr', 'email'],
+    'telephone'     => ['Aide', 'Téléphone', '06 80 43 55 85', 'text'],
+    'fp_video'      => ['Fiche produit', 'Sous la vignette vidéo', 'Le montage en vidéo', 'text'],
+    'fp_lien'       => ['Fiche produit', 'Lien vers la notice', 'Voir la notice de montage →', 'text'],
+    'c_qr'          => ['Page Centre', 'Bandeau après le scan du QR code', 'Vous venez de scanner le QR code de votre colis : choisissez votre luminaire.', 'text'],
+    'c_recherche'   => ['Page Centre', 'Libellé de la recherche', 'Rechercher un luminaire', 'text'],
+    'c_exemples'    => ['Page Centre', 'Exemples dans la recherche', 'Olivia, Mireille, Alice…', 'text'],
+    'c_aucun'       => ['Page Centre', 'Aucun résultat', 'Aucun luminaire ne correspond. Écrivez-moi, je vous envoie la notice.', 'text'],
+    'c_vide'        => ['Page Centre', 'Aucune notice publiée', 'Les notices arrivent bientôt. Écrivez-moi, je vous envoie la notice.', 'text'],
+  ];
+}
+
+/** Numéro pour un lien tel: international (06… → +336…). */
+function sapi_notice_tel($t) {
+  $n = preg_replace('/[^0-9+]/', '', (string) $t);
+  if (preg_match('/^0(\d{9})$/', $n, $m)) $n = '+33' . $m[1];
+  return $n;
+}
+
+/** Texte commun, ou son défaut si le champ est vide ou ACF absent. */
+function sapi_notice_txt($key) {
+  static $cache = [];
+  if (isset($cache[$key])) return $cache[$key];
+  $def = sapi_notice_textes_def()[$key][2] ?? '';
+  $v = function_exists('get_field') ? trim((string) get_field('sapi_nt_' . $key, 'option')) : '';
+  return $cache[$key] = ($v !== '' ? $v : $def);
+}
+
+add_action('acf/init', function () {
+  if (!function_exists('acf_add_options_sub_page') || !function_exists('acf_add_local_field_group')) return;
+  acf_add_options_sub_page([
+    'page_title'  => 'Textes communs des notices',
+    'menu_title'  => 'Textes communs',
+    'menu_slug'   => 'notices-textes-communs',
+    'parent_slug' => 'edit.php?post_type=notice_montage',
+    'capability'  => 'edit_posts',
+  ]);
+  $fields = [];
+  $tab = '';
+  foreach (sapi_notice_textes_def() as $k => $d) {
+    if ($d[0] !== $tab) {
+      $tab = $d[0];
+      $fields[] = ['key' => 'field_nt_tab_' . sanitize_key($tab), 'label' => $tab, 'type' => 'tab'];
+    }
+    $f = ['key' => 'field_nt_' . $k, 'label' => $d[1], 'name' => 'sapi_nt_' . $k, 'type' => $d[3],
+          'placeholder' => $d[2], 'instructions' => 'Vide = texte par défaut affiché en gris.'];
+    if ($d[3] === 'textarea') { $f['rows'] = 2; $f['new_lines'] = ''; }
+    $fields[] = $f;
+  }
+  acf_add_local_field_group([
+    'key'      => 'group_notice_textes',
+    'title'    => 'Textes affichés sur toutes les pages de montage',
+    'location' => [[['param' => 'options_page', 'operator' => '==', 'value' => 'notices-textes-communs']]],
+    'fields'   => $fields,
+  ]);
+});
 
 /* ── Page « Centre d'assemblage » ─────────────────────────────────────────── */
 /** Adresse de l'accueil du centre : la page /assemblage/ (repli sur l'URL brute). */
@@ -595,9 +695,9 @@ add_shortcode('centre_assemblage', function () {
   $from_qr = (($_GET['src'] ?? '') === 'qr');
   ob_start(); ?>
   <div class="sapi-centre-liste">
-    <?php if ($from_qr) : ?><p class="sapi-centre__qr">Vous venez de scanner le QR code de votre colis : choisissez votre luminaire.</p><?php endif; ?>
-    <label class="sapi-centre__label" for="sapi-centre-q">Rechercher un luminaire</label>
-    <input id="sapi-centre-q" class="sapi-centre__search" type="search" placeholder="Olivia, Mireille, Alice…" autocomplete="off">
+    <?php if ($from_qr) : ?><p class="sapi-centre__qr"><?php echo esc_html(sapi_notice_txt('c_qr')); ?></p><?php endif; ?>
+    <label class="sapi-centre__label" for="sapi-centre-q"><?php echo esc_html(sapi_notice_txt('c_recherche')); ?></label>
+    <input id="sapi-centre-q" class="sapi-centre__search" type="search" placeholder="<?php echo esc_attr(sapi_notice_txt('c_exemples')); ?>" autocomplete="off">
     <?php if ($cards) : ?>
     <ul class="sapi-centre__grid">
       <?php foreach ($cards as $c) : ?>
@@ -611,7 +711,7 @@ add_shortcode('centre_assemblage', function () {
       <?php endforeach; ?>
     </ul>
     <?php endif; ?>
-    <p class="sapi-centre__empty"<?php echo $cards ? ' hidden' : ''; ?>><?php echo $cards ? 'Aucun luminaire ne correspond.' : 'Les notices arrivent bientôt.'; ?> Écrivez-moi, je vous envoie la notice.</p>
+    <p class="sapi-centre__empty"<?php echo $cards ? ' hidden' : ''; ?>><?php echo esc_html(sapi_notice_txt($cards ? 'c_aucun' : 'c_vide')); ?></p>
   </div>
   <?php
   return ob_get_clean();
@@ -631,13 +731,18 @@ function sapi_centre_is_page() {
  */
 function sapi_notice_product_links($nid) {
   $out = [];
+  $repli = 0;
   $versions = (array) (get_field('versions', $nid) ?: []);
   foreach ((array) (get_field('produits', $nid) ?: []) as $pid) {
     $pid = (int) $pid;
     if (get_post_status($pid) !== 'publish') continue;
+    if (!$repli) $repli = $pid;
     $vi = count($versions) > 1 ? sapi_notice_version_for_product($nid, $pid) : 0;
     if ($vi !== null && !isset($out[$vi])) $out[$vi] = $pid;
   }
+  if (!$repli) return [];
+  // Chaque version garde un bouton : sans produit à elle, celui du premier produit publié.
+  foreach (array_keys($versions ?: [0 => null]) as $vi) if (!isset($out[$vi])) $out[$vi] = $repli;
   ksort($out);
   return $out;
 }
@@ -647,12 +752,23 @@ function sapi_notice_product_links($nid) {
  * qu'aucun texte ne porte encore [À COMPLÉTER], [À VÉRIFIER], [MÉTHODE À PRÉCISER]…
  */
 function sapi_notice_is_complete($nid) {
-  foreach (sapi_notice_assemblages($nid) as $a) {
-    if (!$a['etapes'] && $a['yt'] === '') return false;
-  }
+  static $cache = [];
+  if (isset($cache[$nid])) return $cache[$nid];
   $textes = (string) get_field('abatjour_texte', $nid);
   foreach ((array) (get_field('versions', $nid) ?: []) as $v) $textes .= ' ' . ($v['texte'] ?? '');
-  return !preg_match('/\[(à|a) (compléter|vérifier|préciser)|\[méthode/iu', $textes);
+  foreach (sapi_notice_assemblages($nid) as $a) {
+    if (!$a['etapes'] && $a['yt'] === '') return $cache[$nid] = false;
+    foreach ($a['etapes'] as $e) {
+      if (($e['type'] ?? '') === 'action' && ($e['action'] ?? '') === 'libre' && trim((string) ($e['action_texte'] ?? '')) === '') return $cache[$nid] = false;
+      $textes .= ' ' . ($e['indice'] ?? '') . ' ' . ($e['precision'] ?? '') . ' ' . ($e['action_texte'] ?? '');
+    }
+  }
+  return $cache[$nid] = !sapi_notice_a_completer($textes);
+}
+
+/** Marqueurs de texte provisoire : [À COMPLÉTER], [A VERIFIER], [MÉTHODE À PRÉCISER]… */
+function sapi_notice_a_completer($texte) {
+  return (bool) preg_match('/\[(à|a) (compl[ée]ter|v[ée]rifier|pr[ée]ciser)|\[m[ée]thode/iu', (string) $texte);
 }
 
 /** Notice incomplète : hors des moteurs de recherche (Yoast), jusqu'à ce qu'elle soit finie. */
@@ -664,11 +780,14 @@ add_filter('wpseo_robots', function ($robots) {
 });
 /** …et hors du sitemap Yoast. */
 add_filter('wpseo_exclude_from_sitemap_by_post_ids', function ($ids) {
+  static $exclus = null;
   if (!function_exists('get_field')) return $ids;
+  if ($exclus !== null) return array_merge((array) $ids, $exclus);
+  $exclus = [];
   foreach (get_posts(['post_type' => 'notice_montage', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'no_found_rows' => true]) as $nid) {
-    if (!sapi_notice_is_complete($nid)) $ids[] = $nid;
+    if (!sapi_notice_is_complete($nid)) $exclus[] = $nid;
   }
-  return $ids;
+  return array_merge((array) $ids, $exclus);
 });
 
 /* ── Hub (taches.atelier-sapi.fr) ─────────────────────────────────────────── */
@@ -697,26 +816,29 @@ function sapi_notice_hub_summary($product_id) {
     'id'        => $nid,
     'title'     => sapi_notice_title($nid),
     'status'    => get_post_status($nid),                 // publish, draft, pending…
-    'url'       => get_permalink($nid) . ($vi !== null && count($asm) > 1 ? '?version=' . $vi : ''),
+    'url'       => ($vi !== null && count($asm) > 1) ? add_query_arg('version', $vi, get_permalink($nid)) : get_permalink($nid),
     'edit_url'  => admin_url('post.php?post=' . $nid . '&action=edit'),
     'version'   => $vi === null ? null : (string) ($versions[$vi]['label'] ?? ''),
     'versions'  => count($versions),
     'video'     => $a['yt'] !== '',
     'etapes'    => count($a['etapes']),
     'propre'    => !empty($a['propre']),
-    'a_completer' => (bool) preg_match('/\[(à|a) (compléter|vérifier|préciser)|\[méthode/iu', $elec . ' ' . (string) get_field('abatjour_texte', $nid)),
+    'a_completer' => sapi_notice_a_completer($elec . ' ' . (string) get_field('abatjour_texte', $nid)),
     'complete'  => sapi_notice_is_complete($nid),   // même règle que le noindex
     'produits'  => array_values(array_map('intval', (array) (get_field('produits', $nid) ?: []))),
   ];
 }
-add_filter('woocommerce_rest_prepare_product_object', function ($response, $product) {
+add_filter('woocommerce_rest_prepare_product_object', function ($response, $product, $request) {
+  // Calculé seulement si l'appelant le demande (&sapi_notice=1) : les autres
+  // intégrations qui lisent l'API produits ne paient pas ce coût.
+  if (!$request || !$request->get_param('sapi_notice')) return $response;
   if ($response instanceof WP_REST_Response) {
     $data = $response->get_data();
     $data['sapi_notice'] = sapi_notice_hub_summary($product->get_id());
     $response->set_data($data);
   }
   return $response;
-}, 10, 2);
+}, 10, 3);
 
 /* ── Assets ──────────────────────────────────────────────────────────────── */
 add_action('wp_enqueue_scripts', function () {

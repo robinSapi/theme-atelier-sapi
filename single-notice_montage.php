@@ -31,18 +31,18 @@ while (have_posts()) : the_post();
 <main class="sapi-notice" data-notice="<?php echo (int) $nid; ?>">
   <div class="sapi-notice__inner">
 
-    <p class="sapi-notice__back"><a href="<?php echo esc_url(sapi_centre_url()); ?>">← Centre d'assemblage</a></p>
+    <p class="sapi-notice__back"><a href="<?php echo esc_url(sapi_centre_url()); ?>"><?php echo esc_html(sapi_notice_txt('retour')); ?></a></p>
 
     <header class="sapi-notice__head">
       <div>
-        <p class="sapi-notice__kicker">Notice de montage</p>
+        <p class="sapi-notice__kicker"><?php echo esc_html(sapi_notice_txt('kicker')); ?></p>
         <h1 class="sapi-notice__title"><?php echo sapi_notice_format_name(get_the_title()); ?></h1>
         <?php if ($meta_line) : ?><p class="sapi-notice__meta"><?php echo esc_html($meta_line); ?></p><?php endif; ?>
       </div>
 
       <?php if (count($versions) > 1) : ?>
       <div class="sapi-notice__versions">
-        <p class="sapi-notice__label" id="sapi-notice-versions-label">Votre version</p>
+        <p class="sapi-notice__label" id="sapi-notice-versions-label"><?php echo esc_html(sapi_notice_txt('versions')); ?></p>
         <div class="sapi-notice__pills" role="group" aria-labelledby="sapi-notice-versions-label">
           <?php foreach ($versions as $i => $v) :
             $vign = (int) ($v['vignette'] ?? 0) ?: $first_thumb; ?>
@@ -63,7 +63,7 @@ while (have_posts()) : the_post();
         <button type="button" class="sapi-phase__head" aria-expanded="true" aria-controls="sapi-phase-1">
           <span class="sapi-phase__badge">1</span>
           <span class="sapi-phase__titles">
-            <span class="sapi-phase__title">Installer le système électrique</span>
+            <span class="sapi-phase__title"><?php echo esc_html(sapi_notice_txt('e1_titre')); ?></span>
             <span class="sapi-phase__sub" data-version-lieu><?php echo esc_html(sapi_notice_lieu_label($versions[0]['lieu'] ?? '')); ?></span>
           </span>
           <span class="sapi-phase__action"></span>
@@ -76,13 +76,13 @@ while (have_posts()) : the_post();
             <?php endif; ?>
             <div class="sapi-phase__text">
               <?php if (!empty($v['coupure'])) : ?>
-                <p class="sapi-phase__warn"><strong>Coupez le courant au disjoncteur</strong> avant de toucher aux fils.</p>
+                <p class="sapi-phase__warn"><strong><?php echo esc_html(sapi_notice_txt('e1_courant')); ?></strong></p>
               <?php endif; ?>
               <p><?php echo wp_kses($v['texte'] ?? '', ['br' => []]); ?></p>
             </div>
           </div>
           <?php endforeach; ?>
-          <div class="sapi-phase__foot"><button type="button" class="sapi-btn-cta" data-validate>C'est installé</button></div>
+          <div class="sapi-phase__foot"><button type="button" class="sapi-btn-cta" data-validate><?php echo esc_html(sapi_notice_txt('e1_bouton')); ?></button></div>
         </div>
       </li>
 
@@ -91,25 +91,23 @@ while (have_posts()) : the_post();
         <button type="button" class="sapi-phase__head" aria-expanded="false" aria-controls="sapi-phase-2">
           <span class="sapi-phase__badge">2</span>
           <span class="sapi-phase__titles">
-            <span class="sapi-phase__title">Assembler le luminaire</span>
-            <span class="sapi-phase__sub">En mode énigme ou guidé</span>
+            <span class="sapi-phase__title"><?php echo esc_html(sapi_notice_txt('e2_titre')); ?></span>
+            <span class="sapi-phase__sub"><?php echo esc_html(sapi_notice_txt('e2_sous')); ?></span>
           </span>
           <span class="sapi-phase__action"></span>
         </button>
         <div class="sapi-phase__panel" id="sapi-phase-2">
           <div class="sapi-tabs" role="tablist" aria-label="Mode d'assemblage">
-            <button type="button" role="tab" id="sapi-tab-enigme" aria-controls="sapi-mode-enigme" aria-selected="true" class="is-active">Mode énigme <span class="sapi-script">à vous de chercher</span></button>
-            <button type="button" role="tab" id="sapi-tab-guide" aria-controls="sapi-mode-guide" aria-selected="false">Mode guidé <span class="sapi-script">le tuto vidéo</span></button>
+            <button type="button" role="tab" id="sapi-tab-enigme" aria-controls="sapi-mode-enigme" aria-selected="true" class="is-active"><?php echo esc_html(sapi_notice_txt('e2_enigme')); ?> <span class="sapi-script"><?php echo esc_html(sapi_notice_txt('e2_enigme_s')); ?></span></button>
+            <button type="button" role="tab" id="sapi-tab-guide" aria-controls="sapi-mode-guide" aria-selected="false"><?php echo esc_html(sapi_notice_txt('e2_guide')); ?> <span class="sapi-script"><?php echo esc_html(sapi_notice_txt('e2_guide_s')); ?></span></button>
           </div>
 
           <div id="sapi-mode-enigme" role="tabpanel" aria-labelledby="sapi-tab-enigme">
-            <p>Chaque pièce porte un symbole : suivez la plaquette dans l'ordre et trouvez les paires.<?php echo $a_indice ? ' Touchez une étape pour voir son indice.' : ''; ?></p>
+            <p><?php echo nl2br(esc_html(sapi_notice_txt('e2_intro') . ($a_indice ? ' ' . sapi_notice_txt('e2_indice') : ''))); ?></p>
             <?php foreach ($blocs as $bi => $b) : ?>
             <div class="sapi-enigme-bloc"<?php if ($par_version) echo ' data-version-panel="' . (int) $bi . '"' . ($bi ? ' hidden' : ''); ?>>
               <?php if (!$b['etapes']) : ?>
-                <p class="sapi-enigme__vide"><?php echo $b['yt']
-                  ? 'L\'énigme de cette version arrive bientôt : suivez la vidéo en mode guidé.'
-                  : 'Le montage de cette version arrive bientôt. En attendant, écrivez-moi : je vous guide.'; ?></p>
+                <p class="sapi-enigme__vide"><?php echo esc_html(sapi_notice_txt($b['yt'] ? 'e2_sans_enigme' : 'e2_sans_rien')); ?></p>
               <?php else : ?>
               <div class="sapi-enigme">
                 <?php foreach ($b['etapes'] as $k => $e) :
@@ -127,7 +125,7 @@ while (have_posts()) : the_post();
               <?php foreach ($b['etapes'] as $k => $e) :
                 $indice = trim((string) ($e['indice'] ?? ''));
                 if ($indice === '') continue; ?>
-                <p class="sapi-enigme__hint" data-hint-text="<?php echo esc_attr($bi . '-' . $k); ?>" hidden><strong>Indice <?php echo (int) $k + 1; ?> :</strong> <?php echo esc_html($indice); ?></p>
+                <p class="sapi-enigme__hint" data-hint-text="<?php echo esc_attr($bi . '-' . $k); ?>" hidden><strong><?php echo esc_html(sapi_notice_txt('e2_indice_lbl')); ?> <?php echo (int) $k + 1; ?> :</strong> <?php echo esc_html($indice); ?></p>
               <?php endforeach; ?>
               <?php endif; ?>
             </div>
@@ -145,7 +143,7 @@ while (have_posts()) : the_post();
                 </button>
               </div>
               <?php else : ?>
-                <p class="sapi-enigme__vide">La vidéo de cette version arrive bientôt.</p>
+                <p class="sapi-enigme__vide"><?php echo esc_html(sapi_notice_txt('e2_sans_video')); ?></p>
               <?php endif; ?>
               <?php if ($b['etapes']) : ?>
               <ol class="sapi-guide__steps">
@@ -157,7 +155,7 @@ while (have_posts()) : the_post();
                   <span>
                     <strong class="sapi-guide__sym"><?php echo esc_html(sapi_notice_step_text($e)); ?></strong>
                     <?php if ($indice !== '') echo ' ' . esc_html($indice); ?>
-                    <?php if ($yt && $sec !== '') : ?> <button type="button" class="sapi-guide__seek" data-seek="<?php echo (int) $sec; ?>">voir à <?php echo esc_html($e['temps_video']); ?></button><?php endif; ?>
+                    <?php if ($yt && $sec !== '') : ?> <button type="button" class="sapi-guide__seek" data-seek="<?php echo (int) $sec; ?>"><?php echo esc_html(sapi_notice_txt('e2_voir_a')); ?> <?php echo esc_html($e['temps_video']); ?></button><?php endif; ?>
                   </span>
                 </li>
                 <?php endforeach; ?>
@@ -167,7 +165,7 @@ while (have_posts()) : the_post();
             <?php endforeach; ?>
           </div>
 
-          <div class="sapi-phase__foot"><button type="button" class="sapi-btn-cta" data-validate>Le luminaire est assemblé</button></div>
+          <div class="sapi-phase__foot"><button type="button" class="sapi-btn-cta" data-validate><?php echo esc_html(sapi_notice_txt('e2_bouton')); ?></button></div>
         </div>
       </li>
 
@@ -176,8 +174,8 @@ while (have_posts()) : the_post();
         <button type="button" class="sapi-phase__head" aria-expanded="false" aria-controls="sapi-phase-3">
           <span class="sapi-phase__badge">3</span>
           <span class="sapi-phase__titles">
-            <span class="sapi-phase__title">Fixer l'abat-jour</span>
-            <span class="sapi-phase__sub">Sur le système électrique</span>
+            <span class="sapi-phase__title"><?php echo esc_html(sapi_notice_txt('e3_titre')); ?></span>
+            <span class="sapi-phase__sub"><?php echo esc_html(sapi_notice_txt('e3_sous')); ?></span>
           </span>
           <span class="sapi-phase__action"></span>
         </button>
@@ -186,7 +184,7 @@ while (have_posts()) : the_post();
             <?php if ($aj_image) : ?><div class="sapi-phase__visual"><?php echo wp_get_attachment_image($aj_image, 'medium_large', false, ['loading' => 'lazy']); ?></div><?php endif; ?>
             <div class="sapi-phase__text"><p><?php echo wp_kses((string) $aj_texte, ['br' => []]); ?></p></div>
           </div>
-          <div class="sapi-phase__foot"><button type="button" class="sapi-btn-cta" data-validate>C'est fixé, j'allume</button></div>
+          <div class="sapi-phase__foot"><button type="button" class="sapi-btn-cta" data-validate><?php echo esc_html(sapi_notice_txt('e3_bouton')); ?></button></div>
         </div>
       </li>
     </ol>
@@ -194,22 +192,22 @@ while (have_posts()) : the_post();
     <section class="sapi-notice__done" hidden>
       <?php if ($first_thumb) echo wp_get_attachment_image($first_thumb, 'medium_large', false, ['loading' => 'lazy', 'class' => 'sapi-notice__done-img']); ?>
       <div class="sapi-notice__done-body">
-        <p class="sapi-script sapi-notice__slogan">Assemblez, Éclairez, Admirez !</p>
-        <p>Il est allumé ? Envoyez-moi une photo, ou laissez un avis : ça aide d'autres personnes à choisir.</p>
+        <p class="sapi-script sapi-notice__slogan"><?php echo esc_html(sapi_notice_txt('fin_slogan')); ?></p>
+        <p><?php echo nl2br(esc_html(sapi_notice_txt('fin_texte'))); ?></p>
         <div class="sapi-notice__done-links">
-          <a class="sapi-btn-light" href="mailto:commande@atelier-sapi.fr?subject=<?php echo rawurlencode('Photo de mon ' . sapi_notice_title($nid)); ?>">Envoyer une photo</a>
+          <a class="sapi-btn-light" href="mailto:<?php echo esc_attr(sapi_notice_txt('email')); ?>?subject=<?php echo rawurlencode('Photo de mon ' . sapi_notice_title($nid)); ?>"><?php echo esc_html(sapi_notice_txt('fin_photo')); ?></a>
           <?php // Lien vers la fiche du luminaire de la version affichée (maillage vers les pages qui vendent).
           $liens = sapi_notice_product_links($nid);
           if (!$liens) : ?>
-            <a class="sapi-btn-outline" href="<?php echo esc_url(home_url('/mes-creations/')); ?>">Découvrir l'atelier</a>
+            <a class="sapi-btn-outline" href="<?php echo esc_url(home_url('/mes-creations/')); ?>"><?php echo esc_html(sapi_notice_txt('fin_atelier')); ?></a>
           <?php else : foreach ($liens as $vi => $pid) : ?>
-            <a class="sapi-btn-outline" href="<?php echo esc_url(get_permalink($pid)); ?>"<?php if (count($liens) > 1) echo ' data-version-panel="' . (int) $vi . '"' . ($vi !== array_key_first($liens) ? ' hidden' : ''); ?>>Revoir la fiche du luminaire</a>
+            <a class="sapi-btn-outline" href="<?php echo esc_url(get_permalink($pid)); ?>"<?php if (count($liens) > 1) echo ' data-version-panel="' . (int) $vi . '"' . ($vi !== array_key_first($liens) ? ' hidden' : ''); ?>><?php echo esc_html(sapi_notice_txt('fin_produit')); ?></a>
           <?php endforeach; endif; ?>
         </div>
       </div>
     </section>
 
-    <p class="sapi-notice__help">Ça coince ? Écrivez-moi : <a href="mailto:commande@atelier-sapi.fr">commande@atelier-sapi.fr</a> · 06 80 43 55 85</p>
+    <p class="sapi-notice__help"><?php echo esc_html(sapi_notice_txt('aide')); ?> <a href="mailto:<?php echo esc_attr(sapi_notice_txt('email')); ?>"><?php echo esc_html(sapi_notice_txt('email')); ?></a> · <a href="tel:<?php echo esc_attr(sapi_notice_tel(sapi_notice_txt('telephone'))); ?>"><?php echo esc_html(sapi_notice_txt('telephone')); ?></a></p>
   </div>
 </main>
 <?php
