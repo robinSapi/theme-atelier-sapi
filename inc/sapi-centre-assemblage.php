@@ -93,7 +93,7 @@ function sapi_notice_etape_fields($p) {
     ['key' => $p . 'fois', 'label' => 'Répéter', 'name' => 'fois', 'type' => 'number', 'min' => 1, 'max' => 50, 'prepend' => '×', 'placeholder' => '1', 'conditional_logic' => $si_paires, 'wrapper' => ['width' => 20]],
     ['key' => $p . 'action', 'label' => 'Action', 'name' => 'action', 'type' => 'select',
      'choices' => ['completez' => 'Complétez', 'retournez' => 'Retournez', 'libre' => 'Autre (texte libre)'], 'default_value' => 'completez', 'conditional_logic' => $si_action, 'wrapper' => ['width' => 30]],
-    ['key' => $p . 'action_texte', 'label' => 'Texte de l\'action', 'name' => 'action_texte', 'type' => 'text', 'required' => 1, 'placeholder' => 'Poser le cercle de verrouillage',
+    ['key' => $p . 'action_texte', 'label' => 'Texte de l\'action', 'name' => 'action_texte', 'type' => 'text', 'placeholder' => 'Poser le cercle de verrouillage',
      'conditional_logic' => [[['field' => $p . 'type', 'operator' => '==', 'value' => 'action'], ['field' => $p . 'action', 'operator' => '==', 'value' => 'libre']]], 'wrapper' => ['width' => 35]],
     ['key' => $p . 'precision', 'label' => 'Précision', 'name' => 'precision', 'type' => 'text', 'placeholder' => 'l\'intérieur', 'conditional_logic' => $si_action, 'wrapper' => ['width' => 35]],
     ['key' => $p . 'photo', 'label' => 'Image', 'name' => 'photo', 'type' => 'image', 'return_format' => 'id', 'preview_size' => 'thumbnail', 'wrapper' => ['width' => 20],
@@ -477,7 +477,12 @@ function sapi_notice_step_rows($e) {
 function sapi_notice_step_action($e) {
   $a = $e['action'] ?? 'completez';
   if ($a === 'retournez') return ['Retournez', '⇅'];
-  if ($a === 'libre') return [trim((string) ($e['action_texte'] ?? '')), ''];
+  if ($a === 'libre') {
+    // Pas de « required » ACF : l'API REST l'exigerait aussi sur les étapes « paires ».
+    // Un texte oublié se voit au lieu de laisser une tuile vide.
+    $t = trim((string) ($e['action_texte'] ?? ''));
+    return [$t !== '' ? $t : 'À compléter', ''];
+  }
   return ['Complétez', '⟳'];
 }
 
