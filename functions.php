@@ -139,6 +139,10 @@ if (!function_exists('sapi_ampoule_for')) {
 // add-ons, ampoule). Doit suivre sapi-ampoule-optin.php.
 require_once get_template_directory() . '/inc/sapi-product-options.php';
 
+// Prix sur les fiches accessoires sans options (ampoules, pied, platine…) :
+// même ligne de sous-total que sur les luminaires.
+require_once get_template_directory() . '/inc/sapi-plain-total.php';
+
 // Vitrine « Ça irait bien avec… » à gauche du mini-panier (desktop).
 // Utilise les fonctions de sapi-ampoule-optin.php.
 require_once get_template_directory() . '/inc/sapi-cart-suggestions.php';
@@ -1285,18 +1289,6 @@ function sapi_get_product_photo_ids_with_fallback($post_id, $type = '', $limit =
 
   return $ids;
 }
-
-/**
- * Prix de la variation toujours affiché sur la fiche produit (26/11/2026).
- *
- * Le thème masque le prix général de la fiche (.product-price-v2) : c'est le
- * prix de la variation choisie, sous les sélecteurs, qui fait foi. Or
- * WooCommerce n'envoie pas ce prix quand toutes les variations coûtent pareil
- * (Câble et douille chevet E14/E27, Platine applique peuplier/okoumé) : la
- * fiche n'affichait alors aucun prix. Sans effet sur les produits dont les
- * variations ont des prix différents (déjà affichés).
- */
-add_filter('woocommerce_show_variation_price', '__return_true');
 
 /**
  * Le prix d'un produit peut-il monter à cause d'un Product Add-On payant ?

@@ -20407,6 +20407,29 @@ body.woocommerce-cart div.woocommerce-wrapper {
   font-size: 1.5rem;
 }
 
+/* Sous-total des fiches accessoires sans options (inc/sapi-plain-total.php) :
+   même rendu que la ligne Product Add-Ons des luminaires ci-dessus */
+.sapi-plain-total {
+  width: 100%;
+}
+.sapi-plain-total[hidden] {
+  display: none;
+}
+.sapi-plain-total p.price {
+  color: #018501 !important;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  margin: 0;
+}
+.sapi-plain-total p.price .amount {
+  font-size: 1.5rem;
+}
+/* Le sous-total remplace le prix de variation de WooCommerce sur ces fiches seulement,
+   une fois le script en place (sinon le prix de variation reste visible) */
+.sapi-plain-total-page form.sapi-plain-total-ready .woocommerce-variation-price {
+  display: none !important;
+}
+
 /* Retire bordures du bloc totals — fiche produit uniquement */
 .single-product .product-addon-totals,
 .single-product .product-addon-totals ul,
