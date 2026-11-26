@@ -198,7 +198,13 @@ while (have_posts()) : the_post();
         <p>Il est allumé ? Envoyez-moi une photo, ou laissez un avis : ça aide d'autres personnes à choisir.</p>
         <div class="sapi-notice__done-links">
           <a class="sapi-btn-light" href="mailto:commande@atelier-sapi.fr?subject=<?php echo rawurlencode('Photo de mon ' . sapi_notice_title($nid)); ?>">Envoyer une photo</a>
-          <a class="sapi-btn-outline" href="<?php echo esc_url(home_url('/mes-creations/')); ?>">Découvrir l'atelier</a>
+          <?php // Lien vers la fiche du luminaire de la version affichée (maillage vers les pages qui vendent).
+          $liens = sapi_notice_product_links($nid);
+          if (!$liens) : ?>
+            <a class="sapi-btn-outline" href="<?php echo esc_url(home_url('/mes-creations/')); ?>">Découvrir l'atelier</a>
+          <?php else : foreach ($liens as $vi => $pid) : ?>
+            <a class="sapi-btn-outline" href="<?php echo esc_url(get_permalink($pid)); ?>"<?php if (count($liens) > 1) echo ' data-version-panel="' . (int) $vi . '"' . ($vi !== array_key_first($liens) ? ' hidden' : ''); ?>>Revoir la fiche du luminaire</a>
+          <?php endforeach; endif; ?>
         </div>
       </div>
     </section>

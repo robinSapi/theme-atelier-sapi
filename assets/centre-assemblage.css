@@ -36,7 +36,7 @@
 .sapi-phase__panel { padding: 0 24px 24px; }
 .js-phases .sapi-phase:not(.is-open) .sapi-phase__panel { display: none; }
 .sapi-phase__split { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
-.sapi-phase__split[hidden], .sapi-guide[hidden], .sapi-enigme-bloc[hidden] { display: none; }
+.sapi-phase__split[hidden], .sapi-guide[hidden], .sapi-enigme-bloc[hidden], .sapi-notice__done-links a[hidden] { display: none; }
 .sapi-phase__visual { flex: 0 1 320px; }
 .sapi-phase__visual img { width: 100%; height: auto; border-radius: 12px; display: block; }
 .sapi-phase__text { flex: 1 1 320px; min-width: 0; color: var(--color-dark, #323232); font-size: 16px; line-height: 1.6; }

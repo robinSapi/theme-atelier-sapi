@@ -557,6 +557,53 @@ function sapi_notice_meta_line($nid) {
   return implode(' · ', array_filter([trim((string) get_field('difficulte', $nid)), trim((string) get_field('duree', $nid)), $o]));
 }
 
+/* ── SEO ─────────────────────────────────────────────────────────────────── */
+/**
+ * Produit publié de chaque version : [index de version => id produit].
+ * Notice à une seule version : [0 => premier produit publié].
+ */
+function sapi_notice_product_links($nid) {
+  $out = [];
+  $versions = (array) (get_field('versions', $nid) ?: []);
+  foreach ((array) (get_field('produits', $nid) ?: []) as $pid) {
+    $pid = (int) $pid;
+    if (get_post_status($pid) !== 'publish') continue;
+    $vi = count($versions) > 1 ? sapi_notice_version_for_product($nid, $pid) : 0;
+    if ($vi !== null && !isset($out[$vi])) $out[$vi] = $pid;
+  }
+  ksort($out);
+  return $out;
+}
+
+/**
+ * Une notice est complète quand chaque version a une énigme ou une vidéo et
+ * qu'aucun texte ne porte encore [À COMPLÉTER], [À VÉRIFIER], [MÉTHODE À PRÉCISER]…
+ */
+function sapi_notice_is_complete($nid) {
+  foreach (sapi_notice_assemblages($nid) as $a) {
+    if (!$a['etapes'] && $a['yt'] === '') return false;
+  }
+  $textes = (string) get_field('abatjour_texte', $nid);
+  foreach ((array) (get_field('versions', $nid) ?: []) as $v) $textes .= ' ' . ($v['texte'] ?? '');
+  return !preg_match('/\[(à|a) (compléter|vérifier|préciser)|\[méthode/iu', $textes);
+}
+
+/** Notice incomplète : hors des moteurs de recherche (Yoast), jusqu'à ce qu'elle soit finie. */
+add_filter('wpseo_robots', function ($robots) {
+  if (is_singular('notice_montage') && function_exists('get_field') && !sapi_notice_is_complete(get_queried_object_id())) {
+    return 'noindex, follow';
+  }
+  return $robots;
+});
+/** …et hors du sitemap Yoast. */
+add_filter('wpseo_exclude_from_sitemap_by_post_ids', function ($ids) {
+  if (!function_exists('get_field')) return $ids;
+  foreach (get_posts(['post_type' => 'notice_montage', 'post_status' => 'publish', 'posts_per_page' => -1, 'fields' => 'ids', 'no_found_rows' => true]) as $nid) {
+    if (!sapi_notice_is_complete($nid)) $ids[] = $nid;
+  }
+  return $ids;
+});
+
 /* ── Hub (taches.atelier-sapi.fr) ─────────────────────────────────────────── */
 /**
  * État de la notice d'un produit, pour le hub : ajouté à la réponse
@@ -591,6 +638,7 @@ function sapi_notice_hub_summary($product_id) {
     'etapes'    => count($a['etapes']),
     'propre'    => !empty($a['propre']),
     'a_completer' => (bool) preg_match('/\[(à|a) (compléter|vérifier|préciser)|\[méthode/iu', $elec . ' ' . (string) get_field('abatjour_texte', $nid)),
+    'complete'  => sapi_notice_is_complete($nid),   // même règle que le noindex
     'produits'  => array_values(array_map('intval', (array) (get_field('produits', $nid) ?: []))),
   ];
 }
